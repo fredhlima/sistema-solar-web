@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg3" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#04060e"/>
+    </radialGradient>
+    <radialGradient id="nucleo" cx="42%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#ffe9b8"/>
+      <stop offset="100%" stop-color="#ff9d4d"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg3)"/>
+  <g stroke="#5cc8ff" stroke-linecap="round" stroke-width="7" opacity="0.85">
+    <line x1="512" y1="512" x2="512" y2="150" transform="rotate(0 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="185" transform="rotate(45 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="150" transform="rotate(90 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="185" transform="rotate(135 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="150" transform="rotate(180 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="185" transform="rotate(225 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="150" transform="rotate(270 512 512)"/>
+    <line x1="512" y1="512" x2="512" y2="185" transform="rotate(315 512 512)"/>
+  </g>
+  <circle cx="512" cy="512" r="205" fill="url(#nucleo)"/>
+  <circle cx="512" cy="512" r="205" fill="none" stroke="#04060e" stroke-width="14"/>
+</svg>

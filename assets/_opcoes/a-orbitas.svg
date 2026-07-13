@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#0d1526"/>
+      <stop offset="100%" stop-color="#04060e"/>
+    </radialGradient>
+    <radialGradient id="estrela" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#ffe9b8"/>
+      <stop offset="100%" stop-color="#ffb454"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb454" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ffb454" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="512" r="220" fill="url(#glow)"/>
+  <g stroke="#5cc8ff" fill="none" stroke-linecap="round">
+    <ellipse cx="512" cy="512" rx="170" ry="170" stroke-opacity="0.9" stroke-width="6"/>
+    <ellipse cx="512" cy="512" rx="270" ry="245" stroke-opacity="0.55" stroke-width="6" transform="rotate(-20 512 512)"/>
+    <ellipse cx="512" cy="512" rx="380" ry="330" stroke-opacity="0.3" stroke-width="6" transform="rotate(14 512 512)"/>
+  </g>
+  <circle cx="512" cy="512" r="86" fill="url(#estrela)"/>
+  <circle cx="682" cy="512" r="15" fill="#e8edf7"/>
+  <circle cx="782" cy="267" r="10" fill="#5cc8ff"/>
+  <circle cx="215" cy="360" r="7" fill="#e8edf7" opacity="0.8"/>
+</svg>

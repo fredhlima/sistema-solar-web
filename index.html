@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sistema Solar — Simulador Interativo</title>
+  <meta name="description" content="Simulador 3D interativo do Sistema Solar em português, inglês e espanhol: 43 corpos celestes, luas, cinturões, missões espaciais, eventos astronômicos e viagem no tempo. Didático, offline e gratuito.">
+  <meta property="og:title" content="Sistema Solar — Simulador Interativo 3D">
+  <meta property="og:description" content="Explore planetas, luas, cometas e missões espaciais em 3D. Avance e retroceda no tempo, compare tamanhos e aprenda com conteúdo didático em 3 idiomas.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#04060e">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='14' fill='%23d8c8a0'/%3E%3Cellipse cx='32' cy='32' rx='26' ry='7' fill='none' stroke='%235cc8ff' stroke-width='3' transform='rotate(-18 32 32)'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/estilos.css?v=9">
+  <link rel="stylesheet" href="css/paywall.css?v=1">
+  <link rel="stylesheet" href="css/quiz.css?v=2">
+  <link rel="stylesheet" href="css/voce-no-espaco.css?v=1">
+  <link rel="stylesheet" href="css/progresso.css?v=1">
+</head>
+<body>
+  <canvas id="cena"></canvas>
+  <div id="ui-root"></div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./lib/three.module.js",
+        "three/addons/": "./lib/addons/"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js?v=35"></script>
+</body>
+</html>

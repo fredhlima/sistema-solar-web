@@ -1,0 +1,171 @@
+/* Paywall: overlay e card glassmorphism */
+
+.paywall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 4, 10, 0.6);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.paywall-card {
+  position: relative;
+  max-width: 420px;
+  width: 90%;
+  background: rgba(11, 16, 28, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 28px;
+  text-align: center;
+}
+
+.paywall-fechar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #93a0b8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 150ms ease;
+}
+
+.paywall-fechar:hover {
+  color: #5cc8ff;
+}
+
+.paywall-badge {
+  display: inline-block;
+  background: rgba(255, 180, 84, 0.16);
+  color: #ffb454;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.paywall-titulo {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #e8edf7;
+  margin: 0 0 8px 0;
+}
+
+.paywall-subtitulo {
+  font-size: 14px;
+  color: #93a0b8;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.paywall-beneficios {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+  text-align: left;
+}
+
+.paywall-beneficios li {
+  font-size: 13px;
+  color: #e8edf7;
+  margin-bottom: 10px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.paywall-beneficios li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 6px;
+  height: 6px;
+  background: #5cc8ff;
+  border-radius: 50%;
+}
+
+.paywall-preco {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e8edf7;
+  margin: 0 0 20px 0;
+}
+
+.paywall-comprar,
+.paywall-restaurar {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.paywall-comprar {
+  background: #5cc8ff;
+  color: #04060e;
+}
+
+.paywall-comprar:hover:not(:disabled) {
+  background: #7dd8ff;
+  box-shadow: 0 0 20px rgba(92, 200, 255, 0.4);
+}
+
+.paywall-comprar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.paywall-restaurar {
+  background: transparent;
+  color: #93a0b8;
+  border: 1px solid rgba(147, 160, 184, 0.3);
+}
+
+.paywall-restaurar:hover:not(:disabled) {
+  color: #5cc8ff;
+  border-color: rgba(92, 200, 255, 0.4);
+}
+
+.paywall-restaurar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.paywall-mensagem {
+  font-size: 12px;
+  padding: 10px;
+  margin: 0 0 16px 0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.paywall-mensagem.paywall-erro {
+  background: rgba(255, 180, 84, 0.16);
+  color: #ffb454;
+}
+
+.paywall-rodape {
+  font-size: 10px;
+  color: #5a6370;
+  margin-top: 16px;
+  line-height: 1.4;
+}

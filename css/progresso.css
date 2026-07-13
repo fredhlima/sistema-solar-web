@@ -1,0 +1,371 @@
+/* Progressão: níveis + badges */
+
+/* Overlay central (padrão paywall) */
+.progresso-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 4, 10, 0.6);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.progresso-overlay.progresso-sair {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.progresso-card {
+  position: relative;
+  max-width: 520px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: rgba(11, 16, 28, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 28px;
+  animation: progresso-card-in 220ms ease;
+}
+
+@keyframes progresso-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progresso-fechar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #93a0b8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 150ms ease;
+}
+
+.progresso-fechar:hover {
+  color: #5cc8ff;
+}
+
+/* Header: nível + barra XP */
+.progresso-header {
+  margin-bottom: 24px;
+}
+
+.progresso-nivel-nome {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #e8edf7;
+  margin: 0 0 12px 0;
+}
+
+.progresso-xp-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progresso-xp-barra {
+  width: 100%;
+  height: 8px;
+  background: rgba(147, 160, 184, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(120, 160, 255, 0.1);
+}
+
+.progresso-xp-preenchido {
+  height: 100%;
+  background: linear-gradient(90deg, #5cc8ff, #7dd8ff);
+  transition: width 300ms ease;
+  border-radius: 4px;
+}
+
+.progresso-xp-texto {
+  font-size: 12px;
+  color: #93a0b8;
+  text-align: right;
+}
+
+/* Grid de badges */
+.progresso-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.progresso-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+  position: relative;
+  background: rgba(147, 160, 184, 0.08);
+  border: 1px solid rgba(120, 160, 255, 0.12);
+}
+
+.progresso-badge.conquistada {
+  background: rgba(92, 200, 255, 0.12);
+  border: 1px solid rgba(92, 200, 255, 0.3);
+}
+
+.progresso-badge.conquistada:hover {
+  background: rgba(92, 200, 255, 0.18);
+  box-shadow: 0 0 12px rgba(92, 200, 255, 0.2);
+}
+
+.progresso-badge.futura {
+  opacity: 0.6;
+}
+
+.progresso-badge-icone {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.progresso-badge.conquistada .progresso-badge-icone {
+  color: #5cc8ff;
+  text-shadow: 0 0 8px rgba(92, 200, 255, 0.4);
+}
+
+.progresso-badge.futura .progresso-badge-icone {
+  color: #93a0b8;
+  position: relative;
+}
+
+.progresso-badge.futura .progresso-badge-icone::after {
+  content: '🔒';
+  font-size: 12px;
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+}
+
+.progresso-badge-nome {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e8edf7;
+  line-height: 1.2;
+}
+
+.progresso-badge.conquistada .progresso-badge-nome {
+  color: #5cc8ff;
+}
+
+.progresso-badge-dica {
+  font-size: 8px;
+  color: #93a0b8;
+  line-height: 1.2;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Contadores */
+.progresso-contadores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(120, 160, 255, 0.1);
+}
+
+.progresso-contador {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progresso-contador-label {
+  font-size: 12px;
+  color: #93a0b8;
+  font-weight: 500;
+}
+
+.progresso-contador-valor {
+  font-size: 12px;
+  color: #e8edf7;
+}
+
+.progresso-contador-valor strong {
+  color: #5cc8ff;
+  font-weight: 600;
+}
+
+/* Chip de nível fixo no topo esquerdo */
+.progresso-chip {
+  position: fixed;
+  top: 86px;
+  left: 20px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(11, 16, 28, 0.74);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  pointer-events: auto;
+  min-width: 120px;
+}
+
+.progresso-chip:hover {
+  background: rgba(11, 16, 28, 0.86);
+  border-color: rgba(92, 200, 255, 0.3);
+  box-shadow: 0 0 12px rgba(92, 200, 255, 0.15);
+}
+
+.progresso-chip-icone {
+  font-size: 16px;
+  text-align: center;
+  color: #5cc8ff;
+}
+
+.progresso-chip-nome {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e8edf7;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.progresso-chip-barra {
+  width: 100%;
+  height: 4px;
+  background: rgba(147, 160, 184, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(120, 160, 255, 0.1);
+}
+
+.progresso-chip-preenchido {
+  height: 100%;
+  background: linear-gradient(90deg, #5cc8ff, #7dd8ff);
+  transition: width 300ms ease;
+  border-radius: 2px;
+}
+
+/* Container e toasts */
+.progresso-toasts {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 26;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 320px;
+}
+
+.progresso-toast {
+  padding: 12px 16px;
+  background: rgba(11, 16, 28, 0.86);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(92, 200, 255, 0.3);
+  border-radius: 10px;
+  color: #5cc8ff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 16px rgba(92, 200, 255, 0.2);
+  pointer-events: auto;
+  animation: progresso-toast-in 200ms ease;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+@keyframes progresso-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.progresso-toast.progresso-toast-sair {
+  animation: progresso-toast-out 250ms ease forwards;
+}
+
+@keyframes progresso-toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .progresso-chip {
+    top: 76px;
+    left: 10px;
+    min-width: 100px;
+  }
+
+  .progresso-card {
+    max-width: 90vw;
+    padding: 20px;
+  }
+
+  .progresso-toasts {
+    bottom: 10px;
+    right: 10px;
+    max-width: 280px;
+  }
+
+  .progresso-toast {
+    font-size: 11px;
+    padding: 10px 14px;
+  }
+}
+
+/* Scrollbar customizado */
+.progresso-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.progresso-card::-webkit-scrollbar-track {
+  background: rgba(147, 160, 184, 0.08);
+  border-radius: 3px;
+}
+
+.progresso-card::-webkit-scrollbar-thumb {
+  background: rgba(92, 200, 255, 0.3);
+  border-radius: 3px;
+}
+
+.progresso-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(92, 200, 255, 0.5);
+}
