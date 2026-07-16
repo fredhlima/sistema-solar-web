@@ -92,7 +92,7 @@ export const EVENTOS = [
     nome: 'Passagem Próxima de Apófis',
     tipo: 'marco',
     dataISO: '2029-04-13',
-    descricao: 'O asteroide Apófis passa a apenas 31.600 km da Terra — dentro da órbita de satélites geoestacionários! Será visível a olho nu. Evento raro de aproximação extrema sem colisão.',
+    descricao: 'O asteroide Apófis passa a apenas 31.600 km da Terra — dentro da órbita de satélites geoestacionários! Será visível a olho nu, um dos encontros mais próximos já previstos sem colisão. Acompanhe no 3D: perto desta data, Apófis mergulha até raspar a Terra, bem dentro da órbita da Lua.',
     corpoFoco: 'apofis'
   },
   {

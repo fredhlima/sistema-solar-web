@@ -1,6 +1,6 @@
 // Núcleo de internacionalização (pt = fonte; en/es = overlays com fallback).
 // Contratos descritos na SPEC.md, seção EXPANSÃO V3.
-import { UI_TEXTOS } from './traducoes-ui.js?v=6';
+import { UI_TEXTOS } from './traducoes-ui.js?v=10';
 
 const IDIOMAS = ['pt', 'en', 'es'];
 const CHAVE_STORAGE = 'sistema-solar-idioma';
@@ -75,7 +75,7 @@ export function formatarDataCurta(iso) {
 export async function carregarConteudoTraduzido() {
   if (idiomaAtual === 'pt') return null;
   try {
-    const mod = await import(`./traducoes-conteudo.${idiomaAtual}.js?v=5`);
+    const mod = await import(`./traducoes-conteudo.${idiomaAtual}.js?v=7`);
     return mod.TRADUCAO || null;
   } catch (e) {
     console.warn('Tradução de conteúdo indisponível, mantendo pt:', e.message);

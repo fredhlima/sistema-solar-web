@@ -1,6 +1,10 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=5';
+import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=15';
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
+  // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
+  // rail vertical de Visualização + barra de comando central de Experiências.
+  // O CSS segue escopado em .ux-ousada.
+  document.body.classList.add('ux-ousada');
   // Freemium: sem objeto premium (ex.: versão web de showcase) tudo é liberado
   const premiumExigir = (recursoId) => !premium || premium.exigir(recursoId);
   const premiumTem = (recursoId) => !premium || premium.recurso(recursoId);
@@ -42,7 +46,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     rotulosVisiveis: true,
     velocidadeAtual: 1,
     velocidadeAnterior: 1,
-    indiceVelocidades: 7, // index for 1 day/s (initial motor state)
+    indiceVelocidades: null, // será atribuído após VELOCIDADES ser definido
     painelEventosAberto: false,
     comparadorAberto: false,
     cardMissaoAberto: false,
@@ -51,7 +55,48 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     missaoSelecionada: null,
   };
 
-  const VELOCIDADES = [-3650, -365, -90, -30, -7, -1, 0, 1, 7, 30, 90, 365, 3650];
+  // Efeito IKEA: favoritar astros cria um senso de posse ("minha coleção do
+  // céu") já na exploração livre, antes de qualquer conta ou compra — o que a
+  // pessoa ajudou a montar, ela valoriza mais. Persistido em localStorage;
+  // marcador ★ na lista Explorar e botão no painel de cada astro.
+  const CHAVE_FAVORITOS = 'sistema-solar-favoritos';
+  let favoritos = new Set();
+  try {
+    const raw = localStorage.getItem(CHAVE_FAVORITOS);
+    if (raw) favoritos = new Set(JSON.parse(raw));
+  } catch (e) { /* sem storage: favoritos só em memória nesta sessão */ }
+
+  function salvarFavoritos() {
+    try { localStorage.setItem(CHAVE_FAVORITOS, JSON.stringify([...favoritos])); } catch (e) { /* segue */ }
+  }
+  function ehFavorito(id) { return favoritos.has(id); }
+  function atualizarMarcadorFavorito(id) {
+    const item = document.getElementById(`explorar-item-${id}`);
+    if (!item) return;
+    let marcador = item.querySelector('.explorar-fav-marcador');
+    if (favoritos.has(id)) {
+      if (!marcador) {
+        marcador = document.createElement('span');
+        marcador.className = 'explorar-fav-marcador';
+        marcador.textContent = ' ★';
+        item.appendChild(marcador);
+      }
+    } else if (marcador) {
+      marcador.remove();
+    }
+  }
+  // Reatribuída ao montar o painel Explorar; reconstrói a seção "Meus favoritos"
+  let atualizarSecaoFavoritos = () => {};
+  function alternarFavorito(id) {
+    if (favoritos.has(id)) favoritos.delete(id); else favoritos.add(id);
+    salvarFavoritos();
+    atualizarMarcadorFavorito(id);
+    atualizarSecaoFavoritos();
+    return favoritos.has(id);
+  }
+
+  const VELOCIDADES = [-3650, -365, -90, -30, -7, -1, -1/24, 0, 1/24, 1, 7, 30, 90, 365, 3650];
+  estado.indiceVelocidades = VELOCIDADES.indexOf(1); // index for 1 day/s (initial motor state)
   const PARADAS_TOUR = [
     'sol', 'mercurio', 'venus', 'terra', 'lua', 'marte',
     'cinturao-asteroides', 'jupiter', 'saturno', 'urano', 'netuno',
@@ -152,15 +197,38 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     div.innerHTML = `
       <h1 class="titulo-principal">${t('titulo')}</h1>
       <p class="titulo-secundario">${t('subtitulo')}</p>
+      <div id="slot-progresso" class="titulo-slot-progresso"></div>
     `;
     root.appendChild(div);
+
+    // iniciarProgresso() roda ANTES de iniciarUI() (ordem do main.js), então o
+    // chip de nível já existe solto no root quando o slot nasce — adota ele.
+    const chipExistente = document.querySelector('.progresso-chip');
+    if (chipExistente) {
+      div.querySelector('#slot-progresso').appendChild(chipExistente);
+    }
   }
 
   function criarBarraAcoes() {
     const div = document.createElement('div');
     div.className = 'barra-acoes';
 
-    // Seletor de idioma (primeiro item)
+    const grupoExperiencias = document.createElement('div');
+    grupoExperiencias.className = 'grupo-acoes grupo-experiencias';
+    grupoExperiencias.setAttribute('role', 'group');
+    grupoExperiencias.setAttribute('aria-label', t('grupoExperiencias'));
+
+    const grupoVisualizacao = document.createElement('div');
+    grupoVisualizacao.className = 'grupo-acoes grupo-visualizacao';
+    grupoVisualizacao.setAttribute('role', 'group');
+    grupoVisualizacao.setAttribute('aria-label', t('grupoVisualizacao'));
+
+    const grupoUtilidades = document.createElement('div');
+    grupoUtilidades.className = 'grupo-acoes grupo-utilidades';
+    grupoUtilidades.setAttribute('role', 'group');
+    grupoUtilidades.setAttribute('aria-label', t('grupoUtilidades'));
+
+    // Seletor de idioma (grupo Utilidades)
     const seletorDiv = document.createElement('div');
     seletorDiv.className = 'seletor-idioma';
 
@@ -204,24 +272,44 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       }
     });
 
-    div.appendChild(seletorDiv);
+    grupoUtilidades.appendChild(seletorDiv);
 
-    // Events button (if available)
+    // Gatilho do popover de experiências (só aparece em mobile, via CSS)
+    const triggerExp = document.createElement('button');
+    triggerExp.className = 'botao experiencias-trigger';
+    triggerExp.innerHTML = '✦ ' + t('grupoExperiencias') + ' ▾';
+    grupoExperiencias.appendChild(triggerExp);
+
+    // Container para os itens do popover (no desktop usa display: contents)
+    const itensExp = document.createElement('div');
+    itensExp.className = 'experiencias-itens';
+    grupoExperiencias.appendChild(itensExp);
+
+    triggerExp.onclick = (e) => {
+      e.stopPropagation();
+      itensExp.classList.toggle('aberto');
+    };
+
+    // Fecha o popover ao clicar num item ou fora
+    itensExp.addEventListener('click', () => itensExp.classList.remove('aberto'));
+    document.addEventListener('click', (e) => {
+      if (!grupoExperiencias.contains(e.target)) itensExp.classList.remove('aberto');
+    });
+
+    // Events button (Experiências)
     if (eventos) {
       const btnEventos = document.createElement('button');
       btnEventos.className = 'botao';
       btnEventos.id = 'btn-eventos';
       btnEventos.innerHTML = t('btnEventos');
-      // Provinha: a LISTA de eventos é grátis (vitrine); só a ação de viajar
-      // até a data é Pro — gate fica em cada botão "Ir para a data"
       btnEventos.onclick = () => {
         progressoEvento('abriu-eventos');
         abrirPainelEventos();
       };
-      div.appendChild(btnEventos);
+      itensExp.appendChild(btnEventos);
     }
 
-    // Size Comparison button
+    // Size Comparison button (Experiências)
     const btnComparador = document.createElement('button');
     btnComparador.className = 'botao';
     btnComparador.id = 'btn-comparador';
@@ -230,9 +318,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       progressoEvento('abriu-comparador');
       abrirComparador();
     };
-    div.appendChild(btnComparador);
+    itensExp.appendChild(btnComparador);
 
-    // Quiz Espacial (módulo js/quiz.js, injetado pelo main.js)
+    // Quiz Espacial (Experiências)
     if (abrirQuiz) {
       const btnQuiz = document.createElement('button');
       btnQuiz.className = 'botao';
@@ -242,10 +330,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         progressoEvento('abriu-quiz');
         abrirQuiz();
       };
-      div.appendChild(btnQuiz);
+      itensExp.appendChild(btnQuiz);
     }
 
-    // Você no Espaço (módulo js/voce-no-espaco.js)
+    // Você no Espaço (Experiências)
     if (abrirVoce) {
       const btnVoce = document.createElement('button');
       btnVoce.className = 'botao';
@@ -255,17 +343,26 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         progressoEvento('abriu-voce');
         abrirVoce();
       };
-      div.appendChild(btnVoce);
+      itensExp.appendChild(btnVoce);
     }
 
-    // Tour button
+    // Tour button (Experiências) — com realce pulsante para atrair o primeiro
+    // clique; para de pulsar depois que a pessoa já fez o tour uma vez
     const btnTour = document.createElement('button');
     btnTour.className = 'botao';
+    btnTour.id = 'btn-tour';
+    let tourVisto = false;
+    try { tourVisto = localStorage.getItem('sistema-solar-tour-visto') === '1'; } catch (e) { /* sem storage */ }
+    if (!tourVisto) btnTour.classList.add('tour-destaque');
     btnTour.innerHTML = t('btnTour');
-    btnTour.onclick = iniciarTour;
-    div.appendChild(btnTour);
+    btnTour.onclick = () => {
+      try { localStorage.setItem('sistema-solar-tour-visto', '1'); } catch (e) { /* sem storage */ }
+      btnTour.classList.remove('tour-destaque');
+      iniciarTour();
+    };
+    itensExp.appendChild(btnTour);
 
-    // Toggle Escala
+    // Toggle Escala (Visualização)
     const divEscala = document.createElement('div');
     divEscala.className = 'toggle-escala';
     divEscala.innerHTML = `
@@ -282,9 +379,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         motor.setEscala(novaEscala);
       };
     });
-    div.appendChild(divEscala);
+    grupoVisualizacao.appendChild(divEscala);
 
-    // Orbits toggle
+    // Orbits toggle (Visualização)
     const btnOrbitas = document.createElement('button');
     btnOrbitas.className = 'botao toggle-ativo';
     btnOrbitas.textContent = t('btnOrbitas');
@@ -293,9 +390,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       motor.setOrbitasVisiveis(estado.orbitasVisiveis);
       btnOrbitas.classList.toggle('toggle-ativo');
     };
-    div.appendChild(btnOrbitas);
+    grupoVisualizacao.appendChild(btnOrbitas);
 
-    // Labels toggle
+    // Labels toggle (Visualização)
     const btnRotulos = document.createElement('button');
     btnRotulos.className = 'botao toggle-ativo';
     btnRotulos.textContent = t('btnRotulos');
@@ -304,15 +401,18 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       motor.setRotulosVisiveis(estado.rotulosVisiveis);
       btnRotulos.classList.toggle('toggle-ativo');
     };
-    div.appendChild(btnRotulos);
+    grupoVisualizacao.appendChild(btnRotulos);
 
-    // Overview button
+    // Overview button (Visualização)
     const btnVisaoGeral = document.createElement('button');
     btnVisaoGeral.className = 'botao';
     btnVisaoGeral.innerHTML = t('btnVisaoGeral');
     btnVisaoGeral.onclick = () => motor.visaoGeral();
-    div.appendChild(btnVisaoGeral);
+    grupoVisualizacao.appendChild(btnVisaoGeral);
 
+    div.appendChild(grupoExperiencias);
+    div.appendChild(grupoVisualizacao);
+    div.appendChild(grupoUtilidades);
     root.appendChild(div);
   }
 
@@ -353,6 +453,44 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     const conteudo = document.createElement('div');
     conteudo.className = 'explorar-conteudo';
+
+    // Seção "Meus favoritos" no topo — reúne a coleção do usuário num lugar só
+    // (Efeito IKEA: o que ele montou, ele valoriza). Reconstruída a cada
+    // favoritar/desfavoritar via atualizarSecaoFavoritos().
+    const grupoFav = document.createElement('div');
+    grupoFav.className = 'explorar-grupo explorar-grupo-favoritos';
+    conteudo.appendChild(grupoFav);
+    atualizarSecaoFavoritos = function () {
+      grupoFav.innerHTML = '';
+      const titulo = document.createElement('h3');
+      titulo.className = 'explorar-grupo-titulo';
+      titulo.textContent = '★ ' + t('grupoFavoritos');
+      grupoFav.appendChild(titulo);
+      const temAlgum = dados.corpos.some(c => favoritos.has(c.id));
+      if (!temAlgum) {
+        const dica = document.createElement('div');
+        dica.className = 'explorar-fav-vazio';
+        dica.textContent = t('favVazioDica');
+        grupoFav.appendChild(dica);
+        return;
+      }
+      // Segue a ordem de dados.corpos para uma lista estável
+      dados.corpos.forEach(corpo => {
+        if (!favoritos.has(corpo.id)) return;
+        const elem = document.createElement('div');
+        elem.className = 'explorar-item explorar-item-fav';
+        let label = corpo.nome;
+        if (corpo.tipo === 'planeta' && corpo.ordemDoSol) label = `${ordinal(corpo.ordemDoSol)} ${corpo.nome}`;
+        elem.textContent = label;
+        const m = document.createElement('span');
+        m.className = 'explorar-fav-marcador';
+        m.textContent = ' ★';
+        elem.appendChild(m);
+        elem.onclick = () => { motor.focar(corpo.id); motor.aoSelecionar(corpo.id); };
+        grupoFav.appendChild(elem);
+      });
+    };
+    atualizarSecaoFavoritos();
 
     // Agrupar corpos
     const grupos = {
@@ -424,6 +562,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
           nomeElem.onclick = () => {
             if (!premiumExigirItem('missoes', item.id)) return;
             abrirCardMissao(item.id);
+            // Selecionar a missão já leva ao lançamento e segue a nave —
+            // o botão "Seguir a nave" no card continua para re-acionar
+            seguirMissao(item.id);
           };
           divMissao.appendChild(nomeElem);
           if (!premiumPermitido('missoes', item.id)) nomeElem.appendChild(criarSeloPro());
@@ -447,9 +588,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         } else {
           // Item de corpo (v1)
           const corpo = item;
-          const elem = document.createElement('div');
-          elem.className = 'explorar-item';
-          elem.id = `explorar-item-${corpo.id}`;
 
           let label = corpo.nome;
           if (corpo.tipo === 'planeta' && corpo.ordemDoSol) {
@@ -457,26 +595,79 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
             label = `${ordinalStr} ${corpo.nome}`;
           }
 
-          elem.textContent = label;
-          elem.onclick = () => {
-            motor.focar(corpo.id);
-            motor.aoSelecionar(corpo.id);
-          };
-          divGrupo.appendChild(elem);
+          if (corpo.tipo === 'sonda') {
+            // Sonda: layout flex com nome + botão de olho
+            const elem = document.createElement('div');
+            elem.className = 'explorar-item explorar-sonda-item';
+            elem.id = `explorar-item-${corpo.id}`;
 
-          // Luas indentadas
-          if (luasPorPlaneta[corpo.id]) {
-            luasPorPlaneta[corpo.id].forEach(lua => {
-              const itemLua = document.createElement('div');
-              itemLua.className = 'explorar-item explorar-item-lua';
-              itemLua.id = `explorar-item-${lua.id}`;
-              itemLua.textContent = lua.nome;
-              itemLua.onclick = () => {
-                motor.focar(lua.id);
-                motor.aoSelecionar(lua.id);
-              };
-              divGrupo.appendChild(itemLua);
-            });
+            const nomeElem = document.createElement('span');
+            nomeElem.className = 'explorar-sonda-nome';
+            nomeElem.textContent = label;
+            nomeElem.onclick = () => {
+              // Tornar visível se estava oculta, depois focar
+              if (!motor.corpoVisivel(corpo.id)) {
+                motor.setCorpoVisivel(corpo.id, true);
+                atualizarIconeOlhoSonda(corpo.id, true);
+              }
+              motor.focar(corpo.id);
+              motor.aoSelecionar(corpo.id);
+            };
+            elem.appendChild(nomeElem);
+
+            const btnOlho = document.createElement('button');
+            btnOlho.className = 'explorar-sonda-btn-olho';
+            btnOlho.innerHTML = '◉';
+            btnOlho.title = t('sondaOlhoTitulo');
+            btnOlho.id = `olho-sonda-${corpo.id}`;
+            btnOlho.onclick = (e) => {
+              e.stopPropagation();
+              const v = !motor.corpoVisivel(corpo.id);
+              motor.setCorpoVisivel(corpo.id, v);
+              atualizarIconeOlhoSonda(corpo.id, v);
+            };
+            elem.appendChild(btnOlho);
+
+            divGrupo.appendChild(elem);
+          } else {
+            // Corpo normal: layout sem flex
+            const elem = document.createElement('div');
+            elem.className = 'explorar-item';
+            elem.id = `explorar-item-${corpo.id}`;
+
+            elem.textContent = label;
+            if (ehFavorito(corpo.id)) {
+              const m = document.createElement('span');
+              m.className = 'explorar-fav-marcador';
+              m.textContent = ' ★';
+              elem.appendChild(m);
+            }
+            elem.onclick = () => {
+              motor.focar(corpo.id);
+              motor.aoSelecionar(corpo.id);
+            };
+            divGrupo.appendChild(elem);
+
+            // Luas indentadas
+            if (luasPorPlaneta[corpo.id]) {
+              luasPorPlaneta[corpo.id].forEach(lua => {
+                const itemLua = document.createElement('div');
+                itemLua.className = 'explorar-item explorar-item-lua';
+                itemLua.id = `explorar-item-${lua.id}`;
+                itemLua.textContent = lua.nome;
+                if (ehFavorito(lua.id)) {
+                  const m = document.createElement('span');
+                  m.className = 'explorar-fav-marcador';
+                  m.textContent = ' ★';
+                  itemLua.appendChild(m);
+                }
+                itemLua.onclick = () => {
+                  motor.focar(lua.id);
+                  motor.aoSelecionar(lua.id);
+                };
+                divGrupo.appendChild(itemLua);
+              });
+            }
           }
         }
       });
@@ -494,6 +685,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     aplicarEstadoColapso();
     root.appendChild(div);
+
+    // Inicializar sondas como ocultas por padrão (não poluem a visão da
+    // Terra). Precisa vir DEPOIS do appendChild: atualizarIconeOlhoSonda
+    // usa getElementById, que só enxerga elementos já no documento.
+    for (const id of ['hubble', 'jwst']) {
+      motor.setCorpoVisivel(id, false);
+      atualizarIconeOlhoSonda(id, false);
+    }
   }
 
   // Function to update mission eye icon
@@ -501,6 +700,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const btn = document.getElementById(`olho-missao-${idMissao}`);
     if (btn) {
       btn.innerHTML = visivel ? '◉' : '◎';
+    }
+  }
+
+  // Function to update probe/telescope eye icon
+  function atualizarIconeOlhoSonda(idSonda, visivel) {
+    const btn = document.getElementById(`olho-sonda-${idSonda}`);
+    if (btn) {
+      btn.innerHTML = visivel ? '◉' : '○';
     }
   }
 
@@ -637,10 +844,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const vel = estado.velocidadeAtual;
     if (vel === 0) {
       elem.textContent = t('pausado');
+    } else if (vel === 1/24) {
+      elem.textContent = t('umaHoraPorSegundo');
     } else if (vel === 1) {
       elem.textContent = t('umDiaPorSegundo');
     } else if (vel > 1) {
       elem.textContent = t('diasPorSegundo', { n: vel });
+    } else if (vel === -1/24) {
+      elem.textContent = `−${t('umaHoraPorSegundo')}`;
     } else if (vel === -1) {
       elem.textContent = `−${t('umDiaPorSegundo')}`;
     } else {
@@ -702,8 +913,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       html += `<div class="info-chip-tipo">${tipoLabel}</div>`;
     }
 
-    // Nome
+    // Nome + botão favoritar (Efeito IKEA — posse antes de conta/compra)
+    const favAtivo = ehFavorito(corpo.id);
     html += `<h2 class="info-nome">${corpo.nome}</h2>`;
+    html += `<button class="info-fav-btn${favAtivo ? ' ativo' : ''}" id="info-fav-btn" aria-pressed="${favAtivo}" title="${favAtivo ? t('favRemover') : t('favAdd')}">${favAtivo ? '★' : '☆'} <span class="info-fav-texto">${favAtivo ? t('favLabelAtivo') : t('favLabel')}</span></button>`;
 
     // Ordem do Sol
     if (corpo.ordemDoSol) {
@@ -796,6 +1009,18 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     }
 
     conteudo.innerHTML = html;
+
+    // Favoritar: alterna estado, persiste e atualiza o marcador na lista
+    const favBtn = conteudo.querySelector('#info-fav-btn');
+    if (favBtn) {
+      favBtn.onclick = () => {
+        const agora = alternarFavorito(corpo.id);
+        favBtn.classList.toggle('ativo', agora);
+        favBtn.setAttribute('aria-pressed', String(agora));
+        favBtn.title = agora ? t('favRemover') : t('favAdd');
+        favBtn.innerHTML = `${agora ? '★' : '☆'} <span class="info-fav-texto">${agora ? t('favLabelAtivo') : t('favLabel')}</span>`;
+      };
+    }
 
     // Chips de luas: focar e abrir o painel da lua clicada
     conteudo.querySelectorAll('.info-lua-chip').forEach(btn => {
@@ -1266,6 +1491,53 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     document.getElementById('card-missao-btn-fechar').onclick = fecharCardMissao;
   }
 
+  // Aplica um ritmo de tempo específico (dias/s) e reflete nos controles de
+  // velocidade (slider, label). Usado ao começar a seguir uma missão e pelo
+  // gatilho de "chegou na órbita final" (ver sim:orbita-capturada abaixo).
+  function definirRitmo(diasPorSegundo) {
+    const idx = VELOCIDADES.indexOf(diasPorSegundo);
+    if (idx < 0) return;
+    estado.indiceVelocidades = idx;
+    estado.velocidadeAtual = diasPorSegundo;
+    estado.velocidadeAnterior = diasPorSegundo;
+    motor.setVelocidade(diasPorSegundo);
+    atualizarLabelVelocidade();
+    atualizarSliderVelocidade();
+  }
+
+  // Seguir a nave desde o lançamento: torna a trajetória visível, volta ao
+  // dia do lançamento, trava a câmera no marcador (que viaja com o tempo) e
+  // ajusta a velocidade para um ritmo em que dá pra VER a viagem acontecer.
+  // Acionado ao selecionar a missão no menu E pelo botão do card.
+  function seguirMissao(idMissao) {
+    if (!trajetorias || !motor.seguirDinamico) return;
+    const missao = missoes?.find(m => m.id === idMissao);
+    if (!missao || !missao.paradas || missao.paradas.length === 0) return;
+
+    trajetorias.setVisivel(idMissao, true);
+    atualizarIconeOlho(idMissao, true);
+    motor.irParaData(missao.paradas[0].data);
+    motor.seguirDinamico(
+      () => trajetorias.posicaoDaNave(idMissao),
+      trajetorias.distanciaCameraSugerida(idMissao),
+      idMissao
+    );
+    // Missões curtas (Apollo/Artemis, ~8-10 dias) declaram velocidadeSeguir: 1
+    definirRitmo(missao.velocidadeSeguir || 7);
+  }
+
+  // Juno/Cassini (órbita de captura): durante o cruzeiro o usuário costuma
+  // acelerar bastante pra ver a viagem passar rápido, mas isso fica ruim de
+  // acompanhar assim que a nave entra na órbita final ao redor do planeta.
+  // trajetorias.js dispara este evento UMA VEZ no instante da entrada (não a
+  // cada frame) — baixamos para 1 dia/s aqui, e o usuário pode mudar de novo
+  // livremente depois, sem o evento reimpor nada.
+  if (trajetorias) {
+    document.addEventListener('sim:orbita-capturada', () => {
+      definirRitmo(1);
+    });
+  }
+
   function abrirCardMissao(idMissao) {
     fecharPainelEventos();
     fecharComparador();
@@ -1343,31 +1615,13 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       };
       conteudo.appendChild(btn);
 
-      // Seguir a nave: volta ao lançamento, trava a câmera no marcador da
-      // missão (que segue viajando conforme o tempo avança) e ajusta a
-      // velocidade para um ritmo em que dá para VER a viagem acontecer
+      // Seguir a nave: mesmo comportamento acionado ao selecionar a missão
+      // no menu — o botão fica no card para re-acionar quando o usuário quiser
       if (trajetorias && motor.seguirDinamico) {
         const btnSeguir = document.createElement('button');
         btnSeguir.className = 'botao card-missao-btn-lancamento';
         btnSeguir.textContent = t('seguirNave');
-        btnSeguir.onclick = () => {
-          trajetorias.setVisivel(idMissao, true);
-          atualizarIconeOlho(idMissao, true);
-          motor.irParaData(missao.paradas[0].data);
-          motor.seguirDinamico(
-            () => trajetorias.posicaoDaNave(idMissao),
-            trajetorias.distanciaCameraSugerida(idMissao)
-          );
-          const idxRitmo = VELOCIDADES.indexOf(7);
-          if (idxRitmo >= 0) {
-            estado.indiceVelocidades = idxRitmo;
-            estado.velocidadeAtual = 7;
-            estado.velocidadeAnterior = 7;
-            motor.setVelocidade(7);
-            atualizarLabelVelocidade();
-            atualizarSliderVelocidade();
-          }
-        };
+        btnSeguir.onclick = () => seguirMissao(idMissao);
         conteudo.appendChild(btnSeguir);
       }
     }

@@ -78,13 +78,29 @@ export class Trajetorias {
   }
 
   _construirTrajetoria(missao) {
+    if (missao.espiral) {
+      this._construirTrajetoriaEspiral(missao);
+      return;
+    }
     const id = missao.id;
+
+    // Missão com captura orbital (Juno/Cassini): o spline representa só o
+    // cruzeiro até a inserção; depois a nave orbita o planeta. Paradas
+    // posteriores à inserção (Grand Finale da Cassini) ficam fora do spline
+    // — senão viram um arco falso ao longo da órbita do planeta.
+    const cap = missao.orbitaCaptura || null;
+    const tempoInicioCaptura = cap ? this._converterDataParaTempoDias(cap.dataInicio) : null;
 
     // Coletar waypoints: posições dos corpos nas datas das paradas
     const waypoints = [];
     const waypointDatas = [];
+    // Missão que termina numa estrela (Parker → Sol): esfera de exclusão para
+    // a linha e o marcador nunca entrarem na esfera visual do Sol
+    let clampEstrela = null;
 
     for (const parada of missao.paradas) {
+      // Parada após a inserção orbital: não entra no spline de cruzeiro
+      if (cap && this._converterDataParaTempoDias(parada.data) > tempoInicioCaptura) continue;
       // Verificar se corpo existe
       const corpo = this.motor.dados.corpos.find(c => c.id === parada.corpo);
       if (!corpo) continue; // Pular parada com corpo inexistente (defensivo)
@@ -102,6 +118,7 @@ export class Trajetorias {
         const aproximacao = posicao.clone().sub(anterior);
         const distAteCentro = aproximacao.length();
         const raioVisual = this.motor._calcularEscala(corpo).raio * 1.6;
+        clampEstrela = { centro: posicao.clone(), raio: raioVisual };
         if (distAteCentro > raioVisual) {
           posicao.copy(anterior).addScaledVector(aproximacao, (distAteCentro - raioVisual) / distAteCentro);
         }
@@ -149,6 +166,11 @@ export class Trajetorias {
 
     // Criar linha: 200 segmentos
     const pontos = curvaFinal.getPoints(200);
+    // A Catmull-Rom pode "mergulhar" dentro da esfera visual da estrela mesmo
+    // com o waypoint final recuado — empurra cada ponto amostrado para fora
+    if (clampEstrela) {
+      for (const p of pontos) this._clampForaDaEsfera(p, clampEstrela);
+    }
     const geometryLinha = new THREE.BufferGeometry().setFromPoints(pontos);
 
     const cor = new THREE.Color(missao.cor);
@@ -200,9 +222,13 @@ export class Trajetorias {
     rotuloSprite.visible = false; // Inicia oculto
     this.scene.add(rotuloSprite);
 
+    // Órbita de captura ao redor do planeta (Juno/Cassini)
+    const captura = cap ? this._criarOrbitaCaptura(missao, cap, tempoInicioCaptura) : null;
+
     // Armazenar dados da trajetória
     this._trajetorias.set(id, {
       missao,
+      captura,
       curva: curvaFinal,
       curvaOriginal: curva,
       linha,
@@ -218,7 +244,375 @@ export class Trajetorias {
       visivel: false,
       selecionada: false,
       escalaMarcador,
+      clampEstrela,
       // Pré-computados para o loop de frame (evita realocar a cada quadro)
+      temposDias: waypointDatas.map((d) => this._converterDataParaTempoDias(d.data)),
+      tempoDiasUltimaParada: this._converterDataParaTempoDias(waypointDatas[waypointDatas.length - 1].data)
+    });
+  }
+
+  // ————— Órbita de captura (Juno/Cassini) —————
+  // Elipse kepleriana ao redor do planeta-alvo, com o planeta no foco. As
+  // distâncias peri/apo (km reais) passam pelo MESMO mapeamento usado para
+  // as luas do simulador (compressão didática ^0.6), então a órbita da nave
+  // fica coerente com as luas na cena. A linha segue o planeta a cada frame.
+  _criarOrbitaCaptura(missao, cap, tempoInicio) {
+    const corpoPai = this.motor.dados.corpos.find((c) => c.id === cap.corpo);
+    if (!corpoPai) return null;
+    const raioPai = this.motor._calcularEscala(corpoPai).raio;
+
+    // Espelha _calcularDistancia do motor para luas — manter em sincronia
+    const mapear = (km) => this.motor.escala === 'didatica'
+      ? raioPai + 2.2 + 4 * Math.pow(km / 384400, 0.6)
+      : Math.max(raioPai * 1.6, (km / 149.6e6) * 70);
+
+    const rPeri = mapear(cap.periKm);
+    const rApo = mapear(cap.apoKm);
+    const a = (rPeri + rApo) / 2;
+    const e = (rApo - rPeri) / (rApo + rPeri);
+    const b = a * Math.sqrt(1 - e * e);
+    const incRad = ((cap.inclinacaoGraus || 0) * Math.PI) / 180;
+    const rot = new THREE.Matrix4().makeRotationX(incRad);
+
+    const pontos = [];
+    for (let i = 0; i <= 128; i++) {
+      const E = (i / 128) * Math.PI * 2;
+      const p = new THREE.Vector3(a * (Math.cos(E) - e), 0, -b * Math.sin(E));
+      p.applyMatrix4(rot);
+      pontos.push(p);
+    }
+    const geometry = new THREE.BufferGeometry().setFromPoints(pontos);
+    const material = new THREE.LineBasicMaterial({
+      color: new THREE.Color(missao.cor),
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false
+    });
+    const linha = new THREE.Line(geometry, material);
+    linha.visible = false;
+    this.scene.add(linha);
+
+    return {
+      linha, geometry, material, corpoPai,
+      a, e, b, rot,
+      tempoInicio,
+      tempoFim: cap.dataFim ? this._converterDataParaTempoDias(cap.dataFim) : Infinity,
+      periodoDias: cap.periodoDias || 20,
+      // Inicializado pelo tempo ATUAL da simulação (não `false` fixo): assim,
+      // trocar de escala (reconstruir() recria este objeto do zero) não
+      // dispara sim:orbita-capturada de novo só porque a nave já estava na
+      // órbita final quando o usuário trocou didática↔real.
+      jaEntrouOrbita: this.motor.tempoDias >= tempoInicio
+    };
+  }
+
+  // Posição LOCAL da nave na órbita de captura (relativa ao planeta)
+  _posicaoCapturaLocal(captura, tempoDias) {
+    const M = (Math.PI * 2 * (tempoDias - captura.tempoInicio)) / captura.periodoDias;
+    const TAU = Math.PI * 2;
+    const Mn = ((M % TAU) + TAU) % TAU;
+    const E = this._resolverKepler(Mn, captura.e);
+    const p = new THREE.Vector3(
+      captura.a * (Math.cos(E) - captura.e),
+      0,
+      -captura.b * Math.sin(E)
+    );
+    p.applyMatrix4(captura.rot);
+    return p;
+  }
+
+  // ————— Trajetória espiral (Parker Solar Probe) —————
+  // O spline por waypoints não representa uma espiral de múltiplas voltas.
+  // Aqui a trajetória é gerada analiticamente: uma sequência de órbitas
+  // keplerianas heliocêntricas cujo periélio encolhe a cada sobrevoo de
+  // Vênus. O afélio fica ancorado na órbita de Vênus DO SIMULADOR (as
+  // posições dos planetas são estilizadas — ancorar nos corpos da cena é o
+  // que faz os estilingues acontecerem visualmente em cima de Vênus).
+
+  // Distância heliocêntrica em UA -> unidades da cena. Espelha
+  // _calcularDistancia do motor para corpos com pai 'sol' — manter em sincronia.
+  _raioSimDeUA(ua) {
+    return this.motor.escala === 'didatica' ? 70 * Math.sqrt(ua) : 70 * ua;
+  }
+
+  // Ângulo heliocêntrico (no plano orbital, antes da inclinação) de um corpo
+  // do simulador num instante. Desfaz a rotação de inclinação do corpo.
+  _anguloCorpoEm(corpo, tempoDias) {
+    const pos = this.motor._calcularPosicao(corpo, false, tempoDias);
+    const inc = ((corpo.inclinacaoOrbitaGraus || 0) * Math.PI) / 180;
+    // Inverso exato do rotX(inc) que o motor aplica a corpos heliocêntricos
+    const z = -pos.y * Math.sin(inc) + pos.z * Math.cos(inc);
+    return Math.atan2(-z, pos.x);
+  }
+
+  _wrapPi(a) {
+    const TAU = Math.PI * 2;
+    let r = a % TAU;
+    if (r > Math.PI) r -= TAU;
+    if (r < -Math.PI) r += TAU;
+    return r;
+  }
+
+  // Resolve Kepler igual ao motor (Newton-Raphson)
+  _resolverKepler(MRad, e) {
+    // e === 0, não !e: !NaN também é true, e uma excentricidade NaN (ex.:
+    // mismatch entre sobrevoos/perieliosUA) deve propagar um erro visível,
+    // não virar "órbita circular" silenciosa.
+    if (e === 0) return MRad;
+    const TAU = Math.PI * 2;
+    const voltas = Math.floor(MRad / TAU);
+    let Mn = MRad - voltas * TAU;
+    let E = e < 0.8 ? Mn : Math.PI;
+    for (let i = 0; i < 30; i++) {
+      const dE = (E - e * Math.sin(E) - Mn) / (1 - e * Math.cos(E));
+      E -= dE;
+      if (Math.abs(dE) < 1e-9) break;
+    }
+    return E + voltas * TAU;
+  }
+
+  _construirTrajetoriaEspiral(missao) {
+    const esp = missao.espiral;
+    const corpos = this.motor.dados.corpos;
+    const venus = corpos.find((c) => c.id === 'venus');
+    const terra = corpos.find((c) => c.id === 'terra');
+    const sol = corpos.find((c) => c.tipo === 'estrela');
+    if (!venus || !terra || !sol) {
+      console.warn(`Missão ${missao.id}: corpos da espiral ausentes, ignorando`);
+      return;
+    }
+    // Mesma guarda defensiva do caminho genérico (waypoints.length < 2): sem
+    // isso, um dado futuro vazio/errado lançaria uma exceção não tratada
+    // aqui dentro de iniciar() (chamado sem try/catch em main.js) e abortaria
+    // a inicialização do app inteiro, não só desta missão.
+    if (!missao.paradas || missao.paradas.length === 0) {
+      console.warn(`Missão ${missao.id}: sem paradas, ignorando espiral`);
+      return;
+    }
+    if (!esp.sobrevoos || !esp.perieliosUA || esp.sobrevoos.length !== esp.perieliosUA.length) {
+      console.warn(`Missão ${missao.id}: sobrevoos e perieliosUA com tamanhos diferentes, ignorando espiral`);
+      return;
+    }
+
+    const UA_KM = 149.6e6; // igual ao motor
+    const uaVenus = venus.distanciaMediaKm / UA_KM;   // ~0.7233
+    const uaTerra = terra.distanciaMediaKm / UA_KM;   // 1.0
+    const incVenusRad = ((venus.inclinacaoOrbitaGraus || 0) * Math.PI) / 180;
+    const raioSolVisual = this.motor._calcularEscala(sol).raio;
+    const pisoRaio = raioSolVisual * 1.12; // a linha "toca" o Sol sem entrar
+
+    const tLanc = this._converterDataParaTempoDias(esp.dataLancamento);
+    const tVGA = esp.sobrevoos.map((d) => this._converterDataParaTempoDias(d));
+    const thetaVenusEm = (t) => this._anguloCorpoEm(venus, t);
+
+    // Verdadeira anomalia a partir da anomalia excêntrica
+    const nuDeE = (E, e) =>
+      2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+
+    // ——— Montar fases ———
+    // Cada fase: órbita (qUA, QUA) percorrida de afélio a afélio n vezes,
+    // com deriva angular linear para o ponto final coincidir com Vênus.
+    const fases = [];
+
+    // Fase 0 — transferência Terra -> 1º sobrevoo de Vênus.
+    // Elipse com afélio na Terra; avança até r = órbita de Vênus (entrada).
+    {
+      const q = esp.perieliosUA[0];
+      const Q = uaTerra;
+      const a = (q + Q) / 2;
+      const e = (Q - q) / (Q + q);
+      // E onde r volta a ser uaVenus no trecho pós-afélio (E em [π, 2π])
+      const cosE = (1 - uaVenus / a) / e;
+      const Efim = Math.PI * 2 - Math.acos(Math.max(-1, Math.min(1, cosE)));
+      const Mfim = Efim - e * Math.sin(Efim);
+      const thetaBase = this._anguloCorpoEm(terra, tLanc);
+      const nuFim = nuDeE(Efim, e);
+      const semDrift = thetaBase + (nuFim - Math.PI);
+      const drift = this._wrapPi(thetaVenusEm(tVGA[0]) - semDrift);
+      fases.push({
+        t0: tLanc, t1: tVGA[0], q, Q, a, e,
+        M0: Math.PI, M1: Mfim, thetaBase, drift,
+        inc0: 0, inc1: incVenusRad
+      });
+    }
+
+    // Fases 1..6 — entre sobrevoos consecutivos: afélio ancorado em Vênus,
+    // n voltas inteiras (n ≈ duração / período kepleriano real da órbita).
+    for (let i = 0; i < tVGA.length - 1; i++) {
+      const q = esp.perieliosUA[i];
+      const Q = uaVenus;
+      const a = (q + Q) / 2;
+      const e = (Q - q) / (Q + q);
+      const periodoDias = 365.25 * Math.pow(a, 1.5); // 3ª lei de Kepler
+      const dur = tVGA[i + 1] - tVGA[i];
+      const n = Math.max(1, Math.round(dur / periodoDias));
+      const thetaBase = thetaVenusEm(tVGA[i]);
+      // fim sem deriva: afélio de novo => mesmo ângulo (mod 2π)
+      const drift = this._wrapPi(thetaVenusEm(tVGA[i + 1]) - thetaBase);
+      fases.push({
+        t0: tVGA[i], t1: tVGA[i + 1], q, Q, a, e,
+        M0: Math.PI, M1: Math.PI + Math.PI * 2 * n, thetaBase, drift,
+        inc0: incVenusRad, inc1: incVenusRad
+      });
+    }
+
+    // Fase final — órbita definitiva após o último sobrevoo, sem fim.
+    // Se houver data de periélio de referência (recorde do Parker), a fase
+    // é ancorada nela: M(dataPerielio) ≡ 0 (mod 2π). Perto do afélio o raio
+    // quase não muda, então a continuidade com o sobrevoo se mantém.
+    {
+      const q = esp.perieliosUA[esp.perieliosUA.length - 1];
+      const Q = uaVenus;
+      const a = (q + Q) / 2;
+      const e = (Q - q) / (Q + q);
+      const periodoDias = 365.25 * Math.pow(a, 1.5); // ~88 dias (real!)
+      const t0 = tVGA[tVGA.length - 1];
+      let M0 = Math.PI;
+      if (esp.dataPerielioRecorde) {
+        const tPeri = this._converterDataParaTempoDias(esp.dataPerielioRecorde);
+        const frac = (tPeri - t0) / periodoDias;
+        M0 = Math.PI * 2 * (Math.ceil(frac) - frac);
+      }
+      // Compensa o M0 fora do afélio para a fase ainda COMEÇAR em Vênus
+      const E0 = this._resolverKepler(M0, e);
+      const nu0 = nuDeE(E0, e);
+      const thetaBase = thetaVenusEm(t0) - (nu0 - Math.PI);
+      fases.push({
+        t0, t1: Infinity, q, Q, a, e,
+        M0, periodoDias, thetaBase, drift: 0,
+        inc0: incVenusRad, inc1: incVenusRad
+      });
+    }
+
+    // Posição da sonda num instante (unidades da cena). null antes do lançamento.
+    const _rotX = new THREE.Matrix4();
+    const espiralFn = (tempoDias) => {
+      if (tempoDias < tLanc) return null;
+      let fase = fases[fases.length - 1];
+      for (const f of fases) {
+        if (tempoDias < f.t1) { fase = f; break; }
+      }
+      let M, tau;
+      if (fase.t1 === Infinity) {
+        tau = 1;
+        M = fase.M0 + (Math.PI * 2 * (tempoDias - fase.t0)) / fase.periodoDias;
+      } else {
+        tau = (tempoDias - fase.t0) / (fase.t1 - fase.t0);
+        M = fase.M0 + (fase.M1 - fase.M0) * tau;
+      }
+      // Anomalia verdadeira ACUMULADA (contínua através das voltas): resolve
+      // Kepler na volta normalizada e soma as voltas completas de novo.
+      // Com En ∈ [0, 2π), nuDeE devolve nu ∈ [0, 2π) monotônico em En.
+      const TAU = Math.PI * 2;
+      const voltas = Math.floor(M / TAU);
+      const En = this._resolverKepler(M - voltas * TAU, fase.e);
+      let nu = nuDeE(En, fase.e);
+      if (nu < 0) nu += TAU;
+      const rUA = fase.a * (1 - fase.e * Math.cos(En));
+      const theta = fase.thetaBase + (nu + voltas * TAU - Math.PI) + fase.drift * tau;
+      const r = Math.max(pisoRaio, this._raioSimDeUA(rUA));
+      const pos = new THREE.Vector3(r * Math.cos(theta), 0, -r * Math.sin(theta));
+      const inc = fase.inc0 + (fase.inc1 - fase.inc0) * tau;
+      if (inc) {
+        _rotX.makeRotationX(inc);
+        pos.applyMatrix4(_rotX);
+      }
+      return pos;
+    };
+
+    // ——— Linha: amostragem temporal fina do caminho todo ———
+    const tFim = esp.dataFimLinha
+      ? this._converterDataParaTempoDias(esp.dataFimLinha)
+      : tVGA[tVGA.length - 1] + 270;
+    // Amostragem ADAPTATIVA: perto do periélio a sonda varre ângulos enormes
+    // em horas (2ª lei de Kepler) — passo uniforme de dias deixaria quinas.
+    // Bisseção até cada segmento ficar curto na cena.
+    const passoDias = 1.25;
+    const segMax = 1.8; // unidades de cena
+    const pontos = [];
+    const refinar = (t0, p0, t1, p1, prof) => {
+      if (prof <= 0 || p0.distanceTo(p1) <= segMax) return;
+      const tm = (t0 + t1) / 2;
+      const pm = espiralFn(tm);
+      refinar(t0, p0, tm, pm, prof - 1);
+      pontos.push(pm);
+      refinar(tm, pm, t1, p1, prof - 1);
+    };
+    let tPrev = tLanc;
+    let pPrev = espiralFn(tLanc);
+    pontos.push(pPrev);
+    for (let t = tLanc + passoDias; t <= tFim; t += passoDias) {
+      const p = espiralFn(t);
+      refinar(tPrev, pPrev, t, p, 7);
+      pontos.push(p);
+      tPrev = t;
+      pPrev = p;
+    }
+
+    const geometryLinha = new THREE.BufferGeometry().setFromPoints(pontos);
+    const materialLinha = new THREE.LineBasicMaterial({
+      color: new THREE.Color(missao.cor),
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+      linewidth: 1
+    });
+    const linha = new THREE.Line(geometryLinha, materialLinha);
+    linha.visible = false;
+    this.scene.add(linha);
+
+    // Marcador e rótulo — mesmos sprites das trajetórias comuns
+    const texturaGlow = criarTexturaGlowCircular(missao.cor);
+    const materialMarcador = new THREE.SpriteMaterial({
+      map: texturaGlow,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+      transparent: true,
+      depthWrite: false
+    });
+    const escalaMarcador = 1.6;
+    const marcador = new THREE.Sprite(materialMarcador);
+    marcador.scale.set(escalaMarcador, escalaMarcador, 1);
+    marcador.visible = false;
+    this.scene.add(marcador);
+
+    const texturaRotulo = criarTexturaRotuloMissao(missao.nome, missao.cor);
+    const materialRotulo = new THREE.SpriteMaterial({
+      map: texturaRotulo,
+      sizeAttenuation: true,
+      transparent: true,
+      depthWrite: false
+    });
+    const rotuloSprite = new THREE.Sprite(materialRotulo);
+    // escalaMarcador é fixo (1,6) neste método (espiral/captura), diferente do
+    // método irmão onde ele varia por missão — por isso o rótulo usa escala
+    // fixa direto, sem o Math.min(1, escalaMarcador/1.6) do outro método (que
+    // aqui sempre avaliaria pra 1, código morto herdado por copy-paste).
+    rotuloSprite.scale.set(12, 3, 1);
+    rotuloSprite.visible = false;
+    this.scene.add(rotuloSprite);
+
+    const waypointDatas = missao.paradas.map((p) => ({ data: p.data, rotulo: p.rotulo }));
+    this._trajetorias.set(missao.id, {
+      missao,
+      curva: null,
+      curvaOriginal: null,
+      linha,
+      geometryLinha,
+      materialLinha,
+      marcador,
+      materialMarcador,
+      rotuloSprite,
+      materialRotulo,
+      waypoints: pontos,
+      waypointDatas,
+      posicaoMarcadorAtual: null,
+      visivel: false,
+      selecionada: false,
+      escalaMarcador,
+      clampEstrela: null,
+      espiralFn,
+      tempoDiasLancamento: tLanc,
       temposDias: waypointDatas.map((d) => this._converterDataParaTempoDias(d.data)),
       tempoDiasUltimaParada: this._converterDataParaTempoDias(waypointDatas[waypointDatas.length - 1].data)
     });
@@ -239,6 +633,12 @@ export class Trajetorias {
       this.scene.remove(traj.linha);
       this.scene.remove(traj.marcador);
       this.scene.remove(traj.rotuloSprite);
+
+      if (traj.captura) {
+        traj.captura.geometry.dispose();
+        traj.captura.material.dispose();
+        this.scene.remove(traj.captura.linha);
+      }
     }
 
     this._trajetorias.clear();
@@ -275,6 +675,13 @@ export class Trajetorias {
       traj.marcador.visible = false;
       traj.rotuloSprite.visible = false;
     }
+    if (traj.captura) traj.captura.linha.visible = bool;
+  }
+
+  // Opacidade da linha (e da elipse de captura junto, quando existir)
+  _setOpacidadeLinha(traj, valor) {
+    traj.materialLinha.opacity = valor;
+    if (traj.captura) traj.captura.material.opacity = valor;
   }
 
   setSelecionada(idMissaoOuNull) {
@@ -282,7 +689,7 @@ export class Trajetorias {
     if (this._selecionada) {
       const trajAnt = this._trajetorias.get(this._selecionada);
       if (trajAnt && this._visiveis.has(this._selecionada)) {
-        trajAnt.materialLinha.opacity = 0.55;
+        this._setOpacidadeLinha(trajAnt, 0.55);
         trajAnt.selecionada = false;
       }
     }
@@ -292,7 +699,7 @@ export class Trajetorias {
     if (idMissaoOuNull) {
       const traj = this._trajetorias.get(idMissaoOuNull);
       if (traj) {
-        traj.materialLinha.opacity = 0.95;
+        this._setOpacidadeLinha(traj, 0.95);
         traj.selecionada = true;
 
         // Esmaiar as outras visíveis
@@ -300,7 +707,7 @@ export class Trajetorias {
           if (id !== idMissaoOuNull) {
             const outraTraj = this._trajetorias.get(id);
             if (outraTraj) {
-              outraTraj.materialLinha.opacity = 0.18;
+              this._setOpacidadeLinha(outraTraj, 0.18);
             }
           }
         }
@@ -310,7 +717,7 @@ export class Trajetorias {
       for (const id of this._visiveis) {
         const traj = this._trajetorias.get(id);
         if (traj) {
-          traj.materialLinha.opacity = 0.55;
+          this._setOpacidadeLinha(traj, 0.55);
         }
       }
     }
@@ -327,6 +734,7 @@ export class Trajetorias {
     const traj = this._trajetorias.get(idMissao);
     if (!traj) return null;
     if (traj.marcador.visible) return traj.marcador.position.clone();
+    if (traj.espiralFn) return traj.espiralFn(traj.tempoDiasLancamento);
     return traj.curva.getPoint(0);
   }
 
@@ -344,9 +752,75 @@ export class Trajetorias {
     return (ms - J2000_EPOCH) / (24 * 3600 * 1000);
   }
 
+  // Empurra o ponto (in-place) para fora da esfera {centro, raio} se estiver
+  // dentro dela. Ponto exatamente no centro é caso degenerado: sobe no eixo Y.
+  _clampForaDaEsfera(ponto, { centro, raio }) {
+    const dir = ponto.clone().sub(centro);
+    const dist = dir.length();
+    if (dist >= raio) return;
+    if (dist < 1e-6) dir.set(0, 1, 0);
+    else dir.divideScalar(dist);
+    ponto.copy(centro).addScaledVector(dir, raio);
+  }
+
   _atualizarMarcadores(tempoDias) {
     for (const [id, traj] of this._trajetorias.entries()) {
       if (!traj.visivel) continue;
+
+      // Trajetória espiral: posição analítica direta (sem spline)
+      if (traj.espiralFn) {
+        const pos = traj.espiralFn(tempoDias);
+        if (!pos) {
+          traj.marcador.visible = false;
+          traj.rotuloSprite.visible = false;
+          continue;
+        }
+        traj.marcador.position.copy(pos);
+        traj.rotuloSprite.position.copy(pos);
+        traj.rotuloSprite.position.y += traj.escalaMarcador + 1.2;
+        traj.marcador.visible = true;
+        traj.rotuloSprite.visible = true;
+        continue;
+      }
+
+      // Órbita de captura: a elipse acompanha o planeta; após a inserção o
+      // marcador orbita o planeta (e após o fim — Cassini — fica no planeta)
+      if (traj.captura) {
+        const posPlaneta = this.motor._calcularPosicao(traj.captura.corpoPai, false, tempoDias);
+        traj.captura.linha.position.copy(posPlaneta);
+        const dentroDaCaptura = tempoDias >= traj.captura.tempoInicio;
+        // Disparo único ao ENTRAR na órbita final (não a cada frame dentro
+        // dela) — pedido do Fred: a nave costuma ser vista em velocidade alta
+        // durante o cruzeiro, mas isso fica ruim de acompanhar já na órbita
+        // final. ui.js escuta este evento e baixa a velocidade uma vez; o
+        // usuário pode mudar de novo depois sem o evento reimpor nada. Se o
+        // tempo voltar pra antes da captura, o flag reseta pra poder disparar
+        // de novo numa futura reentrada.
+        //
+        // Só dispara se a câmera estiver de fato SEGUINDO esta missão
+        // (motor._seguirId === id) — visibilidade (traj.visivel, checado no
+        // topo do loop) não é a mesma coisa: a trajetória pode estar visível
+        // ao fundo enquanto o usuário olha outro astro, e nesse caso o
+        // gatilho não deve mexer na velocidade dele.
+        if (dentroDaCaptura && !traj.captura.jaEntrouOrbita && this.motor._seguirId === id) {
+          traj.captura.jaEntrouOrbita = true;
+          document.dispatchEvent(new CustomEvent('sim:orbita-capturada', { detail: { idMissao: id } }));
+        } else if (!dentroDaCaptura && traj.captura.jaEntrouOrbita) {
+          traj.captura.jaEntrouOrbita = false;
+        }
+        if (dentroDaCaptura) {
+          const pos = posPlaneta.clone();
+          if (tempoDias <= traj.captura.tempoFim) {
+            pos.add(this._posicaoCapturaLocal(traj.captura, tempoDias));
+          }
+          traj.marcador.position.copy(pos);
+          traj.rotuloSprite.position.copy(pos);
+          traj.rotuloSprite.position.y += traj.escalaMarcador + 1.2;
+          traj.marcador.visible = true;
+          traj.rotuloSprite.visible = true;
+          continue;
+        }
+      }
 
       const { temposDias, curva, missao } = traj;
       // A curva pode ter 1 ponto a mais que as paradas (extensão interestelar);
@@ -387,6 +861,8 @@ export class Trajetorias {
 
       const posicaoMarcador = curva.getPoint(u);
       if (posicaoMarcador) {
+        // Nave nunca entra na esfera visual da estrela (Parker "encosta" no Sol)
+        if (traj.clampEstrela) this._clampForaDaEsfera(posicaoMarcador, traj.clampEstrela);
         traj.marcador.position.copy(posicaoMarcador);
         traj.rotuloSprite.position.copy(posicaoMarcador);
         traj.rotuloSprite.position.y += traj.escalaMarcador + 1.2;

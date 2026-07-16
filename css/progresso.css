@@ -216,12 +216,8 @@
   font-weight: 600;
 }
 
-/* Chip de nível fixo no topo esquerdo */
+/* Chip de nível (agora estático dentro do bloco de título) */
 .progresso-chip {
-  position: fixed;
-  top: 86px;
-  left: 20px;
-  z-index: 25;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -234,6 +230,7 @@
   transition: all 150ms ease;
   pointer-events: auto;
   min-width: 120px;
+  margin-top: 10px;
 }
 
 .progresso-chip:hover {

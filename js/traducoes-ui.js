@@ -9,6 +9,9 @@ export const UI_TEXTOS = {
     btnQuiz: '◈ Quiz',
     btnVoce: '◍ Você no Espaço',
     btnTour: '▶ Tour guiado',
+    grupoExperiencias: 'Experiências',
+    grupoVisualizacao: 'Visualização',
+    grupoUtilidades: 'Utilidades',
     escalaDidatica: 'Didática',
     escalaReal: 'Real',
     btnOrbitas: 'Órbitas',
@@ -27,6 +30,7 @@ export const UI_TEXTOS = {
     grupoMissoes: 'MISSÕES ESPACIAIS',
     pausado: 'Pausado',
     umDiaPorSegundo: '1 dia/s',
+    umaHoraPorSegundo: '1 hora/s',
     diasPorSegundo: '{n} dias/s',
     hoje: 'Hoje',
     tituloSlider: 'Velocidade da simulação — esquerda volta no tempo, direita avança',
@@ -70,6 +74,7 @@ export const UI_TEXTOS = {
     toastDica: 'Arraste para girar · Role para dar zoom · Clique em um astro para conhecê-lo',
     credito: 'Texturas: Solar System Scope (CC BY 4.0) · Dados: NASA/JPL',
     seletorIdioma: 'Idioma',
+    sondaOlhoTitulo: 'Mostrar/ocultar telescópio na cena',
     meses: [
       'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
       'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
@@ -86,6 +91,9 @@ export const UI_TEXTOS = {
     paywallBeneficio3: 'Viagem no tempo até eclipses e eventos astronômicos',
     paywallBeneficio4: 'Seu peso, idade e salto em cada planeta',
     paywallPreco: 'R$ 12,90 · compra única',
+    paywallReciprocidade: 'Os 43 astros, o tour guiado e a viagem no tempo já são seus, de graça. O Pro abre o resto.',
+    paywallAncora: 'Pague uma vez, use para sempre — sem mensalidade.',
+    paywallPerda: 'Sem o Pro, o Quiz completo, as 10 missões e os eventos astronômicos seguem trancados.',
     paywallComprar: 'Desbloquear agora',
     paywallComprando: 'Processando…',
     paywallRestaurar: 'Restaurar compra',
@@ -94,7 +102,13 @@ export const UI_TEXTOS = {
     paywallRestaurado: 'Compra restaurada!',
     paywallNadaRestaurar: 'Nenhuma compra anterior encontrada.',
     paywallLegal: 'Pagamento de demonstração (mock) — nenhuma cobrança real é feita nesta versão.',
-    cadeadoTitulo: 'Recurso Pro — toque para desbloquear'
+    cadeadoTitulo: 'Recurso Pro — toque para desbloquear',
+    favLabel: 'Favoritar',
+    favLabelAtivo: 'Favorito',
+    favAdd: 'Adicionar aos favoritos',
+    favRemover: 'Remover dos favoritos',
+    grupoFavoritos: 'Meus favoritos',
+    favVazioDica: 'Toque na ★ de um astro para guardá-lo aqui.'
   },
   en: {
     htmlLang: 'en',
@@ -106,6 +120,9 @@ export const UI_TEXTOS = {
     btnQuiz: '◈ Quiz',
     btnVoce: '◍ You in Space',
     btnTour: '▶ Guided tour',
+    grupoExperiencias: 'Experiences',
+    grupoVisualizacao: 'View',
+    grupoUtilidades: 'Utilities',
     escalaDidatica: 'Didactic',
     escalaReal: 'Real',
     btnOrbitas: 'Orbits',
@@ -124,6 +141,7 @@ export const UI_TEXTOS = {
     grupoMissoes: 'SPACE MISSIONS',
     pausado: 'Paused',
     umDiaPorSegundo: '1 day/s',
+    umaHoraPorSegundo: '1 hour/s',
     diasPorSegundo: '{n} days/s',
     hoje: 'Today',
     tituloSlider: 'Simulation speed — left goes back in time, right advances',
@@ -167,6 +185,7 @@ export const UI_TEXTOS = {
     toastDica: 'Drag to rotate · Scroll to zoom · Click on a celestial body to learn about it',
     credito: 'Textures: Solar System Scope (CC BY 4.0) · Data: NASA/JPL',
     seletorIdioma: 'Language',
+    sondaOlhoTitulo: 'Show/hide telescope in the scene',
     meses: [
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
@@ -183,6 +202,9 @@ export const UI_TEXTOS = {
     paywallBeneficio3: 'Time travel to eclipses and astronomical events',
     paywallBeneficio4: 'Your weight, age and jump on every planet',
     paywallPreco: 'US$ 2.99 · one-time purchase',
+    paywallReciprocidade: 'The 43 worlds, the guided tour and time travel are already yours, free. Pro opens the rest.',
+    paywallAncora: 'Pay once, keep it forever — no subscription.',
+    paywallPerda: 'Without Pro, the full Quiz, all 10 missions and the astronomy events stay locked.',
     paywallComprar: 'Unlock now',
     paywallComprando: 'Processing…',
     paywallRestaurar: 'Restore purchase',
@@ -191,7 +213,13 @@ export const UI_TEXTOS = {
     paywallRestaurado: 'Purchase restored!',
     paywallNadaRestaurar: 'No previous purchases found.',
     paywallLegal: 'Demo payment (mock) — no real charges are made in this version.',
-    cadeadoTitulo: 'Pro feature — tap to unlock'
+    cadeadoTitulo: 'Pro feature — tap to unlock',
+    favLabel: 'Favorite',
+    favLabelAtivo: 'Favorited',
+    favAdd: 'Add to favorites',
+    favRemover: 'Remove from favorites',
+    grupoFavoritos: 'My favorites',
+    favVazioDica: 'Tap the ★ on any object to keep it here.'
   },
   es: {
     htmlLang: 'es',
@@ -203,6 +231,9 @@ export const UI_TEXTOS = {
     btnQuiz: '◈ Quiz',
     btnVoce: '◍ Tú en el Espacio',
     btnTour: '▶ Tour guiado',
+    grupoExperiencias: 'Experiencias',
+    grupoVisualizacao: 'Visualización',
+    grupoUtilidades: 'Utilidades',
     escalaDidatica: 'Didáctica',
     escalaReal: 'Real',
     btnOrbitas: 'Órbitas',
@@ -221,6 +252,7 @@ export const UI_TEXTOS = {
     grupoMissoes: 'MISIONES ESPACIALES',
     pausado: 'En pausa',
     umDiaPorSegundo: '1 día/s',
+    umaHoraPorSegundo: '1 hora/s',
     diasPorSegundo: '{n} días/s',
     hoje: 'Hoy',
     tituloSlider: 'Velocidad de simulación — izquierda retrocede en el tiempo, derecha avanza',
@@ -264,6 +296,7 @@ export const UI_TEXTOS = {
     toastDica: 'Arrastra para rotar · Desplázate para ampliar · Haz clic en un cuerpo celeste para conocerlo',
     credito: 'Texturas: Solar System Scope (CC BY 4.0) · Datos: NASA/JPL',
     seletorIdioma: 'Idioma',
+    sondaOlhoTitulo: 'Mostrar/ocultar telescopio en la escena',
     meses: [
       'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
       'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
@@ -280,6 +313,9 @@ export const UI_TEXTOS = {
     paywallBeneficio3: 'Viaje en el tiempo a eclipses y eventos astronómicos',
     paywallBeneficio4: 'Tu peso, edad y salto en cada planeta',
     paywallPreco: 'US$ 2,99 · pago único',
+    paywallReciprocidade: 'Los 43 astros, el tour guiado y el viaje en el tiempo ya son tuyos, gratis. Pro abre el resto.',
+    paywallAncora: 'Paga una vez, para siempre — sin suscripción.',
+    paywallPerda: 'Sin Pro, el Quiz completo, las 10 misiones y los eventos astronómicos siguen bloqueados.',
     paywallComprar: 'Desbloquear ahora',
     paywallComprando: 'Procesando…',
     paywallRestaurar: 'Restaurar compra',
@@ -288,6 +324,12 @@ export const UI_TEXTOS = {
     paywallRestaurado: '¡Compra restaurada!',
     paywallNadaRestaurar: 'No se encontraron compras anteriores.',
     paywallLegal: 'Pago de demostración (mock) — no se realizan cargos reales en esta versión.',
-    cadeadoTitulo: 'Función Pro — toca para desbloquear'
+    cadeadoTitulo: 'Función Pro — toca para desbloquear',
+    favLabel: 'Favorito',
+    favLabelAtivo: 'Guardado',
+    favAdd: 'Añadir a favoritos',
+    favRemover: 'Quitar de favoritos',
+    grupoFavoritos: 'Mis favoritos',
+    favVazioDica: 'Toca la ★ de un astro para guardarlo aquí.'
   }
 };

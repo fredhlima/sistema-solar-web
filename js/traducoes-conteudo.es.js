@@ -2306,7 +2306,7 @@ export const TRADUCAO = {
     },
     "aproximacao-apofis-2029": {
       "nome": "Paso Cercano de Apófis",
-      "descricao": "El asteroide Apófis pasa a apenas 31.600 km de la Tierra — ¡dentro de la órbita de satélites geoestacionarios! Será visible a simple vista. Evento raro de aproximación extrema sin colisión."
+      "descricao": "El asteroide Apófis pasa a apenas 31.600 km de la Tierra — ¡dentro de la órbita de satélites geoestacionarios! Será visible a simple vista, uno de los encuentros más cercanos jamás previstos sin colisión. Míralo en 3D: cerca de esta fecha, Apófis se sumerge y pasa rozando la Tierra, bien dentro de la órbita de la Luna."
     },
     "geminideas-2030": {
       "nome": "Lluvia de Meteoros Geminidas",
@@ -2492,11 +2492,17 @@ export const TRADUCAO = {
     },
     "parker": {
       "nome": "Parker Solar Probe",
-      "descricao": "La sonda \"toca\" la atmósfera del Sol (corona solar) con escudo térmico de carbono soportando ~1.377°C. Utiliza sobrevuelos de Venus como hondas gravitacionales para acercarse cada vez más al Sol. Velocidad récord de ~690.000 km/h — el objeto más rápido jamás construido por humanos.",
+      "descricao": "La sonda \"toca\" la atmósfera del Sol (corona solar) con escudo térmico de carbono soportando ~1.377°C. Usó 7 sobrevuelos de Venus como hondas gravitacionales para encoger su órbita — en 3D, cada vuelta de la espiral se sumerge más cerca del Sol, hasta el perihelio récord de 2024. Velocidad récord de ~690.000 km/h — el objeto más rápido jamás construido por humanos.",
       "estado": "Activa — la sonda más cercana al Sol jamás construida",
       "paradas": [
         "Lanzamiento de Cabo Cañaveral",
-        "Primer sobrevuelo de Venus",
+        "1er sobrevuelo de Venus",
+        "2º sobrevuelo de Venus",
+        "3er sobrevuelo de Venus",
+        "4º sobrevuelo de Venus",
+        "5º sobrevuelo de Venus",
+        "6º sobrevuelo de Venus",
+        "7º y último sobrevuelo de Venus",
         "Perihelio récord — más cerca del Sol en la historia"
       ]
     },

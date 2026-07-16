@@ -4,7 +4,7 @@
 // e os brilhos são aleatórios). Liga/desliga pelo botão ♫ na barra de ações;
 // preferência persistida. O AudioContext só nasce/resume em gesto do usuário
 // (política de autoplay); com a aba oculta o contexto é suspenso (bateria).
-import { getIdioma } from './i18n.js?v=6';
+import { getIdioma } from './i18n.js?v=15';
 
 const CHAVE_STORAGE = 'sistema-solar-musica';
 
@@ -189,7 +189,7 @@ export function iniciarMusica() {
   }
 
   // Botão ♫ na barra de ações (mesmo visual dos demais botões)
-  const barra = document.querySelector('.barra-acoes');
+  const barra = document.querySelector('.barra-acoes .grupo-utilidades') || document.querySelector('.barra-acoes');
   const btn = document.createElement('button');
   btn.className = 'botao';
   btn.id = 'btn-musica';

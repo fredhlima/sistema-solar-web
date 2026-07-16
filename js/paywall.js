@@ -22,6 +22,8 @@ export function iniciarPaywall({ premium, t }) {
       <h2 class="paywall-titulo">${t('paywallTitulo')}</h2>
       <p class="paywall-subtitulo">${t('paywallSubtitulo')}</p>
 
+      <p class="paywall-reciprocidade">${t('paywallReciprocidade')}</p>
+
       <ul class="paywall-beneficios">
         <li>${t('paywallBeneficio1')}</li>
         <li>${t('paywallBeneficio2')}</li>
@@ -30,6 +32,9 @@ export function iniciarPaywall({ premium, t }) {
       </ul>
 
       <div class="paywall-preco">${t('paywallPreco')}</div>
+      <div class="paywall-ancora">${t('paywallAncora')}</div>
+
+      <p class="paywall-perda">${t('paywallPerda')}</p>
 
       <button id="paywall-comprar" class="paywall-comprar">${t('paywallComprar')}</button>
       <button id="paywall-restaurar" class="paywall-restaurar">${t('paywallRestaurar')}</button>

@@ -267,6 +267,7 @@ export const DADOS = { corpos: [
     // vibração ao redor da Terra e poluía a visão Terra/Lua. 3 dias mantém
     // a leitura "muito mais rápido que a Lua" (27,3 d) com movimento suave.
     periodoOrbitalDias: 3,
+    periodoOrbitalRealDias: 0.0663,
     periodoRotacaoHoras: 0,
     excentricidade: 0,
     inclinacaoOrbitaGraus: 28.5,
@@ -1648,7 +1649,17 @@ export const DADOS = { corpos: [
     inclinacaoOrbitaGraus: 3.393,
     inclinacaoEixoGraus: 0,
     retrogrado: false,
-    anguloInicialGraus: 45,
+    // Fase calibrada para a anomalia verdadeira em 13/04/2029 apontar para a
+    // Terra do simulador (era 45 arbitrário — Apófis passava longe na data).
+    anguloInicialGraus: 2.63,
+    // Encontro de 2029 roteirizado: perto da data, a posição kepleriana é
+    // atraída até raspar a Terra (ver _aplicarAproximacao em motor3d.js)
+    aproximacao: {
+      alvo: 'terra',
+      dataISO: '2029-04-13',
+      janelaDias: 70,
+      fatorRaioAlvo: 2.5
+    },
     aparencia: {
       tipo: 'rochoso',
       cores: ['#696159', '#4a4238', '#2f2724'],

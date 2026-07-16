@@ -1,16 +1,16 @@
-import { DADOS } from './dados.js?v=11';
-import { SistemaSolar3D } from './motor3d.js?v=11';
-import { iniciarUI } from './ui.js?v=16';
-import { EVENTOS } from './eventos.js?v=6';
-import { MISSOES } from './missoes.js?v=7';
-import { Trajetorias } from './trajetorias.js?v=8';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=9';
+import { DADOS } from './dados.js?v=15';
+import { SistemaSolar3D } from './motor3d.js?v=23';
+import { iniciarUI } from './ui.js?v=29';
+import { EVENTOS } from './eventos.js?v=9';
+import { MISSOES } from './missoes.js?v=11';
+import { Trajetorias } from './trajetorias.js?v=15';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=15';
 import { criarPremium } from './premium.js?v=3';
-import { iniciarPaywall } from './paywall.js?v=2';
+import { iniciarPaywall } from './paywall.js?v=3';
 import { iniciarQuiz } from './quiz.js?v=9';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=2';
-import { iniciarProgresso } from './progresso.js?v=3';
-import { iniciarMusica } from './musica.js?v=2';
+import { iniciarProgresso } from './progresso.js?v=5';
+import { iniciarMusica } from './musica.js?v=5';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -46,6 +46,24 @@ iniciarUI({
 // Música de fundo: depois da UI, para o botão ♫ entrar na .barra-acoes
 const musica = iniciarMusica();
 audioCompartilhado.obterCtx = musica.obterCtx;
+
+// Smart default (redução de fadiga de decisão): no PRIMEIRO acesso, em vez de
+// deixar o usuário diante do sistema inteiro sem saber onde clicar entre 45
+// astros, a câmera pousa gentilmente na Terra — nosso lar, o ponto de partida
+// mais relacionável. Só na 1ª vez; depois respeita a exploração livre.
+try {
+  const CHAVE_VISTO = 'sistema-solar-visto';
+  if (!localStorage.getItem(CHAVE_VISTO)) {
+    localStorage.setItem(CHAVE_VISTO, '1');
+    setTimeout(() => {
+      // Não sequestra a câmera se o usuário já focou um astro nesses 1,6s
+      // (clicou na lista/cena) — só pousa na Terra se nada foi escolhido.
+      // Isso também torna benigno o caso de localStorage bloqueado (modo
+      // privado): no máximo pousa na Terra por acesso, nunca por cima de algo.
+      if (!motor.corpoFocado) motor.focar('terra');
+    }, 1600);
+  }
+} catch (e) { /* sem localStorage: abre na visão geral, sem problema */ }
 
 // Exposto para depuração no console do navegador
 window.__motor = motor;

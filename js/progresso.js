@@ -263,7 +263,12 @@ function carregarEstado() {
 
 function criarEstadoVazio() {
   return {
-    xp: 0,
+    // Efeito Gradiente de Meta (endowed progress, Nunes & Drèze): o novato
+    // já começa com uma fração do 1º nível preenchida em vez de uma barra
+    // vazia — a sensação de "já comecei" gera momentum e reduz o abandono
+    // inicial. 15/60 XP ≈ 25% da barra de Iniciante. Só vale para estado
+    // novo; quem já tem progresso salvo carrega o próprio XP intacto.
+    xp: 15,
     corposVisitados: [],
     missoesVistas: [],
     eventosViajados: [],
@@ -387,7 +392,8 @@ export function iniciarProgresso({ dados }) {
       <div class="progresso-chip-preenchido"></div>
     </div>
   `;
-  root.appendChild(chip);
+  const slotChip = document.getElementById('slot-progresso');
+  (slotChip || root).appendChild(chip);
 
   // Container para toasts
   const toastsContainer = document.createElement('div');
