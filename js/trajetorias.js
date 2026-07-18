@@ -140,8 +140,13 @@ export class Trajetorias {
     // Criar curva CatmullRomCurve3
     const curva = new THREE.CatmullRomCurve3(waypoints, false, 'catmullrom', 0.5);
 
-    // Se interestelar, adicionar 1 ponto extra prolongando ~60% do último segmento
+    // Se interestelar, prolongar a rota além do último sobrevoo. A extensão é
+    // ancorada no TEMPO REAL: a sonda segue na velocidade (visual) do último
+    // trecho até a data atual + 25% de folga. O prolongamento fixo de 60%
+    // anterior fazia o marcador congelar em ~2 anos (a Voyager 1 ficava
+    // parada desde 1982 na cena, com o texto dizendo "atualmente viaja").
     let curvaFinal = curva;
+    let durExtensaoDias = 0;
     if (missao.interestelar && waypoints.length >= 2) {
       const ultimoPonto = waypoints[waypoints.length - 1];
       const penultimoPonto = waypoints[waypoints.length - 2];
@@ -155,9 +160,15 @@ export class Trajetorias {
         comprimentoTotal += waypoints[i].distanceTo(waypoints[i - 1]);
       }
 
-      // Prolongar em 60% do comprimento total
-      const prolongamento = direcao.multiplyScalar(comprimentoTotal * 0.6);
-      const pontoProlongado = ultimoPonto.clone().add(prolongamento);
+      const tUlt = this._converterDataParaTempoDias(waypointDatas[waypointDatas.length - 1].data);
+      const tPen = this._converterDataParaTempoDias(waypointDatas[waypointDatas.length - 2].data);
+      const velTrecho = ultimoPonto.distanceTo(penultimoPonto) / Math.max(1, tUlt - tPen);
+      const hojeDias = (Date.now() - J2000_EPOCH) / 86400000;
+      durExtensaoDias = Math.max(365, (hojeDias - tUlt) * 1.25);
+      // Teto de comprimento: a escala didática comprime distâncias (√), então
+      // a extrapolação linear estouraria a cena sem este limite
+      const comprimentoExt = Math.min(velTrecho * durExtensaoDias, comprimentoTotal * 2.5);
+      const pontoProlongado = ultimoPonto.clone().add(direcao.multiplyScalar(comprimentoExt));
 
       // Criar nova curva com o ponto adicional
       const waypointsProlongados = [...waypoints, pontoProlongado];
@@ -222,13 +233,21 @@ export class Trajetorias {
     rotuloSprite.visible = false; // Inicia oculto
     this.scene.add(rotuloSprite);
 
-    // Órbita de captura ao redor do planeta (Juno/Cassini)
-    const captura = cap ? this._criarOrbitaCaptura(missao, cap, tempoInicioCaptura) : null;
+    // Órbita de captura ao redor do planeta (Juno/Cassini). A direção de
+    // chegada do cruzeiro alinha a fase inicial da órbita (M0) para a nave
+    // continuar se movendo "para a frente" na inserção, sem virada seca.
+    let dirChegada = null;
+    if (cap && waypoints.length >= 2) {
+      dirChegada = waypoints[waypoints.length - 1].clone()
+        .sub(waypoints[waypoints.length - 2]).normalize();
+    }
+    const captura = cap ? this._criarOrbitaCaptura(missao, cap, tempoInicioCaptura, dirChegada) : null;
 
     // Armazenar dados da trajetória
     this._trajetorias.set(id, {
       missao,
       captura,
+      durExtensaoDias,
       curva: curvaFinal,
       curvaOriginal: curva,
       linha,
@@ -256,7 +275,7 @@ export class Trajetorias {
   // distâncias peri/apo (km reais) passam pelo MESMO mapeamento usado para
   // as luas do simulador (compressão didática ^0.6), então a órbita da nave
   // fica coerente com as luas na cena. A linha segue o planeta a cada frame.
-  _criarOrbitaCaptura(missao, cap, tempoInicio) {
+  _criarOrbitaCaptura(missao, cap, tempoInicio, dirChegada) {
     const corpoPai = this.motor.dados.corpos.find((c) => c.id === cap.corpo);
     if (!corpoPai) return null;
     const raioPai = this.motor._calcularEscala(corpoPai).raio;
@@ -292,12 +311,38 @@ export class Trajetorias {
     linha.visible = false;
     this.scene.add(linha);
 
+    // Fase inicial (M0) alinhada com a direção de CHEGADA do cruzeiro: em
+    // tempoInicio a nave deve estar do lado da elipse para onde ela vinha
+    // se movendo, para a inserção continuar "para a frente" em vez de
+    // teleportar para o periapse (direção fixa da geometria). Busca a
+    // anomalia excêntrica cuja direção radial casa com a de chegada.
+    let M0 = 0;
+    if (dirChegada) {
+      // Desfaz a inclinação da elipse para comparar no plano orbital
+      const dirPlano = dirChegada.clone().applyMatrix4(rot.clone().invert());
+      const thetaAlvo = Math.atan2(-dirPlano.z, dirPlano.x);
+      let melhorDif = Infinity;
+      for (let i = 0; i < 256; i++) {
+        const E = (i / 256) * Math.PI * 2;
+        const theta = Math.atan2(b * Math.sin(E), a * (Math.cos(E) - e));
+        let dif = Math.abs(theta - thetaAlvo);
+        if (dif > Math.PI) dif = Math.PI * 2 - dif;
+        if (dif < melhorDif) {
+          melhorDif = dif;
+          M0 = E - e * Math.sin(E);
+        }
+      }
+    }
+
     return {
       linha, geometry, material, corpoPai,
-      a, e, b, rot,
+      a, e, b, rot, M0,
       tempoInicio,
       tempoFim: cap.dataFim ? this._converterDataParaTempoDias(cap.dataFim) : Infinity,
       periodoDias: cap.periodoDias || 20,
+      // Janela do blend de inserção: meio período orbital do centro do
+      // planeta (fim do spline) até a órbita — vira uma espiral de inserção
+      janelaInsercao: (cap.periodoDias || 20) * 0.5,
       // Inicializado pelo tempo ATUAL da simulação (não `false` fixo): assim,
       // trocar de escala (reconstruir() recria este objeto do zero) não
       // dispara sim:orbita-capturada de novo só porque a nave já estava na
@@ -308,7 +353,7 @@ export class Trajetorias {
 
   // Posição LOCAL da nave na órbita de captura (relativa ao planeta)
   _posicaoCapturaLocal(captura, tempoDias) {
-    const M = (Math.PI * 2 * (tempoDias - captura.tempoInicio)) / captura.periodoDias;
+    const M = captura.M0 + (Math.PI * 2 * (tempoDias - captura.tempoInicio)) / captura.periodoDias;
     const TAU = Math.PI * 2;
     const Mn = ((M % TAU) + TAU) % TAU;
     const E = this._resolverKepler(Mn, captura.e);
@@ -353,7 +398,9 @@ export class Trajetorias {
     return r;
   }
 
-  // Resolve Kepler igual ao motor (Newton-Raphson)
+  // Resolve Kepler como o motor (Newton-Raphson), com uma diferença DE
+  // PROPÓSITO: preserva o número de voltas (E contínuo) em vez de normalizar
+  // para [0,2π) — a espiral do Parker depende disso. Não "consertar".
   _resolverKepler(MRad, e) {
     // e === 0, não !e: !NaN também é true, e uma excentricidade NaN (ex.:
     // mismatch entre sobrevoos/perieliosUA) deve propagar um erro visível,
@@ -810,8 +857,23 @@ export class Trajetorias {
         }
         if (dentroDaCaptura) {
           const pos = posPlaneta.clone();
-          if (tempoDias <= traj.captura.tempoFim) {
-            pos.add(this._posicaoCapturaLocal(traj.captura, tempoDias));
+          // Fator do raio orbital: 0 = centro do planeta (onde o spline de
+          // cruzeiro termina), 1 = sobre a elipse. Smoothstep na ENTRADA
+          // (inserção em espiral, sem o teleporte de ~8u que existia) e na
+          // SAÍDA após tempoFim (mergulho do Grand Finale da Cassini, que
+          // tinha o mesmo salto seco de volta ao centro).
+          let fator = 1;
+          const dtIn = tempoDias - traj.captura.tempoInicio;
+          if (dtIn < traj.captura.janelaInsercao) {
+            const x = dtIn / traj.captura.janelaInsercao;
+            fator = x * x * (3 - 2 * x);
+          }
+          if (tempoDias > traj.captura.tempoFim) {
+            const x2 = Math.min(1, (tempoDias - traj.captura.tempoFim) / 3);
+            fator *= 1 - x2 * x2 * (3 - 2 * x2);
+          }
+          if (fator > 0) {
+            pos.addScaledVector(this._posicaoCapturaLocal(traj.captura, tempoDias), fator);
           }
           traj.marcador.position.copy(pos);
           traj.rotuloSprite.position.copy(pos);
@@ -848,9 +910,10 @@ export class Trajetorias {
           }
         }
       } else if (missao.interestelar && nCurva > temposDias.length) {
-        // Extensão interestelar: avança da última parada ao fim da curva em
-        // ~60% da duração total da missão (espelha os 60% de comprimento)
-        const durExtensao = Math.max(1, (tempoDiasFim - tempoDiasLancamento) * 0.6);
+        // Extensão interestelar ancorada no tempo real (ver _construirTrajetoria):
+        // o marcador percorre a extensão até a data atual + 25% de folga, então
+        // hoje ele está sempre em movimento, ~80% do prolongamento
+        const durExtensao = traj.durExtensaoDias || Math.max(1, (tempoDiasFim - tempoDiasLancamento) * 0.6);
         const frac = Math.min(1, (tempoDias - tempoDiasFim) / durExtensao);
         const uFim = (temposDias.length - 1) / (nCurva - 1);
         u = uFim + frac * (1 - uFim);

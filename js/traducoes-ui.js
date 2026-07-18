@@ -72,7 +72,7 @@ export const UI_TEXTOS = {
     irParaLancamento: 'Ir para o lançamento',
     seguirNave: '🛰 Seguir a nave',
     toastDica: 'Arraste para girar · Role para dar zoom · Clique em um astro para conhecê-lo',
-    credito: 'Texturas: Solar System Scope (CC BY 4.0) · Dados: NASA/JPL',
+    credito: 'Texturas: Solar System Scope (CC BY 4.0), NASA/JPL/USGS, Askaniy Anpilogov et al. (CC BY-SA 3.0/4.0, Wikimedia) · Dados: NASA/JPL',
     seletorIdioma: 'Idioma',
     sondaOlhoTitulo: 'Mostrar/ocultar telescópio na cena',
     meses: [
@@ -183,7 +183,7 @@ export const UI_TEXTOS = {
     irParaLancamento: 'Go to launch',
     seguirNave: '🛰 Follow the spacecraft',
     toastDica: 'Drag to rotate · Scroll to zoom · Click on a celestial body to learn about it',
-    credito: 'Textures: Solar System Scope (CC BY 4.0) · Data: NASA/JPL',
+    credito: 'Textures: Solar System Scope (CC BY 4.0), NASA/JPL/USGS, Askaniy Anpilogov et al. (CC BY-SA 3.0/4.0, Wikimedia) · Data: NASA/JPL',
     seletorIdioma: 'Language',
     sondaOlhoTitulo: 'Show/hide telescope in the scene',
     meses: [
@@ -294,7 +294,7 @@ export const UI_TEXTOS = {
     irParaLancamento: 'Ir al lanzamiento',
     seguirNave: '🛰 Seguir la nave',
     toastDica: 'Arrastra para rotar · Desplázate para ampliar · Haz clic en un cuerpo celeste para conocerlo',
-    credito: 'Texturas: Solar System Scope (CC BY 4.0) · Datos: NASA/JPL',
+    credito: 'Texturas: Solar System Scope (CC BY 4.0), NASA/JPL/USGS, Askaniy Anpilogov et al. (CC BY-SA 3.0/4.0, Wikimedia) · Datos: NASA/JPL',
     seletorIdioma: 'Idioma',
     sondaOlhoTitulo: 'Mostrar/ocultar telescopio en la escena',
     meses: [

@@ -1,4 +1,4 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=15';
+import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=17';
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
@@ -155,6 +155,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
   // Atalhos de teclado
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
+      // Não intercepta Espaço se o foco estiver num campo de digitação
+      // (ex.: o campo de data inline) — senão a simulação pausaria sozinha
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
       e.preventDefault();
       alternarPausa();
     }
@@ -773,6 +777,52 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     labelData.className = 'tempo-data';
     labelData.id = 'tempo-data';
     labelData.textContent = formatarDataLonga(new Date());
+    labelData.title = t('irParaData');
+    labelData.tabIndex = 0;
+    labelData.setAttribute('role', 'button');
+
+    // Campo de data nativo, sobreposto ao label ao clicar — deixa digitar ou
+    // escolher no calendário do navegador uma data qualquer para ir direto.
+    const inputData = document.createElement('input');
+    inputData.type = 'date';
+    inputData.className = 'tempo-data-input';
+    inputData.id = 'tempo-data-input';
+    inputData.style.display = 'none';
+
+    const abrirInputData = () => {
+      inputData.value = motor.getDataSimulada().toISOString().slice(0, 10);
+      labelData.style.display = 'none';
+      inputData.style.display = 'inline-block';
+      inputData.focus();
+      // showPicker exige gesto direto do usuário — este onclick/onkeydown é um
+      if (typeof inputData.showPicker === 'function') {
+        try { inputData.showPicker(); } catch (e) { /* navegador restringiu, o campo continua editável na mão */ }
+      }
+    };
+    const fecharInputData = () => {
+      inputData.style.display = 'none';
+      labelData.style.display = '';
+    };
+
+    labelData.onclick = abrirInputData;
+    labelData.onkeydown = (e) => {
+      if (e.code === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        e.stopPropagation(); // Espaço aqui abre o campo, não pausa a simulação
+        abrirInputData();
+      }
+    };
+    inputData.onchange = () => {
+      if (inputData.value) motor.irParaData(inputData.value);
+      fecharInputData();
+    };
+    inputData.onblur = fecharInputData;
+    inputData.onkeydown = (e) => {
+      // Não deixa Espaço/Escape do campo vazarem para os atalhos globais
+      // (Espaço pausa a simulação; Escape fecha painéis abertos)
+      e.stopPropagation();
+      if (e.code === 'Escape') fecharInputData();
+    };
 
     const btnHoje = document.createElement('button');
     btnHoje.className = 'botao tempo-botao-hoje';
@@ -787,6 +837,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     pill.appendChild(slider);
     pill.appendChild(labelVelocidade);
     pill.appendChild(labelData);
+    pill.appendChild(inputData);
     pill.appendChild(btnHoje);
 
     div.appendChild(pill);
@@ -1594,9 +1645,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         rotulo.textContent = parada.rotulo;
         item.appendChild(rotulo);
 
-        const data = document.createElement('div');
+        const data = document.createElement('button');
         data.className = 'card-missao-parada-data';
         data.textContent = formatarDataCurta(parada.data);
+        data.title = t('irParaData');
+        data.onclick = () => motor.irParaData(parada.data);
         item.appendChild(data);
 
         timelineDiv.appendChild(item);

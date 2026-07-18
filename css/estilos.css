@@ -416,6 +416,32 @@ html, body {
   font-size: 12px;
   color: #5cc8ff;
   font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 6px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.tempo-data:hover,
+.tempo-data:focus-visible {
+  background: rgba(92, 200, 255, 0.12);
+  color: #7dd8ff;
+  outline: none;
+}
+
+/* Campo de data nativo que substitui o label ao clicar (mesma pílula) */
+.tempo-data-input {
+  min-width: 140px;
+  text-align: center;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  color: #5cc8ff;
+  background: rgba(92, 200, 255, 0.08);
+  border: 1px solid rgba(92, 200, 255, 0.3);
+  border-radius: 8px;
+  padding: 2px 6px;
+  color-scheme: dark; /* ícone de calendário nativo legível no tema escuro */
 }
 
 .tempo-botao-hoje {
@@ -1318,6 +1344,21 @@ html, body {
 .card-missao-parada-data {
   color: #5cc8ff;
   font-weight: 600;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.card-missao-parada-data:hover,
+.card-missao-parada-data:focus-visible {
+  background: rgba(92, 200, 255, 0.15);
+  color: #7dd8ff;
+  outline: none;
 }
 
 .card-missao-btn-lancamento {

@@ -1,10 +1,10 @@
-import { DADOS } from './dados.js?v=15';
-import { SistemaSolar3D } from './motor3d.js?v=23';
-import { iniciarUI } from './ui.js?v=29';
+import { DADOS } from './dados.js?v=16';
+import { SistemaSolar3D } from './motor3d.js?v=31';
+import { iniciarUI } from './ui.js?v=31';
 import { EVENTOS } from './eventos.js?v=9';
-import { MISSOES } from './missoes.js?v=11';
-import { Trajetorias } from './trajetorias.js?v=15';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=15';
+import { MISSOES } from './missoes.js?v=12';
+import { Trajetorias } from './trajetorias.js?v=18';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=18';
 import { criarPremium } from './premium.js?v=3';
 import { iniciarPaywall } from './paywall.js?v=3';
 import { iniciarQuiz } from './quiz.js?v=9';

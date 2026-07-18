@@ -109,9 +109,9 @@ export const MISSOES = [
     // Missão de 10 dias: mesma razão da Apollo 11 — 1 dia/s para dar pra ver.
     velocidadeSeguir: 1,
     paradas: [
-      { corpo: 'terra', data: '2026-04-06', rotulo: 'Lançamento (SLS/Orion)' },
-      { corpo: 'lua', data: '2026-04-10', rotulo: 'Sobrevoo tripulado da Lua' },
-      { corpo: 'terra', data: '2026-04-16', rotulo: 'Retorno e amerissagem' }
+      { corpo: 'terra', data: '2026-04-01', rotulo: 'Lançamento (SLS/Orion)' },
+      { corpo: 'lua', data: '2026-04-06', rotulo: 'Sobrevoo tripulado da Lua' },
+      { corpo: 'terra', data: '2026-04-10', rotulo: 'Retorno e amerissagem' }
     ]
   },
   {
@@ -119,7 +119,7 @@ export const MISSOES = [
     nome: 'Juno',
     cor: '#ff9c42',
     descricao: 'Sonda movida a energia solar estudando a composição, campo magnético e estrutura interna de Júpiter. Recorde de painéis solares mais distantes do Sol em operação. Órbita polar excêntrica que evita os cinturões de radiação mais intensos.',
-    estado: 'Ativa — orbitando Júpiter',
+    estado: 'Em órbita de Júpiter — missão em fase final',
     interestelar: false,
     // Após a inserção, a nave passa a orbitar o planeta (ver orbitaCaptura em
     // trajetorias.js). Números reais: perijove ~75.600 km do centro, apojove

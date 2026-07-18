@@ -81,7 +81,7 @@ export const TRADUCAO = {
           'Venus spins backwards (retrograde rotation) relative to other planets.',
           'The hottest planet in the solar system is Venus, not Mercury, due to runaway greenhouse effect.',
           'A Venusian day lasts 243 Earth days, while a Venusian year lasts 224.7 days — the day is longer than the year!',
-          'Venus\'s clouds travel around the entire planet every 4 days, creating the fastest winds in the solar system (360 km/h).',
+          'Venus\'s clouds travel around the entire planet every 4 days, 60 times faster than the planet itself rotates — super-rotation (360 km/h).',
           'If you went to Venus, atmospheric pressure would crush you as if you were 900 meters deep in Earth\'s ocean — no submarine could survive.',
           'If you visited Venus for 121.5 Earth days, the Sun would be in the same place in the sky where you left it — because the planet takes 243 days to spin once.'
         ],
@@ -92,8 +92,8 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Rocky silicates with volcanic surface; atmosphere of CO₂ (96%), N₂ (3%), traces of H₂SO₄.',
           temperatura: 'Surface: ~462 °C; top of atmosphere: -75 °C; average measured: 462 °C.',
-          missoes: ['Venera 1-16 (1961–1983, USSR)', 'Akatsuki (2015–present)', 'DAVINCI (2028–planned)'],
-          texto: 'Venus is the second planet from the Sun, similar in size to Earth. Its dense carbon dioxide atmosphere creates extreme greenhouse effect maintaining 462 °C at the surface. Its retrograde and slow rotation (243 days) is anomalous. It may have had oceans and been habitable 2 billion years ago. Volcanoes cover ~70% of the surface; Maat Mons is the largest volcanic structure known.'
+          missoes: ['Venera 1-16 (1961–1983, USSR)', 'Akatsuki (2015–2025, JAXA)', 'DAVINCI (launch 2029, arrival 2031 — planned)'],
+          texto: 'Venus is the second planet from the Sun, similar in size to Earth. Its dense carbon dioxide atmosphere creates extreme greenhouse effect maintaining 462 °C at the surface. Its retrograde and slow rotation (243 days) is anomalous. It may have had oceans and been habitable 2 billion years ago. Volcanoes cover ~70% of the surface; Maat Mons is the tallest volcano on Venus (~8 km).'
         }
       }
     },
@@ -146,8 +146,8 @@ export const TRADUCAO = {
           'The Moon always shows the same face to Earth because its rotation is synchronized with its orbital period — this is called tidal locking.',
           'The Moon is responsible for Earth\'s ocean tides. Without it, our tides would be 30% smaller and life would have evolved very differently.',
           '12 humans walked on the Moon between 1969 and 1972 during the Apollo missions.',
-          'The Moon is moving away from Earth at 3.8 cm per year and will eventually leave the Earth-Moon system.',
-          'The Moon is closer to you than any other celestial body — but probes can reach Pluto faster than they return from the Moon.',
+          'The Moon is moving away from Earth at 3.8 cm per year, but will never escape — the recession slows until Earth and Moon become tidally locked together.',
+          'The Moon is closer to you than any other celestial body — and New Horizons, which reached Pluto, crossed the Moon\'s distance in just a few hours — the fastest launch in history.',
           'On the Moon, you\'d weigh only 1/6 of what you weigh on Earth — if you weigh 60 kg here, there you\'d weigh only 10 kg, allowing astronaut-size jumps.'
         ],
         comparacoes: [
@@ -242,12 +242,12 @@ export const TRADUCAO = {
           { rotulo: 'Moons', valor: '2 (Phobos, Deimos)' }
         ],
         curiosidades: [
-          'Mars has the largest known volcano in the solar system: Olympus Mons, with 21 km height and 600 km width — 4 times Mount Everest!',
+          'Mars has the largest known volcano in the solar system: Olympus Mons, with 21 km height and 600 km width — almost 3 times Mount Everest!',
           'Mars\'s Great Rift (Valles Marineris) is 4 km deep and 4,000 km long — 10 times larger than the Grand Canyon.',
           'Mars has ice caps at its poles made of frozen CO₂ and water.',
-          'Seasons on Mars last almost an Earth year each, and the red dust is iron oxide (rust).',
+          'Seasons on Mars last about six months each (ranging 5-7 months due to eccentric orbit), and the red dust is iron oxide (rust).',
           'A day on Mars lasts 24.6 hours — almost like our day — which is why scientists choose Mars for eventual human colonization; our bodies adapt better there.',
-          'Mars has the largest impact crater in the solar system — Hellas Basin is 2,300 km in diameter and 9 km deep.'
+          'Mars has one of the largest impact craters in the solar system — Hellas Basin is 2,300 km in diameter and 9 km deep.'
         ],
         comparacoes: [
           'Mars is half the size of Earth — 7 Marses would fit inside Earth.',
@@ -328,7 +328,7 @@ export const TRADUCAO = {
         ],
         curiosidades: [
           '1,300 Earths would fit inside Jupiter, or 5 billion humans — it is truly gigantic.',
-          'Jupiter\'s Great Red Spot is a storm lasting at least 350 years, large enough to swallow 3 Earths.',
+          'Jupiter\'s Great Red Spot is a storm lasting at least 350 years, large enough to swallow one entire Earth — and it was three times larger a century ago; it\'s shrinking.',
           'Jupiter radiates more energy than it receives from the Sun — it has residual internal heat from formation.',
           'A 100 kg human would weigh 250 kg at Jupiter\'s cloud tops due to intense gravity.',
           'The Great Red Spot is so large that Earth would fit entirely inside it — and this storm is so powerful that winds reach 600 km/h.',
@@ -465,7 +465,7 @@ export const TRADUCAO = {
           { rotulo: 'Year length', valor: '29.46 years' },
           { rotulo: 'Day length', valor: '10.7 hours' },
           { rotulo: 'Density', valor: '0.687 g/cm³ (floats in water!)' },
-          { rotulo: 'Moons', valor: '146 (2 major: Titan, Enceladus)' }
+          { rotulo: 'Moons', valor: '274 confirmed as of 2025 (2 major: Titan, Enceladus)' }
         ],
         curiosidades: [
           'Saturn is less dense than water — if placed in a cosmic bathtub, it would float!',
@@ -477,13 +477,13 @@ export const TRADUCAO = {
         ],
         comparacoes: [
           'Saturn is 95 times more massive than Earth — 764 Earths would fit inside it.',
-          'Saturn\'s rings extend 60,000-280,000 km from the planet — much farther than Earth\'s Moon (384,400 km total).',
+          'Saturn\'s rings extend 60,000-280,000 km from the planet — the entire ring system fits within the Earth-Moon distance (384,400 km).',
           'At 800 km/h by airplane, it would take 37 years to fly around Saturn\'s equator.'
         ],
         avancado: {
           composicao: 'Hydrogen (H₂), helium (He), traces of methane (CH₄), ammonia (NH₃), phosphine (PH₃), rocky core ~30 M⊕.',
           temperatura: 'Top of clouds: -140 °C; core: estimated ~11,000 K.',
-          missoes: ['Pioneer 11 (1979)', 'Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017)', 'Planned: Dragonfly (2027–2035)'],
+          missoes: ['Pioneer 11 (1979)', 'Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017)', 'Planned: Dragonfly (launch 2028, arrival at Titan ~2034)'],
           texto: 'Saturn is the 2nd gas giant, ~95 M⊕. Formed in situ ~4.5 Ga with dynamic migration. Rapid period (10.7h) causes significant flattening > Jupiter. Axial magnetic field 0.5 G (weak), modest magnetosphere. Primary rings (A,B,C) thickness ~30 m, age estimated 100-200 Ma (or primordial). Composed of water ice, rock, traces of CH₄/NH₃. Smaller moons Mimas, Enceladus, Titan, Rhea, Iapetus. Titan (2575 km) has dense N₂/CH₄ atmosphere and criolacunas. Enceladus has cryovolcanic plumes (H₂O/NH₃).'
         }
       }
@@ -511,7 +511,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Water ice crust, possible subsurface water-ammonia ocean, N₂/CH₄ atmosphere, methane-ethane lakes/seas.',
           temperatura: 'Surface: ~-179 °C; possible ocean: estimated -20 to 0 °C.',
-          missoes: ['Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017, Huygens landed on Titan)', 'Dragonfly (2027–2035)'],
+          missoes: ['Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017, Huygens landed on Titan)', 'Dragonfly (launch 2028, arrives at Titan ~2034)'],
           texto: 'Titan is the 2nd Galilean moon (first discovered by Christiaan Huygens 1655), radius 2,575 km. Dense atmosphere N₂/CH₄ (1.5 bar), methane greenhouse maintains -179 °C. Cryosphere H₂O/NH₃. Northern polar lakes/seas of methane-ethane (~2% surface); fluvial features; equatorial dunes of tholins. Possible subsurface ocean 50-80 km deep H₂O-NH₃. Astrobiology: methane cycle analogous to water cycle on Earth; possible cryolife in ocean.'
         }
       }
@@ -660,7 +660,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Ices (H₂O, NH₃, CH₄), molecular hydrogen, helium, methane traces (gives blue color), rocky core ~20 M⊕.',
           temperatura: 'Top of clouds: -224 °C; core: estimated ~4,200 K.',
-          missoes: ['Voyager 2 (1986)', 'Planned: Ariel (ESA 2030s, proposed)', 'Ice Giants Probe (NASA concept)'],
+          missoes: ['Voyager 2 (1986)', 'Ice Giants Probe (NASA concept)'],
           texto: 'Uranus is the 3rd ice giant, ~14.5 M⊕. Formed beyond ice line ~4.5 Ga, Grand Tack dynamic migration may have altered orbit. Extreme axial tilt (97.77°) suggested by collision with Earth-mass body during formation. Retrograde rotation -17.24h. Magnetic field tilted 59° to rotation axis, ~0.23 G. Weak rings (ε, δ, γ, η, β, ζ, χ, ψ, φ, σ, π discovery ring). Moons: Miranda (chaotic geology), Ariel, Umbriel, Titania, Oberon.'
         }
       }
@@ -686,7 +686,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Water ice (crust), silicate rock (mantle), possible subsurface ocean.',
           temperatura: 'Surface: estimated -233 °C; possible ocean (speculative): -50 to -10 °C.',
-          missoes: ['Voyager 2 (1986)', 'Planned: Ariel (ESA 2030s, proposed)'],
+          missoes: ['Voyager 2 (1986)'],
           texto: 'Titania is Uranus\'s largest moon (R = 788 km), 8th largest satellite in solar system. Ice crust H₂O, rocky mantle. Surface shows cratering: multiple craters, linear valleys (Belmont Chasma, Rima Belinda), tectonic faults suggest global cooling. No close-up images post-Voyager 2 (1986). Possible subsurface ocean speculative, but no significant tidal heating. Density 1.71 g/cm³.'
         }
       }
@@ -712,7 +712,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Water ice (primary), embedded silicate rock, composition similar to C asteroids.',
           temperatura: 'Surface: estimated -187 °C.',
-          missoes: ['Voyager 2 (1986)', 'Planned: Ariel (ESA 2030s, proposed)'],
+          missoes: ['Voyager 2 (1986)'],
           texto: 'Miranda is Uranus\'s innermost moon (R = 236 km), smaller than Titania. Extremely chaotic geology: 3 terrain types (Dunsinane, Sicilia, Fer-Tellus Regiones; Verona Chasma ~10 km deep). Theory: massive collision ~4 Ga with multiple fragments, gravitational reassembly created mosaic. Density ~1.2 g/cm³ (high ice/low rock ratio). Orbital resonance 3:1 with Umbriel may have excited tidal heating in past.'
         }
       }
@@ -823,7 +823,7 @@ export const TRADUCAO = {
           'Neptune is deep blue because its methane atmosphere absorbs red light and reflects blue — like a cosmic ocean.',
           'Neptune has the fastest winds in the solar system, exceeding 2,400 km/h (Mach 2), faster than sound!',
           'Neptune radiates more heat than it receives from the Sun — like Jupiter, it has residual internal heat.',
-          'Neptune\'s Great Dark Spot, a giant hurricane, disappeared between 1994 and 1998 — extremely dynamic atmosphere.',
+          'Neptune\'s Great Dark Spot, a giant hurricane, was seen by Voyager 2 in 1989 and had already vanished when Hubble looked in 1994 — extremely dynamic atmosphere.',
           'Neptune has the fastest winds of any known planet — at 2,400 km/h, they were detected moving in opposite directions at different latitudes.',
           'Neptune takes 165 Earth years to orbit the Sun — since its discovery in 1846, it has completed only 1.1 orbits!'
         ],
@@ -835,7 +835,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Ices (H₂O, NH₃, CH₄), molecular hydrogen, helium, methane traces, rocky core ~20 M⊕.',
           temperatura: 'Top of clouds: -220 °C; core: estimated ~4,000-5,000 K.',
-          missoes: ['Voyager 2 (1989)', 'Planned: Ice Giants Probe (NASA concept), ESA Clipper'],
+          missoes: ['Voyager 2 (1989)', 'Planned: Ice Giants Probe (NASA concept)'],
           texto: 'Neptune is the 4th ice giant, ~17 M⊕. Discovered 1846 by gravitational perturbations in Uranus (calculation by Urbain Le Verrier). Grand Tack migration may have displaced it beyond Pluto during formation. Magnetic field tilted 47° to rotation axis, ~0.27 G. Dynamic atmosphere with winds >2400 km/h, cloud plumes, transient Great Dark Spot. Moons: Triton (retrograde, cryovolcanic), Proteus, others. Thin rings (Adams, Le Verrier, Galle).'
         }
       }
@@ -1050,9 +1050,9 @@ export const TRADUCAO = {
         ],
         curiosidades: [
           'Apophis is the most famous potentially dangerous asteroid — in 2004, it was the first asteroid to receive Torino Scale probability > 0.',
-          'Apophis will pass extremely close to Earth on April 29, 2029 — closer than some communication satellites!',
-          'Apophis was intensively observed by the Chandra Space Telescope to refine its orbit — and the risk was virtually eliminated.',
-          'The 2029 passage will be an astronomical spectacle — Apophis will be bright enough to see with the naked eye during the day!'
+          'Apophis will pass extremely close to Earth on April 13, 2029 — closer than some communication satellites!',
+          'Apophis was intensively observed by radar (Goldstone, Arecibo, and Green Bank) to refine its orbit — and the risk was virtually eliminated.',
+          'The 2029 passage will be an astronomical spectacle — Apophis will shine like a star in the Big Dipper (magnitude ~3) — visible to the naked eye at night from Europe, Africa, and Asia!'
         ],
         comparacoes: [
           'Apophis is even smaller than Bennu — just 370 meters diameter.',
@@ -1061,8 +1061,8 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Silicate-carbonaceous, organic compounds, possible water, metals.',
           temperatura: 'Surface: estimated -40 to -80 °C.',
-          missoes: ['Multiple observatories (Chandra, Spitzer, radar)', 'RAMSES (2028–2034, ESA/JAXA—orbital deflection demonstration)'],
-          texto: 'Apophis is NEA class Sq (silicate-carbonaceous). Semi-major axis 1.099 AU, eccentricity 0.1912, inclination 3.393°. Diameter ~370 m, mass ~7.8 × 10¹⁰ kg. Approach 2029: distance ~31,600 km (within geosynchronous). Chandra/Spitzer/radar observations refined orbit, eliminated impact risk 2029-2099 (probability <1 in 150,000). RAMSES (ESA/JAXA 2028) will demonstrate planetary defense orbital deflection. Designated Torino Scale value in 2004; reduced to zero.'
+          missoes: ['Radar (Goldstone, Arecibo, Green Bank)', 'RAMSES (2028–2034, ESA/JAXA—orbital deflection demonstration)'],
+          texto: 'Apophis is NEA class Sq (silicate-carbonaceous). Semi-major axis 1.099 AU, eccentricity 0.1912, inclination 3.393°. Diameter ~370 m, mass ~7.8 × 10¹⁰ kg. Approach 2029: distance ~31,600 km (within geosynchronous). Radar observations (Goldstone, Arecibo, Green Bank) refined orbit; removed from Sentry Risk Table in March 2021 — risk ruled out for the next 100 years. RAMSES (ESA/JAXA 2028) will demonstrate planetary defense orbital deflection. Designated Torino Scale value in 2004; reduced to zero.'
         }
       }
     },
@@ -1296,13 +1296,13 @@ export const TRADUCAO = {
           { rotulo: 'Next passage', valor: 'Year 4385' }
         ],
         curiosidades: [
-          'Hale-Bopp was the brightest comet of the 20th century — visible to the naked eye from 1995 to 1998, a record period.',
-          'Hale-Bopp has semi-major axis of 186 AU — its orbit is nearly parabolic, will take billions of years to return (if ever).',
+          'Hale-Bopp was the brightest comet of the 20th century — visible to the naked eye for 18 months, in 1996 and 1997 — a record period.',
+          'Hale-Bopp has semi-major axis of 186 AU — its orbit is nearly parabolic, will take about 2,500 years to return, around the year 4385.',
           'Hale-Bopp\'s tail extended for billions of kilometers — larger than the inner solar system!',
           'Many ancient cultures recorded similar comets — Hale-Bopp may have been observed thousands of years ago if orbit was different.'
         ],
         comparacoes: [
-          'Hale-Bopp is a giant — its nucleus of 40 km diameter is the largest known comet.',
+          'Hale-Bopp is a giant — its nucleus of 40 km diameter is one of the largest comets ever observed — second only to distant giants like C/2014 UN271 at 137 km.',
           'Its orbit extends so far that at aphelion it is 10 times farther than Pluto.',
           'The bright tail extended millions of km — visible to naked eye even during daylight in 1997.'
         ],
@@ -1329,7 +1329,7 @@ export const TRADUCAO = {
         curiosidades: [
           '67P/Churyumov-Gerasimenko has unique "rubber duck" shape — two lobes of different sizes connected by neck.',
           'Rosetta orbited 67P for 2 years (2014-2016), revealing surface details never before seen.',
-          'Philae, Rosetta\'s landing module, landed on 67P on November 14, 2014 — first landing on a comet!',
+          'Philae, Rosetta\'s landing module, landed on 67P on November 12, 2014 — first landing on a comet!',
           'Gas jets exit from cracks in 67P — Rosetta observed cometary activity in real time.'
         ],
         comparacoes: [
@@ -1341,7 +1341,7 @@ export const TRADUCAO = {
           composicao: 'Nucleus carbonaceous chondrite (water ice, dust, primitive organic compounds), rock.',
           temperatura: 'Surface at rest: ~-35 °C (warmer than expected); during perihelion: intense sublimation.',
           missoes: ['Rosetta/Philae (2014–2016)', 'First probe to orbit/land on comet'],
-          texto: '67P/Churyumov-Gerasimenko is periodic comet discovered 1969. Semi-major axis 3.46 AU, eccentricity 0.6399, period 6.44 years. Recent perihelion (last 2015/08/13). Bilobed shape ~4.3 × 4.1 × 3.3 km result fusion two primordial bodies. Rosetta (2014–2016) orbit & Philae landing (2014/11/14, first comet). Cratered surface, gas jets, bright deposits (ice + salts). Density ~470 kg/m³ (loose rubble pile). Original composition — primitive Kuiper Belt object captured.'
+          texto: '67P/Churyumov-Gerasimenko is periodic comet discovered 1969. Semi-major axis 3.46 AU, eccentricity 0.6399, period 6.44 years. Recent perihelion (last 2015/08/13). Bilobed shape ~4.3 × 4.1 × 3.3 km result fusion two primordial bodies. Rosetta (2014–2016) orbit & Philae landing (2014/11/12, first comet). Cratered surface, gas jets, bright deposits (ice + salts). Density ~470 kg/m³ (loose rubble pile). Original composition — primitive Kuiper Belt object captured.'
         }
       }
     }
@@ -1386,7 +1386,7 @@ export const TRADUCAO = {
     cassini: { nome: 'Cassini-Huygens', descricao: 'The great explorer of Saturn. It used the gravity of Venus, Earth, and Jupiter as "slingshots" to gain speed — a masterclass in orbital physics. It orbited Saturn for 13 years and landed the Huygens probe on Titan.', estado: 'Completed — final plunge into Saturn (2017)', paradas: ['Launch', 'Venus slingshot', 'Second Venus slingshot', 'Earth slingshot', 'Jupiter slingshot', 'Arrival at Saturn', 'Grand Finale — plunge into Saturn'] },
     rosetta: { nome: 'Rosetta', descricao: 'The first mission to orbit a comet and land on it. It chased comet 67P for 10 years and released the Philae lander — the first comet landing in history.', estado: 'Completed — final touchdown on 67P (2016)', paradas: ['Launch', 'Mars slingshot', 'Final Earth slingshot', 'Rendezvous with comet 67P', 'Final touchdown on the comet'] },
     'artemis-2': { nome: 'Artemis 2', descricao: 'The first crewed mission beyond low Earth orbit since Apollo 17 (1972). Four astronauts flew around the Moon aboard the Orion spacecraft, paving the way for the Artemis 3 landing.', estado: 'Completed — crewed lunar flyby (2026)', paradas: ['Launch (SLS/Orion)', 'Crewed flyby of the Moon', 'Return and splashdown'] },
-    juno: { nome: 'Juno', descricao: 'Solar-powered probe studying the composition, magnetic field, and internal structure of Jupiter. Record holder for solar panels farthest from the Sun in operation. Eccentric polar orbit that avoids the most intense radiation belts.', estado: 'Active — orbiting Jupiter', paradas: ['Launch from Cape Canaveral', 'Gravitational assist at Earth', 'Orbital insertion at Jupiter'] },
+    juno: { nome: 'Juno', descricao: 'Solar-powered probe studying the composition, magnetic field, and internal structure of Jupiter. Record holder for solar panels farthest from the Sun in operation. Eccentric polar orbit that avoids the most intense radiation belts.', estado: 'In orbit around Jupiter — mission in final phase', paradas: ['Launch from Cape Canaveral', 'Gravitational assist at Earth', 'Orbital insertion at Jupiter'] },
     parker: { nome: 'Parker Solar Probe', descricao: 'The probe "touches" the Sun\'s atmosphere (solar corona) with a carbon-based heat shield withstanding ~1,377°C. Used 7 Venus flybys as gravitational slingshots to shrink its orbit — in 3D, each loop of the spiral dives closer to the Sun, down to the record 2024 perihelion. Record speed of ~690,000 km/h — the fastest human-made object ever.', estado: 'Active — the closest probe to the Sun ever built', paradas: ['Launch from Cape Canaveral', '1st Venus slingshot', '2nd Venus slingshot', '3rd Venus slingshot', '4th Venus slingshot', '5th Venus slingshot', '6th Venus slingshot', '7th and final Venus slingshot', 'Record perihelion — closest to the Sun in history'] },
     perseverance: { nome: 'Perseverance', descricao: 'Car-sized rover searching for signs of ancient microbial life on Mars. Collects and preserves Martian rock samples for a future return mission to Earth. Carried the small Ingenuity helicopter, the first powered flight on another planet (2021).', estado: 'Active — exploring Jezero Crater on Mars', paradas: ['Launch from Cape Canaveral', 'Landing in Jezero Crater'] }
   }

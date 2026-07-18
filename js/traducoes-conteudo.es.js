@@ -141,7 +141,7 @@ export const TRADUCAO = {
           "Venus gira de adelante hacia atrás (rotación retrógrada) en relación con otros planetas.",
           "El planeta más caliente del sistema solar es Venus, no Mercurio, debido al efecto invernadero descontrolado.",
           "Un día venusiano dura 243 días terrestres, mientras que el año venusiano dura 224.7 días — ¡el día es más largo que el año!",
-          "Las nubes de Venus viajan alrededor del planeta entero cada 4 días, creando los vientos más rápidos del sistema solar (360 km/h).",
+          "Las nubes de Venus viajan alrededor del planeta entero cada 4 días, 60 veces más rápido de lo que gira el propio planeta — la superrotación (360 km/h).",
           "Si fueras a Venus, la presión atmosférica te aplastaría como si estuvieras 900 metros de profundidad en el océano terrestre.",
           "Si visitaras Venus durante 121.5 días terrestres, el Sol estaría en el mismo lugar del cielo — porque tarda 243 días en girar una vez."
         ],
@@ -154,10 +154,10 @@ export const TRADUCAO = {
           "temperatura": "Superficie: ~462 °C; superior de la atmósfera: -75 °C; promedio medido: 462 °C.",
           "missoes": [
             "Venera 1-16 (1961–1983, URSS)",
-            "Akatsuki (2015–presente)",
-            "DAVINCI (2028–planeado)"
+            "Akatsuki (2015–2025)",
+            "DAVINCI (lanzamiento 2029, llegada 2031)"
           ],
-          "texto": "Venus es el segundo planeta solar, similar en tamaño a la Tierra. Su densa atmósfera de dióxido de carbono genera un efecto invernadero extremo manteniendo 462 °C en la superficie. Su rotación retrógrada y lenta (243 días) es anómala. Pudo haber tenido océanos y ser habitable hace 2 mil millones de años. Los volcanes cubren ~70% de la superficie; el volcán Maat Mons es la estructura volcánica más grande conocida."
+          "texto": "Venus es el segundo planeta solar, similar en tamaño a la Tierra. Su densa atmósfera de dióxido de carbono genera un efecto invernadero extremo manteniendo 462 °C en la superficie. Su rotación retrógrada y lenta (243 días) es anómala. Pudo haber tenido océanos y ser habitable hace 2 mil millones de años. Los volcanes cubren ~70% de la superficie; el volcán Maat Mons, con ~8 km, es el más alto de Venus."
         }
       }
     },
@@ -195,8 +195,8 @@ export const TRADUCAO = {
           "La Luna siempre muestra la misma cara a la Tierra porque su rotación está sincronizada con su período orbital — esto se llama acoplamiento mareal.",
           "La Luna es responsable de las mareas de los océanos. Sin ella, nuestras mareas serían 30% menores y la vida habría evolucionado muy diferente.",
           "12 humanos pisaron la Luna entre 1969 y 1972 durante las misiones Apollo.",
-          "La Luna se aleja de la Tierra a 3.8 cm por año, y eventualmente dejará el sistema Tierra-Luna.",
-          "La Luna está más cerca de ti que cualquier otro cuerpo celeste — pero las sondas pueden llegar a Plutón más rápidamente que regresar de la Luna.",
+          "La Luna se aleja de la Tierra a 3.8 cm por año, pero nunca escapará — el alejamiento se desacelera hasta que Tierra y Luna queden bloqueadas una con la otra.",
+          "La Luna está más cerca de ti que cualquier otro cuerpo celeste — y la New Horizons, que fue hasta Plutón, cruzó la distancia de la Luna en pocas horas: el lanzamiento más rápido de la historia.",
           "En la Luna, pesarías solo 1/6 de lo que pesas en la Tierra — si pesas 60 kg aquí, allá pesarías solo 10 kg, permitiendo saltos gigantescos de astronauta."
         ],
         "comparacoes": [
@@ -359,12 +359,12 @@ export const TRADUCAO = {
           }
         ],
         "curiosidades": [
-          "Marte tiene el volcán más grande conocido del sistema solar: Olympus Mons, con 21 km de altura y 600 km de ancho — ¡4 veces el Monte Everest!",
+          "Marte tiene el volcán más grande conocido del sistema solar: Olympus Mons, con 21 km de altura y 600 km de ancho — ¡casi 3 veces el Monte Everest!",
           "La Gran Grieta de Marte (Valles Marineris) tiene 4 km de profundidad y 4.000 km de largo — 10 veces más grande que el Gran Cañón.",
           "Marte tiene casquetes de hielo en sus polos hechos de CO₂ congelado y agua.",
-          "Las estaciones en Marte duran casi un año terrestre cada una, y el polvo rojo son óxidos de hierro (herrumbre).",
+          "Las estaciones en Marte duran unos seis meses cada una — casi el doble de las terrestres — y el polvo rojo son óxidos de hierro (herrumbre).",
           "Un día en Marte dura 24,6 horas — casi igual a nuestro día — por eso los científicos eligen Marte para una eventual colonización, pues nuestro cuerpo se adapta mejor allá.",
-          "Marte tiene el cráter de impacto más grande del sistema solar — la Cuenca de Hellas tiene 2.300 km de diámetro y 9 km de profundidad."
+          "Marte tiene uno de los mayores cráteres de impacto del sistema solar — la Cuenca de Hellas tiene 2.300 km de diámetro y 9 km de profundidad."
         ],
         "comparacoes": [
           "Marte tiene la mitad del tamaño de la Tierra — cabrían 7 Martes dentro de la Tierra.",
@@ -517,7 +517,7 @@ export const TRADUCAO = {
         ],
         "curiosidades": [
           "Cabrían 1.300 Tierras dentro de Júpiter, o 5 mil millones de humanos — ¡es verdaderamente gigantesco!",
-          "La Gran Mancha Roja de Júpiter es una tormenta que dura al menos 350 años, lo suficientemente grande para engullir 3 Tierras.",
+          "La Gran Mancha Roja de Júpiter es una tormenta que dura al menos 350 años — hoy engulliría 1 Tierra entera; hace un siglo era 3 veces mayor y sigue encogiéndose.",
           "Júpiter irradia más energía de la que recibe del Sol — tiene un calor interno residual de su formación.",
           "Un humano de 100 kg pesaría 250 kg en la superficie de las nubes de Júpiter debido a la gravedad intensísima.",
           "La Gran Mancha Roja de Júpiter es tan grande que toda la Tierra cabría dentro de ella — y esa tormenta es tan fuerte que los vientos alcanzan 600 km/h.",
@@ -737,7 +737,7 @@ export const TRADUCAO = {
           "missoes": [
             "Voyager 1-2 (1980–1981)",
             "Cassini-Huygens (2004–2017, Huygens aterrizó en Titán)",
-            "Dragonfly (2027–2035)"
+            "Dragonfly (lanzamiento 2028, llegada ~2034)"
           ],
           "texto": "Titán es la 2ª luna galileana (primera descubierta por Christiaan Huygens en 1655), radio 2.575 km. Atmósfera densa N₂/CH₄ (1.5 bar), efecto invernadero CH₄ mantiene -179 °C. Criosfera H₂O/NH₃. Lagos/mares de metano-etano polar norte (~2% superficie); características fluviales; dunas ecuatoriales de tholins. Posible océano subsuperficial 50-80 km profundidad H₂O-NH₃. Astrobiología: ciclo metano análogo al ciclo del agua en la Tierra; posible criovida en océano."
         }
@@ -835,7 +835,7 @@ export const TRADUCAO = {
           "temperatura": "Superficie: estimada -200 °C.",
           "missoes": [
             "Cassini-Huygens (2004–2017)",
-            "Dragonfly (2027–planeado)"
+            "Dragonfly (lanzamiento 2028, llegada ~2034)"
           ],
           "texto": "Mimas es una pequeña luna (R = 198 km), miembro de la familia saturnina interna. Órbita resonancia 2:1 con Encélado crea la brecha de Cassini en los anillos. La superficie está dominada por el cráter Herschel de 139 km de diámetro (~10 km profundidad) — un impacto antiguo que casi lo destruyó. Densidad 1.15 g/cm³ (hielo puro). Geología congelada; sin actividad tectónica. Albedo 0.51 (brillante). Apodo \"Muerte Negra\" (Star Wars) por su apariencia."
         }
@@ -968,7 +968,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Lunas",
-            "valor": "146 (2 principales: Titán, Encélado)"
+            "valor": "274 confirmadas (2 principales: Titán, Encélado)"
           }
         ],
         "curiosidades": [
@@ -981,7 +981,7 @@ export const TRADUCAO = {
         ],
         "comparacoes": [
           "Saturno es 95 veces más masivo que la Tierra — cabrían 764 Tierras dentro de él.",
-          "Los anillos de Saturno están a 60.000-280.000 km del planeta — mucho más distantes que la Luna de la Tierra (384.400 km total).",
+          "Los anillos de Saturno se extienden de 60.000 a 280.000 km del planeta — todo el sistema de anillos principales cabría dentro de la distancia Tierra-Luna (384.400 km).",
           "En avión a 800 km/h, tardaría 37 años en volar alrededor del ecuador de Saturno."
         ],
         "avancado": {
@@ -991,7 +991,7 @@ export const TRADUCAO = {
             "Pioneer 11 (1979)",
             "Voyager 1-2 (1980–1981)",
             "Cassini-Huygens (2004–2017)",
-            "Prevista: Dragonfly (2027–2035)"
+            "Prevista: Dragonfly (lanzamiento 2028, llegada ~2034)"
           ],
           "texto": "Saturno es el 2º planeta gaseoso, ~95 M⊕. Se formó in situ ~4.5 mil millones de años atrás con migración dinámica. La rotación rápida (10.7h) causa mayor achatamiento que Júpiter. Campo magnético axial 0.5 G (débil), magnetosfera modesta. Los anillos primarios (A, B, C) tienen espesor ~30 m, edad estimada 100-200 millones de años (o primordial). Compuestos de hielo H₂O, roca, trazas de CH₄/NH₃. Lunas menores Mimas, Encélado, Titán, Rea, Japeto. Titán (2.575 km) tiene atmósfera densa N₂/CH₄ y lagos crioníveos. Encélado tiene plumas criovulcánicas (H₂O/NH₃)."
         }
@@ -1045,7 +1045,6 @@ export const TRADUCAO = {
           "temperatura": "Tope de las nubes: -224 °C; núcleo: estimado ~4.200 K.",
           "missoes": [
             "Voyager 2 (1986)",
-            "Prevista: Ariel (ESA 2030s, propuesto)",
             "Ice Giants Probe (NASA concept)"
           ],
           "texto": "Urano es el 3º gigante de hielo, ~14.5 M⊕. Se formó más allá de la línea de hielo ~4.5 mil millones de años atrás, la migración dinámica del Grand Tack puede haber alterado su órbita. La inclinación axial extrema (97.77°) sugerida por colisión de cuerpo de masa similar a la Tierra durante la formación. Rotación retrógrada -17.24h. Campo magnético inclinado 59° al eje rotacional, ~0.23 G. Anillos débiles (ε, δ, γ, η, β, ζ, χ, ψ, φ, σ, π anillo descubrimiento). Lunas: Miranda (geología caótica), Ariel, Umbriel, Titania, Oberón."
@@ -1092,8 +1091,7 @@ export const TRADUCAO = {
           "composicao": "Hielo de agua (corteza), roca silicática (manto), posible océano subsuperficial.",
           "temperatura": "Superficie: estimada -233 °C; posible océano (especulativo): -50 a -10 °C.",
           "missoes": [
-            "Voyager 2 (1986)",
-            "Prevista: Ariel (ESA 2030s, propuesto)"
+            "Voyager 2 (1986)"
           ],
           "texto": "Titania es la luna más grande de Urano (R = 788 km), 8º satélite más grande del sistema solar. Corteza hielo H₂O, manto rocoso. La superficie muestra craterización: cráteres múltiples, valles lineales (Belmont Chasma, Rima Belinda), fallas tectónicas sugieren enfriamiento global. Sin imágenes de primerísimo plano post-Voyager 2 (1986). Posible océano subsuperficial especulativo, pero sin calentamiento tidal significativo. Densidad 1.71 g/cm³."
         }
@@ -1136,12 +1134,12 @@ export const TRADUCAO = {
           "Voyager 2 reveló que Miranda es una luna con una historia de colisiones cataclísmicas imposibles de explicar completamente."
         ],
         "avancado": {
-          "composicao": "Hielo de agua (primario), roca silicática, posible composición heterogénea.",
+          "composicao": "Hielo de agua (primario), roca silicática embutida, composición similar a asteroides C.",
           "temperatura": "Superficie: estimada -187 °C.",
           "missoes": [
             "Voyager 2 (1986)"
           ],
-          "texto": "Miranda es una luna pequeña (R = 236 km) de Urano, tercera lunaGalileo. Órbita interior resonancia 3:1 con Ariel genera aquecimiento tidal residual. Geología extraordinariamente compleja: cordilleras, terrazas escalonadas, fondo de cráteres antiguas, canyons. Chevron-shaped (forma V) características (Verona Rupes, acantilado 20 km), regiones craqueadas (Arden, Elsinore coronae). Interpretación: destrucción colisor seguida reagrupación de fragmentos. Albedo 0.32 (pálida). Densidad ~1.20 g/cm³."
+          "texto": "Miranda es la luna más interna de Urano (R = 236 km), más pequeña que Titania. Geología extremadamente caótica: terrenos de 3 tipos (Dunsinane, Sicilia, Fer-Tellus Regiones; Chasma Verona ~10 km profundo). Teoría: colisión masiva ~4 Ga con múltiples fragmentos, reagrupación gravitacional creó mosaico. Densidad ~1,2 g/cm³ (alto hielo/bajo roca ratio). Resonancia orbital 3:1 con Umbriel puede haber excitado calentamiento tidal antiguo."
         }
       }
     },
@@ -1391,7 +1389,8 @@ export const TRADUCAO = {
           "composicao": "Hielo de nitrógeno, metano congelado, hielo de agua, núcleo rocoso pequeño.",
           "temperatura": "Superficie: -235 °C a -210 °C; posible océano subsuperficial: especulativo.",
           "missoes": [
-            "Voyager 2 (1989)"
+            "Voyager 2 (1989)",
+            "Prevista: Ice Giants Probe (NASA concept)"
           ],
           "texto": "Tritón es una luna neptuniana (R = 1354 km), satélite único grande retrógrado (a = 354.8 km, e = ~0.0). Órbita retrógrada 5.877 días; acercamiento Neptuno ~3.6 Ga destrucción tidal. Superficie única: cantálidas geladas, Planum suaves (hielo N₂, CH₄, H₂O), grietas, giseres criovulcánicos erupción N₂ a 8 km altura. Atmósfera delgada N₂ sostenida por sublimación punto triple. Geología joven/activa; posible océano subsuperficial antigua H₂O-N₂-NH₃. Captura por Neptuno: transferencia de órbita heliocéntrica a satélite durante Gran Migración (~4.5 Ga)."
         }
@@ -1533,8 +1532,7 @@ export const TRADUCAO = {
           "composicao": "Condrita carbonácea tipo F, posible composición similar a meteoritos CM.",
           "temperatura": "Estimada -120 °C a -70 °C.",
           "missoes": [
-            "Lucy (2027, sobrevuelo propuesto, ahora dudoso)",
-            "Observaciones telescópicas solo"
+            "Posible objetivo de misión futura (ESA/JAXA)"
           ],
           "texto": "Palas es asteroide Cinturón Principal (a = 2.77 UA, 582 km diámetro), tercer cuerpo por tamaño, pero menos masivo Ceres/Vesta. Órbita excéntrica e = 0.231, inclinación extrema i = 34.84° vs eclíptica (anómala). Composición carbonácea tipo F (análogo meteoritos CM). Albedo bajo 0.16 (oscura) — menor reflectividad causa bajo brillo aparente. Núcleo sin diferenciación. Posible fragmento primordial protoplaneta destruido temprano. Descubierta 1802 Olbers."
         }
@@ -1580,8 +1578,9 @@ export const TRADUCAO = {
           "composicao": "Condrita ordinaria tipo S, silicatos, olivina, piroxeno.",
           "temperatura": "Media -110 °C, máxima -25 °C",
           "missoes": [
-            "NEAR-Shoemaker (2000-2001, órbita+aterrizaje)",
-            "Hayabusa2 (observación futura propuesta)"
+            "NEAR-Shoemaker (2000–2001)",
+            "Hayabusa (2005, vuelo próximo)",
+            "Posible objetivo futuro de minería"
           ],
           "texto": "Eros es asteroide cercano-Tierra (a = 1.458 UA, e = 0.223), pequeño cuerpo binario contacto (34 × 11 × 11 km) con forma patata. Órbita período sinódico 1.27 años, gravedad superficial exigua (~0.0005 g). Composición condrita ordinaria S (olivina, piroxeno, feldespato). NEAR-Shoemaker orbitó 2000-2001, mapeó superficie craterizada, midió gravedad/densidad, aterrizó febrero 2001. Geología: cráteres superpostos de todas edades, regolito, bloques eyectados, posible roca madre subsuperficial. Albedo 0.25. Objeto científico primario asteroide."
         },
@@ -1732,15 +1731,16 @@ export const TRADUCAO = {
           "¡La sonda New Horizons tardó 9,5 años en llegar a Plutón — si fuera un coche en una carretera a velocidad de crucero, viajaría a 700.000 km/h durante todo el viaje!"
         ],
         "comparacoes": [
-          "Plutón es más pequeño que la Luna — tiene apenas 2.377 km de diámetro.",
-          "Plutón está tan distante que la luz del Sol es 1.600 veces más débil que en la Tierra."
+          "Plutón es menor que la Luna — cabrían 9 Plutones dentro de la Tierra.",
+          "La luz del Sol tarda 5 horas y 30 minutos en llegar a Plutón — vives en una penumbra permanente.",
+          "En avión a 800 km/h, tardaría 28 horas en volar en volta del ecuador de Plutón."
         ],
         "avancado": {
           "composicao": "Nitrógeno congelado, metano, hielo de agua, posible océano subsuperficial, núcleo rocoso.",
           "temperatura": "Superficie -380 °C a -220 °C; posible océano ~200-300 °C (especulativo).",
           "missoes": [
-            "New Horizons (2015, sobrevuelo)",
-            "Lucy (2033, sobrevuelo propuesto)"
+            "New Horizons (2015 sobrevuelo, datos aún siendo analizados)",
+            "Posible orbitador propuesto"
           ],
           "texto": "Plutón es planeta enano (a = 39.48 UA, e = 0.249, i = 17.16°), R = 1.189 km, satélite binario Caronte (1.212 km) a 19.600 km. Composición mixta: corteza volátil nitrógeno congelado (Sputnik Planitia, llanura 1.600 km), metano, hielo agua; montañas criosféricas (Cthulhu Macula escarpadas hasta 5 km), núcleo silicato posible. Atmósfera delgada N₂/CH₄ sostenida sublimación (presión ~1 Pa, dependerá periastrón ~1989). New Horizons (flyby 2015) reveló geología compleja, criovulcanismo, vientos, dinámicas espectaculares. Órbita período 248 años; descubierta 1930 Tombaugh, reclasificada planeta enano 2006 IAU."
         }
@@ -1786,7 +1786,8 @@ export const TRADUCAO = {
           "composicao": "Hielo de agua, roca silicática, posible material orgánico en polos.",
           "temperatura": "Superficie -220 °C a -160 °C",
           "missoes": [
-            "New Horizons (2015, sobrevuelo)"
+            "New Horizons (2015 sobrevuelo)",
+            "Posible orbitador o módulo de aterrizaje futuro"
           ],
           "texto": "Caronte es satélite binario único Plutón (R = 606 km, semiejes a = 19.600 km, período sinódico 6.387 días, acoplamiento mareal mutuo). Composición primaria hielo agua (corteza ~200 km), núcleo rocoso silicato. Superficie joven craterizada ~4 Ga: sistema canyons Serenity Chasma (10 km profundidad), Mandjet Chasma, planicies suaves hielo, regiones polares rojo-marrón (tholins organogénicos posibles). Nueva Horizons (2015) reveló raya ecuatorial distintiva marrón (Serenity band) — mecanismo origen aún debatido (migración polar, química posible). Geología binaria: efectos mareal mutuo posible fuente calor pasado, criovulcanismo hipotético. Baricentro Plutón-Caronte ubicado fuera Plutón."
         }
@@ -2018,7 +2019,7 @@ export const TRADUCAO = {
           "temperatura": "-235 a -250 °C típicamente",
           "missoes": [
             "New Horizons (2015 Plutón, sobrevuelo 2019 MU69)",
-            "Lucy (2033-2050, múltiples sobrevuelos propuestos)"
+            "Lucy (Troyanos 2021–2033, órbita de Júpiter)"
           ],
           "texto": "Cinturón de Kuiper es región heliocéntrica (30-50 UA, aunque controversia límite exacto), poblada cuerpos pequeños primordiales hielo (planetesimales remanentes). Población estimada ~100.000 objetos >100 km diámetro, millones menores. Composición: hielo agua primaria, metano, nitrógeno, silicatos, carbón (KBOs tipo \"clásicos\" colisionados históricamente). Fuente cometas períodic cortos (<200 años): inestabilidades gravitacional por encuentros planetarios, ejeciones órbita heliocéntrica. Cuerpos mayores: Eris (1.163 km), Plutón (1.189 km), Makemake (715 km), Haumea (alargada ~1.2 km), Gonggong, Orcus, varios cientos clases \"plutinos\" más. New Horizons (2015 sobrevuelo Plutón, 2019 MU69 Arrokoth). Descubrimiento 1995 primeros KBOs; teoría 1951 Edgeworth, 1949 Kuiper — nombrado holandés astrónomo Kuiper."
         }
@@ -2066,9 +2067,10 @@ export const TRADUCAO = {
           "composicao": "Núcleo hielo (principalmente H₂O, CO₂, CH₄, NH₃), polvo silicatos, material orgánico.",
           "temperatura": "Núcleo -70 a 0 °C (punto de sublimación), coma mucho más caliente.",
           "missoes": [
-            "Giotto (ESA, 1986, sobrevuelo)",
-            "Vega 1-2 (URSS, 1986, sobrevuelo)",
-            "Suisei, Sakigake (Japón, 1986, observación remota)"
+            "Vega 1-2 (URSS, 1986)",
+            "Giotto (ESA, 1986)",
+            "Suisei, Sakigake (Japón, 1986)",
+            "Propuesta futura de retorno de muestras"
           ],
           "texto": "Halley es cometa periódico (período 75.3 años, próximo retorno 2061-07-28), semieje 17.8 UA, excentricidad 0.967 (trayectoria retrógrada i = 162.26°). Núcleo patata ~16 × 8 × 7 km compuesto hielo (H₂O, CO₂, CH₄ congelado), polvo silicatos, materiales orgánicos/tholins. Apariciones históricas documentadas tantas veces — registros chinos a 240 AC, europeos incluyen 1066 (Bayeux Tapestry). Período determinado Edmund Halley 1705 órbita análisis; regresó 1758 predicción, confirmando naturaleza periódica (primer cometa así demostrado). Giotto (1986) sobrevuelo ESA: primera foto núcleo cometa, mapeó fuentes jets de polvo. Próxima aparición 2061-07-28, después 2136."
         }
@@ -2114,12 +2116,13 @@ export const TRADUCAO = {
           "composicao": "Núcleo hielo (H₂O, CO₂, CH₄, posiblemente material orgánico complejo), polvo rico silicatos.",
           "temperatura": "Núcleo -100 a -200 °C, coma mucho más caliente por radiación solar.",
           "missoes": [
-            "Observaciones telescópicas/ópticas solo"
+            "Observaciones telescópicas múltiples (Hubble, Chandra, etc.)",
+            "Sin sonda interplanetaria planejada"
           ],
-          "texto": "Hale-Bopp es cometa periódico largo período (~2533 años, próximo regreso año 4385), semieje 186 UA, excentricidad 0.995 (órbita casi parabólica). Núcleo muy grande estimado ~60 km diámetro (entre mayores cometas conocidos). Aparición 1997: aphelion 2061, perihelio 1997-04-01, visible ojo desnudo ~18 meses (1996-1997). Brillo excepcional: magnitud máxima -0.8 (más brillante que Polaris), cola gemela brillante (polvo+gas iones). Descubrimiento doble independiente Alan Hale, Thomas Bopp (1995-07-23). Período orbital deducido de órbita pre-retorno registros históricos (descubrimientos pasados ~4.206 AC propuesto, pero incertidumbre). Próximo paso interior 4385-09-27, período extremadamente largo significa rareza esta generación."
+          "texto": "Hale-Bopp es cometa periódico largo período (~2.533 años, próximo regreso año 4385), semieje 186 UA, excentricidad 0.995 (órbita casi parabólica). Núcleo muy grande estimado ~60 km diámetro (entre mayores cometas conocidos). Aparición 1997: afelio 2061, perihelio 1997-04-01, visible ojo desnudo ~18 meses (1996-1997). Brillo excepcional: magnitud máxima -0.8 (más brillante que Polaris), cola gemela brillante (polvo+gas iones). Descubrimiento doble independiente Alan Hale, Thomas Bopp (1995-07-23). Período orbital deducido de órbita pre-retorno registros históricos (descubrimientos pasados ~4.206 AC propuesto, pero incertidumbre). Próximo paso interior 4385-09-27, período extremadamente largo significa rareza esta generación."
         },
         "comparacoes": [
-          "Hale-Bopp es un gigante — su núcleo de 40 km de diámetro es el mayor cometa conocido.",
+          "Hale-Bopp es un gigante — su núcleo de 40 km de diámetro es uno de los mayores cometas jamás observados — solo pierde ante gigantes distantes como C/2014 UN271, de 137 km.",
           "Su órbita se extiende tan lejos que en el afelio está 10 veces más lejos que Plutón.",
           "Su cola brillante se extendía por millones de km — visible a simple vista incluso de día en 1997."
         ]
@@ -2165,11 +2168,10 @@ export const TRADUCAO = {
           "composicao": "Hielo de agua, CO₂, CO, polvo orgánico (CHON), silicatos — composición primordial bien preservada.",
           "temperatura": "-200 °C a -50 °C (varía por insolación), manto activo sublimación perihelio.",
           "missoes": [
-            "Rosetta (ESA, 2014-2016, órbita)",
-            "Philae lander (2014, alunizaje)",
-            "Posible muestra-retorno futuro (CAESAR propuesto NASA)"
+            "Rosetta/Philae (2014–2016)",
+            "Primera sonda en orbitar/aterrizar en un cometa"
           ],
-          "texto": "Cometa 67P/Churyumov-Gerasimenko (período 6.449 años, semieje 3.46 UA, excentricidad 0.644). Núcleo binario contacto (\"forma pato\") ~4 × 4.3 × 2 km total, densidad baja 0.47 g/cm³ (rubble pile), dos lóbulos distintos unidos cuello angosto. Composición primordial: hielo H₂O, CO₂, CO congelado, polvo CHON orgánico, silicatos — análogo condritas carbonáceas. Rosetta (ESA) órbita 2014-2016: mapeó superficie (cráteres, acantilados, boulder fields), midió composición, actividad. Philae lander (2014-11-12): primer contacto cometa, rebotó, posó cráter sombrío, experiments cutoff rápidamente por energía insuficiente. Primer análisis in-situ composición orgánica. Próximo perihelio 2021-01-03 (pasado); próximo 2027.5. CAESAR (sample-return propuesta futuro)."
+          "texto": "Cometa 67P/Churyumov-Gerasimenko (período 6.449 años, semieje 3.46 UA, excentricidad 0.644). Núcleo binario contacto (\"forma pato\") ~4 × 4.3 × 2 km total, densidad baja 0.47 g/cm³ (rubble pile), dos lóbulos distintos unidos cuello angosto. Composición primordial: hielo H₂O, CO₂, CO congelado, polvo CHON orgánico, silicatos — análogo condritas carbonáceas. Rosetta (ESA) órbita 2014-2016: mapeó superficie (cráteres, acantilados, boulder fields), midió composición, actividad. Philae lander (2014-11-12): primer contacto cometa, rebotó, posó cráter sombrío, experiments cutoff rápidamente por energía insuficiente. Primer análisis in-situ composición orgánica. Próximo perihelio 2021-01-03 (pasado); próximo 2027.5."
         },
         "comparacoes": [
           "67P es un cometa pequeño — apenas 4,3 km de diámetro, menor que cualquier asteroide grande.",
@@ -2483,7 +2485,7 @@ export const TRADUCAO = {
     "juno": {
       "nome": "Juno",
       "descricao": "Sonda impulsada por energía solar estudiando la composición, campo magnético y estructura interna de Júpiter. Récord de paneles solares más distantes del Sol en operación. Órbita polar excéntrica que evita los cinturones de radiación más intensos.",
-      "estado": "Activa — orbitando Júpiter",
+      "estado": "En órbita de Júpiter — misión en fase final",
       "paradas": [
         "Lanzamiento de Cabo Cañaveral",
         "Asistencia gravitacional en la Tierra",

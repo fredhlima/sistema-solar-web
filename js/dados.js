@@ -135,7 +135,7 @@ export const DADOS = { corpos: [
         'Vênus gira de trás para frente (rotação retrógrada) em relação aos outros planetas.',
         'O planeta mais quente do sistema solar é Vênus, não Mercúrio, por causa do efeito estufa descontrolado.',
         'Um dia venusiano dura 243 dias terrestres, enquanto o ano venusiano dura 224,7 dias — o dia é mais longo que o ano!',
-        'As nuvens de Vênus viajam ao redor do planeta inteiro a cada 4 dias, criando os ventos mais velozes do sistema solar (360 km/h).',
+        'As nuvens de Vênus viajam ao redor do planeta inteiro a cada 4 dias, 60 vezes mais rápido do que o próprio planeta gira — a superrotação (360 km/h).',
         'Se você fosse para Vênus, a pressão atmosférica te esmagaria como se estivesse 900 metros de profundidade no oceano terrestre — nenhum submarino conseguiria resistir.',
         'Um dia venusiano dura tanto que se você visitasse Vênus por 121,5 dias terrestres, o Sol estaria no mesmo lugar do céu onde você o deixou.'
       ],
@@ -146,8 +146,8 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Silicatos rochosos com superfície vulcânica; atmosfera de CO₂ (96%), N₂ (3%), traços de H₂SO₄.',
         temperatura: 'Superfície: ~462 °C; superior da atmosfera: -75 °C; média mensurada: 462 °C.',
-        missoes: ['Venera 1-16 (1961–1983, URSS)', 'Akatsuki (2015–presente)', 'DAVINCI (2028–planejado)'],
-        texto: 'Vênus é o segundo planeta solar, similar em tamanho à Terra. Sua atmosfera densa de dióxido de carbono gera efeito estufa extremo mantendo 462 °C em superfície. Sua rotação retrógrada e lenta (243 dias) é anômala. Pode ter tido oceanos e ser habitável 2 bilhões de anos atrás. Vulcões cobrem ~70% da superfície; o vulcão Maat Mons é a maior estrutura vulcânica conhecida.'
+        missoes: ['Venera 1-16 (1961–1983, URSS)', 'Akatsuki (2015–2025, JAXA)', 'DAVINCI (lançamento 2029, chegada 2031 — planejado)'],
+        texto: 'Vênus é o segundo planeta solar, similar em tamanho à Terra. Sua atmosfera densa de dióxido de carbono gera efeito estufa extremo mantendo 462 °C em superfície. Sua rotação retrógrada e lenta (243 dias) é anômala. Pode ter tido oceanos e ser habitável 2 bilhões de anos atrás. Vulcões cobrem ~70% da superfície; o Maat Mons é o vulcão mais alto de Vênus (~8 km).'
       }
     }
   },
@@ -237,8 +237,8 @@ export const DADOS = { corpos: [
         'A Lua sempre mostra a mesma face para a Terra porque sua rotação está sincronizada com seu período orbital — isso é chamado de aprisionamento mareal.',
         'A Lua é responsável pelas marés dos oceanos. Sem ela, nossas marés seriam 30% menores e a vida teria evoluído muito diferente.',
         '12 humanos pisaram na Lua entre 1969 e 1972 durante as missões Apollo.',
-        'A Lua se afasta da Terra a 3,8 cm por ano, e eventualmente deixará o sistema Terra-Lua.',
-        'A Lua está mais perto de você do que qualquer outro corpo celeste — mas as sondas conseguem chegar a Plutão mais rapidamente do que voltar da Lua.',
+        'A Lua se afasta da Terra a 3,8 cm por ano, mas nunca vai escapar — o afastamento desacelera até Terra e Lua ficarem travadas uma na outra.',
+        'A Lua está mais perto de você do que qualquer outro corpo celeste — e a New Horizons, que foi até Plutão, cruzou a distância da Lua em poucas horas — o lançamento mais rápido da história.',
         'Na Lua, você pesaria apenas 1/6 do que pesa na Terra — se você pesa 60 kg aqui, lá você pesaria apenas 10 kg, permitindo pulos gigantes de astronauta.'
       ],
       comparacoes: [
@@ -392,12 +392,12 @@ export const DADOS = { corpos: [
         { rotulo: 'Luas', valor: '2 (Fobos, Deimos)' }
       ],
       curiosidades: [
-        'Marte tem o maior vulcão conhecido do sistema solar: Olympus Mons, com 21 km de altura e 600 km de largura — 4 vezes o Mount Everest!',
+        'Marte tem o maior vulcão conhecido do sistema solar: Olympus Mons, com 21 km de altura e 600 km de largura — quase 3 vezes a altura do Monte Everest!',
         'A Grande Rift de Marte (Valles Marineris) tem 4 km de profundidade e 4.000 km de comprimento — 10 vezes maior que o Grand Canyon.',
         'Marte tem calotas de gelo em seus polos feitas de CO₂ congelado e água.',
-        'As estações em Marte duram quase um ano terrestre cada, e as poeiras vermelhas são óxido de ferro (ferrugem).',
+        'As estações em Marte duram cerca de seis meses terrestres cada (de 5 a 7, porque a órbita é bem excêntrica), e as poeiras vermelhas são óxido de ferro (ferrugem).',
         'Um dia em Marte dura 24,6 horas — quase igual ao nosso dia — por isso cientistas escolhem Marte para eventual colonização, pois nosso corpo se adapta melhor lá.',
-        'Marte tem a maior cratera de impacto do sistema solar — a Bacia de Hellas tem 2.300 km de diâmetro e 9 km de profundidade.'
+        'Marte tem uma das maiores crateras de impacto do sistema solar — a Bacia de Hellas tem 2.300 km de diâmetro e 9 km de profundidade.'
       ],
       comparacoes: [
         'Marte é metade do tamanho da Terra — caberiam 7 Marte dentro da Terra.',
@@ -533,7 +533,7 @@ export const DADOS = { corpos: [
       ],
       curiosidades: [
         'Caberiam 1.300 Terras dentro de Júpiter, ou 5 bilhões de humanos — é verdadeiramente gigantesco.',
-        'A Grande Mancha Vermelha de Júpiter é uma tempestade que dura pelo menos 350 anos, grande o bastante para engolir 3 Terras.',
+        'A Grande Mancha Vermelha de Júpiter é uma tempestade que dura pelo menos 350 anos, grande o bastante para engolir a Terra inteira — e há um século era três vezes maior; está encolhendo.',
         'Júpiter irradia mais energia do que recebe do Sol — tem um calor interno residual de sua formação.',
         'Um humano de 100 kg pesaria 250 kg na superfície das nuvens de Júpiter devido à gravidade intensíssima.',
         'A Grande Mancha Vermelha de Júpiter é tão grande que a Terra inteira caberia dentro dela — e essa tempestade é tão forte que os ventos alcançam 600 km/h.',
@@ -766,7 +766,7 @@ export const DADOS = { corpos: [
         { rotulo: 'Duração do ano', valor: '29,46 anos' },
         { rotulo: 'Duração do dia', valor: '10,7 horas' },
         { rotulo: 'Densidade', valor: '0,687 g/cm³ (flutuaria na água)' },
-        { rotulo: 'Luas', valor: '146 (2 principais: Titã, Encélado)' }
+        { rotulo: 'Luas', valor: '274 confirmadas em 2025 (2 principais: Titã, Encélado)' }
       ],
       curiosidades: [
         'Saturno é menos denso que a água — se colocado em uma banheira cósmica, ele flutuaria!',
@@ -778,13 +778,13 @@ export const DADOS = { corpos: [
       ],
       comparacoes: [
         'Saturno é 95 vezes mais massivo que a Terra — caberiam 764 Terras dentro dele.',
-        'Os anéis de Saturno estão a 60.000-280.000 km do planeta — muito mais distantes que a Lua da Terra (384.400 km total).',
+        'Os anéis de Saturno estão a 60.000-280.000 km do planeta — todo o sistema de anéis cabe dentro da distância Terra-Lua (384.400 km).',
         'De avião a 800 km/h, levaria 37 anos para voar em volta do equador de Saturno.'
       ],
       avancado: {
         composicao: 'Hidrogênio (H₂), hélio (He), traços de metano (CH₄), amônia (NH₃), fosfina (PH₃), núcleo rochoso ~30 M⊕.',
         temperatura: 'Topo das nuvens: -140 °C; núcleo: estimado ~11.000 K.',
-        missoes: ['Pioneer 11 (1979)', 'Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017)', 'Prevista: Dragonfly (2027–2035)'],
+        missoes: ['Pioneer 11 (1979)', 'Voyager 1-2 (1980–1981)', 'Cassini-Huygens (2004–2017)', 'Prevista: Dragonfly (lançamento 2028, chegada a Titã em 2034)'],
         texto: 'Saturno é o 2º planeta gasoso, ~95 M⊕. Formou-se in situ ~4,5 Ga com migração dinâmica. Período rápido (10,7h) causa achatamento >Jupiter. Campo magnético axial 0,5 G (fraco), magnetosfera modesta. Anéis primários (A,B,C) espessura ~30 m, idade estimada 100-200 Ma (ou primitiva). Compostos de gelo H₂O, rocha, traços de CH₄/NH₃. Luas menores Mimas, Enceladus, Titã, Rhea, Iapetus. Titã (2575 km) tem atmosfera densa N₂/CH₄ e criolacunas. Enceladus tem plumas criovulcânicas (H₂O/NH₃).'
       }
     }
@@ -1075,7 +1075,7 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Gelos (H₂O, NH₃, CH₄), hidrogênio molecular, hélio, traços de metano (dá cor azul), núcleo rochoso ~20 M⊕.',
         temperatura: 'Topo das nuvens: -224 °C; núcleo: estimado ~4.200 K.',
-        missoes: ['Voyager 2 (1986)', 'Prevista: Ariel (ESA 2030s, proposto)', 'Ice Giants Probe (NASA concept)'],
+        missoes: ['Voyager 2 (1986)', 'Ice Giants Probe (NASA concept)'],
         texto: 'Urano é o 3º gigante gelado, ~14,5 M⊕. Formou-se além de linha gelo ~4,5 Ga, migração dinâmica Grande Tack pode ter alterado órbita. Inclinação axial extrema (97,77°) sugerida por colisão corpo de massa parecida com a da Terra durante formação. Rotação retrógrada -17,24h. Campo magnético inclinado 59° a eixo rotacional, ~0,23 G. Anéis fracos (ε, δ, γ, η, β, ζ, χ, ψ, φ, σ, π anel discovery). Luas: Miranda (geologia caótica), Ariel, Umbriel, Titânia, Obéron.'
       }
     }
@@ -1119,7 +1119,7 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Gelo de água (crosta), rocha silicática (manto), possível oceano subsuperficial.',
         temperatura: 'Superfície: estimada -233 °C; possível oceano (especulativo): -50 a -10 °C.',
-        missoes: ['Voyager 2 (1986)', 'Prevista: Ariel (ESA 2030s, proposto)'],
+        missoes: ['Voyager 2 (1986)'],
         texto: 'Titânia é a maior lua de Urano (R = 788 km), maior 8º satélite do sistema solar. Crosta gelo H₂O, manto rochoso. Superfície mostrar craterizado: crateras múltiplas, vales lineares (Belmont Chasma, Rima Belinda), falhas tectônicas sugerem resfriamento global. Sem imagens de close-up pós-Voyager 2 (1986). Possível oceano subsuperficial especulativo, mas sem aquecimento tidal significativo. Densidade 1,71 g/cm³.'
       }
     }
@@ -1163,7 +1163,7 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Gelo de água (primário), rocha silicática embutida, composição similar a asteroides C.',
         temperatura: 'Superfície: estimada -187 °C.',
-        missoes: ['Voyager 2 (1986)', 'Prevista: Ariel (ESA 2030s, proposto)'],
+        missoes: ['Voyager 2 (1986)'],
         texto: 'Miranda é a lua mais interna de Urano (R = 236 km), mais pequena que Titânia. Geologia extremamente caótica: terrenos de 3 tipos (Dunsinane, Sicilia, Fer-Tellus Regiones; Chasma Verona ~10 km fundo). Teoria: colidir massiço ~4 Ga com múltiplos fragmentos, reassembly gravitacional criou mosaico. Densidade ~1,2 g/cm³ (alto gelo/baixo rocha ratio). Ressonância orbital 3:1 com Umbriel pode ter excitado tidal aquecimento antigo.'
       }
     }
@@ -1347,7 +1347,7 @@ export const DADOS = { corpos: [
         'Netuno é azul profundo porque sua atmosfera de metano absorve luz vermelha e reflete azul — como um oceano cósmico.',
         'Netuno tem os ventos mais rápidos do sistema solar, superiores a 2.400 km/h (Mach 2), mais rápido que o som!',
         'Netuno irradia mais calor do que recebe do Sol — como Júpiter, tem um calor interno residual.',
-        'A Mancha Escura Grande de Netuno, um furacão gigante, desapareceu entre 1994 e 1998 — atmosfera dinâmica extrema.',
+        'A Mancha Escura Grande de Netuno, um furacão gigante, foi vista pela Voyager 2 em 1989 e já tinha sumido quando o Hubble olhou, em 1994 — atmosfera dinâmica extrema.',
         'Netuno tem os ventos mais rápidos de qualquer planeta conhecido — a 2.400 km/h, foram detectados em direções opostas em diferentes latitudes do planeta.',
         'Netuno leva 165 anos terrestres para dar uma volta ao redor do Sol — desde sua descoberta em 1846, completou apenas 1,1 volta!'
       ],
@@ -1359,7 +1359,7 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Gelos (H₂O, NH₃, CH₄), hidrogênio molecular, hélio, traços de metano, núcleo rochoso ~20 M⊕.',
         temperatura: 'Topo das nuvens: -220 °C; núcleo: estimado ~4.000-5.000 K.',
-        missoes: ['Voyager 2 (1989)', 'Prevista: Ice Giants Probe (NASA concept), ESA Clipper'],
+        missoes: ['Voyager 2 (1989)', 'Prevista: Ice Giants Probe (NASA concept)'],
         texto: 'Netuno é o 4º gigante gelado, ~17 M⊕. Descoberto 1846 por perturbações gravitacionais em Urano (cálculo Urbain Le Verrier). Migração Grande Tack pode ter deslocado-o além de Plutão durante formação. Campo magnético inclinado 47° a eixo rotacional, ~0,27 G. Atmosfera dinâmica com ventos >2400 km/h, plumas de nuvem, Grande Mancha Escura transiente. Luas: Tritão (retrógrada, criovulcânica), Proteu, outros. Anéis finos (Adams, Le Verrier, Galle).'
       }
     }
@@ -1678,9 +1678,9 @@ export const DADOS = { corpos: [
       ],
       curiosidades: [
         'Apófis é o asteroide potencialmente perigoso mais famoso — em 2004, foi a primeira vez que um asteroide recebeu probabilidade Torino Scale > 0.',
-        'Apófis passará extremamente perto da Terra em 29 de abril de 2029 — mais perto que alguns satélites de comunicação!',
-        'Apófis foi observado intensivamente pelo Telescópio Espacial Chandra para refinar sua órbita — e o risco foi praticamente eliminado.',
-        'A passagem de 2029 será um espetáculo astronômico — Apófis será brilhante o bastante para ver a olho nu durante o dia!'
+        'Apófis passará extremamente perto da Terra em 13 de abril de 2029 — mais perto que alguns satélites de comunicação!',
+        'Apófis foi observado intensivamente por radar (Goldstone, Arecibo e Green Bank) para refinar sua órbita — e o risco foi praticamente eliminado.',
+        'A passagem de 2029 será um espetáculo astronômico — Apófis brilhará como uma estrela da Ursa Maior (magnitude ~3) — visível a olho nu à noite, da Europa, África e Ásia!'
       ],
       comparacoes: [
         'Apófis é ainda menor que Bennu — apenas 370 metros de diâmetro.',
@@ -1689,8 +1689,8 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Silicato-carbonáceo, compostos orgânicos, possível água, metais.',
         temperatura: 'Superfície: estimada -40 a -80 °C.',
-        missoes: ['Múltiplos observatórios (Chandra, Spitzer, radar)', 'RAMSES (2028–2034, ESA/JAXA—desvio orbital demonstração)'],
-        texto: 'Apófis é NEA classe Sq (silicato-carbonáceo). Semi-eixo maior 1,099 UA, excentricidade 0,1912, inclinação 3,393°. Diâmetro ~370 m, massa ~7,8 × 10¹⁰ kg. Aproximação 2029: distância ~31.600 km (dentro geosynchronous). Observações Chandra/Spitzer/radar refinaram órbita, eliminaram risco impacto 2029-2099 (probabilidade <1 em 150.000). RAMSES (ESA/JAXA 2028) demonstrará defesa planetária desvio de órbita. Designado Torino Scale value em 2004; reduzido para zero.'
+        missoes: ['Radar (Goldstone, Arecibo, Green Bank)', 'RAMSES (2028–2034, ESA/JAXA—desvio orbital demonstração)'],
+        texto: 'Apófis é NEA classe Sq (silicato-carbonáceo). Semi-eixo maior 1,099 UA, excentricidade 0,1912, inclinação 3,393°. Diâmetro ~370 m, massa ~7,8 × 10¹⁰ kg. Aproximação 2029: distância ~31.600 km (dentro geosynchronous). Observações de radar (Goldstone, Arecibo, Green Bank) refinaram a órbita; removido da Sentry Risk Table em março de 2021 — risco descartado para os próximos 100 anos. RAMSES (ESA/JAXA 2028) demonstrará defesa planetária desvio de órbita. Designado Torino Scale value em 2004; reduzido para zero.'
       }
     }
   },
@@ -2084,13 +2084,13 @@ export const DADOS = { corpos: [
         { rotulo: 'Próxima passagem', valor: 'Ano 4385' }
       ],
       curiosidades: [
-        'Hale-Bopp foi o cometa mais brilhante do século XX — visível a olho nu de 1995 a 1998, período recorde.',
-        'Hale-Bopp tem semieixo maior de 186 UA — sua órbita é quase parabólica, levará bilhões de anos para retornar (se retornar).',
+        'Hale-Bopp foi o cometa mais brilhante do século XX — visível a olho nu por 18 meses, em 1996 e 1997 — período recorde.',
+        'Hale-Bopp tem semieixo maior de 186 UA — sua órbita é quase parabólica, levará cerca de 2.500 anos para retornar, por volta do ano 4385.',
         'A cauda de Hale-Bopp se estendia por bilhões de quilômetros — maior que o sistema solar interno!',
         'Muitas culturas antigas registraram cometas semelhantes — Hale-Bopp pode ter sido observado há milhares de anos se órbita foi diferente.'
       ],
       comparacoes: [
-        'Hale-Bopp é um gigante — seu núcleo de 40 km de diâmetro é o maior cometa conhecido.',
+        'Hale-Bopp é um gigante — seu núcleo de 40 km de diâmetro é um dos maiores cometas já observados — só perde para gigantes distantes como o C/2014 UN271, de 137 km.',
         'Sua órbita se estende tão longe que em afélio está 10 vezes mais longe que Plutão.',
         'A cauda brilhante se estendia por milhões de km — visível a olho nu mesmo durante o dia em 1997.'
       ],
@@ -2134,7 +2134,7 @@ export const DADOS = { corpos: [
       curiosidades: [
         '67P/Churyumov-Gerasimenko tem forma única de "pato de borracha" — dois lóbulos de diferentes tamanhos conectados por pescoço.',
         'A sonda Rosetta orbitou 67P por 2 anos (2014-2016), revelando detalhes da superfície nunca antes vistos.',
-        'Philae, o módulo de pouso da Rosetta, aterrou em 67P em 14 de novembro de 2014 — primeiro pouso em um cometa!',
+        'Philae, o módulo de pouso da Rosetta, aterrou em 67P em 12 de novembro de 2014 — primeiro pouso em um cometa!',
         'Jatos de gás saem de rachaduras em 67P — a sonda Rosetta observou atividade cometária em tempo real.'
       ],
       comparacoes: [
@@ -2146,7 +2146,7 @@ export const DADOS = { corpos: [
         composicao: 'Núcleo condrita carbonácea (gelo de água, poeira, compostos orgânicos primitivos), rocha.',
         temperatura: 'Superfície em repouso: ~-35 °C (mais quente que esperado); durante periélio: sublimação intensa.',
         missoes: ['Rosetta/Philae (2014–2016)', 'Primeira sonda a orbitar/pousar cometa'],
-        texto: '67P/Churyumov-Gerasimenko é cometa periódico descoberto 1969. Semi-eixo maior 3,46 UA, excentricidade 0,6399, período 6,44 anos. Periélio próximo (último 2015/08/13). Forma bilobada ~4,3 × 4,1 × 3,3 km resultado fusão dois corpos primitivos. Rosetta (2014–2016) órbita & Philae pouso (2014/11/14, primeiro cometa). Superfície craqueada, jatos gas, depósitos brilhantes (gelo + sais). Densidade ~470 kg/m³ (amontoado solto). Composição original solar — objeto primitivo Cinturão Kuiper capturado.'
+        texto: '67P/Churyumov-Gerasimenko é cometa periódico descoberto 1969. Semi-eixo maior 3,46 UA, excentricidade 0,6399, período 6,44 anos. Periélio próximo (último 2015/08/13). Forma bilobada ~4,3 × 4,1 × 3,3 km resultado fusão dois corpos primitivos. Rosetta (2014–2016) órbita & Philae pouso (2014/11/12, primeiro cometa). Superfície craqueada, jatos gas, depósitos brilhantes (gelo + sais). Densidade ~470 kg/m³ (amontoado solto). Composição original solar — objeto primitivo Cinturão Kuiper capturado.'
       }
     }
   }

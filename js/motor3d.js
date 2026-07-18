@@ -74,21 +74,29 @@ export class SistemaSolar3D {
   // Troca texturas procedurais por imagens reais quando existirem em
   // texturas/ (manifest.json lista os ids disponíveis). Sem rede ou sem a
   // pasta, o visual procedural permanece — o app nunca depende disso.
+  // ?v= aqui evita servir um manifest.json/jpg em cache divergente do atual
+  // (diferente do resto do projeto, este caminho não tinha cache-busting).
   async _carregarTexturasReais() {
+    const V = 29;
     try {
-      const resp = await fetch('texturas/manifest.json');
+      const resp = await fetch(`texturas/manifest.json?v=${V}`);
       if (!resp.ok) return;
       const ids = await resp.json();
       const loader = new THREE.TextureLoader();
       for (const id of ids) {
         const fisico = this.corposFisicos.get(id);
         if (!fisico || !fisico.mesh || !fisico.mesh.material || fisico.isCinturao) continue;
-        loader.load(`texturas/${id}.jpg`, (tex) => {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-          fisico.mesh.material.map = tex;
-          fisico.mesh.material.needsUpdate = true;
-        });
+        loader.load(
+          `texturas/${id}.jpg?v=${V}`,
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
+            fisico.mesh.material.map = tex;
+            fisico.mesh.material.needsUpdate = true;
+          },
+          undefined,
+          (erro) => console.warn(`Textura real de "${id}" falhou ao carregar, mantendo procedural:`, erro)
+        );
       }
     } catch (e) {
       // offline ou pasta ausente: mantém texturas procedurais
@@ -904,7 +912,13 @@ export class SistemaSolar3D {
     });
 
     const ring = new THREE.Mesh(geometry, material);
-    ring.rotation.x = Math.PI / 2.5;
+    // Normal do anel = eixo de rotação do corpo, derivado de
+    // inclinacaoEixoGraus (mesma rotação Z aplicada ao mesh). Antes era 72°
+    // fixo para todos — o anel de Urano ficava igual ao de Saturno,
+    // contradizendo a ficha "gira deitado" (97,77°).
+    const eixoRad = ((corpo.inclinacaoEixoGraus || 0) * Math.PI) / 180;
+    const eixo = new THREE.Vector3(-Math.sin(eixoRad), Math.cos(eixoRad), 0);
+    ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), eixo);
     grupo.add(ring);
     return ring;
   }
