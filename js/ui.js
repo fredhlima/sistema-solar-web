@@ -1,4 +1,4 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=17';
+import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=19';
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
@@ -447,11 +447,22 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       conteudo.style.display = recolhido ? 'none' : 'block';
     }
 
-    btnColapsar.onclick = () => {
+    function alternarColapso() {
       recolhido = !recolhido;
       try { localStorage.setItem(CHAVE_COLAPSO, recolhido ? '1' : '0'); } catch (e) { /* sem storage */ }
       aplicarEstadoColapso();
+    }
+    btnColapsar.onclick = (e) => {
+      // Não deixa subir até o listener do painel: recolher e reexpandir
+      // no mesmo clique se anulariam
+      e.stopPropagation();
+      alternarColapso();
     };
+    // Recolhido, o painel vira uma barra estreita de 44px — a barra INTEIRA
+    // (rótulo vertical incluso) reabre, não só a setinha
+    div.addEventListener('click', () => {
+      if (recolhido) alternarColapso();
+    });
     cabecalho.appendChild(btnColapsar);
     div.appendChild(cabecalho);
 
@@ -496,55 +507,135 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     };
     atualizarSecaoFavoritos();
 
-    // Agrupar corpos
-    const grupos = {
-      [t('grupoEstrela')]: [],
-      [t('grupoPlanetas')]: [],
-      [t('grupoAnoes')]: [],
-      [t('grupoCinturoes')]: [],
-      [t('grupoAsteroides')]: [],
-      [t('grupoCometas')]: [],
-      [t('grupoTelescopios')]: [],
-      [t('grupoMissoes')]: []
+    // Acordeão (comportamento do mobile). No desktop o CSS mantém tudo
+    // visível, então alternar estas classes é inócuo lá — um DOM só,
+    // mesma ideia do popover .experiencias-itens.
+    const mqExplorarMobile = window.matchMedia('(max-width: 1024px)');
+    const ehMobileExplorar = () => mqExplorarMobile.matches;
+
+    function fecharGrupo(g) {
+      g.classList.remove('grupo-aberto');
+      const btn = g.querySelector('.explorar-grupo-toggle');
+      if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? 'false' : 'true');
+    }
+    function alternarGrupo(divGrupo) {
+      const abrir = !divGrupo.classList.contains('grupo-aberto');
+      // Um grupo aberto por vez no mobile: com ~5 linhas visíveis, dois
+      // grupos abertos deixam a rolagem cega. Fecha os irmãos ao abrir.
+      if (abrir && ehMobileExplorar()) {
+        conteudo.querySelectorAll('.explorar-grupo-colapsavel.grupo-aberto').forEach(g => {
+          if (g !== divGrupo) fecharGrupo(g);
+        });
+      }
+      divGrupo.classList.toggle('grupo-aberto', abrir);
+      const btn = divGrupo.querySelector('.explorar-grupo-toggle');
+      if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(abrir) : 'true');
+      // Rola o cabeçalho aberto para o topo da lista (delta de rect, não
+      // scrollIntoView — este empurra o documento sob painéis fixed no iOS).
+      if (abrir && ehMobileExplorar()) {
+        requestAnimationFrame(() => {
+          conteudo.scrollTop += divGrupo.getBoundingClientRect().top - conteudo.getBoundingClientRect().top;
+        });
+      }
+    }
+    function sincronizarAriaAcordeao() {
+      conteudo.querySelectorAll('.explorar-grupo-colapsavel').forEach(g => {
+        const btn = g.querySelector('.explorar-grupo-toggle');
+        if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(g.classList.contains('grupo-aberto')) : 'true');
+      });
+      conteudo.querySelectorAll('.explorar-item-pai').forEach(p => {
+        const btn = p.querySelector('.explorar-item-chevron');
+        if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(p.classList.contains('item-aberto')) : 'true');
+      });
+    }
+
+    // Agrupar corpos — array com chave ESTÁVEL (a versão antiga indexava
+    // pela string traduzida e detectava missões comparando com t(), que
+    // quebraria se a tradução mudasse; a chave é imune a isso).
+    const grupos = [
+      { chave: 'planetas',    titulo: t('grupoPlanetas'),    itens: [] },
+      { chave: 'anoes',       titulo: t('grupoAnoes'),       itens: [] },
+      { chave: 'cinturoes',   titulo: t('grupoCinturoes'),   itens: [] },
+      { chave: 'asteroides',  titulo: t('grupoAsteroides'),  itens: [] },
+      { chave: 'cometas',     titulo: t('grupoCometas'),     itens: [] },
+      { chave: 'telescopios', titulo: t('grupoTelescopios'), itens: [] },
+      { chave: 'missoes',     titulo: t('grupoMissoes'),     itens: [] }
+    ];
+    const porChave = Object.fromEntries(grupos.map(g => [g.chave, g]));
+    const TIPO_PARA_GRUPO = {
+      planeta: 'planetas', 'planeta-anao': 'anoes',
+      cinturao: 'cinturoes', asteroide: 'asteroides', cometa: 'cometas',
+      sonda: 'telescopios'
     };
 
     dados.corpos.forEach(corpo => {
-      if (corpo.tipo === 'estrela') {
-        grupos[t('grupoEstrela')].push(corpo);
-      } else if (corpo.tipo === 'planeta') {
-        grupos[t('grupoPlanetas')].push(corpo);
-      } else if (corpo.tipo === 'planeta-anao') {
-        grupos[t('grupoAnoes')].push(corpo);
-      } else if (corpo.tipo === 'cinturao') {
-        grupos[t('grupoCinturoes')].push(corpo);
-      } else if (corpo.tipo === 'asteroide') {
-        grupos[t('grupoAsteroides')].push(corpo);
-      } else if (corpo.tipo === 'cometa') {
-        grupos[t('grupoCometas')].push(corpo);
-      } else if (corpo.tipo === 'sonda') {
-        grupos[t('grupoTelescopios')].push(corpo);
+      const chave = TIPO_PARA_GRUPO[corpo.tipo];
+      if (chave) porChave[chave].itens.push(corpo);
+    });
+
+    // O Sol fica SOLTO logo abaixo de Favoritos: uma seção "ESTRELA" com um
+    // único item era puro ruído de navegação (único grupo singleton da lista).
+    dados.corpos.filter(c => c.tipo === 'estrela').forEach(sol => {
+      const grupoSol = document.createElement('div');
+      grupoSol.className = 'explorar-grupo explorar-grupo-solo';
+      const itemSol = document.createElement('div');
+      itemSol.className = 'explorar-item';
+      itemSol.id = `explorar-item-${sol.id}`;
+      itemSol.textContent = sol.nome;
+      if (ehFavorito(sol.id)) {
+        const m = document.createElement('span');
+        m.className = 'explorar-fav-marcador';
+        m.textContent = ' ★';
+        itemSol.appendChild(m);
       }
+      itemSol.onclick = () => {
+        motor.focar(sol.id);
+        motor.aoSelecionar(sol.id);
+      };
+      grupoSol.appendChild(itemSol);
+      conteudo.appendChild(grupoSol);
     });
 
     // Add missions if available (requires trajectories for toggles)
     if (missoes && trajetorias) {
-      grupos[t('grupoMissoes')] = missoes;
+      porChave.missoes.itens = missoes;
     }
 
-    Object.keys(grupos).forEach(grupoNome => {
-      if (grupos[grupoNome].length === 0) return;
+    grupos.forEach(grupo => {
+      if (grupo.itens.length === 0) return;
 
       const divGrupo = document.createElement('div');
-      divGrupo.className = 'explorar-grupo';
+      divGrupo.className = 'explorar-grupo explorar-grupo-colapsavel';
+      divGrupo.dataset.grupo = grupo.chave;
 
+      // Cabeçalho vira um botão (colapsa/expande no mobile; inerte no desktop)
       const titulo = document.createElement('h3');
       titulo.className = 'explorar-grupo-titulo';
-      titulo.textContent = grupoNome;
+      const btnGrupo = document.createElement('button');
+      btnGrupo.type = 'button';
+      btnGrupo.className = 'explorar-grupo-toggle';
+      btnGrupo.setAttribute('aria-controls', `explorar-corpo-${grupo.chave}`);
+      const rotulo = document.createElement('span');
+      rotulo.className = 'explorar-grupo-rotulo';
+      rotulo.textContent = grupo.titulo;
+      const chevronGrupo = document.createElement('span');
+      chevronGrupo.className = 'explorar-grupo-chevron';
+      chevronGrupo.setAttribute('aria-hidden', 'true');
+      chevronGrupo.textContent = '▾';
+      btnGrupo.appendChild(rotulo);
+      btnGrupo.appendChild(chevronGrupo);
+      titulo.appendChild(btnGrupo);
       divGrupo.appendChild(titulo);
+      btnGrupo.onclick = () => alternarGrupo(divGrupo);
 
-      grupos[grupoNome].forEach(item => {
-        // Bodies have 'tipo' field; missions have 'cor' field
-        const isMissao = grupoNome === t('grupoMissoes');
+      // Corpo colapsável do grupo — os itens entram AQUI, não no divGrupo
+      const corpoGrupo = document.createElement('div');
+      corpoGrupo.className = 'explorar-grupo-corpo';
+      corpoGrupo.id = `explorar-corpo-${grupo.chave}`;
+      divGrupo.appendChild(corpoGrupo);
+
+      grupo.itens.forEach(item => {
+        const isMissao = grupo.chave === 'missoes';
 
         if (isMissao) {
           // Mission item: colored dot + name + eye icon
@@ -588,7 +679,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
           btnOlho.id = `olho-missao-${item.id}`;
           divMissao.appendChild(btnOlho);
 
-          divGrupo.appendChild(divMissao);
+          corpoGrupo.appendChild(divMissao);
         } else {
           // Item de corpo (v1)
           const corpo = item;
@@ -632,60 +723,98 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
             };
             elem.appendChild(btnOlho);
 
-            divGrupo.appendChild(elem);
+            corpoGrupo.appendChild(elem);
           } else {
-            // Corpo normal: layout sem flex
+            // Corpo normal. Se tem luas, vira linha-pai com chevron de
+            // disclosure e as luas entram numa caixa IRMÃ (nunca filha —
+            // se fosse filha, o clique na lua borbulharia para o planeta).
+            const temLuas = !!(luasPorPlaneta[corpo.id] && luasPorPlaneta[corpo.id].length);
             const elem = document.createElement('div');
-            elem.className = 'explorar-item';
+            elem.className = temLuas ? 'explorar-item explorar-item-pai' : 'explorar-item';
             elem.id = `explorar-item-${corpo.id}`;
 
-            elem.textContent = label;
-            if (ehFavorito(corpo.id)) {
+            const marcadorFav = () => {
               const m = document.createElement('span');
               m.className = 'explorar-fav-marcador';
               m.textContent = ' ★';
-              elem.appendChild(m);
+              return m;
+            };
+
+            if (temLuas) {
+              const nomeElem = document.createElement('span');
+              nomeElem.className = 'explorar-item-nome';
+              nomeElem.textContent = label;
+              if (ehFavorito(corpo.id)) nomeElem.appendChild(marcadorFav());
+              elem.appendChild(nomeElem);
+            } else {
+              elem.textContent = label;
+              if (ehFavorito(corpo.id)) elem.appendChild(marcadorFav());
             }
             elem.onclick = () => {
               motor.focar(corpo.id);
               motor.aoSelecionar(corpo.id);
             };
-            divGrupo.appendChild(elem);
+            corpoGrupo.appendChild(elem);
 
-            // Luas indentadas
-            if (luasPorPlaneta[corpo.id]) {
+            if (temLuas) {
+              const idLuas = `explorar-luas-${corpo.id}`;
+              const btnLuas = document.createElement('button');
+              btnLuas.type = 'button';
+              btnLuas.className = 'explorar-item-chevron';
+              btnLuas.textContent = '▸';
+              btnLuas.setAttribute('aria-controls', idLuas);
+              btnLuas.setAttribute('aria-expanded', 'false');
+              btnLuas.setAttribute('aria-label', t('verLuasDe', { nome: corpo.nome }));
+              elem.appendChild(btnLuas);
+
+              const caixaLuas = document.createElement('div');
+              caixaLuas.className = 'explorar-luas';
+              caixaLuas.id = idLuas;
               luasPorPlaneta[corpo.id].forEach(lua => {
                 const itemLua = document.createElement('div');
                 itemLua.className = 'explorar-item explorar-item-lua';
                 itemLua.id = `explorar-item-${lua.id}`;
                 itemLua.textContent = lua.nome;
-                if (ehFavorito(lua.id)) {
-                  const m = document.createElement('span');
-                  m.className = 'explorar-fav-marcador';
-                  m.textContent = ' ★';
-                  itemLua.appendChild(m);
-                }
+                if (ehFavorito(lua.id)) itemLua.appendChild(marcadorFav());
                 itemLua.onclick = () => {
                   motor.focar(lua.id);
                   motor.aoSelecionar(lua.id);
                 };
-                divGrupo.appendChild(itemLua);
+                caixaLuas.appendChild(itemLua);
               });
+              corpoGrupo.appendChild(caixaLuas);
+
+              // Chevron abre/fecha só as luas — stopPropagation para o
+              // clique não voar a câmera para o planeta (mesmo idioma do olho)
+              btnLuas.onclick = (e) => {
+                e.stopPropagation();
+                const abrir = !elem.classList.contains('item-aberto');
+                elem.classList.toggle('item-aberto', abrir);
+                caixaLuas.classList.toggle('luas-abertas', abrir);
+                btnLuas.setAttribute('aria-expanded', ehMobileExplorar() ? String(abrir) : 'true');
+                btnLuas.setAttribute('aria-label', t(abrir ? 'ocultarLuasDe' : 'verLuasDe', { nome: corpo.nome }));
+              };
             }
           }
         }
       });
 
+      // Estado inicial no mobile: só "Planetas" começa aberto
+      divGrupo.classList.toggle('grupo-aberto', grupo.chave === 'planetas');
+
       conteudo.appendChild(divGrupo);
     });
 
-    div.appendChild(conteudo);
+    sincronizarAriaAcordeao();
 
-    // Footer with credits
+    // Créditos no FIM do conteúdo rolável (não como rodapé fixo): só
+    // aparecem ao rolar até o final, sem roubar altura útil da lista
     const rodape = document.createElement('div');
     rodape.className = 'explorar-rodape';
     rodape.innerHTML = t('credito');
-    div.appendChild(rodape);
+    conteudo.appendChild(rodape);
+
+    div.appendChild(conteudo);
 
     aplicarEstadoColapso();
     root.appendChild(div);

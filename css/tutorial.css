@@ -1,0 +1,150 @@
+@keyframes tutorialFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  animation: tutorialFade 0.25s ease;
+}
+
+.tutorial-foco {
+  position: fixed;
+  border-radius: 16px;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(4, 6, 14, 0.72);
+  border: 2px solid rgba(92, 200, 255, 0.55);
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+
+.tutorial-card {
+  position: fixed;
+  width: min(340px, calc(100vw - 24px));
+  background: rgba(11, 16, 28, 0.85);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 14px;
+  padding: 18px 20px;
+  z-index: 2001;
+  transition: top 0.3s ease, left 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-card.centrado {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+.tutorial-card-titulo {
+  color: #e8edf7;
+  font-size: 1.05rem;
+  margin: 0 0 12px 0;
+}
+
+.tutorial-card-texto {
+  color: #93a0b8;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 18px 0;
+}
+
+.tutorial-dots {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0;
+  justify-content: center;
+}
+
+.tutorial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(147, 160, 184, 0.35);
+  cursor: pointer;
+}
+
+.tutorial-dot.ativo {
+  background: #5cc8ff;
+}
+
+.tutorial-botoes {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.tutorial-btn-pular {
+  margin-right: auto;
+  background: transparent;
+  border: none;
+  color: #93a0b8;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+}
+
+.tutorial-btn-pular:hover {
+  text-decoration: underline;
+}
+
+.tutorial-btn-anterior,
+.tutorial-btn-livre {
+  background: transparent;
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  color: #93a0b8;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.tutorial-btn-anterior:hover,
+.tutorial-btn-livre:hover {
+  border-color: rgba(92, 200, 255, 0.35);
+  color: #5cc8ff;
+}
+
+.tutorial-btn-proximo,
+.tutorial-btn-tour {
+  background: rgba(92, 200, 255, 0.16);
+  border: 1px solid rgba(92, 200, 255, 0.45);
+  color: #5cc8ff;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.tutorial-btn-proximo:hover,
+.tutorial-btn-tour:hover {
+  background: rgba(92, 200, 255, 0.25);
+  border-color: rgba(92, 200, 255, 0.65);
+}
+
+.botao-tutorial {
+  /* Herda de .botao do app */
+}
+
+body.tutorial-ativo .toast-dica {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .tutorial-card {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    top: auto !important;
+    width: auto;
+  }
+}
