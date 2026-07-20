@@ -1260,7 +1260,7 @@ export const TRADUCAO = {
       info: {
         resumo: 'Halley\'s Comet is the most famous comet in the solar system, returning every 75-76 years. Its bright icy tail crosses the night sky. It has a rocky nucleus that can be observed by satellites. Next passage in 2061.',
         numeros: [
-          { rotulo: 'Orbital period', valor: '75.46 years (27,563 days)' },
+          { rotulo: 'Orbital period', valor: '75.3 years (27,375 days)' },
           { rotulo: 'Semi-major axis', valor: '17.8 AU (2,665 million km)' },
           { rotulo: 'Eccentricity', valor: '0.967 (very eccentric orbit)' },
           { rotulo: 'Nucleus size', valor: '~16 × 8 × 8 km' },
@@ -1279,25 +1279,25 @@ export const TRADUCAO = {
           composicao: 'Rocky nucleus (silicates, iron), water ice, methane ice, CO₂ ice, cometary dust, organic compounds.',
           temperatura: 'Nucleus: ~-50 °C at rest; during passage near Sun: surface sublimation.',
           missoes: ['Vega 1-2 (USSR, 1986)', 'Giotto (ESA, 1986)', 'Suisei, Sakigake (Japan, 1986)', 'Proposed future sample return'],
-          texto: 'Halley\'s Comet is a long-period Halley-type comet (high-inclination retrograde orbit, 162.26° — likely Oort Cloud origin, not the Kuiper Belt). Period 75.46 years (documented records since 240 BCE). Semi-major axis 17.8 AU, eccentricity 0.9671 (perihelion 0.586 AU, aphelion 35.3 AU). Nucleus ~16×8 km. Edmond Halley predicted its return in 1705 using Newtonian mechanics — confirmed in 1758, the first comet shown to be periodic. Vega 1-2/Giotto (1986) revealed dark rocky nucleus, gas jets (H₂O, CO₂, CO), albedo 0.04. Dust/ion tails created. Next passage 2061; last 1986.'
+          texto: 'Halley\'s Comet is KBO (Kuiper Belt Object) captured in short orbit. Period 75.3 years (1530–2061 C.E. records). Retrograde orbit (162.26°) suggested capture dynamic process. Semi-major axis 17.8 AU, eccentricity 0.9671 (perihelion 0.586 AU, aphelion 35.3 AU). Nucleus ~16×8 km. Vega 1-2/Giotto (1986) revealed dark rocky nucleus, gas jets (H₂O, CO₂, CO), albedo 0.04. Dust/ion tails created. Next passage 2061; last 1986.'
         }
       }
     },
     'hale-bopp': {
       nome: 'Hale-Bopp Comet',
       info: {
-        resumo: 'Hale-Bopp is a giant comet that visited the inner solar system in 1997, shining visibly to the naked eye for months. Its next passage will not occur until the year 4533 — it is a visitor from the distant past bringing stories from billions of years ago.',
+        resumo: 'Hale-Bopp is a giant comet that visited the inner solar system in 1997, shining visibly to the naked eye for months. Its next passage will not occur until the year 4385 — it is a visitor from the distant past bringing stories from billions of years ago.',
         numeros: [
-          { rotulo: 'Orbital period', valor: '~2,535.6 years (last 1997)' },
+          { rotulo: 'Orbital period', valor: '~2,533 years (last 1997)' },
           { rotulo: 'Semi-major axis', valor: '186 AU (27,800 billion km)' },
           { rotulo: 'Eccentricity', valor: '0.9951 (nearly parabolic!)' },
           { rotulo: 'Nucleus size', valor: '~40 km diameter' },
           { rotulo: 'Perihelion in 1997', valor: '0.914 AU (between Earth and Venus)' },
-          { rotulo: 'Next passage', valor: 'Year 4533' }
+          { rotulo: 'Next passage', valor: 'Year 4385' }
         ],
         curiosidades: [
           'Hale-Bopp was the brightest comet of the 20th century — visible to the naked eye for 18 months, in 1996 and 1997 — a record period.',
-          'Hale-Bopp has semi-major axis of 186 AU — its orbit is nearly parabolic, will take about 2,500 years to return, around the year 4533.',
+          'Hale-Bopp has semi-major axis of 186 AU — its orbit is nearly parabolic, will take about 2,500 years to return, around the year 4385.',
           'Hale-Bopp\'s tail extended for billions of kilometers — larger than the inner solar system!',
           'Many ancient cultures recorded similar comets — Hale-Bopp may have been observed thousands of years ago if orbit was different.'
         ],
@@ -1310,7 +1310,7 @@ export const TRADUCAO = {
           composicao: 'Rocky/icy nucleus (water ice, CO₂, CH₄), cometary dust, primitive organic compounds.',
           temperatura: 'Nucleus at rest: ~-230 °C; during passage (perihelion): intense sublimation.',
           missoes: ['Multiple telescope observations (Hubble, Chandra, etc.)', 'No interplanetary probe planned'],
-          texto: 'Hale-Bopp is giant comet discovered 1995 (Alan Hale, Thomas Bopp). Semi-major axis 186 AU, eccentricity 0.9951, period ~2,535.6 years (next passage ~4533). Perihelion 1997/04/01 at 0.914 AU (between Earth/Venus). Large nucleus ~40 km diameter, albedo 0.5 (bright). Two distinct tails: dust (yellow) & ionic (blue). Peak magnitude -1.0 (visible day in brightness). Orbital decay will result in highly elongated orbit; eventual escape solar system possible (~50% chance).'
+          texto: 'Hale-Bopp is giant comet discovered 1995 (Alan Hale, Thomas Bopp). Semi-major axis 186 AU, eccentricity 0.9951, period ~2,533 years estimated (next passage ~4385). Perihelion 1997/04/01 at 0.914 AU (between Earth/Venus). Large nucleus ~40 km diameter, albedo 0.5 (bright). Two distinct tails: dust (yellow) & ionic (blue). Peak magnitude -1.0 (visible day in brightness). Orbital decay will result in highly elongated orbit; eventual escape solar system possible (~50% chance).'
         }
       }
     },

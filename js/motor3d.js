@@ -5,12 +5,6 @@ import { criarTexturaCanvas, criarTexturaAneis } from './texturas.js?v=4';
 const J2000_EPOCH = new Date('2000-01-01T12:00:00Z').getTime();
 const UA_KM = 149.6e6;
 
-// Constantes de módulo para o spin em torno do eixo inclinado (evita
-// alocação por frame em _atualizarFisica — ver uso mais abaixo).
-const _EIXO_X = new THREE.Vector3(1, 0, 0);
-const _EIXO_Y = new THREE.Vector3(0, 1, 0);
-const _qSpinTmp = new THREE.Quaternion();
-
 // Sprite circular suave compartilhado por estrelas e partículas dos cinturões
 // (sem ele, THREE.Points desenha quadrados sólidos)
 let _texturaPonto = null;
@@ -83,7 +77,7 @@ export class SistemaSolar3D {
   // ?v= aqui evita servir um manifest.json/jpg em cache divergente do atual
   // (diferente do resto do projeto, este caminho não tinha cache-busting).
   async _carregarTexturasReais() {
-    const V = 30;
+    const V = 29;
     try {
       const resp = await fetch(`texturas/manifest.json?v=${V}`);
       if (!resp.ok) return;
@@ -102,29 +96,6 @@ export class SistemaSolar3D {
           },
           undefined,
           (erro) => console.warn(`Textura real de "${id}" falhou ao carregar, mantendo procedural:`, erro)
-        );
-      }
-
-      // Nuvens da Terra: a camada era um véu branco uniforme (opacity 0.2
-      // sem padrão nenhum) — a textura real (mapa de densidade de nuvens,
-      // Solar System Scope CC BY 4.0, mesma família das demais) vira
-      // alphaMap: branco=nuvem opaca, preto=céu limpo/transparente. Só a
-      // FORMA das nuvens muda; a esfera de nuvens/rotação já existiam.
-      const fisicoTerra = this.corposFisicos.get('terra');
-      const meshNuvens = fisicoTerra?.grupoOrbita?.userData?.meshNuvens;
-      if (meshNuvens) {
-        loader.load(
-          `texturas/terra_nuvens.jpg?v=${V}`,
-          (tex) => {
-            tex.colorSpace = THREE.SRGBColorSpace;
-            tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
-            meshNuvens.material.alphaMap = tex;
-            meshNuvens.material.opacity = 0.85;
-            meshNuvens.material.depthWrite = false;
-            meshNuvens.material.needsUpdate = true;
-          },
-          undefined,
-          (erro) => console.warn('Textura de nuvens da Terra falhou ao carregar, mantendo véu uniforme:', erro)
         );
       }
     } catch (e) {
@@ -172,12 +143,7 @@ export class SistemaSolar3D {
   }
 
   _criarRenderer() {
-    // logarithmicDepthBuffer: o near plane vai a 5e-5 (foco em corpos minúsculos como
-    // Hubble/asteroides) enquanto far fica em 12000 — razão ~2,4e8, muito além do que
-    // um depth buffer linear aguenta (~1e5-1e6). Sem isso, corpos distantes na mesma
-    // cena (ex.: o Sol, visto depois de focar o Hubble) sofrem z-fighting severo
-    // (textura "piscando"/ruído). Custo de performance é desprezível nesta cena.
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, logarithmicDepthBuffer: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
     const pixelRatio = Math.min(window.devicePixelRatio, 2);
     this.renderer.setPixelRatio(pixelRatio);
     this._ajustarTamanoRenderer();
@@ -213,38 +179,6 @@ export class SistemaSolar3D {
     this.controls.minDistance = 0.06; // acima do near plane (0,05); dá folga p/ o foco de corpos pequenos na escala real e um pouco mais de zoom manual
     this.controls.maxDistance = 3800;
     this.controls.target.set(0, 0, 0);
-  }
-
-  // Ajusta near plane e zoom mínimo ao corpo focado: com raios visuais que
-  // variam ~6 ordens de magnitude entre as escalas (piso 0,0003 na Real até
-  // Sol 9), valores fixos cortavam a esfera (near > distância da superfície,
-  // virando "anel" — near plane fatiando a casca) ou deixavam atravessá-la
-  // (minDistance < raio, a câmera entrando no corpo). Sem corpo focado, volta
-  // aos padrões da visão geral.
-  //
-  // Piso do near escolhido (5e-5): no zoom máximo (minDistance = raio×1,35),
-  // a distância da câmera até a superfície é minDistance − raio = 0,35×raio.
-  // Para nunca cortar a esfera, near precisa ficar abaixo disso. O near
-  // "ideal" (raio/50 = 0,02×raio) já garante isso com folga para qualquer
-  // raio — mas o Math.max abaixo impõe um piso ABSOLUTO para o caso de
-  // raio/50 ficar rente à precisão de ponto flutuante em corpos minúsculos.
-  // O menor raio visual do sistema é o PISO_MINIMO de 0,0003 (asteroides/
-  // núcleos de cometa); nesse caso 0,35×raio = 1,05e-4. Um piso absoluto de
-  // 1e-4 já ficaria perigosamente perto desse limite (sem margem); 5e-5
-  // fica com ~2x de folga abaixo de 1,05e-4 para TODO corpo do sistema
-  // (o pior caso é justamente o PISO_MINIMO), então é o valor usado.
-  _ajustarCameraParaCorpo(corpoId) {
-    const fisico = corpoId ? this.corposFisicos.get(corpoId) : null;
-    if (fisico && fisico.escala && !fisico.isCinturao) {
-      const raio = fisico.escala.raio;
-      // near bem menor que a menor distância de aproximação possível
-      this.camera.near = Math.max(5e-5, raio / 50);
-      this.controls.minDistance = raio * 1.35;
-    } else {
-      this.camera.near = 0.05;
-      this.controls.minDistance = 0.06;
-    }
-    this.camera.updateProjectionMatrix();
   }
 
   _criarIluminacao() {
@@ -403,20 +337,10 @@ export class SistemaSolar3D {
         grupoOrbita.userData.meshNuvens = meshNuvens;
       }
 
-    }
-
-    // Quaternion de inclinação axial: o spin diário precisa acontecer EM
-    // TORNO do eixo inclinado (composição qTilt·qSpin por frame, em
-    // _atualizarFisica). O eixo agora tem AZIMUTE próprio por planeta
-    // (_poloCena) — antes todos os polos "caíam" para o mesmo lado do mundo
-    // (Rz global); agora Marte e Saturno, com obliquidades parecidas,
-    // inclinam para direções diferentes, como no céu real.
-    let qTilt = null;
-    if (corpo.tipo !== 'estrela' && corpo.inclinacaoEixoGraus) {
-      qTilt = new THREE.Quaternion().setFromUnitVectors(
-        new THREE.Vector3(0, 1, 0),
-        this._poloCena(corpo)
-      );
+      // Rotação do eixo
+      if (corpo.inclinacaoEixoGraus) {
+        mesh.rotation.z = (corpo.inclinacaoEixoGraus * Math.PI) / 180;
+      }
     }
 
     mesh.castShadow = true;
@@ -457,7 +381,6 @@ export class SistemaSolar3D {
       corpo,
       escala,
       periodoRotacao: corpo.periodoRotacaoHoras || 24,
-      qTilt,
     });
   }
 
@@ -813,10 +736,7 @@ export class SistemaSolar3D {
       const E = M + e * Math.sin(M);
       const x = a * (Math.cos(E) - e);
       const z = -a * Math.sqrt(1 - e * e) * Math.sin(E);
-      // Orientação ASSADA nos pontos com a MESMA cadeia da posição
-      // (_aplicarFrameOrbital) — antes era linha.rotation.x, que não
-      // acompanharia ω/Ω/frame do pai e faria a linha divergir da lua
-      pontos.push(this._aplicarFrameOrbital(new THREE.Vector3(x, 0, z), corpo));
+      pontos.push(new THREE.Vector3(x, 0, z));
     }
 
     const geometry = new THREE.BufferGeometry().setFromPoints(pontos);
@@ -828,6 +748,11 @@ export class SistemaSolar3D {
     });
 
     const linha = new THREE.LineLoop(geometry, material);
+
+    // Rotação por inclinação
+    if (corpo.inclinacaoOrbitaGraus) {
+      linha.rotation.x = (corpo.inclinacaoOrbitaGraus * Math.PI) / 180;
+    }
 
     // Attach ao pai ou ao scene
     if (corpo.pai === 'sol' || !corpo.pai) {
@@ -987,66 +912,15 @@ export class SistemaSolar3D {
     });
 
     const ring = new THREE.Mesh(geometry, material);
-    // Normal do anel = eixo de rotação do corpo (_poloCena, com azimute) —
-    // anel sempre no plano equatorial do planeta, coplanar com o spin e,
-    // após a migração de frames, com as órbitas das luas regulares.
-    ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), this._poloCena(corpo));
+    // Normal do anel = eixo de rotação do corpo, derivado de
+    // inclinacaoEixoGraus (mesma rotação Z aplicada ao mesh). Antes era 72°
+    // fixo para todos — o anel de Urano ficava igual ao de Saturno,
+    // contradizendo a ficha "gira deitado" (97,77°).
+    const eixoRad = ((corpo.inclinacaoEixoGraus || 0) * Math.PI) / 180;
+    const eixo = new THREE.Vector3(-Math.sin(eixoRad), Math.cos(eixoRad), 0);
+    ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), eixo);
     grupo.add(ring);
     return ring;
-  }
-
-  // Cadeia de ORIENTAÇÃO orbital — única fonte de verdade, usada pela
-  // posição (_calcularPosicao), pela linha de órbita (_criarLinhaOrbita) e
-  // pelo recomputo em setEscala; se divergirem, a lua "sai do trilho".
-  // perifocal → ω (argPeriastroGraus, rot. Y) → i (inclinacaoOrbitaGraus,
-  // rot. X = linha dos nós) → Ω (nodoAscendenteGraus, rot. Y) → frame
-  // ('equadorPai': rotação que leva o norte da eclíptica ao polo do pai).
-  // Com ω=Ω=0 e frame='ecliptica' (defaults), reproduz exatamente o rotX
-  // legado — planetas, cometas e Apófis não mudam (guard: validacao-frames).
-  _aplicarFrameOrbital(v, corpo) {
-    const w = ((corpo.argPeriastroGraus || 0) * Math.PI) / 180;
-    const i = ((corpo.inclinacaoOrbitaGraus || 0) * Math.PI) / 180;
-    const O = ((corpo.nodoAscendenteGraus || 0) * Math.PI) / 180;
-    if (w) v.applyAxisAngle(_EIXO_Y, w);
-    if (i) v.applyAxisAngle(_EIXO_X, i);
-    if (O) v.applyAxisAngle(_EIXO_Y, O);
-    if (corpo.frameOrbita === 'equadorPai' && corpo.pai && corpo.pai !== 'sol') {
-      v.applyQuaternion(this._quatEquadorPai(corpo.pai));
-    }
-    return v;
-  }
-
-  // Quaternion eclíptica→equador do pai, cacheado por pai (não muda em
-  // runtime; azimute/obliquidade são estáticos)
-  _quatEquadorPai(paiId) {
-    if (!this._quatsEquador) this._quatsEquador = new Map();
-    let q = this._quatsEquador.get(paiId);
-    if (!q) {
-      const pai = this.dados.corpos.find((c) => c.id === paiId);
-      q = pai
-        ? new THREE.Quaternion().setFromUnitVectors(_EIXO_Y, this._poloCena(pai))
-        : new THREE.Quaternion();
-      this._quatsEquador.set(paiId, q);
-    }
-    return q;
-  }
-
-  // Vetor-polo do corpo em coordenadas da cena (Y = norte da eclíptica).
-  // Opção B do PLANO-EIXOS-ORBITAS.md: obliquidade (inclinacaoEixoGraus) +
-  // azimute (azimutePoloGraus, direção no plano XZ para onde o polo se
-  // inclina). Default de azimute = 180°, que reproduz EXATAMENTE o vetor do
-  // Rz legado (polo em (−sin ε, cos ε, 0)) — corpos sem o campo novo não
-  // mudam de visual. Azimutes reais (derivados dos polos IAU α₀/δ₀) ficam
-  // em dados.js por planeta.
-  _poloCena(corpo) {
-    const obl = ((corpo.inclinacaoEixoGraus || 0) * Math.PI) / 180;
-    const azGraus = corpo.azimutePoloGraus !== undefined ? corpo.azimutePoloGraus : 180;
-    const az = (azGraus * Math.PI) / 180;
-    return new THREE.Vector3(
-      Math.sin(obl) * Math.cos(az),
-      Math.cos(obl),
-      Math.sin(obl) * Math.sin(az)
-    ).normalize();
   }
 
   _configurarEventos() {
@@ -1154,7 +1028,6 @@ export class SistemaSolar3D {
     this._seguirFn = null; // focar um corpo cancela o seguimento de nave
     this._seguirId = null;
     this.corpoFocado = id;
-    this._ajustarCameraParaCorpo(id);
     const ehCinturao = fisicoInfo.corpo.tipo === 'cinturao';
 
     const posInicial = this.camera.position.clone();
@@ -1214,7 +1087,6 @@ export class SistemaSolar3D {
     if (!alvoInicial) return;
 
     this.corpoFocado = null;
-    this._ajustarCameraParaCorpo(null);
     this._seguirFn = getPosicao;
     this._seguirId = id;
 
@@ -1249,7 +1121,6 @@ export class SistemaSolar3D {
 
   visaoGeral() {
     this.corpoFocado = null;
-    this._ajustarCameraParaCorpo(null);
     this._seguirFn = null;
     this._seguirId = null;
     this._posSeguida = null;
@@ -1367,8 +1238,7 @@ export class SistemaSolar3D {
           const E = M + e * Math.sin(M);
           const x = a * (Math.cos(E) - e);
           const z = -a * Math.sqrt(1 - e * e) * Math.sin(E);
-          // Mesma cadeia de orientação da criação (fonte única de verdade)
-          pontos.push(this._aplicarFrameOrbital(new THREE.Vector3(x, 0, z), corpo));
+          pontos.push(new THREE.Vector3(x, 0, z));
         }
 
         linha.geometry.setFromPoints(pontos);
@@ -1539,8 +1409,12 @@ export class SistemaSolar3D {
 
     let posicao = new THREE.Vector3(x, 0, z);
 
-    // Orientação orbital (cadeia única: ω → i → Ω → frame do pai)
-    this._aplicarFrameOrbital(posicao, corpo);
+    // Rotação por inclinação
+    if (corpo.inclinacaoOrbitaGraus) {
+      const mat = new THREE.Matrix4();
+      mat.makeRotationX((corpo.inclinacaoOrbitaGraus * Math.PI) / 180);
+      posicao.applyMatrix4(mat);
+    }
 
     // Se tem pai (lua) e não é relativo, somar posição do pai
     if (!relativo && corpo.pai && corpo.pai !== 'sol') {
@@ -1600,33 +1474,7 @@ export class SistemaSolar3D {
         // Atualizar rotação própria (tempoDias em dias, período em horas)
         if (fisico.mesh && corpo.periodoRotacaoHoras) {
           const rotacaoGraus = (360 * this.tempoDias * 24) / corpo.periodoRotacaoHoras;
-          const spinRad = (rotacaoGraus * Math.PI) / 180;
-          if (fisico.qTilt) {
-            // qTilt · qSpin: gira em torno do próprio eixo inclinado
-            fisico.mesh.quaternion
-              .copy(fisico.qTilt)
-              .multiply(_qSpinTmp.setFromAxisAngle(_EIXO_Y, spinRad));
-          } else {
-            fisico.mesh.rotation.y = spinRad;
-          }
-
-          // Nuvens (Terra): mesh clonado à parte — sem isto, ficava PARADO
-          // enquanto a superfície girava por baixo (visível agora que a
-          // textura tem padrão real, antes era um véu uniforme e não dava
-          // pra notar). Acompanha a rotação da superfície + uma deriva
-          // atmosférica leve e independente (~4°/dia, nuvens reais não
-          // giram em lockstep perfeito com o solo).
-          const nuvens = fisico.grupoOrbita.userData.meshNuvens;
-          if (nuvens) {
-            const derivaRad = (this.tempoDias * 4 * Math.PI) / 180;
-            if (fisico.qTilt) {
-              nuvens.quaternion
-                .copy(fisico.qTilt)
-                .multiply(_qSpinTmp.setFromAxisAngle(_EIXO_Y, spinRad + derivaRad));
-            } else {
-              nuvens.rotation.y = spinRad + derivaRad;
-            }
-          }
+          fisico.mesh.rotation.y = (rotacaoGraus * Math.PI) / 180;
         }
 
         // Atualizar cauda do cometa

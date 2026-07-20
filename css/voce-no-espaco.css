@@ -279,3 +279,6 @@
 .voce-no-espaco-card::-webkit-scrollbar-thumb:hover {
   background: rgba(92, 200, 255, 0.4);
 }
+
+/* dvh: 100vh no Safari iOS inclui a barra de URL (corta o pé do card) */
+.voce-no-espaco-card { max-height: 90dvh; }

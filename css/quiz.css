@@ -730,3 +730,6 @@
   color: #ffb454;
   text-align: center;
 }
+
+/* dvh: 100vh no Safari iOS inclui a barra de URL (corta o pé do card) */
+.quiz-card { max-height: 85dvh; }

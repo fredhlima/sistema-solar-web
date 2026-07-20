@@ -2079,11 +2079,11 @@ export const TRADUCAO = {
     "hale-bopp": {
       "nome": "Cometa Hale-Bopp",
       "info": {
-        "resumo": "El Cometa Hale-Bopp es uno de los cometas más brillantes del siglo XX. Fue visible a ojo desnudo durante varios meses en 1997. Su próximo retorno será en el año 4533 — un período extremadamente largo.",
+        "resumo": "El Cometa Hale-Bopp es uno de los cometas más brillantes del siglo XX. Fue visible a ojo desnudo durante varios meses en 1997. Su próximo retorno será en el año 4385 — un período extremadamente largo.",
         "numeros": [
           {
             "rotulo": "Período orbital",
-            "valor": "~2.535,6 años (largo)"
+            "valor": "~2.533 años (largo)"
           },
           {
             "rotulo": "Semieje mayor",
@@ -2099,17 +2099,17 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Núcleo",
-            "valor": "~40 km (muy grande)"
+            "valor": "~60 km (muy grande)"
           },
           {
             "rotulo": "Próximo retorno",
-            "valor": "Año 4533"
+            "valor": "Año 4385"
           }
         ],
         "curiosidades": [
           "Hale-Bopp fue el cometa más brillante visible a ojo desnudo del siglo XX — visible durante 18 meses (1996-1997).",
-          "El núcleo de Hale-Bopp es muy grande — estimado ~40 km de diámetro, uno de los más grandes conocidos.",
-          "Hale-Bopp no regresará hasta el año 4533 — la humanidad deberá esperar casi 2.500 años más.",
+          "El núcleo de Hale-Bopp es muy grande — estimado ~60 km de diámetro, uno de los más grandes conocidos.",
+          "Hale-Bopp no regresará hasta el año 4385 — la humanidad deberá esperar casi 2.400 años más.",
           "Hale-Bopp fue descubierto independientemente por Alan Hale y Thomas Bopp el mismo día (23 de julio de 1995)."
         ],
         "avancado": {
@@ -2119,7 +2119,7 @@ export const TRADUCAO = {
             "Observaciones telescópicas múltiples (Hubble, Chandra, etc.)",
             "Sin sonda interplanetaria planejada"
           ],
-          "texto": "Hale-Bopp es cometa periódico largo período (~2.535,6 años, próximo regreso año 4533), semieje 186 UA, excentricidad 0.995 (órbita casi parabólica). Núcleo muy grande estimado ~40 km diámetro (entre mayores cometas conocidos). Aparición 1997: perihelio 1997-04-01, visible ojo desnudo ~18 meses (1996-1997). Brillo excepcional: magnitud máxima -1.0 (más brillante que Polaris), cola gemela brillante (polvo+gas iones). Descubrimiento doble independiente Alan Hale, Thomas Bopp (1995-07-23). Período orbital deducido de órbita pre-retorno registros históricos (descubrimientos pasados ~4.206 AC propuesto, pero incertidumbre). Próximo paso interior ~año 4533 (fecha exacta incierta a tan largo plazo), período extremadamente largo significa rareza esta generación."
+          "texto": "Hale-Bopp es cometa periódico largo período (~2.533 años, próximo regreso año 4385), semieje 186 UA, excentricidad 0.995 (órbita casi parabólica). Núcleo muy grande estimado ~60 km diámetro (entre mayores cometas conocidos). Aparición 1997: afelio 2061, perihelio 1997-04-01, visible ojo desnudo ~18 meses (1996-1997). Brillo excepcional: magnitud máxima -0.8 (más brillante que Polaris), cola gemela brillante (polvo+gas iones). Descubrimiento doble independiente Alan Hale, Thomas Bopp (1995-07-23). Período orbital deducido de órbita pre-retorno registros históricos (descubrimientos pasados ~4.206 AC propuesto, pero incertidumbre). Próximo paso interior 4385-09-27, período extremadamente largo significa rareza esta generación."
         },
         "comparacoes": [
           "Hale-Bopp es un gigante — su núcleo de 40 km de diámetro es uno de los mayores cometas jamás observados — solo pierde ante gigantes distantes como C/2014 UN271, de 137 km.",

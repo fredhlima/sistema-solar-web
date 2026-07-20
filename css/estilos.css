@@ -56,6 +56,16 @@ html, body {
   pointer-events: none;
 }
 
+/* Logo do app (Gemini, sol + órbitas): disco à esquerda do nome. O
+   border-radius circular esconde o fundo quadrado do PNG sobre o céu. */
+.titulo-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  float: left;
+  margin-right: 10px;
+}
+
 .titulo-principal {
   font-size: 20px;
   font-weight: 600;
@@ -179,8 +189,11 @@ html, body {
     flex-direction: column;
     gap: 8px;
     position: fixed;
-    top: calc(205px + env(safe-area-inset-top));
-    left: calc(12px + env(safe-area-inset-left));
+    /* Centrado sob o gatilho de Experiências (pill centrada em top:10,
+       na mesma linha do título) — mesma âncora visual da web */
+    top: calc(56px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(11, 16, 28, 0.92);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(120, 160, 255, 0.2);
@@ -214,15 +227,29 @@ html, body {
   width: 44px;
   bottom: auto;
   background: rgba(11, 16, 28, 0.6);
+  /* A barra inteira expande o painel (ui.js) — não só a setinha */
+  cursor: pointer;
 }
 
 .painel-explorar.colapsado .explorar-cabecalho {
+  flex-direction: column;
   justify-content: center;
-  padding: 10px 0;
+  gap: 6px;
+  padding: 12px 0;
   border-bottom: none;
 }
 
-.painel-explorar.colapsado .explorar-titulo,
+/* Recolhido, o rótulo EXPLORAR fica de pé — a barra deixa de ser um
+   "‹" anônimo e diz o que guarda. rotate(180) sobre o vertical-rl deixa
+   o TOPO das letras apontando para a esquerda (lombada de livro). */
+.painel-explorar.colapsado .explorar-titulo {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: #93a0b8;
+}
+
 .painel-explorar.colapsado .explorar-rodape {
   display: none;
 }
@@ -292,6 +319,40 @@ html, body {
   border-top: 1px solid rgba(120, 160, 255, 0.08);
   margin-top: 8px;
 }
+
+/* ——— Acordeão do Explorar (comportamento no mobile; ver @media abaixo) ———
+   Regras base = DESKTOP: tudo expandido, sem chevrons, o header é um botão
+   de largura total mas inerte. O grupo de Favoritos NÃO é colapsável, então
+   mantém o padding base do título (só o header colapsável zera o padding do
+   h3 e o repassa ao botão). */
+.explorar-grupo-colapsavel > .explorar-grupo-titulo { padding: 0; border-top: none; }
+.explorar-grupo-colapsavel { border-top: 1px solid rgba(120, 160, 255, 0.08); margin-top: 8px; }
+.explorar-grupo-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px 16px 8px;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+}
+.explorar-grupo-rotulo { pointer-events: none; }
+.explorar-grupo-chevron { display: none; }   /* desktop: sem chevron */
+.explorar-grupo-corpo { display: block; }     /* desktop: sempre expandido */
+.explorar-luas { display: block; }            /* desktop: luas sempre visíveis */
+.explorar-item-chevron { display: none; }     /* desktop: sem disclosure */
+.explorar-item-pai {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.explorar-item-nome { flex: 1; min-width: 0; }
 
 .explorar-item {
   padding: 10px 16px;
@@ -1205,26 +1266,18 @@ html, body {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  cursor: pointer;
-  /* Área de toque mínima acolchoada — o círculo em si pode ficar minúsculo
-     (Terra ao lado do Sol) sem prejudicar o clique/toque, porque o cartão
-     inteiro (círculo + rótulo) é a área clicável, não só o círculo. */
-  padding: 4px 10px;
 }
 
 .comparador-circulo {
   border-radius: 50%;
   box-shadow: 0 0 12px rgba(92, 200, 255, 0.2);
+  cursor: pointer;
   transition: all 150ms ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* SEM min-width/min-height aqui: um piso em px nesta camada sobrescrevia
-     o diâmetro calculado em ui.js e destruía a proporção real quando o Sol
-     entra na comparação (Terra e Júpiter — com >32px de fator de escala
-     compartilhado — colapsavam ambos no mesmo piso de 32px e pareciam do
-     mesmo tamanho). O piso correto (Math.max em ui.js, bem menor) já
-     garante que nada suma; ele é a única fonte de verdade do tamanho mínimo. */
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .comparador-circulo:hover {
@@ -1667,6 +1720,12 @@ html, body {
   .tempo-slider { width: 72px; margin: 0 6px; }
 }
 
+/* Telas estreitas: com a pill de tempo à direita, o slider cede 16px para
+   a pill não encostar na coluna do Explorar (ver bloco ux-ousada mobile) */
+@media (max-width: 800px) {
+  .tempo-slider { width: 56px; }
+}
+
 /* SELETOR DE IDIOMA */
 .seletor-idioma {
   position: relative;
@@ -1856,54 +1915,121 @@ html, body {
   min-width: 140px;
 }
 
-/* ——— Ousada no MOBILE (<=1024): rail vira toolbar inferior; comando central
-   compacto (o gatilho de Experiências do popover já cuida dos 5 itens) ——— */
+/* ——— Ousada no MOBILE (<=1024): MESMA distribuição da web, compactada
+   para a tela HORIZONTAL do celular (~844×390 — mobile só roda em
+   landscape; ver bloco de orientação no fim do arquivo). Gatilho de
+   Experiências centrado no topo na mesma linha do título, rail de
+   Visualização vertical na borda direita, utilidades no canto superior
+   direito, Explorar à esquerda, tempo embaixo. Nada de toolbar inferior
+   dupla nem pilha de elementos à esquerda. ——— */
 @media (max-width: 1024px) {
-  /* Contêiner segue transparente; volta a alinhar à esquerda (linha rolável
-     da fundação) em vez do centro do desktop */
+  /* Contêiner vira inerte: cada grupo se posiciona sozinho (fixed),
+     como no desktop */
   .ux-ousada .barra-acoes {
-    left: calc(12px + env(safe-area-inset-left));
-    right: calc(12px + env(safe-area-inset-right));
-    top: calc(150px + env(safe-area-inset-top));
-    justify-content: flex-start;
+    left: 0;
+    right: 0;
+    top: 0;
+    overflow: visible;
+    pointer-events: none;
   }
+  .ux-ousada .barra-acoes .grupo-acoes { pointer-events: auto; }
+  /* Comando centrado no topo, na MESMA linha do título (esquerda) e das
+     utilidades (direita) — em ~390px de altura não há segunda linha.
+     Cartão de vidro igual ao desktop, compacto. */
   .ux-ousada .grupo-experiencias {
-    background: transparent;
-    border: none;
-    padding: 0;
-    backdrop-filter: none;
-  }
-  /* Toolbar inferior: acima do controle de tempo (que fica em bottom:20px,
-     ~58px de altura) */
-  .ux-ousada .grupo-visualizacao {
-    top: auto;
-    right: auto;
-    transform: none;
-    bottom: calc(96px + env(safe-area-inset-bottom));
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
     left: 50%;
     transform: translateX(-50%);
-    flex-direction: row;
+    background: rgba(11, 16, 28, 0.6);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(120, 160, 255, 0.16);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  /* Rail vertical na borda direita, como na web (compacto). max-height +
+     scroll: em 390px de altura o rail inteiro precisa caber. */
+  .ux-ousada .grupo-visualizacao {
+    position: fixed;
+    top: 50%;
+    right: calc(8px + env(safe-area-inset-right));
+    left: auto;
+    bottom: auto;
+    transform: translateY(-50%);
+    flex-direction: column;
     width: auto;
-    max-width: calc(100vw - 24px);
-    overflow-x: auto;
+    max-width: 104px;
+    padding: 8px 6px;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
     scrollbar-width: none;
-    justify-content: flex-start;
-    padding: 6px 10px;
   }
   .ux-ousada .grupo-visualizacao::-webkit-scrollbar { display: none; }
-  /* Explorar para antes da toolbar inferior (que começa ~657px em 812 de altura) */
-  .ux-ousada .painel-explorar {
-    bottom: calc(170px + env(safe-area-inset-bottom));
+  .ux-ousada .grupo-visualizacao .botao {
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 5px 10px;
   }
-  .ux-ousada .grupo-visualizacao::before { display: none; }
+  /* No rail estreito (~104px) do mobile, o seletor Didática/Real fica
+     EMPILHADO (coluna), igual ao desktop — em linha o "Real" vazava da
+     borda direita da tela. */
   .ux-ousada .grupo-visualizacao .toggle-escala {
-    flex-direction: row;
-    align-items: center;
-    height: 32px;
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
   }
-  .ux-ousada .grupo-visualizacao .botao { white-space: nowrap; }
+  /* Explorar: abaixo da linha de identidade (título+pílula) e descendo
+     até quase o pé da tela — a pill de tempo agora vive à direita, então
+     o canto inferior esquerdo é todo do Explorar. Este top vale para
+     tablets (subtítulo visível); em altura de celular o bloco
+     max-height:520 abaixo aproxima ainda mais. */
+  .ux-ousada .painel-explorar {
+    top: calc(96px + env(safe-area-inset-top));
+    bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  /* Recolhido, a barra abraça só a palavra EXPLORAR — sem o bottom acima
+     ela esticava até o pé da tela (especificidade: 3 classes > 2) */
+  .ux-ousada .painel-explorar.colapsado {
+    bottom: auto;
+  }
+  /* Utilidades no canto superior direito, como na web */
   .ux-ousada .grupo-utilidades {
-    position: static;
+    position: fixed;
+    top: calc(10px + env(safe-area-inset-top));
+    right: calc(12px + env(safe-area-inset-right));
+  }
+  /* Tempo ancorado à DIREITA (não centrado): libera o canto inferior
+     esquerdo para o Explorar crescer. Tamanho da pill mantido. */
+  .ux-ousada .controles-tempo {
+    left: auto;
+    right: calc(12px + env(safe-area-inset-right));
+    transform: none;
+  }
+  /* Identidade em UMA linha: título + pílula de nível lado a lado — em
+     ~390px de altura a segunda linha do bloco não paga o aluguel. O
+     subtítulo (quando visível, ex. tablet) quebra para baixo. */
+  .ux-ousada .titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  /* :1910 fixa min-width:140px fora de media query (2 classes de
+     especificidade) — sem isso o chip não encolhe e a linha do título
+     invade o gatilho central de Experiências */
+  .ux-ousada .progresso-chip {
+    min-width: 0;
+  }
+  /* Logo menor no mobile, mesma altura da pílula de nível */
+  .ux-ousada .titulo-logo {
+    float: none;
+    width: 34px;
+    height: 34px;
+    margin-right: 0;
+  }
+  .ux-ousada .titulo-secundario {
+    flex-basis: 100%;
+    margin: 2px 0 0;
   }
 }
 
@@ -1917,8 +2043,10 @@ html, body {
     flex-direction: column;
     gap: 8px;
     position: fixed;
-    top: calc(205px + env(safe-area-inset-top));
-    left: calc(12px + env(safe-area-inset-left));
+    /* Centrado sob o gatilho (pill em top:10) — mesma âncora da web */
+    top: calc(56px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(11, 16, 28, 0.92);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(120, 160, 255, 0.2);
@@ -1938,4 +2066,142 @@ html, body {
 @keyframes pulsar-tour {
   0%, 100% { box-shadow: 0 0 0 0 rgba(92, 200, 255, 0); }
   50% { box-shadow: 0 0 14px 3px rgba(92, 200, 255, 0.35); }
+}
+
+/* ============================================================
+   MOBILE = SÓ LANDSCAPE (~844×390)
+   O app Android trava em landscape (AndroidManifest:
+   userLandscape; fazer o mesmo na futura casca iOS via Info.plist,
+   UISupportedInterfaceOrientations só landscape). Na web o
+   navegador não trava orientação — em portrait de celular um
+   overlay "gire o dispositivo" cobre a tela (fim do arquivo).
+   Estas regras dimensionam tudo para ~390px de ALTURA útil.
+   ============================================================ */
+
+/* Popover de Experiências nunca pode vazar da tela: em ~390px de
+   altura os 5 botões em coluna passavam do fim da viewport e os
+   últimos ficavam inalcançáveis. dvh já desconta a barra de URL do
+   Safari (fallback: sem suporte a dvh, valem as regras anteriores). */
+.experiencias-itens.aberto,
+.ux-ousada .experiencias-itens.aberto {
+  /* 56px do top + ~26px de padding/borda (max-height mede só o
+     conteúdo) + ~68px de respiro até a pill de tempo no pé */
+  max-height: calc(100dvh - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+/* Área de toque >=44px sem mudar o visual: os botões de tempo têm
+   28-32px visuais (28 no mobile) e o colapsar do Explorar ~24px; o
+   ::after expande o alvo clicável em 8px para cada lado. */
+.tempo-botao,
+.explorar-botao-colapsar {
+  position: relative;
+}
+.tempo-botao::after,
+.explorar-botao-colapsar::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+/* Thumb do slider de velocidade: 14px era alvo de arraste minúsculo */
+@media (max-width: 1024px) {
+  .tempo-slider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Altura baixa (~390px): o subtítulo do bloco de identidade não paga
+   o aluguel — escondê-lo, somado à pílula na linha do título, deixa a
+   identidade terminar em ~y=54 e o Explorar colar logo abaixo,
+   descendo até quase o pé (tempo está à direita). */
+@media (max-height: 520px) and (max-width: 1024px) {
+  .titulo-secundario { display: none; }
+  .ux-ousada .painel-explorar {
+    top: calc(64px + env(safe-area-inset-top));
+  }
+}
+
+/* Acordeão do Explorar ATIVO no mobile: grupos e luas colapsam. O JS liga
+   as classes .grupo-aberto / .luas-abertas / .item-aberto; aqui elas passam
+   a valer. No desktop (sem este @media) as regras base mantêm tudo aberto. */
+@media (max-width: 1024px) {
+  .explorar-grupo-chevron {
+    display: inline-block;
+    color: #5cc8ff;
+    font-size: 11px;
+    transition: transform 150ms ease;
+  }
+  .explorar-grupo-colapsavel .explorar-grupo-corpo { display: none; }
+  .explorar-grupo-colapsavel.grupo-aberto .explorar-grupo-corpo { display: block; }
+  .explorar-grupo-colapsavel.grupo-aberto .explorar-grupo-chevron { transform: rotate(180deg); }
+
+  .explorar-luas { display: none; }
+  .explorar-luas.luas-abertas { display: block; }
+
+  /* Chevron de disclosure das luas: 8×13px visual, alvo de 44px via ::after */
+  .explorar-item-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #5cc8ff;
+    font-size: 13px;
+    line-height: 1;
+    padding: 4px 8px;
+    margin: -4px -4px -4px 0;
+    cursor: pointer;
+    transition: transform 150ms ease;
+  }
+  .explorar-item-chevron::after { content: ''; position: absolute; inset: -8px; }
+  .explorar-item-pai.item-aberto .explorar-item-chevron { transform: rotate(90deg); }
+
+  /* Cabeçalho do grupo: alvo de toque confortável */
+  .explorar-grupo-toggle { min-height: 44px; }
+}
+
+/* Modais: 100vh no Safari iOS inclui a barra de URL e cortava o pé
+   do modal; dvh mede a viewport dinâmica real. */
+.comparador-painel { max-height: 80dvh; }
+@media (max-width: 1024px) {
+  .comparador-painel { max-height: 70dvh; }
+}
+
+/* ============================================================
+   PORTRAIT DE CELULAR NA WEB: overlay "gire o dispositivo".
+   Os apps nativos travam em landscape, mas o navegador não — em
+   portrait de telefone (touch + tela estreita) cobrimos a cena e
+   pedimos para girar. Puro CSS: body::after existe sempre, e o
+   texto localiza via html[lang] (i18n.js atualiza o atributo).
+   Tablets em portrait (>=520px de largura) NÃO são bloqueados.
+   ============================================================ */
+@media (orientation: portrait) and (max-width: 519px) and (pointer: coarse) {
+  body::after {
+    content: '🔄📱\A Gire o celular para o modo paisagem';
+    white-space: pre-line;
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    background: rgba(4, 6, 14, 0.96);
+    color: #e8edf7;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 2.2;
+    letter-spacing: 0.02em;
+  }
+  html[lang^='en'] body::after {
+    content: '🔄📱\A Rotate your phone to landscape';
+  }
+  html[lang^='es'] body::after {
+    content: '🔄📱\A Gira el teléfono al modo horizontal';
+  }
 }
