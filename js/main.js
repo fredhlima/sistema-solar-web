@@ -1,17 +1,16 @@
-import { DADOS } from './dados.js?v=16';
-import { SistemaSolar3D } from './motor3d.js?v=31';
-import { iniciarUI } from './ui.js?v=36';
+import { DADOS } from './dados.js?v=22';
+import { SistemaSolar3D } from './motor3d.js?v=38';
+import { iniciarUI } from './ui.js?v=32';
 import { EVENTOS } from './eventos.js?v=9';
 import { MISSOES } from './missoes.js?v=12';
 import { Trajetorias } from './trajetorias.js?v=18';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=19';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=18';
 import { criarPremium } from './premium.js?v=3';
 import { iniciarPaywall } from './paywall.js?v=3';
 import { iniciarQuiz } from './quiz.js?v=9';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=2';
 import { iniciarProgresso } from './progresso.js?v=5';
-import { iniciarMusica } from './musica.js?v=7';
-import { iniciarTutorial } from './tutorial.js?v=5';
+import { iniciarMusica } from './musica.js?v=5';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -47,9 +46,6 @@ iniciarUI({
 // Música de fundo: depois da UI, para o botão ♫ entrar na .barra-acoes
 const musica = iniciarMusica();
 audioCompartilhado.obterCtx = musica.obterCtx;
-
-// Tutorial de onboarding: por último, quando todos os alvos de coachmark já existem
-iniciarTutorial();
 
 // Smart default (redução de fadiga de decisão): no PRIMEIRO acesso, em vez de
 // deixar o usuário diante do sistema inteiro sem saber onde clicar entre 45
