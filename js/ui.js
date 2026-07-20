@@ -1606,6 +1606,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
       const div = document.createElement('div');
       div.className = 'comparador-corpo';
+      // Clique no CARTÃO inteiro (não só no círculo): com o Sol incluído o
+      // círculo de corpos pequenos (ex.: Terra) fica com poucos pixels de
+      // diâmetro — precisa de uma área de toque maior que ele mesmo.
+      div.onclick = () => {
+        fecharComparador();
+        motor.focar(idCorpo);
+        motor.aoSelecionar(idCorpo);
+      };
 
       const raioKm = corpo.raioKm || 6371;
       const diametroReal = Math.max(3, diametroPxDe(corpo) * fatorEscala);
@@ -1621,12 +1629,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         const gradentStops = cores.map((cor, i) => `${cor} ${(i / (cores.length - 1)) * 100}%`).join(', ');
         circulo.style.background = `radial-gradient(circle, ${gradentStops})`;
       }
-
-      circulo.onclick = () => {
-        fecharComparador();
-        motor.focar(idCorpo);
-        motor.aoSelecionar(idCorpo);
-      };
 
       div.appendChild(circulo);
 

@@ -1,5 +1,5 @@
-import { DADOS } from './dados.js?v=16';
-import { SistemaSolar3D } from './motor3d.js?v=31';
+import { DADOS } from './dados.js?v=22';
+import { SistemaSolar3D } from './motor3d.js?v=38';
 import { iniciarUI } from './ui.js?v=37';
 import { EVENTOS } from './eventos.js?v=9';
 import { MISSOES } from './missoes.js?v=12';

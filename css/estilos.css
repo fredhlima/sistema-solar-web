@@ -1266,18 +1266,26 @@ html, body {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  cursor: pointer;
+  /* Área de toque mínima acolchoada — o círculo em si pode ficar minúsculo
+     (Terra ao lado do Sol) sem prejudicar o clique/toque, porque o cartão
+     inteiro (círculo + rótulo) é a área clicável, não só o círculo. */
+  padding: 4px 10px;
 }
 
 .comparador-circulo {
   border-radius: 50%;
   box-shadow: 0 0 12px rgba(92, 200, 255, 0.2);
-  cursor: pointer;
   transition: all 150ms ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  min-height: 32px;
+  /* SEM min-width/min-height aqui: um piso em px nesta camada sobrescrevia
+     o diâmetro calculado em ui.js e destruía a proporção real quando o Sol
+     entra na comparação (Terra e Júpiter — com >32px de fator de escala
+     compartilhado — colapsavam ambos no mesmo piso de 32px e pareciam do
+     mesmo tamanho). O piso correto (Math.max em ui.js, bem menor) já
+     garante que nada suma; ele é a única fonte de verdade do tamanho mínimo. */
 }
 
 .comparador-circulo:hover {

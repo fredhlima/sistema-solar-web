@@ -11,6 +11,8 @@ export const DADOS = { corpos: [
     excentricidade: 0,
     inclinacaoOrbitaGraus: 0,
     inclinacaoEixoGraus: 7.25,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 14.2,
     retrogrado: false,
     anguloInicialGraus: 0,
     aparencia: {
@@ -62,6 +64,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.2056,
     inclinacaoOrbitaGraus: 7.005,
     inclinacaoEixoGraus: 0.03,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 41.6,
     retrogrado: false,
     anguloInicialGraus: 42,
     aparencia: {
@@ -109,10 +113,14 @@ export const DADOS = { corpos: [
     raioKm: 6051.8,
     distanciaMediaKm: 108.209e6,
     periodoOrbitalDias: 224.7,
-    periodoRotacaoHoras: -2807,
+    // Sentido retrógrado vem só da geometria (inclinacaoEixoGraus=177,36° > 90,
+    // polo já invertido) — período positivo evita dupla negação (mesmo padrão do Tritão).
+    periodoRotacaoHoras: 2807,
     excentricidade: 0.0068,
     inclinacaoOrbitaGraus: 3.395,
     inclinacaoEixoGraus: 177.36,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 149.8,
     retrogrado: false,
     anguloInicialGraus: 156,
     aparencia: {
@@ -164,6 +172,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.0167,
     inclinacaoOrbitaGraus: 0,
     inclinacaoEixoGraus: 23.4,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 270.0,
     retrogrado: false,
     anguloInicialGraus: 288,
     aparencia: {
@@ -373,6 +383,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.0934,
     inclinacaoOrbitaGraus: 1.851,
     inclinacaoEixoGraus: 25.19,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 7.1,
     retrogrado: false,
     anguloInicialGraus: 85,
     aparencia: {
@@ -422,7 +434,9 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 0.3189,
     periodoRotacaoHoras: 7.66,
     excentricidade: 0.0151,
-    inclinacaoOrbitaGraus: 1.075,
+    inclinacaoOrbitaGraus: 1.08,
+    // Órbita no plano EQUATORIAL de Marte (lua regular, PLANO-EIXOS-ORBITAS §1b)
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 200,
@@ -466,7 +480,9 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 1.2624,
     periodoRotacaoHoras: 30.3,
     excentricidade: 0.0002,
-    inclinacaoOrbitaGraus: 0.93,
+    inclinacaoOrbitaGraus: 1.79,
+    // Órbita no plano EQUATORIAL de Marte (lua regular, PLANO-EIXOS-ORBITAS §1b)
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 315,
@@ -513,6 +529,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.0489,
     inclinacaoOrbitaGraus: 1.304,
     inclinacaoEixoGraus: 3.13,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 112.2,
     retrogrado: false,
     anguloInicialGraus: 127,
     aparencia: {
@@ -562,7 +580,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 1.769,
     periodoRotacaoHoras: 42.46,
     excentricidade: 0.0041,
-    inclinacaoOrbitaGraus: 0.04,
+    inclinacaoOrbitaGraus: 0.05,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 90,
@@ -609,6 +630,9 @@ export const DADOS = { corpos: [
     periodoRotacaoHoras: 85.22,
     excentricidade: 0.009,
     inclinacaoOrbitaGraus: 0.47,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 210,
@@ -654,7 +678,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 7.154,
     periodoRotacaoHoras: 171.7,
     excentricidade: 0.0013,
-    inclinacaoOrbitaGraus: 0.19,
+    inclinacaoOrbitaGraus: 0.2,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 330,
@@ -698,7 +725,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 16.689,
     periodoRotacaoHoras: 400.5,
     excentricidade: 0.0074,
-    inclinacaoOrbitaGraus: 0.19,
+    inclinacaoOrbitaGraus: 0.25,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 45,
@@ -745,6 +775,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.0565,
     inclinacaoOrbitaGraus: 2.485,
     inclinacaoEixoGraus: 26.73,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 280.5,
     retrogrado: false,
     anguloInicialGraus: 100,
     aparencia: {
@@ -799,7 +831,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 15.945,
     periodoRotacaoHoras: 382.68,
     excentricidade: 0.0288,
-    inclinacaoOrbitaGraus: 0.33,
+    inclinacaoOrbitaGraus: 0.35,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 270,
@@ -846,6 +881,9 @@ export const DADOS = { corpos: [
     periodoRotacaoHoras: 32.9,
     excentricidade: 0.0047,
     inclinacaoOrbitaGraus: 0.02,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 0,
@@ -890,6 +928,9 @@ export const DADOS = { corpos: [
     periodoRotacaoHoras: 22.62,
     excentricidade: 0.0196,
     inclinacaoOrbitaGraus: 1.57,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 45,
@@ -937,7 +978,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 4.518,
     periodoRotacaoHoras: 108.4,
     excentricidade: 0.0012,
-    inclinacaoOrbitaGraus: 0.35,
+    inclinacaoOrbitaGraus: 0.33,
+    // Órbita no plano EQUATORIAL do pai (lua regular; i medida vs equador,
+    // ref. PLANO-EIXOS-ORBITAS.md §1b) — antes era referenciada à eclíptica
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 120,
@@ -985,7 +1029,12 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 79.33,
     periodoRotacaoHoras: 1904,
     excentricidade: 0.0283,
-    inclinacaoOrbitaGraus: 27.47,
+    inclinacaoOrbitaGraus: 15.5,
+    // ESTILIZADO (PLANO-EIXOS-ORBITAS §2.7): Japeto é far-moon cujo plano de
+    // Laplace real fica ENTRE o equador de Saturno e a eclíptica; usamos
+    // equadorPai com i=15,5° (aparência correta de lua distante inclinada)
+    // sem modelar um frame de Laplace dedicado
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 200,
@@ -1032,10 +1081,14 @@ export const DADOS = { corpos: [
     raioKm: 25362,
     distanciaMediaKm: 2873.46e6,
     periodoOrbitalDias: 30687,
-    periodoRotacaoHoras: -17.24,
+    // Sentido retrógrado vem só da geometria (inclinacaoEixoGraus=97,77° > 90,
+    // polo já invertido) — período positivo evita dupla negação (mesmo padrão do Tritão).
+    periodoRotacaoHoras: 17.24,
     excentricidade: 0.047,
     inclinacaoOrbitaGraus: 0.773,
     inclinacaoEixoGraus: 97.77,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 282.4,
     retrogrado: false,
     anguloInicialGraus: 228,
     aparencia: {
@@ -1090,7 +1143,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 8.7,
     periodoRotacaoHoras: 208,
     excentricidade: 0.0011,
-    inclinacaoOrbitaGraus: 0.10,
+    inclinacaoOrbitaGraus: 0.34,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 120,
@@ -1134,7 +1190,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 1.413,
     periodoRotacaoHoras: 33.9,
     excentricidade: 0.0013,
-    inclinacaoOrbitaGraus: 4.22,
+    inclinacaoOrbitaGraus: 4.34,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 75,
@@ -1178,7 +1237,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 2.520,
     periodoRotacaoHoras: 60.5,
     excentricidade: 0.0012,
-    inclinacaoOrbitaGraus: 0.31,
+    inclinacaoOrbitaGraus: 0.26,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 160,
@@ -1226,7 +1288,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 4.144,
     periodoRotacaoHoras: 99.5,
     excentricidade: 0.0039,
-    inclinacaoOrbitaGraus: 0.36,
+    inclinacaoOrbitaGraus: 0.13,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 250,
@@ -1274,7 +1339,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 13.463,
     periodoRotacaoHoras: 323.1,
     excentricidade: 0.0008,
-    inclinacaoOrbitaGraus: 0.10,
+    inclinacaoOrbitaGraus: 0.1,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 310,
@@ -1325,6 +1393,8 @@ export const DADOS = { corpos: [
     excentricidade: 0.0113,
     inclinacaoOrbitaGraus: 1.77,
     inclinacaoEixoGraus: 28.32,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 40.8,
     retrogrado: false,
     anguloInicialGraus: 310,
     aparencia: {
@@ -1371,12 +1441,16 @@ export const DADOS = { corpos: [
     pai: 'netuno',
     raioKm: 1353.4,
     distanciaMediaKm: 354759,
-    periodoOrbitalDias: -5.877,
+    periodoOrbitalDias: 5.877,
     periodoRotacaoHoras: 141.1,
     excentricidade: 0.000016,
-    inclinacaoOrbitaGraus: 156.86,
+    inclinacaoOrbitaGraus: 157,
+    // Órbita RETRÓGRADA capturada: o sentido vem da GEOMETRIA (i=157° > 90°
+    // vs equador de Netuno), não de flags. O par antigo (P negativo +
+    // retrogrado:true) se cancelava — dupla negação acidental, limpada aqui.
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
-    retrogrado: true,
+    retrogrado: false,
     anguloInicialGraus: 180,
     aparencia: {
       tipo: 'gelado',
@@ -1702,10 +1776,14 @@ export const DADOS = { corpos: [
     raioKm: 1188.3,
     distanciaMediaKm: 5913.52e6,
     periodoOrbitalDias: 90465,
-    periodoRotacaoHoras: -153.3,
+    // Sentido retrógrado vem só da geometria (inclinacaoEixoGraus=119,6° > 90,
+    // polo já invertido) — período positivo evita dupla negação (mesmo padrão do Tritão).
+    periodoRotacaoHoras: 153.3,
     excentricidade: 0.2488,
     inclinacaoOrbitaGraus: 17.16,
     inclinacaoEixoGraus: 119.6,
+    // Azimute do polo derivado de α₀/δ₀ IAU J2000 (ver PLANO-EIXOS-ORBITAS.md)
+    azimutePoloGraus: 222.7,
     retrogrado: false,
     anguloInicialGraus: 280,
     aparencia: {
@@ -1755,7 +1833,10 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 6.387,
     periodoRotacaoHoras: 153.3,
     excentricidade: 0,
-    inclinacaoOrbitaGraus: 0,
+    inclinacaoOrbitaGraus: 0.0,
+    // Órbita no plano EQUATORIAL do pai (ref. PLANO-EIXOS-ORBITAS.md §1b);
+    // com o pai 'deitado' (Urano 97,8° / Plutão 119,6°), a órbita deita junto
+    frameOrbita: 'equadorPai',
     inclinacaoEixoGraus: 0,
     retrogrado: false,
     anguloInicialGraus: 0,
@@ -2016,13 +2097,21 @@ export const DADOS = { corpos: [
     pai: 'sol',
     raioKm: 10.5,
     distanciaMediaKm: 2689.4e6,
-    periodoOrbitalDias: 27375,
+    // Período recalibrado (era 27375d): intervalo EXATO entre os periélios
+    // documentados de 1986-02-09 e 2061-07-28 — faz os dois ancorarem certo
+    // ao mesmo tempo (74,95 a puro-Kepler não bate nos dois; perturbações
+    // reais de Júpiter/Saturno fazem o período variar apariçao a apariçao).
+    periodoOrbitalDias: 27563,
     periodoRotacaoHoras: 52,
     excentricidade: 0.9671,
     inclinacaoOrbitaGraus: 162.26,
     inclinacaoEixoGraus: 0,
     retrogrado: true,
-    anguloInicialGraus: 90,
+    // Fase calibrada: anguloInicialGraus antigo (90) era arbitrário — o
+    // cometa aparecia a ~14 UA do Sol na data real do periélio (09/02/1986),
+    // longe demais para ter sido visível. Agora M=0 (periélio) cai exatamente
+    // em 1986-02-09 E em 2061-07-28 (ver periodoOrbitalDias acima).
+    anguloInicialGraus: 66.278,
     aparencia: {
       tipo: 'cometa',
       cores: ['#8b7355', '#a0907d', '#e8d8d0']
@@ -2031,7 +2120,7 @@ export const DADOS = { corpos: [
     info: {
       resumo: 'O Cometa Halley é o cometa mais famoso do sistema solar, retornando a cada 75-76 anos. Sua cauda gelada brilhante atravessa o céu noturno. Tem um núcleo rochoso que pode ser observado por satélites. Próxima passagem em 2061.',
       numeros: [
-        { rotulo: 'Período orbital', valor: '75,3 anos (27.375 dias)' },
+        { rotulo: 'Período orbital', valor: '75,46 anos (27.563 dias)' },
         { rotulo: 'Semieixo maior', valor: '17,8 UA (2.665 milhões km)' },
         { rotulo: 'Excentricidade', valor: '0,967 (órbita muito excêntrica)' },
         { rotulo: 'Tamanho do núcleo', valor: '~16 × 8 × 8 km' },
@@ -2050,7 +2139,7 @@ export const DADOS = { corpos: [
         composicao: 'Núcleo rochoso (silicatos, ferro), gelo de água, gelo de metano, gelo de CO₂, poeira cometária, compostos orgânicos.',
         temperatura: 'Núcleo: ~-50 °C em repouso; durante passagem perto do Sol: sublimação de superfície.',
         missoes: ['Vega 1-2 (USSR, 1986)', 'Giotto (ESA, 1986)', 'Suisei, Sakigake (Japão, 1986)', 'Proposta futura de retorno de amostras'],
-        texto: 'Cometa Halley é KBO (Kuiper Belt Object) capturado em órbita curta. Período 75,3 anos (1530–2061 d.C. registros). Órbita retrógrada (162,26°) sugeriu captura dinâmica. Semieixo maior 17,8 UA, excentricidade 0,9671 (periélio 0,586 UA, afélio 35,3 UA). Núcleo ~16×8 km. Sondas Vega 1-2/Giotto (1986) revelaram núcleo rochoso escuro, jatos de gás (H₂O, CO₂, CO), albedo 0,04. Ejeção matéria cria caudas de poeira/íons. Próxima passagem 2061; última 1986.'
+        texto: 'Cometa Halley é um cometa de período longo do tipo "Halley" (órbita retrógrada de alta inclinação, 162,26° — origem provável na Nuvem de Oort, não no Cinturão de Kuiper). Período 75,46 anos (registros documentados desde 240 a.C.). Semieixo maior 17,8 UA, excentricidade 0,9671 (periélio 0,586 UA, afélio 35,3 UA). Núcleo ~16×8 km. Edmond Halley previu seu retorno em 1705 usando mecânica newtoniana — confirmado em 1758, primeiro cometa demonstrado como periódico. Sondas Vega 1-2/Giotto (1986) revelaram núcleo rochoso escuro, jatos de gás (H₂O, CO₂, CO), albedo 0,04. Ejeção de matéria cria caudas de poeira/íons. Próxima passagem 2061; última 1986.'
       }
     }
   },
@@ -2061,31 +2150,37 @@ export const DADOS = { corpos: [
     pai: 'sol',
     raioKm: 18,
     distanciaMediaKm: 27817.5e6,
-    periodoOrbitalDias: 337500,
+    // Período corrigido (era 337500d = 924a): não batia com o próprio
+    // semieixo maior (186 UA). Pela 3ª lei de Kepler, a=186 UA implica
+    // ~2.535,6 anos — bate com o "~2.533 anos" que a ficha já afirmava.
+    periodoOrbitalDias: 926126,
     periodoRotacaoHoras: 48,
     excentricidade: 0.9951,
     inclinacaoOrbitaGraus: 89.43,
     inclinacaoEixoGraus: 0,
     retrogrado: false,
-    anguloInicialGraus: 270,
+    // Fase calibrada: era 270 (arbitrário) — o cometa aparecia a 311,8 UA
+    // do Sol no periélio real (01/04/1997), quando na verdade esteve a
+    // 0,914 UA e visível a olho nu. Agora M=0 cai exatamente nessa data.
+    anguloInicialGraus: 0.391,
     aparencia: {
       tipo: 'cometa',
       cores: ['#a0907d', '#8b8680', '#e8d8d0']
     },
     aneis: null,
     info: {
-      resumo: 'Hale-Bopp é um cometa gigantesco que visitou o sistema solar interno em 1997, brilhando visivelmente ao olho nu por meses. Sua próxima passagem não ocorrerá até o ano 4385 — é um visitante do distante passado trazendo histórias de bilhões de anos atrás.',
+      resumo: 'Hale-Bopp é um cometa gigantesco que visitou o sistema solar interno em 1997, brilhando visivelmente ao olho nu por meses. Sua próxima passagem não ocorrerá até o ano 4533 — é um visitante do distante passado trazendo histórias de bilhões de anos atrás.',
       numeros: [
-        { rotulo: 'Período orbital', valor: '~2.533 anos (última 1997)' },
+        { rotulo: 'Período orbital', valor: '~2.535,6 anos (última 1997)' },
         { rotulo: 'Semieixo maior', valor: '186 UA (27.800 bilhões km)' },
         { rotulo: 'Excentricidade', valor: '0,9951 (próxima de parábola!)' },
         { rotulo: 'Tamanho do núcleo', valor: '~40 km de diâmetro' },
         { rotulo: 'Periélio em 1997', valor: '0,914 UA (entre Terra e Vênus)' },
-        { rotulo: 'Próxima passagem', valor: 'Ano 4385' }
+        { rotulo: 'Próxima passagem', valor: 'Ano 4533' }
       ],
       curiosidades: [
         'Hale-Bopp foi o cometa mais brilhante do século XX — visível a olho nu por 18 meses, em 1996 e 1997 — período recorde.',
-        'Hale-Bopp tem semieixo maior de 186 UA — sua órbita é quase parabólica, levará cerca de 2.500 anos para retornar, por volta do ano 4385.',
+        'Hale-Bopp tem semieixo maior de 186 UA — sua órbita é quase parabólica, levará cerca de 2.500 anos para retornar, por volta do ano 4533.',
         'A cauda de Hale-Bopp se estendia por bilhões de quilômetros — maior que o sistema solar interno!',
         'Muitas culturas antigas registraram cometas semelhantes — Hale-Bopp pode ter sido observado há milhares de anos se órbita foi diferente.'
       ],
@@ -2098,7 +2193,7 @@ export const DADOS = { corpos: [
         composicao: 'Núcleo rochoso/gelado (gelo de água, CO₂, CH₄), poeira cometária, compostos orgânicos primitivos.',
         temperatura: 'Núcleo em repouso: ~-230 °C; durante passagem (periélio): intensa sublimação.',
         missoes: ['Observações telescópicas múltiplas (Hubble, Chandra, etc.)', 'Sem sonda interplanetária planejada'],
-        texto: 'Hale-Bopp é cometa gigantesco descoberto 1995 (Alan Hale, Thomas Bopp). Semi-eixo maior 186 UA, excentricidade 0,9951, período ~2.533 anos estimado (próxima passagem ~4385). Periélio 1997/04/01 a 0,914 UA (entre Terra/Vênus). Núcleo grande ~40 km diâmetro, albedo 0,5 (brilhante). Duas caudas distintas: pó (amarela) & iônica (azul). Magnitude pico -1,0 (visível dia em brilho). Decomposição orbital resultará em órbita muito alongada; eventual escape sistema solar possível (~50% chance).'
+        texto: 'Hale-Bopp é cometa gigantesco descoberto 1995 (Alan Hale, Thomas Bopp). Semi-eixo maior 186 UA, excentricidade 0,9951, período ~2.535,6 anos (próxima passagem ~4533). Periélio 1997/04/01 a 0,914 UA (entre Terra/Vênus). Núcleo grande ~40 km diâmetro, albedo 0,5 (brilhante). Duas caudas distintas: pó (amarela) & iônica (azul). Magnitude pico -1,0 (visível dia em brilho). Decomposição orbital resultará em órbita muito alongada; eventual escape sistema solar possível (~50% chance).'
       }
     }
   },
@@ -2115,7 +2210,10 @@ export const DADOS = { corpos: [
     inclinacaoOrbitaGraus: 7.028,
     inclinacaoEixoGraus: 0,
     retrogrado: false,
-    anguloInicialGraus: 120,
+    // Fase calibrada: era 120 (arbitrário) — agora M=0 (periélio) cai em
+    // 13/08/2015, a data real do periélio pós-Rosetta (a sonda chegou em
+    // 06/08/2014, ainda a caminho do Sol, então fica perto mas não exata).
+    anguloInicialGraus: 207.354,
     aparencia: {
       tipo: 'cometa',
       cores: ['#696159', '#4a4238', '#2f2724']
