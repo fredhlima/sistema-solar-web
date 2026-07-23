@@ -271,44 +271,6 @@
   border-radius: 2px;
 }
 
-/* Mobile (landscape do celular): o chip de nível vira uma PÍLULA HORIZONTAL
-   compacta — ícone + nome + barra lado a lado — para não desperdiçar altura
-   na tela deitada. No desktop segue como card vertical (regras base acima). */
-@media (max-width: 1024px) {
-  .progresso-chip {
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 12px;
-    /* Na linha do título (flex no .titulo), sem empurrar para baixo */
-    margin-top: 0;
-    border-radius: 999px;
-    min-width: 0;
-  }
-  .progresso-chip-icone {
-    font-size: 14px;
-    flex-shrink: 0;
-  }
-  .progresso-chip-nome {
-    font-size: 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .progresso-chip-barra {
-    /* Com o logo na linha (34px + gap), a barra cede para a linha inteira
-       não encostar no gatilho central de Experiências em 844px */
-    width: 24px;
-    flex-shrink: 0;
-    margin-left: 2px;
-  }
-}
-
-/* Telas mais estreitas (ex. 800px): mesmo com 24px a linha invadiria o
-   gatilho central — some a barra, fica ícone + nome do nível */
-@media (max-width: 800px) {
-  .progresso-chip-barra { display: none; }
-}
-
 /* Container e toasts */
 .progresso-toasts {
   position: fixed;
@@ -404,6 +366,3 @@
 .progresso-card::-webkit-scrollbar-thumb:hover {
   background: rgba(92, 200, 255, 0.5);
 }
-
-/* dvh: 100vh no Safari iOS inclui a barra de URL (corta o pé do card) */
-.progresso-card { max-height: 90dvh; }

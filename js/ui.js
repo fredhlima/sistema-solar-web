@@ -1,4 +1,4 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=19';
+import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=22';
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
@@ -418,6 +418,27 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     div.appendChild(grupoExperiencias);
     div.appendChild(grupoVisualizacao);
     div.appendChild(grupoUtilidades);
+
+    // Celular deitado: o rail de Visualização vira menu — este botão-ícone
+    // (mesmo desenho do favicon: planeta + anel) o abre/fecha. Só aparece no
+    // deitado via CSS (.vis-trigger).
+    const btnVis = document.createElement('button');
+    btnVis.className = 'vis-trigger';
+    btnVis.setAttribute('aria-label', t('grupoVisualizacao'));
+    btnVis.innerHTML = '<svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><circle cx="32" cy="32" r="13" fill="none" stroke="currentColor" stroke-width="5"/><ellipse cx="32" cy="32" rx="27" ry="8" fill="none" stroke="currentColor" stroke-width="4" transform="rotate(-18 32 32)"/></svg>';
+    btnVis.onclick = (e) => {
+      e.stopPropagation();
+      const aberto = grupoVisualizacao.classList.toggle('menu-aberto');
+      btnVis.classList.toggle('ativo', aberto);
+    };
+    document.addEventListener('click', (e) => {
+      if (!grupoVisualizacao.contains(e.target)) {
+        grupoVisualizacao.classList.remove('menu-aberto');
+        btnVis.classList.remove('ativo');
+      }
+    });
+    div.appendChild(btnVis);
+
     root.appendChild(div);
   }
 
@@ -448,22 +469,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       conteudo.style.display = recolhido ? 'none' : 'block';
     }
 
-    function alternarColapso() {
+    btnColapsar.onclick = () => {
       recolhido = !recolhido;
       try { localStorage.setItem(CHAVE_COLAPSO, recolhido ? '1' : '0'); } catch (e) { /* sem storage */ }
       aplicarEstadoColapso();
-    }
-    btnColapsar.onclick = (e) => {
-      // Não deixa subir até o listener do painel: recolher e reexpandir
-      // no mesmo clique se anulariam
-      e.stopPropagation();
-      alternarColapso();
     };
-    // Recolhido, o painel vira uma barra estreita de 44px — a barra INTEIRA
-    // (rótulo vertical incluso) reabre, não só a setinha
-    div.addEventListener('click', () => {
-      if (recolhido) alternarColapso();
-    });
     cabecalho.appendChild(btnColapsar);
     div.appendChild(cabecalho);
 
@@ -508,135 +518,55 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     };
     atualizarSecaoFavoritos();
 
-    // Acordeão (comportamento do mobile). No desktop o CSS mantém tudo
-    // visível, então alternar estas classes é inócuo lá — um DOM só,
-    // mesma ideia do popover .experiencias-itens.
-    const mqExplorarMobile = window.matchMedia('(max-width: 1024px)');
-    const ehMobileExplorar = () => mqExplorarMobile.matches;
-
-    function fecharGrupo(g) {
-      g.classList.remove('grupo-aberto');
-      const btn = g.querySelector('.explorar-grupo-toggle');
-      if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? 'false' : 'true');
-    }
-    function alternarGrupo(divGrupo) {
-      const abrir = !divGrupo.classList.contains('grupo-aberto');
-      // Um grupo aberto por vez no mobile: com ~5 linhas visíveis, dois
-      // grupos abertos deixam a rolagem cega. Fecha os irmãos ao abrir.
-      if (abrir && ehMobileExplorar()) {
-        conteudo.querySelectorAll('.explorar-grupo-colapsavel.grupo-aberto').forEach(g => {
-          if (g !== divGrupo) fecharGrupo(g);
-        });
-      }
-      divGrupo.classList.toggle('grupo-aberto', abrir);
-      const btn = divGrupo.querySelector('.explorar-grupo-toggle');
-      if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(abrir) : 'true');
-      // Rola o cabeçalho aberto para o topo da lista (delta de rect, não
-      // scrollIntoView — este empurra o documento sob painéis fixed no iOS).
-      if (abrir && ehMobileExplorar()) {
-        requestAnimationFrame(() => {
-          conteudo.scrollTop += divGrupo.getBoundingClientRect().top - conteudo.getBoundingClientRect().top;
-        });
-      }
-    }
-    function sincronizarAriaAcordeao() {
-      conteudo.querySelectorAll('.explorar-grupo-colapsavel').forEach(g => {
-        const btn = g.querySelector('.explorar-grupo-toggle');
-        if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(g.classList.contains('grupo-aberto')) : 'true');
-      });
-      conteudo.querySelectorAll('.explorar-item-pai').forEach(p => {
-        const btn = p.querySelector('.explorar-item-chevron');
-        if (btn) btn.setAttribute('aria-expanded', ehMobileExplorar() ? String(p.classList.contains('item-aberto')) : 'true');
-      });
-    }
-
-    // Agrupar corpos — array com chave ESTÁVEL (a versão antiga indexava
-    // pela string traduzida e detectava missões comparando com t(), que
-    // quebraria se a tradução mudasse; a chave é imune a isso).
-    const grupos = [
-      { chave: 'planetas',    titulo: t('grupoPlanetas'),    itens: [] },
-      { chave: 'anoes',       titulo: t('grupoAnoes'),       itens: [] },
-      { chave: 'cinturoes',   titulo: t('grupoCinturoes'),   itens: [] },
-      { chave: 'asteroides',  titulo: t('grupoAsteroides'),  itens: [] },
-      { chave: 'cometas',     titulo: t('grupoCometas'),     itens: [] },
-      { chave: 'telescopios', titulo: t('grupoTelescopios'), itens: [] },
-      { chave: 'missoes',     titulo: t('grupoMissoes'),     itens: [] }
-    ];
-    const porChave = Object.fromEntries(grupos.map(g => [g.chave, g]));
-    const TIPO_PARA_GRUPO = {
-      planeta: 'planetas', 'planeta-anao': 'anoes',
-      cinturao: 'cinturoes', asteroide: 'asteroides', cometa: 'cometas',
-      sonda: 'telescopios'
+    // Agrupar corpos
+    const grupos = {
+      [t('grupoEstrela')]: [],
+      [t('grupoPlanetas')]: [],
+      [t('grupoAnoes')]: [],
+      [t('grupoCinturoes')]: [],
+      [t('grupoAsteroides')]: [],
+      [t('grupoCometas')]: [],
+      [t('grupoTelescopios')]: [],
+      [t('grupoMissoes')]: []
     };
 
     dados.corpos.forEach(corpo => {
-      const chave = TIPO_PARA_GRUPO[corpo.tipo];
-      if (chave) porChave[chave].itens.push(corpo);
-    });
-
-    // O Sol fica SOLTO logo abaixo de Favoritos: uma seção "ESTRELA" com um
-    // único item era puro ruído de navegação (único grupo singleton da lista).
-    dados.corpos.filter(c => c.tipo === 'estrela').forEach(sol => {
-      const grupoSol = document.createElement('div');
-      grupoSol.className = 'explorar-grupo explorar-grupo-solo';
-      const itemSol = document.createElement('div');
-      itemSol.className = 'explorar-item';
-      itemSol.id = `explorar-item-${sol.id}`;
-      itemSol.textContent = sol.nome;
-      if (ehFavorito(sol.id)) {
-        const m = document.createElement('span');
-        m.className = 'explorar-fav-marcador';
-        m.textContent = ' ★';
-        itemSol.appendChild(m);
+      if (corpo.tipo === 'estrela') {
+        grupos[t('grupoEstrela')].push(corpo);
+      } else if (corpo.tipo === 'planeta') {
+        grupos[t('grupoPlanetas')].push(corpo);
+      } else if (corpo.tipo === 'planeta-anao') {
+        grupos[t('grupoAnoes')].push(corpo);
+      } else if (corpo.tipo === 'cinturao') {
+        grupos[t('grupoCinturoes')].push(corpo);
+      } else if (corpo.tipo === 'asteroide') {
+        grupos[t('grupoAsteroides')].push(corpo);
+      } else if (corpo.tipo === 'cometa') {
+        grupos[t('grupoCometas')].push(corpo);
+      } else if (corpo.tipo === 'sonda') {
+        grupos[t('grupoTelescopios')].push(corpo);
       }
-      itemSol.onclick = () => {
-        motor.focar(sol.id);
-        motor.aoSelecionar(sol.id);
-      };
-      grupoSol.appendChild(itemSol);
-      conteudo.appendChild(grupoSol);
     });
 
     // Add missions if available (requires trajectories for toggles)
     if (missoes && trajetorias) {
-      porChave.missoes.itens = missoes;
+      grupos[t('grupoMissoes')] = missoes;
     }
 
-    grupos.forEach(grupo => {
-      if (grupo.itens.length === 0) return;
+    Object.keys(grupos).forEach(grupoNome => {
+      if (grupos[grupoNome].length === 0) return;
 
       const divGrupo = document.createElement('div');
-      divGrupo.className = 'explorar-grupo explorar-grupo-colapsavel';
-      divGrupo.dataset.grupo = grupo.chave;
+      divGrupo.className = 'explorar-grupo';
 
-      // Cabeçalho vira um botão (colapsa/expande no mobile; inerte no desktop)
       const titulo = document.createElement('h3');
       titulo.className = 'explorar-grupo-titulo';
-      const btnGrupo = document.createElement('button');
-      btnGrupo.type = 'button';
-      btnGrupo.className = 'explorar-grupo-toggle';
-      btnGrupo.setAttribute('aria-controls', `explorar-corpo-${grupo.chave}`);
-      const rotulo = document.createElement('span');
-      rotulo.className = 'explorar-grupo-rotulo';
-      rotulo.textContent = grupo.titulo;
-      const chevronGrupo = document.createElement('span');
-      chevronGrupo.className = 'explorar-grupo-chevron';
-      chevronGrupo.setAttribute('aria-hidden', 'true');
-      chevronGrupo.textContent = '▾';
-      btnGrupo.appendChild(rotulo);
-      btnGrupo.appendChild(chevronGrupo);
-      titulo.appendChild(btnGrupo);
+      titulo.textContent = grupoNome;
       divGrupo.appendChild(titulo);
-      btnGrupo.onclick = () => alternarGrupo(divGrupo);
 
-      // Corpo colapsável do grupo — os itens entram AQUI, não no divGrupo
-      const corpoGrupo = document.createElement('div');
-      corpoGrupo.className = 'explorar-grupo-corpo';
-      corpoGrupo.id = `explorar-corpo-${grupo.chave}`;
-      divGrupo.appendChild(corpoGrupo);
-
-      grupo.itens.forEach(item => {
-        const isMissao = grupo.chave === 'missoes';
+      grupos[grupoNome].forEach(item => {
+        // Bodies have 'tipo' field; missions have 'cor' field
+        const isMissao = grupoNome === t('grupoMissoes');
 
         if (isMissao) {
           // Mission item: colored dot + name + eye icon
@@ -680,7 +610,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
           btnOlho.id = `olho-missao-${item.id}`;
           divMissao.appendChild(btnOlho);
 
-          corpoGrupo.appendChild(divMissao);
+          divGrupo.appendChild(divMissao);
         } else {
           // Item de corpo (v1)
           const corpo = item;
@@ -724,98 +654,60 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
             };
             elem.appendChild(btnOlho);
 
-            corpoGrupo.appendChild(elem);
+            divGrupo.appendChild(elem);
           } else {
-            // Corpo normal. Se tem luas, vira linha-pai com chevron de
-            // disclosure e as luas entram numa caixa IRMÃ (nunca filha —
-            // se fosse filha, o clique na lua borbulharia para o planeta).
-            const temLuas = !!(luasPorPlaneta[corpo.id] && luasPorPlaneta[corpo.id].length);
+            // Corpo normal: layout sem flex
             const elem = document.createElement('div');
-            elem.className = temLuas ? 'explorar-item explorar-item-pai' : 'explorar-item';
+            elem.className = 'explorar-item';
             elem.id = `explorar-item-${corpo.id}`;
 
-            const marcadorFav = () => {
+            elem.textContent = label;
+            if (ehFavorito(corpo.id)) {
               const m = document.createElement('span');
               m.className = 'explorar-fav-marcador';
               m.textContent = ' ★';
-              return m;
-            };
-
-            if (temLuas) {
-              const nomeElem = document.createElement('span');
-              nomeElem.className = 'explorar-item-nome';
-              nomeElem.textContent = label;
-              if (ehFavorito(corpo.id)) nomeElem.appendChild(marcadorFav());
-              elem.appendChild(nomeElem);
-            } else {
-              elem.textContent = label;
-              if (ehFavorito(corpo.id)) elem.appendChild(marcadorFav());
+              elem.appendChild(m);
             }
             elem.onclick = () => {
               motor.focar(corpo.id);
               motor.aoSelecionar(corpo.id);
             };
-            corpoGrupo.appendChild(elem);
+            divGrupo.appendChild(elem);
 
-            if (temLuas) {
-              const idLuas = `explorar-luas-${corpo.id}`;
-              const btnLuas = document.createElement('button');
-              btnLuas.type = 'button';
-              btnLuas.className = 'explorar-item-chevron';
-              btnLuas.textContent = '▸';
-              btnLuas.setAttribute('aria-controls', idLuas);
-              btnLuas.setAttribute('aria-expanded', 'false');
-              btnLuas.setAttribute('aria-label', t('verLuasDe', { nome: corpo.nome }));
-              elem.appendChild(btnLuas);
-
-              const caixaLuas = document.createElement('div');
-              caixaLuas.className = 'explorar-luas';
-              caixaLuas.id = idLuas;
+            // Luas indentadas
+            if (luasPorPlaneta[corpo.id]) {
               luasPorPlaneta[corpo.id].forEach(lua => {
                 const itemLua = document.createElement('div');
                 itemLua.className = 'explorar-item explorar-item-lua';
                 itemLua.id = `explorar-item-${lua.id}`;
                 itemLua.textContent = lua.nome;
-                if (ehFavorito(lua.id)) itemLua.appendChild(marcadorFav());
+                if (ehFavorito(lua.id)) {
+                  const m = document.createElement('span');
+                  m.className = 'explorar-fav-marcador';
+                  m.textContent = ' ★';
+                  itemLua.appendChild(m);
+                }
                 itemLua.onclick = () => {
                   motor.focar(lua.id);
                   motor.aoSelecionar(lua.id);
                 };
-                caixaLuas.appendChild(itemLua);
+                divGrupo.appendChild(itemLua);
               });
-              corpoGrupo.appendChild(caixaLuas);
-
-              // Chevron abre/fecha só as luas — stopPropagation para o
-              // clique não voar a câmera para o planeta (mesmo idioma do olho)
-              btnLuas.onclick = (e) => {
-                e.stopPropagation();
-                const abrir = !elem.classList.contains('item-aberto');
-                elem.classList.toggle('item-aberto', abrir);
-                caixaLuas.classList.toggle('luas-abertas', abrir);
-                btnLuas.setAttribute('aria-expanded', ehMobileExplorar() ? String(abrir) : 'true');
-                btnLuas.setAttribute('aria-label', t(abrir ? 'ocultarLuasDe' : 'verLuasDe', { nome: corpo.nome }));
-              };
             }
           }
         }
       });
 
-      // Estado inicial no mobile: só "Planetas" começa aberto
-      divGrupo.classList.toggle('grupo-aberto', grupo.chave === 'planetas');
-
       conteudo.appendChild(divGrupo);
     });
 
-    sincronizarAriaAcordeao();
+    div.appendChild(conteudo);
 
-    // Créditos no FIM do conteúdo rolável (não como rodapé fixo): só
-    // aparecem ao rolar até o final, sem roubar altura útil da lista
+    // Footer with credits
     const rodape = document.createElement('div');
     rodape.className = 'explorar-rodape';
     rodape.innerHTML = t('credito');
-    conteudo.appendChild(rodape);
-
-    div.appendChild(conteudo);
+    div.appendChild(rodape);
 
     aplicarEstadoColapso();
     root.appendChild(div);
@@ -1080,7 +972,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const conteudo = document.getElementById('info-conteudo-inner');
 
     painel.classList.add('aberto');
+    painel.classList.remove('expandido');
     estado.painelInfoAberto = true;
+    // "Um painel por vez" no celular deitado: classe no body em vez de :has()
+    // (compatível com WebView antigo; :has() exige Chrome 105+)
+    document.body.classList.add('com-painel-dir');
 
     // Clear previous content
     conteudo.innerHTML = '';
@@ -1189,7 +1085,15 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       html += '</div></details></div>';
     }
 
+    // Card compacto no celular deitado: detalhes ficam atrás deste botão.
+    // fichaSaibaMais ≠ saibaMais: a chave antiga carrega o selo "(11+)" do
+    // conteúdo avançado, que não cabe aqui.
+    html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
+
     conteudo.innerHTML = html;
+
+    const btnSaiba = document.getElementById('info-saiba-btn');
+    if (btnSaiba) btnSaiba.onclick = () => painel.classList.toggle('expandido');
 
     // Favoritar: alterna estado, persiste e atualiza o marcador na lista
     const favBtn = conteudo.querySelector('#info-fav-btn');
@@ -1217,6 +1121,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     painel.classList.remove('aberto');
     estado.painelInfoAberto = false;
     estado.corpoSelecionado = null;
+    if (!estado.painelEventosAberto) document.body.classList.remove('com-painel-dir');
   }
 
   function obterTipoLabel(corpo) {
@@ -1402,6 +1307,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     painel.classList.add('aberto');
     estado.painelEventosAberto = true;
+    document.body.classList.add('com-painel-dir');
 
     // Atualizar lista de eventos
     conteudo.innerHTML = '';
@@ -1494,6 +1400,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     if (painel) {
       painel.classList.remove('aberto');
       estado.painelEventosAberto = false;
+      if (!estado.painelInfoAberto) document.body.classList.remove('com-painel-dir');
     }
   }
 
@@ -1851,4 +1758,41 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       // Rest is handled by v1 handler
     }
   }, true); // capture phase para rodar antes do handler v1
+
+  // ============ AÇÕES EXPOSTAS (dock mobile) ============
+  // O mobile-dock.js é uma UI paralela (só em toque+paisagem) que reusa TODA a
+  // lógica daqui em vez de duplicá-la. Este "saco de ações" é o único contrato
+  // entre os dois — mantê-lo fino.
+  return {
+    // Experiências → reaproveitam os overlays existentes
+    abrirEventos: abrirPainelEventos,
+    abrirComparador,
+    abrirQuiz,
+    abrirVoce,
+    iniciarTour,
+    // Transporte de tempo
+    alternarPausa,
+    avancarVelocidade,
+    recuarVelocidade,
+    estadoTempo: () => ({
+      pausado: estado.velocidadeAtual === 0,
+      rotulo: document.getElementById('tempo-velocidade')?.textContent || '',
+    }),
+    getDataSimulada: () => motor.getDataSimulada(),
+    irParaData: (iso) => motor.irParaData(iso),
+    // Visualização (Settings)
+    setOrbitas: (v) => { estado.orbitasVisiveis = v; motor.setOrbitasVisiveis(v); },
+    setRotulos: (v) => { estado.rotulosVisiveis = v; motor.setRotulosVisiveis(v); },
+    setEscala: (m) => { estado.escalaAtual = m; motor.setEscala(m); },
+    estadoVis: () => ({ orbitas: estado.orbitasVisiveis, rotulos: estado.rotulosVisiveis, escala: estado.escalaAtual }),
+    // Favoritos (Efeito IKEA) — usados na lista/ficha do dock
+    ehFavorito,
+    alternarFavorito,
+    // Rótulo de tipo já traduzido ("Estrela", "Planeta", "Lua de X"…)
+    tipoLabel: obterTipoLabel,
+    // Missões espaciais: abre o card + segue a nave (mesmo gate premium por item
+    // do menu Explorar do desktop). missaoPro diz se o item mostra o selo PRO.
+    abrirMissao: (id) => { if (!premiumExigirItem('missoes', id)) return; abrirCardMissao(id); seguirMissao(id); },
+    missaoPro: (id) => !premiumPermitido('missoes', id),
+  };
 }

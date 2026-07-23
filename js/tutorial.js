@@ -1,14 +1,17 @@
-import { t } from './i18n.js?v=19';
+import { t } from './i18n.js?v=22';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 
+// alvoMobile: seletores do dock mobile (js/mobile-dock.js). No celular deitado
+// o chrome desktop fica display:none (spotlight não acharia nada), então cada
+// passo mira o equivalente do dock quando body.modo-dock está ativo.
 const PASSOS = [
-  { alvo: null,                    titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
-  { alvo: '#painel-explorar',      titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
-  { alvo: '.grupo-experiencias',   titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },
-  { alvo: '.grupo-visualizacao',   titulo: 'tutorialTitulo4', texto: 'tutorialTexto4' },
-  { alvo: '.controles-tempo',      titulo: 'tutorialTitulo5', texto: 'tutorialTexto5' },
-  { alvo: '.progresso-chip',       titulo: 'tutorialTitulo6', texto: 'tutorialTexto6' },
+  { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
+  { alvo: '#painel-explorar',      alvoMobile: '#mdock-btn-exp',  titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
+  { alvo: '.grupo-experiencias',   alvoMobile: '#mdock-btn-xp',   titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },
+  { alvo: '.grupo-visualizacao',   alvoMobile: '.mdock-gear',     titulo: 'tutorialTitulo4', texto: 'tutorialTexto4' },
+  { alvo: '.controles-tempo',      alvoMobile: '.mdock-transporte', titulo: 'tutorialTitulo5', texto: 'tutorialTexto5' },
+  { alvo: '.progresso-chip',       alvoMobile: '#mdock-nivel',    titulo: 'tutorialTitulo6', texto: 'tutorialTexto6' },
 ];
 
 let passoAtual = 0;
@@ -209,8 +212,10 @@ function posicionarCard(passo) {
   let elemento = null;
   let deveEstarCentrado = false;
 
-  if (passo.alvo) {
-    elemento = document.querySelector(passo.alvo);
+  const noDock = document.body.classList.contains('modo-dock');
+  const seletor = noDock ? passo.alvoMobile : passo.alvo;
+  if (seletor) {
+    elemento = document.querySelector(seletor);
   }
 
   if (!elemento || elemento.offsetWidth === 0 || !isElementVisible(elemento)) {

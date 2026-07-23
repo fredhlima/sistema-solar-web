@@ -1,17 +1,18 @@
 import { DADOS } from './dados.js?v=22';
-import { SistemaSolar3D } from './motor3d.js?v=38';
-import { iniciarUI } from './ui.js?v=37';
+import { SistemaSolar3D } from './motor3d.js?v=39';
+import { iniciarUI } from './ui.js?v=38';
+import { iniciarMobileDock } from './mobile-dock.js?v=7';
 import { EVENTOS } from './eventos.js?v=9';
 import { MISSOES } from './missoes.js?v=12';
-import { Trajetorias } from './trajetorias.js?v=18';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=19';
+import { Trajetorias } from './trajetorias.js?v=20';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=22';
 import { criarPremium } from './premium.js?v=3';
 import { iniciarPaywall } from './paywall.js?v=3';
 import { iniciarQuiz } from './quiz.js?v=9';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=2';
 import { iniciarProgresso } from './progresso.js?v=5';
-import { iniciarMusica } from './musica.js?v=7';
-import { iniciarTutorial } from './tutorial.js?v=5';
+import { iniciarMusica } from './musica.js?v=6';
+import { iniciarTutorial } from './tutorial.js?v=1';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -40,7 +41,7 @@ const audioCompartilhado = { obterCtx: () => null };
 const quiz = iniciarQuiz({ motor, dados: DADOS, premium, obterCtxCompartilhado: () => audioCompartilhado.obterCtx() });
 const voce = iniciarVoceNoEspaco({ dados: DADOS, premium });
 const progresso = iniciarProgresso({ dados: DADOS });
-iniciarUI({
+const acoesUI = iniciarUI({
   motor, dados: DADOS, eventos: EVENTOS, missoes: MISSOES, trajetorias, premium,
   abrirQuiz: quiz.abrir, abrirVoce: voce.abrir,
 });
@@ -48,7 +49,13 @@ iniciarUI({
 const musica = iniciarMusica();
 audioCompartilhado.obterCtx = musica.obterCtx;
 
-// Tutorial de onboarding: por último, quando todos os alvos de coachmark já existem
+// Dock mobile (UI paralela em toque+paisagem; desktop/web fica intacto).
+// Reusa o motor real e as ações do ui.js — ver mobile-dock.js.
+iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir });
+
+// Tutorial de onboarding: depois do dock, pra checar body.modo-dock (já
+// setado por iniciarMobileDock) e mirar os alvos certos (desktop ou dock).
+// Só abre sozinho na PRIMEIRA vez (localStorage) — reaberto via botão "?".
 iniciarTutorial();
 
 // Smart default (redução de fadiga de decisão): no PRIMEIRO acesso, em vez de

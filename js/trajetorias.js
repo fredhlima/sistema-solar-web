@@ -137,8 +137,16 @@ export class Trajetorias {
       return;
     }
 
-    // Criar curva CatmullRomCurve3
-    const curva = new THREE.CatmullRomCurve3(waypoints, false, 'catmullrom', 0.5);
+    // Criar curva CatmullRomCurve3. Parametrização 'centripetal' (não a
+    // 'catmullrom'/uniforme usada antes): com waypoints bem desigualmente
+    // espaçados (Terra→Júpiter e Júpiter→Saturno têm distâncias/direções
+    // diferentes) a uniforme sobrepassa perto do ponto do meio e desenha um
+    // laço 3D ali — ficou visível na Voyager 1 perto de Júpiter assim que a
+    // inclinação orbital passou a ser aplicada corretamente (o laço existia
+    // no plano antes, só que achatado/invisível). Centripetal é o tipo
+    // recomendado pela literatura Catmull-Rom justamente para eliminar esse
+    // laço sem mudar os pontos que a curva atravessa.
+    const curva = new THREE.CatmullRomCurve3(waypoints, false, 'centripetal');
 
     // Se interestelar, prolongar a rota além do último sobrevoo. A extensão é
     // ancorada no TEMPO REAL: a sonda segue na velocidade (visual) do último
@@ -172,7 +180,7 @@ export class Trajetorias {
 
       // Criar nova curva com o ponto adicional
       const waypointsProlongados = [...waypoints, pontoProlongado];
-      curvaFinal = new THREE.CatmullRomCurve3(waypointsProlongados, false, 'catmullrom', 0.5);
+      curvaFinal = new THREE.CatmullRomCurve3(waypointsProlongados, false, 'centripetal');
     }
 
     // Criar linha: 200 segmentos
