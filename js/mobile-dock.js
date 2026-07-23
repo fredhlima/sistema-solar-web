@@ -550,11 +550,16 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     $('mdock-settings').hidden = !estado.settingsOpen;
     // Explorar (e o card de missão, que abre na mesma janela — ver mobile.css)
     // ocupam ~46% da esquerda: desloca a ótica pra centralizar o astro/nave
-    // focado na metade livre (sem zoom, sem mexer na cena/dados). O card de
-    // missão é do ui.js (display:block/none, sem passar por estado.panel).
+    // focado na metade livre (sem zoom, sem mexer na cena/dados). SÓ no modo
+    // dock: `estado.panel` é sincronizado por um poll universal (roda mesmo
+    // no desktop, ao selecionar qualquer astro na cena) — sem o gate por
+    // body.modo-dock, o desktop levava um deslocamento de câmera de um
+    // painel esquerdo que nem existe lá (o painel de info do desktop é uma
+    // gaveta à DIREITA).
+    const emModoDock = document.body.classList.contains('modo-dock');
     const cardMissaoEl = $('card-missao');
     const cardMissaoVisivel = !!cardMissaoEl && getComputedStyle(cardMissaoEl).display !== 'none';
-    if (motor.setDeslocamentoVisao) motor.setDeslocamentoVisao((estado.panel === 'exp' || cardMissaoVisivel) ? 0.46 : 0);
+    if (motor.setDeslocamentoVisao) motor.setDeslocamentoVisao(emModoDock && (estado.panel === 'exp' || cardMissaoVisivel) ? 0.46 : 0);
     // scrim de cena aparece quando um painel ou o calendário está aberto
     $('mdock-scrim-cena').hidden = !(estado.panel || estado.calOpen);
     $('mdock-btn-exp').classList.toggle('ativo', estado.panel === 'exp');
