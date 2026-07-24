@@ -1,6 +1,6 @@
 // Núcleo de internacionalização (pt = fonte; en/es = overlays com fallback).
 // Contratos descritos na SPEC.md, seção EXPANSÃO V3.
-import { UI_TEXTOS } from './traducoes-ui.js?v=16';
+import { UI_TEXTOS } from './traducoes-ui.js?v=13';
 
 const IDIOMAS = ['pt', 'en', 'es'];
 const CHAVE_STORAGE = 'sistema-solar-idioma';
@@ -59,6 +59,17 @@ export function formatarDataLonga(date) {
   const a = date.getFullYear();
   if (idiomaAtual === 'en') return `${m} ${d}, ${a}`;
   return `${d} de ${m} de ${a}`;
+}
+
+// Versão compacta (mês abreviado, sem "de"/vírgula) — usada no mobile para
+// caber em 1 linha na barra de tempo, nos 3 idiomas.
+export function formatarDataCompacta(date) {
+  const meses = t('mesesCurtos');
+  const d = date.getDate();
+  const m = Array.isArray(meses) ? meses[date.getMonth()] : '';
+  const a = date.getFullYear();
+  if (idiomaAtual === 'en') return `${m} ${d} ${a}`;
+  return `${d} ${m} ${a}`;
 }
 
 export function formatarDataCurta(iso) {

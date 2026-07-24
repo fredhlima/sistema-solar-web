@@ -1,4 +1,11 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=22';
+import { t, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=19';
+
+// Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
+// tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
+const mqDataCompacta = window.matchMedia('(max-width: 430px)');
+function formatarDataParaTela(date) {
+  return mqDataCompacta.matches ? formatarDataCompacta(date) : formatarDataLonga(date);
+}
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
@@ -187,7 +194,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const dataSimulada = motor.getDataSimulada();
     const elemData = document.getElementById('tempo-data');
     if (elemData) {
-      elemData.textContent = formatarDataLonga(dataSimulada);
+      elemData.textContent = formatarDataParaTela(dataSimulada);
     }
     rafId = requestAnimationFrame(atualizarTempo);
   }
@@ -199,7 +206,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const div = document.createElement('div');
     div.className = 'titulo';
     div.innerHTML = `
-      <img class="titulo-logo" src="assets/logo.png" alt="" aria-hidden="true">
       <h1 class="titulo-principal">${t('titulo')}</h1>
       <p class="titulo-secundario">${t('subtitulo')}</p>
       <div id="slot-progresso" class="titulo-slot-progresso"></div>
@@ -239,7 +245,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     const btnSeletor = document.createElement('button');
     btnSeletor.className = 'seletor-idioma-botao';
-    btnSeletor.innerHTML = `🌐 ${getIdioma().toUpperCase()} ▾`;
+    // Ícone custom (SVG) no lugar do emoji 🌐: no iOS/Safari o globo vem
+    // colorido pela fonte de emoji do sistema, destoando do resto dos
+    // ícones em linha/monocromáticos do app.
+    const ICONE_GLOBO = '<svg class="icone-globo" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><ellipse cx="8" cy="8" rx="2.9" ry="6.3"/><line x1="1.9" y1="8" x2="14.1" y2="8"/></svg>';
+    btnSeletor.innerHTML = `${ICONE_GLOBO} ${getIdioma().toUpperCase()} ▾`;
     btnSeletor.onclick = () => {
       const menu = document.getElementById('seletor-idioma-menu');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -367,7 +377,15 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     };
     itensExp.appendChild(btnTour);
 
-    // Toggle Escala (Visualização)
+    // Toggle Escala (Visualização). No desktop o rail lateral já tem o
+    // cabeçalho "VISUALIZAÇÃO" dando contexto; no mobile o toggle fica solto
+    // na barra inferior sem esse contexto, então ganha um rótulo próprio
+    // ("Tamanho") ao lado, visível só ali (.toggle-escala-label, CSS ≤1024px).
+    const labelEscala = document.createElement('span');
+    labelEscala.className = 'toggle-escala-label';
+    labelEscala.textContent = t('escalaGrupoLabel');
+    grupoVisualizacao.appendChild(labelEscala);
+
     const divEscala = document.createElement('div');
     divEscala.className = 'toggle-escala';
     divEscala.innerHTML = `
@@ -418,27 +436,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     div.appendChild(grupoExperiencias);
     div.appendChild(grupoVisualizacao);
     div.appendChild(grupoUtilidades);
-
-    // Celular deitado: o rail de Visualização vira menu — este botão-ícone
-    // (mesmo desenho do favicon: planeta + anel) o abre/fecha. Só aparece no
-    // deitado via CSS (.vis-trigger).
-    const btnVis = document.createElement('button');
-    btnVis.className = 'vis-trigger';
-    btnVis.setAttribute('aria-label', t('grupoVisualizacao'));
-    btnVis.innerHTML = '<svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><circle cx="32" cy="32" r="13" fill="none" stroke="currentColor" stroke-width="5"/><ellipse cx="32" cy="32" rx="27" ry="8" fill="none" stroke="currentColor" stroke-width="4" transform="rotate(-18 32 32)"/></svg>';
-    btnVis.onclick = (e) => {
-      e.stopPropagation();
-      const aberto = grupoVisualizacao.classList.toggle('menu-aberto');
-      btnVis.classList.toggle('ativo', aberto);
-    };
-    document.addEventListener('click', (e) => {
-      if (!grupoVisualizacao.contains(e.target)) {
-        grupoVisualizacao.classList.remove('menu-aberto');
-        btnVis.classList.remove('ativo');
-      }
-    });
-    div.appendChild(btnVis);
-
     root.appendChild(div);
   }
 
@@ -458,8 +455,19 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     // Estado persistido: painel recolhido vira uma barra mínima no canto,
     // para quem só quer navegar/olhar a cena sem a lista por cima
     const CHAVE_COLAPSO = 'sistema-solar-explorar-colapsado';
+    // Sem preferência salva: no mobile (≤430px) começa recolhido — no 1º load
+    // o painel aberto cobria metade da tela por cima do planeta. No desktop
+    // continua aberto por padrão. Uma vez que a pessoa mexe no toggle, a
+    // preferência dela (localStorage) manda, em qualquer tamanho de tela.
     let recolhido = false;
-    try { recolhido = localStorage.getItem(CHAVE_COLAPSO) === '1'; } catch (e) { /* sem storage */ }
+    try {
+      const salvo = localStorage.getItem(CHAVE_COLAPSO);
+      if (salvo !== null) {
+        recolhido = salvo === '1';
+      } else if (window.matchMedia('(max-width: 430px)').matches) {
+        recolhido = true;
+      }
+    } catch (e) { /* sem storage */ }
 
     function aplicarEstadoColapso() {
       div.classList.toggle('colapsado', recolhido);
@@ -798,7 +806,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const labelData = document.createElement('div');
     labelData.className = 'tempo-data';
     labelData.id = 'tempo-data';
-    labelData.textContent = formatarDataLonga(new Date());
+    labelData.textContent = formatarDataParaTela(new Date());
     labelData.title = t('irParaData');
     labelData.tabIndex = 0;
     labelData.setAttribute('role', 'button');
@@ -972,11 +980,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const conteudo = document.getElementById('info-conteudo-inner');
 
     painel.classList.add('aberto');
-    painel.classList.remove('expandido');
     estado.painelInfoAberto = true;
-    // "Um painel por vez" no celular deitado: classe no body em vez de :has()
-    // (compatível com WebView antigo; :has() exige Chrome 105+)
-    document.body.classList.add('com-painel-dir');
 
     // Clear previous content
     conteudo.innerHTML = '';
@@ -1085,15 +1089,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       html += '</div></details></div>';
     }
 
-    // Card compacto no celular deitado: detalhes ficam atrás deste botão.
-    // fichaSaibaMais ≠ saibaMais: a chave antiga carrega o selo "(11+)" do
-    // conteúdo avançado, que não cabe aqui.
-    html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
-
     conteudo.innerHTML = html;
-
-    const btnSaiba = document.getElementById('info-saiba-btn');
-    if (btnSaiba) btnSaiba.onclick = () => painel.classList.toggle('expandido');
 
     // Favoritar: alterna estado, persiste e atualiza o marcador na lista
     const favBtn = conteudo.querySelector('#info-fav-btn');
@@ -1121,7 +1117,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     painel.classList.remove('aberto');
     estado.painelInfoAberto = false;
     estado.corpoSelecionado = null;
-    if (!estado.painelEventosAberto) document.body.classList.remove('com-painel-dir');
   }
 
   function obterTipoLabel(corpo) {
@@ -1278,8 +1273,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     cabecalho.appendChild(titulo);
 
     const btnFechar = document.createElement('button');
-    btnFechar.className = 'eventos-btn-fechar';
-    btnFechar.innerHTML = '✕';
+    btnFechar.className = 'eventos-btn-fechar botao-fechar-overlay';
+    btnFechar.setAttribute('aria-label', t('voltar'));
+    btnFechar.innerHTML = `<span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span>`;
     btnFechar.onclick = fecharPainelEventos;
     cabecalho.appendChild(btnFechar);
 
@@ -1307,7 +1303,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     painel.classList.add('aberto');
     estado.painelEventosAberto = true;
-    document.body.classList.add('com-painel-dir');
 
     // Atualizar lista de eventos
     conteudo.innerHTML = '';
@@ -1400,7 +1395,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     if (painel) {
       painel.classList.remove('aberto');
       estado.painelEventosAberto = false;
-      if (!estado.painelInfoAberto) document.body.classList.remove('com-painel-dir');
     }
   }
 
@@ -1428,8 +1422,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     header.appendChild(titulo);
 
     const btnFechar = document.createElement('button');
-    btnFechar.className = 'comparador-btn-fechar';
-    btnFechar.innerHTML = '✕';
+    btnFechar.className = 'comparador-btn-fechar botao-fechar-overlay';
+    btnFechar.setAttribute('aria-label', t('voltar'));
+    btnFechar.innerHTML = `<span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span>`;
     btnFechar.onclick = fecharComparador;
     header.appendChild(btnFechar);
 
@@ -1758,41 +1753,4 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       // Rest is handled by v1 handler
     }
   }, true); // capture phase para rodar antes do handler v1
-
-  // ============ AÇÕES EXPOSTAS (dock mobile) ============
-  // O mobile-dock.js é uma UI paralela (só em toque+paisagem) que reusa TODA a
-  // lógica daqui em vez de duplicá-la. Este "saco de ações" é o único contrato
-  // entre os dois — mantê-lo fino.
-  return {
-    // Experiências → reaproveitam os overlays existentes
-    abrirEventos: abrirPainelEventos,
-    abrirComparador,
-    abrirQuiz,
-    abrirVoce,
-    iniciarTour,
-    // Transporte de tempo
-    alternarPausa,
-    avancarVelocidade,
-    recuarVelocidade,
-    estadoTempo: () => ({
-      pausado: estado.velocidadeAtual === 0,
-      rotulo: document.getElementById('tempo-velocidade')?.textContent || '',
-    }),
-    getDataSimulada: () => motor.getDataSimulada(),
-    irParaData: (iso) => motor.irParaData(iso),
-    // Visualização (Settings)
-    setOrbitas: (v) => { estado.orbitasVisiveis = v; motor.setOrbitasVisiveis(v); },
-    setRotulos: (v) => { estado.rotulosVisiveis = v; motor.setRotulosVisiveis(v); },
-    setEscala: (m) => { estado.escalaAtual = m; motor.setEscala(m); },
-    estadoVis: () => ({ orbitas: estado.orbitasVisiveis, rotulos: estado.rotulosVisiveis, escala: estado.escalaAtual }),
-    // Favoritos (Efeito IKEA) — usados na lista/ficha do dock
-    ehFavorito,
-    alternarFavorito,
-    // Rótulo de tipo já traduzido ("Estrela", "Planeta", "Lua de X"…)
-    tipoLabel: obterTipoLabel,
-    // Missões espaciais: abre o card + segue a nave (mesmo gate premium por item
-    // do menu Explorar do desktop). missaoPro diz se o item mostra o selo PRO.
-    abrirMissao: (id) => { if (!premiumExigirItem('missoes', id)) return; abrirCardMissao(id); seguirMissao(id); },
-    missaoPro: (id) => !premiumPermitido('missoes', id),
-  };
 }

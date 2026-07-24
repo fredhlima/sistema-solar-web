@@ -120,7 +120,7 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
   overlay.style.display = 'none';
   overlay.innerHTML = `
     <div class="quiz-card">
-      <button class="quiz-fechar" aria-label="Fechar">✕</button>
+      <button class="quiz-fechar botao-fechar-overlay" aria-label="${tt('voltar')}"><span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${tt('voltar')}</span></button>
       <div id="quiz-conteudo"></div>
     </div>
   `;
