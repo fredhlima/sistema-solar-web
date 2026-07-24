@@ -23,14 +23,28 @@ body.modo-dock #mdock {
 
 /* CAMADA DE MODAIS: toda superfície que abre "sobre" o app fica acima do dock
    (z20-22) e do scrim. Antes tour(11)/missao(11)/comparador(13)/eventos(12)
-   abriam POR BAIXO do dock. Faixa única = z60. */
+   abriam POR BAIXO do dock. Faixa única = z60.
+   ATENÇÃO: esses overlays vivem DENTRO de #ui-root, que é um stacking context
+   próprio (position:fixed) — o z60 deles é interno e não compete com o #mdock
+   (filho direto do body, z20). Por isso o #ui-root inteiro sobe acima do dock
+   no modo-dock: as páginas (quiz/comparador/você/paywall/eventos/missão/tour)
+   passam a cobrir o dock e o título/engrenagem, como devem. As áreas vazias do
+   #ui-root têm pointer-events:none, então o dock continua clicável quando
+   nenhuma página está aberta. Tutorial (z2000) e "gire" (z3000) são filhos do
+   body e seguem acima de tudo. */
+body.modo-dock #ui-root { z-index: 60; }
+
 body.modo-dock .painel-eventos,
 body.modo-dock .comparador-overlay,
 body.modo-dock .card-missao,
 body.modo-dock .tour-card,
 body.modo-dock .quiz-overlay,
-body.modo-dock .voce-no-espaco-overlay,
-body.modo-dock .paywall-overlay { z-index: 60; }
+body.modo-dock .voce-no-espaco-overlay { z-index: 60; }
+
+/* Paywall acima das DEMAIS páginas (z60): ele abre a partir de conteúdo
+   bloqueado dentro de quiz/você-no-espaço — no mesmo z60, a ordem do DOM
+   deixava-o POR BAIXO (paywall é criado primeiro no main.js). */
+body.modo-dock .paywall-overlay { z-index: 62; }
 
 #mdock-girar { display: none; }
 body.modo-girar #mdock-girar {
@@ -121,11 +135,15 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
   border: 1px solid rgba(180, 210, 255, .1); color: #5cc8ff; cursor: pointer;
 }
 .mdock-gear {
+  position: relative;
   width: 30px; height: 30px; border-radius: 9px; background: rgba(18, 26, 42, .2);
   backdrop-filter: blur(13px) saturate(125%); -webkit-backdrop-filter: blur(13px) saturate(125%);
   border: 1px solid rgba(180, 210, 255, .1); padding: 0; cursor: pointer; color: #5cc8ff;
   display: flex; align-items: center; justify-content: center;
 }
+/* Área de toque ≥44px sem crescer o visual: -9px porque o inset é relativo à
+   padding box (28×28, border fora) → 28 + 18 = 46px de área efetiva. */
+.mdock-gear::after { content: ''; position: absolute; inset: -9px; pointer-events: auto; }
 .mdock-gear svg { width: 16px; height: 16px; }
 
 /* ---------- Settings ---------- */
@@ -206,7 +224,7 @@ body.modo-dock .card-missao {
 .mdock-busca::placeholder { color: #93a0b8; }
 .mdock-lista { flex: 1; overflow-y: auto; padding: 4px 0; }
 .mdock-grupo-titulo {
-  padding: 8px 16px 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #6b7690;
+  padding: 8px 16px 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #7d88a2;
 }
 .mdock-item {
   padding: 8px 16px; font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; cursor: pointer; display: flex; align-items: center; gap: 8px;
@@ -243,7 +261,7 @@ body.modo-dock .comparador-painel {
   display: inline-block; margin-top: 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase;
   color: #5cc8ff; background: rgba(92, 200, 255, .12); border: 1px solid rgba(92, 200, 255, .25); border-radius: 20px; padding: 3px 9px;
 }
-.mdock-ficha-fav { background: none; border: none; cursor: pointer; font-size: 18px; color: #6b7690; flex: none; }
+.mdock-ficha-fav { background: none; border: none; cursor: pointer; font-size: 18px; color: #7d88a2; flex: none; }
 .mdock-ficha-fav.on { color: #ffcf6b; }
 .mdock-abas { display: flex; gap: 5px; padding: 0 12px 9px; flex-wrap: wrap; flex: none; }
 .mdock-aba {
@@ -341,7 +359,7 @@ body.modo-dock .comparador-painel {
   filter: drop-shadow(0 0 6px rgba(92, 200, 255, .6));
 }
 .mdock-transp-play svg { width: 20px; height: 20px; }
-.mdock-slider { -webkit-appearance: none; appearance: none; width: 70px; height: 14px; background: transparent; cursor: pointer; }
+.mdock-slider { -webkit-appearance: none; appearance: none; width: 70px; height: 44px; margin: -15px 0; background: transparent; cursor: pointer; }
 .mdock-slider::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, rgba(255, 138, 92, .5), rgba(120, 160, 255, .18) 50%, rgba(92, 200, 255, .6)); border-radius: 2px; }
 .mdock-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #5cc8ff; box-shadow: 0 0 6px rgba(92, 200, 255, .6); margin-top: -4px; }
 .mdock-slider::-moz-range-track { height: 2px; background: linear-gradient(90deg, rgba(255, 138, 92, .5), rgba(120, 160, 255, .18) 50%, rgba(92, 200, 255, .6)); border-radius: 2px; }

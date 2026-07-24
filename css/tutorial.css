@@ -148,3 +148,16 @@ body.tutorial-ativo .toast-dica {
     width: auto;
   }
 }
+
+/* Alvos de toque ≥44px (Apple HIG) só em telas touch — desktop mantém o visual */
+@media (pointer: coarse) {
+  .tutorial-btn-pular,
+  .tutorial-btn-anterior,
+  .tutorial-btn-livre,
+  .tutorial-btn-proximo,
+  .tutorial-btn-tour {
+    min-height: 44px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}

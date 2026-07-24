@@ -634,7 +634,7 @@ html, body {
 .explorar-fav-vazio {
   font-size: 11px;
   line-height: 1.4;
-  color: #6b7686;
+  color: #7d88a2;
   padding: 2px 0 4px 0;
 }
 
@@ -2117,6 +2117,7 @@ html, body {
     z-index: 5;
     display: inline-flex;
     align-items: center;
+    min-height: 44px;
     transition: all 150ms ease;
   }
 
@@ -2195,11 +2196,18 @@ body.modo-dock .botao-fechar-overlay {
   z-index: 65;
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   transition: all 150ms ease;
 }
 
 body.modo-dock .botao-fechar-overlay .fechar-icone { display: none; }
 body.modo-dock .botao-fechar-overlay .fechar-texto { display: inline; }
+
+/* Mesmo respiro que o breakpoint ≤768px já dá: sem isto o «‹ Voltar» fixo
+   cobre o título "EVENTOS" do painel no shell de dock (viewport > 768px). */
+body.modo-dock .eventos-cabecalho {
+  padding-top: calc(60px + env(safe-area-inset-top));
+}
 
 .vis-trigger, .info-saiba-btn { display: none; }
 
