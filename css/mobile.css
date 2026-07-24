@@ -10,7 +10,7 @@ body.modo-dock #mdock {
   inset: 0;
   z-index: 20;
   pointer-events: none;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 /* [hidden] tem que vencer o display:flex dos painéis/calendário — senão o
    painel não some ao fechar (bug: os dois painéis ficavam abertos). */
@@ -44,7 +44,7 @@ body.modo-girar #mdock-girar {
   gap: 20px;
   padding: 32px;
   text-align: center;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: radial-gradient(600px 440px at 50% 34%, rgba(30, 60, 120, 0.28), transparent 60%), #04060e;
 }
 #mdock-girar .mdock-girar-logo { width: 54px; height: 54px; filter: drop-shadow(0 0 18px rgba(92, 200, 255, 0.4)); }
@@ -105,8 +105,8 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 }
 .mdock-titulo-logo { width: 38px; height: 38px; flex: none; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 .mdock-titulo-logo svg { width: 100%; height: 100%; }
-.mdock-titulo-principal { font: 600 13px 'Segoe UI'; color: #e8edf7; letter-spacing: .06em; text-transform: uppercase; }
-.mdock-titulo-sub { font: 400 10px 'Segoe UI'; color: #93a0b8; letter-spacing: .02em; }
+.mdock-titulo-principal { font: 600 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7; letter-spacing: .06em; text-transform: uppercase; }
+.mdock-titulo-sub { font: 400 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #93a0b8; letter-spacing: .02em; }
 
 /* ---------- Nível + engrenagem ---------- */
 .mdock-topo-dir {
@@ -116,7 +116,7 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
   display: flex; align-items: center; gap: 9px; pointer-events: auto;
 }
 .mdock-nivel {
-  font: 600 10px 'Segoe UI'; letter-spacing: .06em; padding: 6px 12px; border-radius: 20px;
+  font: 600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .06em; padding: 6px 12px; border-radius: 20px;
   background: rgba(18, 26, 42, .2); backdrop-filter: blur(13px) saturate(125%); -webkit-backdrop-filter: blur(13px) saturate(125%);
   border: 1px solid rgba(180, 210, 255, .1); color: #5cc8ff; cursor: pointer;
 }
@@ -139,15 +139,15 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
   background: rgba(11, 16, 28, .94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(120, 160, 255, .16); box-shadow: 0 16px 40px rgba(0, 0, 0, .5);
 }
-.mdock-settings-titulo { font: 600 10.5px 'Segoe UI'; letter-spacing: .1em; text-transform: uppercase; color: #93a0b8; margin-bottom: 10px; }
+.mdock-settings-titulo { font: 600 10.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #93a0b8; margin-bottom: 10px; }
 .mdock-settings-linha { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-top: 1px solid rgba(120, 160, 255, .08); }
-.mdock-settings-linha span { font: 400 12px 'Segoe UI'; color: #e8edf7; }
+.mdock-settings-linha span { font: 400 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7; }
 .mdock-toggle { width: 34px; height: 18px; border-radius: 10px; cursor: pointer; background: rgba(120, 160, 255, .18); position: relative; }
 .mdock-toggle.on { background: #5cc8ff; }
 .mdock-toggle-bolinha { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: left .15s; }
 .mdock-toggle.on .mdock-toggle-bolinha { left: 18px; }
 .mdock-idiomas { display: flex; gap: 5px; }
-.mdock-idioma-op { font: 600 10px 'Segoe UI'; padding: 4px 9px; border-radius: 12px; cursor: pointer; color: #93a0b8; }
+.mdock-idioma-op { font: 600 10px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 4px 9px; border-radius: 12px; cursor: pointer; color: #93a0b8; }
 .mdock-idioma-op.sel { background: rgba(92, 200, 255, .2); color: #5cc8ff; }
 
 /* ---------- Painéis Explorar / Experiências (shells na Fase 1) ---------- */
@@ -183,7 +183,7 @@ body.modo-dock .card-missao {
 .mdock-painel-cabeca {
   display: flex; align-items: center; justify-content: space-between; padding: 11px 14px;
   border-bottom: 1px solid rgba(120, 160, 255, .08); cursor: pointer;
-  font: 600 12px 'Segoe UI'; letter-spacing: .06em; text-transform: uppercase; color: #e8edf7;
+  font: 600 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #e8edf7;
 }
 .mdock-painel-cabeca span:first-child { display: inline-flex; align-items: center; gap: 7px; }
 .mdock-painel-cabeca svg { width: 15px; height: 15px; flex: none; }
@@ -201,22 +201,22 @@ body.modo-dock .card-missao {
 }
 .mdock-busca-wrap svg { width: 14px; height: 14px; flex: none; color: #93a0b8; }
 .mdock-busca {
-  flex: 1; border: none; background: transparent; outline: none; font: 400 11px 'Segoe UI'; color: #e8edf7;
+  flex: 1; border: none; background: transparent; outline: none; font: 400 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7;
 }
 .mdock-busca::placeholder { color: #93a0b8; }
 .mdock-lista { flex: 1; overflow-y: auto; padding: 4px 0; }
 .mdock-grupo-titulo {
-  padding: 8px 16px 4px; font: 600 9px 'Segoe UI'; letter-spacing: .12em; text-transform: uppercase; color: #6b7690;
+  padding: 8px 16px 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #6b7690;
 }
 .mdock-item {
-  padding: 8px 16px; font: 500 12px 'Segoe UI'; color: #c9d3e6; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  padding: 8px 16px; font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; cursor: pointer; display: flex; align-items: center; gap: 8px;
 }
 .mdock-item:hover { background: rgba(92, 200, 255, .08); color: #fff; }
 .mdock-item-lua { padding-left: 30px; color: #93a0b8; }
 .mdock-item-fav { color: #ffcf6b; }
 /* Missões espaciais na lista: bolinha colorida + selo PRO */
 .mdock-missao-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-.mdock-item-pro { margin-left: auto; font: 700 8px 'Segoe UI'; letter-spacing: .08em; color: #ffb454; border: 1px solid rgba(255, 180, 84, .4); border-radius: 8px; padding: 1px 5px; }
+.mdock-item-pro { margin-left: auto; font: 700 8px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .08em; color: #ffb454; border: 1px solid rgba(255, 180, 84, .4); border-radius: 8px; padding: 1px 5px; }
 
 /* TELA CHEIA no deitado (pedido do Fred): paywall/compras, quiz, você e
    comparador ocupam a tela inteira, com rolagem interna e sem cantos. */
@@ -229,46 +229,46 @@ body.modo-dock .comparador-painel {
   border-radius: 0; margin: 0;
   box-sizing: border-box; overflow-y: auto;
 }
-.mdock-lista-vazia { padding: 16px; font: 400 11px 'Segoe UI'; color: #6b7690; text-align: center; }
+.mdock-lista-vazia { padding: 16px; font: 400 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #6b7690; text-align: center; }
 
 /* ---------- Explorar: ficha ---------- */
 .mdock-voltar { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid rgba(120, 160, 255, .08); cursor: pointer; flex: none; }
 .mdock-voltar-seta { color: #5cc8ff; font-size: 15px; }
-.mdock-voltar span:last-child { font: 600 11px 'Segoe UI'; letter-spacing: .06em; text-transform: uppercase; color: #93a0b8; }
+.mdock-voltar span:last-child { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #93a0b8; }
 .mdock-ficha-cab { display: flex; align-items: center; gap: 12px; padding: 12px 14px 10px; flex: none; }
 .mdock-ficha-swatch { width: 44px; height: 44px; border-radius: 50%; flex: none; box-shadow: inset -6px -4px 10px rgba(0, 0, 0, .5), 0 0 18px rgba(92, 200, 255, .18); }
 .mdock-ficha-info { flex: 1; }
-.mdock-ficha-nome { font: 600 16px 'Segoe UI'; color: #e8edf7; }
+.mdock-ficha-nome { font: 600 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7; }
 .mdock-ficha-pill {
-  display: inline-block; margin-top: 4px; font: 600 9px 'Segoe UI'; letter-spacing: .1em; text-transform: uppercase;
+  display: inline-block; margin-top: 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase;
   color: #5cc8ff; background: rgba(92, 200, 255, .12); border: 1px solid rgba(92, 200, 255, .25); border-radius: 20px; padding: 3px 9px;
 }
 .mdock-ficha-fav { background: none; border: none; cursor: pointer; font-size: 18px; color: #6b7690; flex: none; }
 .mdock-ficha-fav.on { color: #ffcf6b; }
 .mdock-abas { display: flex; gap: 5px; padding: 0 12px 9px; flex-wrap: wrap; flex: none; }
 .mdock-aba {
-  font: 600 9px 'Segoe UI'; letter-spacing: .03em; text-transform: uppercase; padding: 5px 9px; border-radius: 20px;
+  font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .03em; text-transform: uppercase; padding: 5px 9px; border-radius: 20px;
   border: 1px solid rgba(92, 200, 255, .22); cursor: pointer; color: #93a0b8; background: transparent;
 }
 .mdock-aba.ativa { background: #5cc8ff; color: #04121e; border-color: #5cc8ff; }
 .mdock-aba-conteudo { flex: 1; overflow-y: auto; padding: 2px 14px 14px; }
-.mdock-resumo-txt { font: 400 11.5px/1.65 'Segoe UI'; color: #c9d3e6; margin-bottom: 14px; }
-.mdock-subtitulo { font: 600 9px 'Segoe UI'; letter-spacing: .12em; text-transform: uppercase; color: #93a0b8; margin-bottom: 8px; }
+.mdock-resumo-txt { font: 400 11.5px/1.65 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; margin-bottom: 14px; }
+.mdock-subtitulo { font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #93a0b8; margin-bottom: 8px; }
 .mdock-subtitulo-ciano { color: #5cc8ff; margin-bottom: 4px; }
-.mdock-linha-diamante, .mdock-linha-estrela, .mdock-linha-triangulo { display: flex; gap: 8px; font: 400 11px/1.55 'Segoe UI'; color: #c9d3e6; margin-bottom: 9px; }
+.mdock-linha-diamante, .mdock-linha-estrela, .mdock-linha-triangulo { display: flex; gap: 8px; font: 400 11px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; margin-bottom: 9px; }
 .mdock-diamante { color: #5cc8ff; }
 .mdock-estrela-amb { color: #ffcf6b; }
 .mdock-triangulo { color: #5cc8ff; }
 .mdock-numero-linha { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid rgba(120, 160, 255, .08); }
-.mdock-numero-rotulo { font: 400 11px 'Segoe UI'; color: #93a0b8; }
-.mdock-numero-valor { font: 600 11px 'Segoe UI'; color: #e8edf7; text-align: right; }
+.mdock-numero-rotulo { font: 400 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #93a0b8; }
+.mdock-numero-valor { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7; text-align: right; }
 .mdock-av-secao { margin-bottom: 11px; }
-.mdock-av-texto { font: 400 11px/1.55 'Segoe UI'; color: #c9d3e6; }
+.mdock-av-texto { font: 400 11px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; }
 
 /* ---------- Experiências ---------- */
 .mdock-xp-lista { flex: 1; overflow-y: auto; padding: 9px 10px; display: flex; flex-direction: column; gap: 7px; }
 .mdock-xp-btn {
-  border-radius: 12px; justify-content: flex-start; padding: 9px 12px; font: 500 11.5px 'Segoe UI'; color: #e8edf7;
+  border-radius: 12px; justify-content: flex-start; padding: 9px 12px; font: 500 11.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #e8edf7;
   background: rgba(92, 200, 255, .08); border: 1px solid rgba(92, 200, 255, .24); cursor: pointer;
   display: flex; align-items: center; gap: 9px; text-align: left;
 }
@@ -286,13 +286,13 @@ body.modo-dock .comparador-painel {
 }
 .mdock-cal-cabeca { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .mdock-cal-nav { cursor: pointer; color: #93a0b8; font-size: 16px; padding: 0 6px; }
-.mdock-cal-mes { font: 600 11px 'Segoe UI'; letter-spacing: .06em; text-transform: uppercase; color: #e8edf7; }
+.mdock-cal-mes { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #e8edf7; }
 .mdock-cal-semana, .mdock-cal-dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; justify-items: center; }
 .mdock-cal-semana { margin-bottom: 4px; }
-.mdock-cal-semana div { font: 600 9px 'Segoe UI'; color: #6b7690; }
+.mdock-cal-semana div { font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #6b7690; }
 .mdock-cal-dia {
   width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  border-radius: 50%; font: 500 11px 'Segoe UI'; cursor: pointer; color: #c9d3e6;
+  border-radius: 50%; font: 500 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; cursor: pointer; color: #c9d3e6;
 }
 .mdock-cal-dia.hoje { color: #5cc8ff; border: 1px solid rgba(92, 200, 255, .5); }
 .mdock-cal-dia.sel {
@@ -302,7 +302,7 @@ body.modo-dock .comparador-painel {
 .mdock-cal-hoje {
   width: 100%; margin-top: 12px; text-align: center; border-radius: 12px; padding: 8px;
   background: rgba(255, 180, 84, .12); border: 1px solid rgba(255, 180, 84, .3); color: #ffb454;
-  font: 600 11px 'Segoe UI'; cursor: pointer;
+  font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; cursor: pointer;
 }
 
 /* ---------- Dock inferior ---------- */
@@ -326,7 +326,7 @@ body.modo-dock .comparador-painel {
 }
 .mdock-sec {
   display: flex; align-items: center; justify-content: center; gap: 7px; padding: 14px 10px;
-  cursor: pointer; color: #f2f5fb; font: 600 12.5px 'Segoe UI'; letter-spacing: .02em;
+  cursor: pointer; color: #f2f5fb; font: 600 12.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .02em;
 }
 .mdock-sec svg { width: 16px; height: 16px; flex: none; }
 .mdock-sec.ativo { color: #5cc8ff; }
@@ -346,8 +346,8 @@ body.modo-dock .comparador-painel {
 .mdock-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #5cc8ff; box-shadow: 0 0 6px rgba(92, 200, 255, .6); margin-top: -4px; }
 .mdock-slider::-moz-range-track { height: 2px; background: linear-gradient(90deg, rgba(255, 138, 92, .5), rgba(120, 160, 255, .18) 50%, rgba(92, 200, 255, .6)); border-radius: 2px; }
 .mdock-slider::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: #5cc8ff; border: none; }
-.mdock-speed { font: 600 11px 'Segoe UI'; color: #93a0b8; cursor: pointer; min-width: 48px; text-align: center; }
-.mdock-data { font: 600 11px 'Segoe UI'; color: #5cc8ff; cursor: pointer; padding: 3px 8px; border-radius: 20px; background: transparent; }
+.mdock-speed { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #93a0b8; cursor: pointer; min-width: 48px; text-align: center; }
+.mdock-data { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #5cc8ff; cursor: pointer; padding: 3px 8px; border-radius: 20px; background: transparent; }
 .mdock-data.ativo { color: #04121e; background: rgba(92, 200, 255, .85); }
 
 /* ---------- Telas estreitas (ex.: iPhone SE deitado, ~667px) ---------- */

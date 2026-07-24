@@ -4,7 +4,13 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #04060e;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  /* Pilha de fonte nativa: San Francisco no iOS/macOS, Segoe UI no Windows,
+     Roboto no Android — moderna, legível, sem baixar nada. Único lugar que
+     precisa dessa lista completa; o resto do app herda daqui. Nunca declarar
+     'Segoe UI' sozinho em outro arquivo sem essa mesma pilha de fallback —
+     causou texto serifado no iOS (Segoe UI não existe lá, sem fallback o
+     Safari cai na fonte serif padrão dele). Ver CLAUDE.md. */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #e8edf7;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

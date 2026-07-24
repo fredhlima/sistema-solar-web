@@ -81,7 +81,7 @@
 
 .voce-no-espaco-controle input[type="number"],
 .voce-no-espaco-controle input[type="range"] {
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 .voce-no-espaco-controle input[type="number"] {
