@@ -22,6 +22,13 @@ html, body {
   user-select: none;
 }
 
+/* Controles de formulário NÃO herdam fonte por padrão — no iOS um input sem
+   font-family explícita pode cair na serif do sistema (fonte inconsistente
+   que o Fred viu na busca do Explorar). Blindagem única e global: */
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 #cena {
   position: fixed;
   top: 0;
@@ -2164,7 +2171,19 @@ body.modo-dock .voce-no-espaco-overlay,
 body.modo-dock .paywall-overlay {
   align-items: stretch !important;
   justify-content: stretch !important;
-  padding: 0 !important;
+  /* laterais: notch/Dynamic Island viram borda ESQUERDA/DIREITA em paisagem —
+     sem isto o conteúdo das páginas colava na área de risco (iPhone do Fred) */
+  padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left) !important;
+}
+
+/* Eventos é painel lateral direito no dock: respiro pro notch/ilha à direita
+   e termina ACIMA da barra do dock — senão cobre o botão Experiências e o
+   transporte (o painel está na camada z60, acima do dock desde a rodada 2). */
+body.modo-dock .painel-eventos {
+  padding-right: env(safe-area-inset-right);
+  /* height:100% da regra base ignoraria o bottom — top+bottom mandam aqui */
+  height: auto;
+  bottom: var(--mdock-bar-h, 64px);
 }
 
 body.modo-dock .comparador-painel,

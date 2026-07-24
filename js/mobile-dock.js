@@ -189,9 +189,15 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     render();
   }
 
+  // Exclusividade de janelas: qualquer superfície nova fecha as páginas de
+  // ui-root abertas (eventos/comparador/quiz/você/paywall/missão) — sem isto
+  // elas empilhavam (achado do Fred no iPhone, 24/07).
+  const fecharPaginas = () => { if (acoes.fecharOverlays) acoes.fecharOverlays(); };
+
   function togglePainel(nome) {
     estado.panel = estado.panel === nome ? null : nome;
     estado.calOpen = false;
+    if (estado.panel) fecharPaginas();
     render();
   }
 
@@ -211,6 +217,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   $('mdock-date').onclick = () => {
     estado.calOpen = !estado.calOpen;
     estado.panel = null;
+    if (estado.calOpen) fecharPaginas();
     if (estado.calOpen) {
       const cur = acoes.getDataSimulada();
       estado.calY = cur.getFullYear();
@@ -345,26 +352,27 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     const corpo = dados.corpos.find((c) => c.id === id);
     if (!corpo) { estado.sel = null; montarLista(shell); return; }
 
-    const voltar = document.createElement('div');
-    voltar.className = 'mdock-voltar';
-    voltar.innerHTML = `<span class="mdock-voltar-seta">‹</span><span>${t('mdockVoltar')}</span>`;
-    voltar.onclick = () => { estado.sel = null; expAssinatura = null; shell.innerHTML = ''; montarLista(shell); };
-    shell.appendChild(voltar);
-
-    const cab = document.createElement('div');
-    cab.className = 'mdock-ficha-cab';
+    // Cabeçalho de 1 LINHA (proposta §5 do PLANO-QUALIDADE, pedida pelo Fred):
+    // «‹» (volta à lista) + nome + tipo + ★ em ~44px. O cabeçalho "EXPLORAR"
+    // do painel some enquanto a ficha está aberta (classe com-ficha, ver
+    // syncPainelExp) — a altura liberada vira área de leitura.
     // Sem swatch do astro: ele já aparece no motor 3D ao lado (pedido do Fred).
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'mdock-ficha-info';
+    const linha = document.createElement('div');
+    linha.className = 'mdock-ficha-linha';
+    const btnVoltar = document.createElement('button');
+    btnVoltar.className = 'mdock-ficha-voltar';
+    btnVoltar.setAttribute('aria-label', t('mdockVoltar'));
+    btnVoltar.textContent = '‹';
+    btnVoltar.onclick = () => { estado.sel = null; expAssinatura = null; shell.innerHTML = ''; montarLista(shell); syncComFicha(); };
+    linha.appendChild(btnVoltar);
     const nome = document.createElement('div');
     nome.className = 'mdock-ficha-nome';
     nome.textContent = corpo.nome;
-    infoDiv.appendChild(nome);
+    linha.appendChild(nome);
     const pill = document.createElement('span');
     pill.className = 'mdock-ficha-pill';
     pill.textContent = acoes.tipoLabel(corpo);
-    infoDiv.appendChild(pill);
-    cab.appendChild(infoDiv);
+    linha.appendChild(pill);
     const btnFav = document.createElement('button');
     btnFav.className = 'mdock-ficha-fav';
     const setFavIcone = () => {
@@ -374,8 +382,8 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     };
     setFavIcone();
     btnFav.onclick = () => { acoes.alternarFavorito(corpo.id); setFavIcone(); };
-    cab.appendChild(btnFav);
-    shell.appendChild(cab);
+    linha.appendChild(btnFav);
+    shell.appendChild(linha);
 
     const abas = document.createElement('div');
     abas.className = 'mdock-abas';
@@ -408,6 +416,8 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     function renderAba() {
       abas.querySelectorAll('.mdock-aba').forEach((b) => b.classList.toggle('ativa', b.dataset.tab === estado.tab));
       conteudo.innerHTML = '';
+      // Números em 2 colunas (§5): mesma informação em metade da altura
+      conteudo.classList.toggle('mdock-duas-colunas', estado.tab === 'numeros');
       const inf = corpo.info || {};
       if (estado.tab === 'resumo') {
         const p = document.createElement('div');
@@ -460,7 +470,14 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   }
 
   // ---------- Explorar: alterna lista/ficha conforme estado ----------
+  // Com a ficha aberta o cabeçalho "EXPLORAR" do painel some (classe
+  // com-ficha em CSS) — sobra o cabeçalho de 1 linha da própria ficha (§5).
+  function syncComFicha() {
+    const painel = document.getElementById('mdock-painel-exp');
+    if (painel) painel.classList.toggle('com-ficha', !!estado.sel);
+  }
   function syncPainelExp() {
+    syncComFicha();
     const shell = document.querySelector('#mdock-painel-exp .mdock-shell');
     if (!shell) return;
     const assinatura = estado.panel === 'exp' ? (estado.sel ? 'ficha:' + estado.sel : 'lista') : 'fechado';
@@ -488,7 +505,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       const span = document.createElement('span');
       span.textContent = it.label;
       b.appendChild(span);
-      b.onclick = () => { estado.panel = null; render(); it.acao(); };
+      b.onclick = () => { estado.panel = null; render(); fecharPaginas(); it.acao(); };
       wrap.appendChild(b);
     });
     shell.appendChild(wrap);
@@ -504,6 +521,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       estado.panel = 'exp';
       estado.calOpen = false;
       estado.settingsOpen = false;
+      fecharPaginas();
     } else if (estado.panel === 'exp') {
       estado.sel = null;
     }
@@ -516,6 +534,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     estado.settingsOpen = !estado.settingsOpen;
     estado.panel = null;
     estado.calOpen = false;
+    if (estado.settingsOpen) fecharPaginas();
     render();
   };
   $('mdock-settings-scrim').onclick = () => { estado.settingsOpen = false; render(); };
@@ -572,6 +591,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     $('mdock-scrim-cena').hidden = !(estado.panel || estado.calOpen);
     $('mdock-btn-exp').classList.toggle('ativo', estado.panel === 'exp');
     $('mdock-btn-xp').classList.toggle('ativo', estado.panel === 'xp');
+    // Painel esquerdo (Explorar/missão) sobrepunha o cartão do logo — o
+    // título some enquanto ele está aberto (CSS .mdock-painel-aberto).
+    mdock.classList.toggle('mdock-painel-aberto', estado.panel === 'exp' || cardMissaoVisivel);
     $('mdock-exp-seta').textContent = estado.panel === 'exp' ? '▾' : '▴';
     $('mdock-xp-seta').textContent = estado.panel === 'xp' ? '▾' : '▴';
     $('mdock-date').classList.toggle('ativo', estado.calOpen);

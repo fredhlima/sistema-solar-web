@@ -1,7 +1,7 @@
 import { DADOS } from './dados.js?v=22';
 import { SistemaSolar3D } from './motor3d.js?v=39';
-import { iniciarUI } from './ui.js?v=39';
-import { iniciarMobileDock } from './mobile-dock.js?v=9';
+import { iniciarUI } from './ui.js?v=40';
+import { iniciarMobileDock } from './mobile-dock.js?v=10';
 import { EVENTOS } from './eventos.js?v=9';
 import { MISSOES } from './missoes.js?v=12';
 import { Trajetorias } from './trajetorias.js?v=20';

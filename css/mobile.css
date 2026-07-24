@@ -146,6 +146,11 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 .mdock-gear::after { content: ''; position: absolute; inset: -9px; pointer-events: auto; }
 .mdock-gear svg { width: 16px; height: 16px; }
 
+/* Painel esquerdo aberto (Explorar/missão) sobrepunha o cartão do logo —
+   o título some enquanto isso (classe alternada no render()). */
+#mdock .mdock-titulo { transition: opacity 150ms ease; }
+#mdock.mdock-painel-aberto .mdock-titulo { opacity: 0; pointer-events: none; }
+
 /* ---------- Settings ---------- */
 .mdock-settings { position: absolute; inset: 0; z-index: 22; pointer-events: auto; }
 .mdock-scrim { position: absolute; inset: 0; }
@@ -179,7 +184,9 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 /* Explorar cresce a ~quase-meia-tela: o astro focado fica centralizado na
    metade livre (câmera deslocada via motor.setDeslocamentoVisao — ver
    mobile-dock.js). Cap em 460px para não engolir a tela em tablets largos. */
-.mdock-painel-l { left: calc(12px + env(safe-area-inset-left)); width: min(46vw, 460px); }
+/* §5: painel mais largo em paisagem — a metade livre da cena ainda mostra o
+   astro focado (câmera desloca via setDeslocamentoVisao) e o texto respira. */
+.mdock-painel-l { left: calc(12px + env(safe-area-inset-left)); width: min(52vw, 520px); }
 .mdock-painel-r { right: calc(12px + env(safe-area-inset-right)); width: 290px; }
 
 /* Experiências abre em TELA CHEIA (pedido do Fred: facilita a visualização
@@ -253,6 +260,23 @@ body.modo-dock .comparador-painel {
 .mdock-voltar { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-bottom: 1px solid rgba(120, 160, 255, .08); cursor: pointer; flex: none; }
 .mdock-voltar-seta { color: #5cc8ff; font-size: 15px; }
 .mdock-voltar span:last-child { font: 600 11px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #93a0b8; }
+/* §5: cabeçalho de 1 LINHA da ficha («‹» + nome + tipo + ★, ≤44px). O
+   cabeçalho "EXPLORAR" do painel some junto (com-ficha) — a altura vira
+   área de leitura. */
+#mdock-painel-exp.com-ficha .mdock-painel-cabeca { display: none; }
+.mdock-ficha-linha {
+  display: flex; align-items: center; gap: 8px; padding: 2px 12px 2px 4px;
+  box-sizing: border-box; min-height: 44px; flex: none;
+  border-bottom: 1px solid rgba(120, 160, 255, .08);
+}
+.mdock-ficha-voltar {
+  background: none; border: none; cursor: pointer; color: #5cc8ff;
+  font-size: 26px; line-height: 1; padding: 4px 10px 8px; flex: none;
+  box-sizing: border-box; min-width: 44px; min-height: 40px;
+}
+.mdock-ficha-linha .mdock-ficha-nome {
+  flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .mdock-ficha-cab { display: flex; align-items: center; gap: 12px; padding: 12px 14px 10px; flex: none; }
 .mdock-ficha-swatch { width: 44px; height: 44px; border-radius: 50%; flex: none; box-shadow: inset -6px -4px 10px rgba(0, 0, 0, .5), 0 0 18px rgba(92, 200, 255, .18); }
 .mdock-ficha-info { flex: 1; }
@@ -270,7 +294,12 @@ body.modo-dock .comparador-painel {
 }
 .mdock-aba.ativa { background: #5cc8ff; color: #04121e; border-color: #5cc8ff; }
 .mdock-aba-conteudo { flex: 1; overflow-y: auto; padding: 2px 14px 14px; }
-.mdock-resumo-txt { font: 400 11.5px/1.65 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; margin-bottom: 14px; }
+/* §5: leitura confortável — 13px/1.6 (era 11.5px) */
+.mdock-resumo-txt { font: 400 13px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; margin-bottom: 14px; }
+/* §5: números em 2 colunas — mesma informação em metade da altura */
+.mdock-aba-conteudo.mdock-duas-colunas {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px 18px; align-content: start;
+}
 .mdock-subtitulo { font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #93a0b8; margin-bottom: 8px; }
 .mdock-subtitulo-ciano { color: #5cc8ff; margin-bottom: 4px; }
 .mdock-linha-diamante, .mdock-linha-estrela, .mdock-linha-triangulo { display: flex; gap: 8px; font: 400 11px/1.55 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; margin-bottom: 9px; }

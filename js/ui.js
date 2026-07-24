@@ -1802,6 +1802,19 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     abrirQuiz,
     abrirVoce,
     iniciarTour,
+    // Exclusividade de janelas (dock): fecha qualquer página/overlay aberto —
+    // eventos, card de missão, comparador, quiz, você-no-espaço, paywall —
+    // antes de outra superfície abrir. Quiz/você/paywall são módulos externos
+    // sem função de fechar exposta: o caminho é o próprio «‹ Voltar» deles,
+    // clicado programaticamente (mantém o estado interno consistente).
+    fecharOverlays: () => {
+      fecharPainelEventos();
+      fecharCardMissao();
+      for (const b of document.querySelectorAll('.botao-fechar-overlay')) {
+        const overlay = b.closest('.comparador-overlay, .quiz-overlay, .voce-no-espaco-overlay, .paywall-overlay');
+        if (overlay && getComputedStyle(overlay).display !== 'none') b.click();
+      }
+    },
     // Transporte de tempo
     alternarPausa,
     avancarVelocidade,
