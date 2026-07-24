@@ -17,7 +17,7 @@ export function iniciarPaywall({ premium, t }) {
   overlay.className = 'paywall-overlay';
   overlay.innerHTML = `
     <div class="paywall-card">
-      <button class="paywall-fechar" aria-label="Fechar">✕</button>
+      <button class="paywall-fechar botao-fechar-overlay" aria-label="${t('voltar')}"><span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span></button>
       <div class="paywall-badge">${t('proBadge')}</div>
       <h2 class="paywall-titulo">${t('paywallTitulo')}</h2>
       <p class="paywall-subtitulo">${t('paywallSubtitulo')}</p>

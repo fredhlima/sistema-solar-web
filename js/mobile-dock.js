@@ -31,6 +31,14 @@ const SVG_GEAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 
 const SVG_EXPLORAR = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.2 5.2-5.2 2.2 2.2-5.2z"/></svg>`;
 const SVG_XP = `<svg viewBox="0 0 24 24" fill="#5cc8ff"><path d="M12 2l1.7 6.1L20 10l-6.3 1.9L12 18l-1.7-6.1L4 10l6.3-1.9z"/></svg>`;
+
+// Ícones de transporte custom: ⏮/▶/⏸/⏭ (Unicode) renderizam coloridos como
+// emoji no iOS/Safari, destoando dos ícones em linha do resto do app (mesmo
+// problema já corrigido no botão de idioma 🌐 — ver CLAUDE.md).
+const SVG_VOLTAR = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM19 6L9 12l10 6z"/></svg>`;
+const SVG_AVANCAR = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM5 6l10 6L5 18z"/></svg>`;
+const SVG_PLAY = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5l12 7-12 7z"/></svg>`;
+const SVG_PAUSE = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
 const SVG_BUSCA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/></svg>`;
 const SVG_TOUR = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2 3.2 2 3.2H6"/></svg>`;
 const SVG_EVENTOS = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3v4M16 3v4"/></svg>`;
@@ -155,9 +163,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       <div class="mdock-sec mdock-sec-exp" id="mdock-btn-exp">${SVG_EXPLORAR}<span>${t('explorar')}</span> <span class="mdock-seta-sec" id="mdock-exp-seta">▴</span></div>
       <div class="mdock-divisor"></div>
       <div class="mdock-sec mdock-transporte">
-        <span class="mdock-transp-btn" id="mdock-back" title="⏮">⏮</span>
-        <span class="mdock-transp-play" id="mdock-play" title="▶/⏸">⏸</span>
-        <span class="mdock-transp-btn" id="mdock-fwd" title="⏭">⏭</span>
+        <span class="mdock-transp-btn" id="mdock-back" title="${t('mdockRetroceder')}">${SVG_VOLTAR}</span>
+        <span class="mdock-transp-play" id="mdock-play" title="${t('mdockPlayPausa')}">${SVG_PAUSE}</span>
+        <span class="mdock-transp-btn" id="mdock-fwd" title="${t('mdockAvancar')}">${SVG_AVANCAR}</span>
         <input class="mdock-slider" id="mdock-slider" type="range" min="0" max="14" step="1" value="9" title="${t('tituloSlider')}">
         <span class="mdock-speed" id="mdock-speed" title="${t('tituloSlider')}"></span>
         <span class="mdock-data" id="mdock-date" title="${t('irParaData')}"></span>
@@ -573,7 +581,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
 
     // transporte
     const et = acoes.estadoTempo();
-    $('mdock-play').textContent = et.pausado ? '▶' : '⏸';
+    $('mdock-play').innerHTML = et.pausado ? SVG_PLAY : SVG_PAUSE;
     $('mdock-speed').textContent = et.rotulo.startsWith('−') ? '◀ ' + et.rotulo.slice(1) : et.rotulo;
     $('mdock-date').textContent = fmtData(acoes.getDataSimulada());
     const realSlider = document.getElementById('tempo-slider');

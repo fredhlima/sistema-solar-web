@@ -1,4 +1,11 @@
-import { t, formatarDataLonga, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=22';
+import { t, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=23';
+
+// Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
+// tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
+const mqDataCompacta = window.matchMedia('(max-width: 430px)');
+function formatarDataParaTela(date) {
+  return mqDataCompacta.matches ? formatarDataCompacta(date) : formatarDataLonga(date);
+}
 
 export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
@@ -187,7 +194,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const dataSimulada = motor.getDataSimulada();
     const elemData = document.getElementById('tempo-data');
     if (elemData) {
-      elemData.textContent = formatarDataLonga(dataSimulada);
+      elemData.textContent = formatarDataParaTela(dataSimulada);
     }
     rafId = requestAnimationFrame(atualizarTempo);
   }
@@ -239,7 +246,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     const btnSeletor = document.createElement('button');
     btnSeletor.className = 'seletor-idioma-botao';
-    btnSeletor.innerHTML = `🌐 ${getIdioma().toUpperCase()} ▾`;
+    // Ícone custom (SVG) no lugar do emoji 🌐: no iOS/Safari o globo vem
+    // colorido pela fonte de emoji do sistema, destoando do resto dos
+    // ícones em linha/monocromáticos do app.
+    const ICONE_GLOBO = '<svg class="icone-globo" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><ellipse cx="8" cy="8" rx="2.9" ry="6.3"/><line x1="1.9" y1="8" x2="14.1" y2="8"/></svg>';
+    btnSeletor.innerHTML = `${ICONE_GLOBO} ${getIdioma().toUpperCase()} ▾`;
     btnSeletor.onclick = () => {
       const menu = document.getElementById('seletor-idioma-menu');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -367,7 +378,15 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     };
     itensExp.appendChild(btnTour);
 
-    // Toggle Escala (Visualização)
+    // Toggle Escala (Visualização). No desktop o rail lateral já tem o
+    // cabeçalho "VISUALIZAÇÃO" dando contexto; no mobile o toggle fica solto
+    // na barra inferior sem esse contexto, então ganha um rótulo próprio
+    // ("Tamanho") ao lado, visível só ali (.toggle-escala-label, CSS ≤1024px).
+    const labelEscala = document.createElement('span');
+    labelEscala.className = 'toggle-escala-label';
+    labelEscala.textContent = t('escalaGrupoLabel');
+    grupoVisualizacao.appendChild(labelEscala);
+
     const divEscala = document.createElement('div');
     divEscala.className = 'toggle-escala';
     divEscala.innerHTML = `
@@ -458,8 +477,19 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     // Estado persistido: painel recolhido vira uma barra mínima no canto,
     // para quem só quer navegar/olhar a cena sem a lista por cima
     const CHAVE_COLAPSO = 'sistema-solar-explorar-colapsado';
+    // Sem preferência salva: no mobile (≤430px) começa recolhido — no 1º load
+    // o painel aberto cobria metade da tela por cima do planeta. No desktop
+    // continua aberto por padrão. Uma vez que a pessoa mexe no toggle, a
+    // preferência dela (localStorage) manda, em qualquer tamanho de tela.
     let recolhido = false;
-    try { recolhido = localStorage.getItem(CHAVE_COLAPSO) === '1'; } catch (e) { /* sem storage */ }
+    try {
+      const salvo = localStorage.getItem(CHAVE_COLAPSO);
+      if (salvo !== null) {
+        recolhido = salvo === '1';
+      } else if (window.matchMedia('(max-width: 430px)').matches) {
+        recolhido = true;
+      }
+    } catch (e) { /* sem storage */ }
 
     function aplicarEstadoColapso() {
       div.classList.toggle('colapsado', recolhido);
@@ -798,7 +828,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const labelData = document.createElement('div');
     labelData.className = 'tempo-data';
     labelData.id = 'tempo-data';
-    labelData.textContent = formatarDataLonga(new Date());
+    labelData.textContent = formatarDataParaTela(new Date());
     labelData.title = t('irParaData');
     labelData.tabIndex = 0;
     labelData.setAttribute('role', 'button');
@@ -1278,8 +1308,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     cabecalho.appendChild(titulo);
 
     const btnFechar = document.createElement('button');
-    btnFechar.className = 'eventos-btn-fechar';
-    btnFechar.innerHTML = '✕';
+    btnFechar.className = 'eventos-btn-fechar botao-fechar-overlay';
+    btnFechar.setAttribute('aria-label', t('voltar'));
+    btnFechar.innerHTML = `<span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span>`;
     btnFechar.onclick = fecharPainelEventos;
     cabecalho.appendChild(btnFechar);
 
@@ -1428,8 +1459,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     header.appendChild(titulo);
 
     const btnFechar = document.createElement('button');
-    btnFechar.className = 'comparador-btn-fechar';
-    btnFechar.innerHTML = '✕';
+    btnFechar.className = 'comparador-btn-fechar botao-fechar-overlay';
+    btnFechar.setAttribute('aria-label', t('voltar'));
+    btnFechar.innerHTML = `<span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span>`;
     btnFechar.onclick = fecharComparador;
     header.appendChild(btnFechar);
 

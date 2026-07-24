@@ -177,6 +177,27 @@ html, body {
   font-weight: 300;
 }
 
+/* No desktop o rail lateral já mostra "VISUALIZAÇÃO" acima do toggle, então
+   o rótulo fica escondido ali; no mobile (toolbar inferior, ≤1024px) o
+   toggle perde esse contexto e o rótulo "Tamanho" aparece pra deixar claro
+   que Didático/Real é sobre escala de tamanho, não outra coisa. */
+.toggle-escala-label {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .toggle-escala-label {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #93a0b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+}
+
 /* Popover de experiências: no desktop os itens ficam inline (contents) e o
    gatilho some; no mobile o gatilho aparece e os itens viram um painel */
 .experiencias-trigger { display: none; }
@@ -473,6 +494,12 @@ html, body {
 
 /* PAINEL DE INFO (direita) */
 .painel-info {
+  /* border-box: sem isso, a borda de 1px soma ao width declarado e o
+     right:-Npx (calculado para os N do width) some por 1-2px do que devia,
+     deixando um fiapo/canto do painel visível na borda direita mesmo
+     fechado — reportado num iPhone. width e right precisam concordar
+     exatamente para o painel ficar 100% fora da tela quando fechado. */
+  box-sizing: border-box;
   position: fixed;
   right: -420px;
   top: 0;
@@ -977,6 +1004,8 @@ html, body {
 
 /* V2: PAINEL EVENTOS */
 .painel-eventos {
+  /* box-sizing: ver comentário equivalente em .painel-info */
+  box-sizing: border-box;
   position: fixed;
   right: -420px;
   top: 0;
@@ -1696,6 +1725,14 @@ html, body {
   cursor: pointer;
   transition: all 150ms ease;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icone-globo {
+  flex-shrink: 0;
+  color: #5cc8ff;
 }
 
 .seletor-idioma-botao:hover {
@@ -1950,6 +1987,213 @@ html, body {
   0%, 100% { box-shadow: 0 0 0 0 rgba(92, 200, 255, 0); }
   50% { box-shadow: 0 0 14px 3px rgba(92, 200, 255, 0.35); }
 }
+
+/* Telas estreitas/tablets (≤1024px): o rótulo 3D gigante do corpo
+   selecionado (sprite desenhado na cena, não é DOM) pode ficar bem próximo
+   da câmera e vazar por cima do header. Confirmado não só no mobile como em
+   tablet (768px e 800px de largura — a câmera fica próxima o bastante pro
+   rótulo colidir com "SISTEMA SOLAR" nos dois). Como não dá pra recortar o
+   canvas por elemento, o header ganha um cartão opaco (mesmo tratamento
+   visual dos painéis) que cobre a safe-area do topo e bloqueia qualquer
+   coisa da cena atrás dele. */
+@media (max-width: 1024px) {
+  /* Vinheta de topo full-width: o gradiente esmaece qualquer coisa da cena
+     nessa faixa antes que ela chegue no header, mesmo fora da largura do
+     cartão do título. Fica abaixo do header/barra de ações (z-index 10) e
+     acima do canvas (z-index 0). */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: calc(150px + env(safe-area-inset-top));
+    background: linear-gradient(to bottom,
+      rgba(4, 6, 14, 0.88) 0%,
+      rgba(4, 6, 14, 0.5) 60%,
+      rgba(4, 6, 14, 0) 100%);
+    pointer-events: none;
+    z-index: 9;
+  }
+
+  .titulo {
+    background: rgba(11, 16, 28, 0.82);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Só no mobile de fato (≤430px): aperta a posição do cartão do título para
+   a safe-area, além do tratamento de fundo já aplicado acima. */
+@media (max-width: 430px) {
+  .titulo {
+    top: calc(8px + env(safe-area-inset-top));
+    left: calc(8px + env(safe-area-inset-left));
+    max-width: calc(100vw - 16px - env(safe-area-inset-right));
+  }
+}
+
+/* Data compacta (js/i18n.js formatarDataCompacta) já é curta; garante 1
+   linha mesmo se a pílula de tempo espremer em telas bem estreitas. */
+@media (max-width: 430px) {
+  .tempo-data,
+  .tempo-data-input {
+    white-space: nowrap;
+    min-width: auto;
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+}
+
+/* ===== Experiências como páginas full-screen no mobile ===== */
+/* No desktop, Eventos/Tamanhos/Quiz/Você no Espaço/paywall são cartões
+   centralizados com um ✕ no canto. No mobile isso fica apertado e o ✕
+   sozinho não é um padrão de navegação claro — cada um vira uma página que
+   cobre a tela toda, com um botão "‹ Voltar" no topo (mesmo texto/handler
+   de fechar de antes, só reestilizado). Botão e marcação (.fechar-icone/
+   .fechar-texto) são compartilhados pelos 5 componentes: comparador
+   (Tamanhos), eventos, quiz, você-no-espaço e paywall. */
+.fechar-texto {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* !important em todo o bloco: quiz.css/paywall.css/voce-no-espaco.css são
+     carregados DEPOIS de estilos.css no index.html, então uma regra sem
+     !important aqui perde pra regra incondicional (mesma especificidade,
+     ordem de fonte) de cada arquivo próprio — mesmo dentro de um media
+     query mais específico. Só .comparador-* não precisaria (vive neste
+     mesmo arquivo), mas fica igual pelo padrão. */
+  .comparador-overlay,
+  .quiz-overlay,
+  .voce-no-espaco-overlay,
+  .paywall-overlay {
+    align-items: stretch !important;
+    justify-content: stretch !important;
+    padding: 0 !important;
+  }
+
+  .comparador-painel,
+  .quiz-card,
+  .voce-no-espaco-card,
+  .paywall-card {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+
+  .painel-eventos {
+    width: 100%;
+    right: -100%;
+  }
+
+  /* Botão "‹ Voltar": fixo no topo-esquerda da viewport (a página ocupa a
+     tela toda, então "fixed" já cobre o caso), pill com fundo opaco pra
+     ficar legível sobre qualquer conteúdo atrás. */
+  .botao-fechar-overlay {
+    position: fixed !important;
+    top: calc(12px + env(safe-area-inset-top)) !important;
+    left: calc(12px + env(safe-area-inset-left)) !important;
+    right: auto !important;
+    bottom: auto !important;
+    background: rgba(11, 16, 28, 0.85);
+    border: 1px solid rgba(120, 160, 255, 0.24);
+    border-radius: 20px;
+    padding: 8px 16px 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: #e8edf7;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    transition: all 150ms ease;
+  }
+
+  .botao-fechar-overlay:hover {
+    border-color: rgba(92, 200, 255, 0.5);
+    color: #5cc8ff;
+  }
+
+  .fechar-icone {
+    display: none;
+  }
+
+  .fechar-texto {
+    display: inline;
+  }
+
+  /* Espaço pro botão fixo não cobrir o título/conteúdo do topo de cada
+     página (a altura do botão + folga ≈ 52px + safe-area). !important
+     necessário: quiz.css/paywall.css/voce-no-espaco.css são carregados
+     DEPOIS de estilos.css no index.html, então o padding sem !important
+     de cada arquivo (mesma especificidade, ordem de fonte por último)
+     vencia essa regra mesmo dentro do media query mais específico. */
+  .comparador-painel,
+  .quiz-card,
+  .voce-no-espaco-card,
+  .paywall-card {
+    padding-top: calc(60px + env(safe-area-inset-top)) !important;
+  }
+
+  .eventos-cabecalho {
+    padding-top: calc(60px + env(safe-area-inset-top));
+  }
+}
+
+/* Mesmo tratamento acima, mas gatilho por CLASSE (body.modo-dock) em vez de
+   largura: no shell de dock (celular/tablet touch em paisagem — ver
+   mobile.css) a viewport costuma ser MAIS larga que 768px (ex.: iPhone Pro
+   Max deitado ~930px), então a regra por max-width sozinha não cobria esse
+   modo — paywall/quiz/etc. voltavam a abrir como cartão centralizado com ✕
+   em vez de página cheia com "‹ Voltar". */
+body.modo-dock .comparador-overlay,
+body.modo-dock .quiz-overlay,
+body.modo-dock .voce-no-espaco-overlay,
+body.modo-dock .paywall-overlay {
+  align-items: stretch !important;
+  justify-content: stretch !important;
+  padding: 0 !important;
+}
+
+body.modo-dock .comparador-painel,
+body.modo-dock .quiz-card,
+body.modo-dock .voce-no-espaco-card,
+body.modo-dock .paywall-card {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  padding-top: calc(60px + env(safe-area-inset-top)) !important;
+}
+
+body.modo-dock .botao-fechar-overlay {
+  position: fixed !important;
+  top: calc(12px + env(safe-area-inset-top)) !important;
+  left: calc(12px + env(safe-area-inset-left)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  background: rgba(11, 16, 28, 0.85);
+  border: 1px solid rgba(120, 160, 255, 0.24);
+  border-radius: 20px;
+  padding: 8px 16px 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #e8edf7;
+  z-index: 65;
+  display: inline-flex;
+  align-items: center;
+  transition: all 150ms ease;
+}
+
+body.modo-dock .botao-fechar-overlay .fechar-icone { display: none; }
+body.modo-dock .botao-fechar-overlay .fechar-texto { display: inline; }
 
 .vis-trigger, .info-saiba-btn { display: none; }
 

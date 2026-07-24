@@ -80,14 +80,41 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 .mdock-hud-r { right: 8px; border-width: 0 1px 1px 0; border-radius: 0 0 10px 0; }
 
 /* ---------- Título ---------- */
-.mdock-titulo { position: absolute; left: 16px; top: 14px; display: flex; align-items: center; gap: 11px; pointer-events: none; }
+/* Em paisagem no iPhone a Dynamic Island fica na borda de CIMA da tela
+   física, que vira uma borda LATERAL depois de rotacionar — por isso
+   folga tanto no top quanto no left/right (o lado exato depende de pra
+   que direção o aparelho foi girado). env() vira 0 em quem não tem
+   ilha/notch, então é seguro em qualquer device. */
+/* Fundo opaco: o nome gigante do corpo selecionado é um sprite 3D na cena
+   (não é DOM), e com a câmera perto ele vaza atrás do título — mesma causa
+   e mesmo tratamento já aplicados em .titulo pro modo retrato (ver
+   estilos.css e CLAUDE.md). A vinheta em body::before (estilos.css,
+   ≤1024px, cobre esse width em paisagem) já esmaece o sprite, mas o cartão
+   opaco garante legibilidade mesmo se a câmera ficar bem próxima. */
+.mdock-titulo {
+  position: absolute;
+  left: calc(16px + env(safe-area-inset-left));
+  top: calc(14px + env(safe-area-inset-top));
+  display: flex; align-items: center; gap: 11px; pointer-events: none;
+  background: rgba(11, 16, 28, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
 .mdock-titulo-logo { width: 38px; height: 38px; flex: none; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 .mdock-titulo-logo svg { width: 100%; height: 100%; }
 .mdock-titulo-principal { font: 600 13px 'Segoe UI'; color: #e8edf7; letter-spacing: .06em; text-transform: uppercase; }
 .mdock-titulo-sub { font: 400 10px 'Segoe UI'; color: #93a0b8; letter-spacing: .02em; }
 
 /* ---------- Nível + engrenagem ---------- */
-.mdock-topo-dir { position: absolute; right: 16px; top: 16px; display: flex; align-items: center; gap: 9px; pointer-events: auto; }
+.mdock-topo-dir {
+  position: absolute;
+  right: calc(16px + env(safe-area-inset-right));
+  top: calc(16px + env(safe-area-inset-top));
+  display: flex; align-items: center; gap: 9px; pointer-events: auto;
+}
 .mdock-nivel {
   font: 600 10px 'Segoe UI'; letter-spacing: .06em; padding: 6px 12px; border-radius: 20px;
   background: rgba(18, 26, 42, .2); backdrop-filter: blur(13px) saturate(125%); -webkit-backdrop-filter: blur(13px) saturate(125%);
@@ -105,7 +132,10 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 .mdock-settings { position: absolute; inset: 0; z-index: 22; pointer-events: auto; }
 .mdock-scrim { position: absolute; inset: 0; }
 .mdock-settings-painel {
-  position: absolute; right: 16px; top: 56px; width: 224px; border-radius: 14px; padding: 14px;
+  position: absolute;
+  right: calc(16px + env(safe-area-inset-right));
+  top: calc(56px + env(safe-area-inset-top));
+  width: 224px; border-radius: 14px; padding: 14px;
   background: rgba(11, 16, 28, .94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(120, 160, 255, .16); box-shadow: 0 16px 40px rgba(0, 0, 0, .5);
 }
@@ -122,7 +152,8 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 
 /* ---------- Painéis Explorar / Experiências (shells na Fase 1) ---------- */
 .mdock-painel {
-  position: absolute; bottom: var(--mdock-bar-h, 56px); top: 54px; width: 300px; border-radius: 16px 16px 0 0;
+  position: absolute; bottom: var(--mdock-bar-h, 56px); top: calc(54px + env(safe-area-inset-top));
+  width: 300px; border-radius: 16px 16px 0 0;
   z-index: 21; display: flex; flex-direction: column; overflow: hidden; pointer-events: auto;
   background: rgba(11, 16, 28, .9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(120, 160, 255, .16); border-bottom: none;
@@ -130,8 +161,8 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 /* Explorar cresce a ~quase-meia-tela: o astro focado fica centralizado na
    metade livre (câmera deslocada via motor.setDeslocamentoVisao — ver
    mobile-dock.js). Cap em 460px para não engolir a tela em tablets largos. */
-.mdock-painel-l { left: 12px; width: min(46vw, 460px); }
-.mdock-painel-r { right: 12px; width: 290px; }
+.mdock-painel-l { left: calc(12px + env(safe-area-inset-left)); width: min(46vw, 460px); }
+.mdock-painel-r { right: calc(12px + env(safe-area-inset-right)); width: 290px; }
 
 /* Experiências abre em TELA CHEIA (pedido do Fred: facilita a visualização
    das 5 opções). O cabeçalho já fecha ao toque — "voltar" fica de graça. */
@@ -145,7 +176,8 @@ body.modo-dock #mdock-painel-xp {
    direito. O astro/nave continua visível na metade livre (mesmo deslocamento
    de câmera do Explorar, aplicado em mobile-dock.js). */
 body.modo-dock .card-missao {
-  position: fixed; left: 12px; right: auto; bottom: var(--mdock-bar-h, 56px); top: 54px;
+  position: fixed; left: calc(12px + env(safe-area-inset-left)); right: auto;
+  bottom: var(--mdock-bar-h, 56px); top: calc(54px + env(safe-area-inset-top));
   width: min(46vw, 460px); border-radius: 16px 16px 0 0; z-index: 60;
 }
 .mdock-painel-cabeca {
@@ -274,9 +306,21 @@ body.modo-dock .comparador-painel {
 }
 
 /* ---------- Dock inferior ---------- */
+/* padding-bottom com a safe-area (home indicator / barra de sugestão do
+   Siri no iPhone): sem isso os botões de transporte ficavam colados na
+   área de gesto do sistema. --mdock-bar-h é lido do offsetHeight real
+   (mobile-dock.js), então já inclui esse padding automaticamente — não
+   precisa ajustar os `bottom: var(--mdock-bar-h, 56px)` dos painéis. */
 .mdock-bar {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; pointer-events: auto;
   display: flex; align-items: stretch; justify-content: space-between;
+  gap: 6px;
+  padding-bottom: env(safe-area-inset-bottom);
+  /* +10px além da safe-area: Explorar/Experiências (as duas pontas do
+     space-between) ficavam coladas na borda física da tela — não é só a
+     ilha/notch, era falta de respiro visual mesmo em telas sem safe-area. */
+  padding-left: calc(10px + env(safe-area-inset-left));
+  padding-right: calc(10px + env(safe-area-inset-right));
   background: rgba(18, 26, 42, .2); backdrop-filter: blur(13px) saturate(125%); -webkit-backdrop-filter: blur(13px) saturate(125%);
   border-top: 1px solid rgba(180, 210, 255, .1); box-shadow: 0 -2px 22px rgba(0, 0, 0, .22);
 }
@@ -289,8 +333,14 @@ body.modo-dock .comparador-painel {
 .mdock-seta-sec { font-size: 10px; opacity: .8; }
 .mdock-divisor { width: 1px; margin: 11px 0; background: linear-gradient(180deg, transparent, rgba(180, 210, 255, .16), transparent); }
 .mdock-transporte { flex: 1.9; gap: 10px; padding: 11px 8px; cursor: default; }
-.mdock-transp-btn { cursor: pointer; font-size: 13px; color: #c9d3e6; }
-.mdock-transp-play { cursor: pointer; font-size: 19px; color: #5cc8ff; text-shadow: 0 0 12px rgba(92, 200, 255, .6); width: 22px; text-align: center; }
+.mdock-transp-btn { cursor: pointer; color: #c9d3e6; display: inline-flex; align-items: center; justify-content: center; }
+.mdock-transp-btn svg { width: 15px; height: 15px; }
+.mdock-transp-play {
+  cursor: pointer; color: #5cc8ff; width: 22px; text-align: center;
+  display: inline-flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 0 6px rgba(92, 200, 255, .6));
+}
+.mdock-transp-play svg { width: 20px; height: 20px; }
 .mdock-slider { -webkit-appearance: none; appearance: none; width: 70px; height: 14px; background: transparent; cursor: pointer; }
 .mdock-slider::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, rgba(255, 138, 92, .5), rgba(120, 160, 255, .18) 50%, rgba(92, 200, 255, .6)); border-radius: 2px; }
 .mdock-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #5cc8ff; box-shadow: 0 0 6px rgba(92, 200, 255, .6); margin-top: -4px; }
