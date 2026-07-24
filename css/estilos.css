@@ -56,6 +56,16 @@ html, body {
   pointer-events: none;
 }
 
+/* Logo do app (sol + órbitas): disco à esquerda do nome. O border-radius
+   circular esconde o fundo quadrado do PNG sobre o céu. */
+.titulo-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  float: left;
+  margin-right: 10px;
+}
+
 .titulo-principal {
   font-size: 20px;
   font-weight: 600;
@@ -63,6 +73,7 @@ html, body {
   text-transform: uppercase;
   margin: 0;
   color: #e8edf7;
+  white-space: nowrap; /* nome ao lado do logo, sem quebrar "SISTEMA / SOLAR" */
 }
 
 .titulo-secundario {
@@ -164,27 +175,6 @@ html, body {
   color: rgba(92, 200, 255, 0.2);
   font-size: 16px;
   font-weight: 300;
-}
-
-/* No desktop o rail lateral já mostra "VISUALIZAÇÃO" acima do toggle, então
-   o rótulo fica escondido ali; no mobile (toolbar inferior, ≤1024px) o
-   toggle perde esse contexto e o rótulo "Tamanho" aparece pra deixar claro
-   que Didático/Real é sobre escala de tamanho, não outra coisa. */
-.toggle-escala-label {
-  display: none;
-}
-
-@media (max-width: 1024px) {
-  .toggle-escala-label {
-    display: flex;
-    align-items: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: #93a0b8;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-  }
 }
 
 /* Popover de experiências: no desktop os itens ficam inline (contents) e o
@@ -483,12 +473,6 @@ html, body {
 
 /* PAINEL DE INFO (direita) */
 .painel-info {
-  /* border-box: sem isso, a borda de 1px soma ao width declarado e o
-     right:-Npx (calculado para os N do width) some por 1-2px do que devia,
-     deixando um fiapo/canto do painel visível na borda direita mesmo
-     fechado — reportado num iPhone. width e right precisam concordar
-     exatamente para o painel ficar 100% fora da tela quando fechado. */
-  box-sizing: border-box;
   position: fixed;
   right: -420px;
   top: 0;
@@ -993,8 +977,6 @@ html, body {
 
 /* V2: PAINEL EVENTOS */
 .painel-eventos {
-  /* box-sizing: ver comentário equivalente em .painel-info */
-  box-sizing: border-box;
   position: fixed;
   right: -420px;
   top: 0;
@@ -1714,14 +1696,6 @@ html, body {
   cursor: pointer;
   transition: all 150ms ease;
   white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.icone-globo {
-  flex-shrink: 0;
-  color: #5cc8ff;
 }
 
 .seletor-idioma-botao:hover {
@@ -1977,159 +1951,122 @@ html, body {
   50% { box-shadow: 0 0 14px 3px rgba(92, 200, 255, 0.35); }
 }
 
-/* Telas estreitas/tablets (≤1024px): o rótulo 3D gigante do corpo
-   selecionado (sprite desenhado na cena, não é DOM) pode ficar bem próximo
-   da câmera e vazar por cima do header. Confirmado não só no mobile como em
-   tablet (768px e 800px de largura — a câmera fica próxima o bastante pro
-   rótulo colidir com "SISTEMA SOLAR" nos dois). Como não dá pra recortar o
-   canvas por elemento, o header ganha um cartão opaco (mesmo tratamento
-   visual dos painéis) que cobre a safe-area do topo e bloqueia qualquer
-   coisa da cena atrás dele. */
-@media (max-width: 1024px) {
-  /* Vinheta de topo full-width: o gradiente esmaece qualquer coisa da cena
-     nessa faixa antes que ela chegue no header, mesmo fora da largura do
-     cartão do título. Fica abaixo do header/barra de ações (z-index 10) e
-     acima do canvas (z-index 0). */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: calc(150px + env(safe-area-inset-top));
-    background: linear-gradient(to bottom,
-      rgba(4, 6, 14, 0.88) 0%,
-      rgba(4, 6, 14, 0.5) 60%,
-      rgba(4, 6, 14, 0) 100%);
-    pointer-events: none;
-    z-index: 9;
-  }
+.vis-trigger, .info-saiba-btn { display: none; }
 
-  .titulo {
-    background: rgba(11, 16, 28, 0.82);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 8px 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  }
-}
-
-/* Só no mobile de fato (≤430px): aperta a posição do cartão do título para
-   a safe-area, além do tratamento de fundo já aplicado acima. */
-@media (max-width: 430px) {
-  .titulo {
+/* ——— Ousada em CELULAR DEITADO (landscape ≤520px de altura) — v2 polida.
+   Zonas: identidade em 1 linha no topo-esq; Experiências topo-centro;
+   utilidades topo-dir; Explorar = painel ALTO à esquerda (peça principal);
+   Visualização = 1 botão-ícone na borda direita que abre menu; ficha do
+   astro = card compacto com "Saiba mais"; player de tempo compacto embaixo.
+   Regras de ouro: sem transform na .barra-acoes (pai de fixed) e
+   body.ux-ousada:has(...) para "um painel por vez". ——— */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* — Identidade: logo + nome + chip de nível numa ÚNICA linha (~34px) — */
+  .ux-ousada .titulo {
     top: calc(8px + env(safe-area-inset-top));
-    left: calc(8px + env(safe-area-inset-left));
-    max-width: calc(100vw - 16px - env(safe-area-inset-right));
+    left: calc(10px + env(safe-area-inset-left));
+    display: flex; align-items: center; gap: 10px;
   }
-}
-
-/* Data compacta (js/i18n.js formatarDataCompacta) já é curta; garante 1
-   linha mesmo se a pílula de tempo espremer em telas bem estreitas. */
-@media (max-width: 430px) {
-  .tempo-data,
-  .tempo-data-input {
-    white-space: nowrap;
-    min-width: auto;
-    font-size: 11px;
-    padding: 2px 4px;
+  .ux-ousada .titulo-secundario { display: none; }
+  .ux-ousada .titulo-logo { width: 26px; height: 26px; margin: 0; float: none; }
+  .ux-ousada .titulo-principal { font-size: 13px; line-height: 1; white-space: nowrap; }
+  .ux-ousada .titulo-slot-progresso { margin: 0; }
+  .ux-ousada .progresso-chip {
+    flex-direction: row; align-items: center; gap: 7px;
+    padding: 4px 9px; min-width: 0; width: max-content;
   }
-}
+  .ux-ousada .progresso-chip-icone { font-size: 12px; }
+  .ux-ousada .progresso-chip-nome { font-size: 9px; }
+  .ux-ousada .progresso-chip-barra { width: 34px; }
 
-/* ===== Experiências como páginas full-screen no mobile ===== */
-/* No desktop, Eventos/Tamanhos/Quiz/Você no Espaço/paywall são cartões
-   centralizados com um ✕ no canto. No mobile isso fica apertado e o ✕
-   sozinho não é um padrão de navegação claro — cada um vira uma página que
-   cobre a tela toda, com um botão "‹ Voltar" no topo (mesmo texto/handler
-   de fechar de antes, só reestilizado). Botão e marcação (.fechar-icone/
-   .fechar-texto) são compartilhados pelos 5 componentes: comparador
-   (Tamanhos), eventos, quiz, você-no-espaço e paywall. */
-.fechar-texto {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  /* !important em todo o bloco: quiz.css/paywall.css/voce-no-espaco.css são
-     carregados DEPOIS de estilos.css no index.html, então uma regra sem
-     !important aqui perde pra regra incondicional (mesma especificidade,
-     ordem de fonte) de cada arquivo próprio — mesmo dentro de um media
-     query mais específico. Só .comparador-* não precisaria (vive neste
-     mesmo arquivo), mas fica igual pelo padrão. */
-  .comparador-overlay,
-  .quiz-overlay,
-  .voce-no-espaco-overlay,
-  .paywall-overlay {
-    align-items: stretch !important;
-    justify-content: stretch !important;
-    padding: 0 !important;
+  /* — Experiências no topo-centro (sem transform no pai) — */
+  .ux-ousada .barra-acoes { top: calc(10px + env(safe-area-inset-top)); left: 0; right: 0; justify-content: center; }
+  .ux-ousada .experiencias-itens.aberto {
+    top: calc(52px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+    max-height: calc(100vh - 120px); overflow-y: auto;
   }
 
-  .comparador-painel,
-  .quiz-card,
-  .voce-no-espaco-card,
-  .paywall-card {
-    width: 100% !important;
-    max-width: none !important;
-    height: 100% !important;
-    max-height: none !important;
-    border-radius: 0 !important;
-  }
+  /* — Utilidades topo-dir — */
+  .ux-ousada .grupo-utilidades { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); }
 
-  .painel-eventos {
-    width: 100%;
-    right: -100%;
+  /* — EXPLORAR: peça principal — painel alto, lista respirando — */
+  .ux-ousada .painel-explorar {
+    top: calc(50px + env(safe-area-inset-top));
+    bottom: calc(60px + env(safe-area-inset-bottom));
+    width: 188px;
   }
+  .ux-ousada .explorar-rodape { display: none; }  /* créditos ficam p/ desktop; aqui a lista é prioridade */
 
-  /* Botão "‹ Voltar": fixo no topo-esquerda da viewport (a página ocupa a
-     tela toda, então "fixed" já cobre o caso), pill com fundo opaco pra
-     ficar legível sobre qualquer conteúdo atrás. */
-  .botao-fechar-overlay {
-    position: fixed !important;
-    top: calc(12px + env(safe-area-inset-top)) !important;
-    left: calc(12px + env(safe-area-inset-left)) !important;
-    right: auto !important;
-    bottom: auto !important;
-    background: rgba(11, 16, 28, 0.85);
-    border: 1px solid rgba(120, 160, 255, 0.24);
-    border-radius: 20px;
-    padding: 8px 16px 8px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    color: #e8edf7;
-    z-index: 5;
-    display: inline-flex;
-    align-items: center;
-    transition: all 150ms ease;
+  /* — VISUALIZAÇÃO: botão-ícone (borda dir, centro) + menu — */
+  .ux-ousada .vis-trigger {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; right: calc(12px + env(safe-area-inset-right)); top: 50%;
+    transform: translateY(-50%);
+    width: 46px; height: 46px; border-radius: 14px;
+    color: #93a0b8; background: rgba(11, 16, 28, 0.7);
+    border: 1px solid rgba(120, 160, 255, 0.16);
+    backdrop-filter: blur(14px); cursor: pointer; z-index: 11;
+    transition: color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
   }
+  .ux-ousada .vis-trigger.ativo {
+    color: #5cc8ff; border-color: rgba(92, 200, 255, 0.45);
+    box-shadow: 0 0 14px rgba(92, 200, 255, 0.25);
+  }
+  .ux-ousada .grupo-visualizacao { display: none; }
+  .ux-ousada .grupo-visualizacao.menu-aberto {
+    display: flex; position: fixed;
+    right: calc(66px + env(safe-area-inset-right)); top: 50%; left: auto; bottom: auto;
+    transform: translateY(-50%);
+    flex-direction: column; align-items: stretch; gap: 5px;
+    width: 138px; max-width: none; overflow: visible; padding: 10px 8px;
+    background: rgba(11, 16, 28, 0.88); backdrop-filter: blur(16px);
+    border: 1px solid rgba(120, 160, 255, 0.22); border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); z-index: 12;
+  }
+  .ux-ousada .grupo-visualizacao.menu-aberto::before { display: block; }
+  .ux-ousada .grupo-visualizacao .toggle-escala { flex-direction: column; height: auto; align-items: stretch; }
+  .ux-ousada .grupo-visualizacao .botao { font-size: 12px; padding: 8px 10px; min-height: 40px; white-space: nowrap; }
 
-  .botao-fechar-overlay:hover {
-    border-color: rgba(92, 200, 255, 0.5);
-    color: #5cc8ff;
+  /* — FICHA: card compacto (não a folha de 45% da tela) — */
+  .ux-ousada .painel-info {
+    left: auto; right: calc(12px + env(safe-area-inset-right));
+    top: calc(50px + env(safe-area-inset-top)); bottom: auto;
+    width: 262px; max-height: calc(100vh - 116px);
+    border-radius: 16px;
   }
+  .ux-ousada .painel-info .info-nome { font-size: 17px; margin: 2px 0 4px; }
+  .ux-ousada .painel-info .info-grid { gap: 6px; }
+  .ux-ousada .painel-info .info-numero { padding: 6px 8px; }
+  /* detalhes colapsados atrás do "Saiba mais" */
+  .ux-ousada .painel-info:not(.expandido) .info-resumo,
+  .ux-ousada .painel-info:not(.expandido) .info-curiosidades-titulo,
+  .ux-ousada .painel-info:not(.expandido) .info-curiosidades,
+  .ux-ousada .painel-info:not(.expandido) .info-comparacoes-titulo,
+  .ux-ousada .painel-info:not(.expandido) .info-comparacoes { display: none; }
+  .ux-ousada .info-saiba-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 9px 12px;
+    font: inherit; font-size: 12px; font-weight: 600; color: #5cc8ff;
+    background: rgba(92, 200, 255, 0.08); border: 1px solid rgba(92, 200, 255, 0.25);
+    border-radius: 10px; cursor: pointer;
+  }
+  /* o botão tem 2 spans: mostra o 1º ("Saiba mais") fechado, o 2º expandido */
+  .ux-ousada .painel-info:not(.expandido) .info-saiba-btn span:last-child,
+  .ux-ousada .painel-info.expandido .info-saiba-btn span:first-child { display: none; }
 
-  .fechar-icone {
-    display: none;
-  }
+  /* — PLAYER DE TEMPO compacto — */
+  .ux-ousada .controles-tempo { padding: 6px 10px; gap: 8px; }
+  .ux-ousada .tempo-botao { width: 32px; height: 32px; font-size: 12px; }
+  .ux-ousada .tempo-slider { width: 110px; }
+  .ux-ousada .tempo-pill { font-size: 12px; }
 
-  .fechar-texto {
-    display: inline;
+  /* — UM PAINEL POR VEZ (ficha/eventos abertos escondem o resto da direita) — */
+  /* A classe .com-painel-dir é posta/tirada pelo ui.js ao abrir/fechar a
+     ficha e o painel de Eventos — mais compatível que :has() (WebView) */
+  body.ux-ousada.com-painel-dir .grupo-visualizacao,
+  body.ux-ousada.com-painel-dir .vis-trigger,
+  body.ux-ousada.com-painel-dir .grupo-experiencias {
+    opacity: 0; pointer-events: none;
   }
-
-  /* Espaço pro botão fixo não cobrir o título/conteúdo do topo de cada
-     página (a altura do botão + folga ≈ 52px + safe-area). !important
-     necessário: quiz.css/paywall.css/voce-no-espaco.css são carregados
-     DEPOIS de estilos.css no index.html, então o padding sem !important
-     de cada arquivo (mesma especificidade, ordem de fonte por último)
-     vencia essa regra mesmo dentro do media query mais específico. */
-  .comparador-painel,
-  .quiz-card,
-  .voce-no-espaco-card,
-  .paywall-card {
-    padding-top: calc(60px + env(safe-area-inset-top)) !important;
-  }
-
-  .eventos-cabecalho {
-    padding-top: calc(60px + env(safe-area-inset-top));
-  }
+  .ux-ousada .grupo-visualizacao, .ux-ousada .vis-trigger,
+  .ux-ousada .grupo-experiencias { transition: opacity 180ms ease; }
 }

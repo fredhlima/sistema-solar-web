@@ -13,8 +13,7 @@ const TEXTOS = {
     cm: 'cm',
     m: 'm',
     pro: 'PRO',
-    aprenderMais: 'Toque para desbloquear',
-    voltar: 'Voltar'
+    aprenderMais: 'Toque para desbloquear'
   },
   en: {
     titulo: 'You in Space',
@@ -27,8 +26,7 @@ const TEXTOS = {
     cm: 'cm',
     m: 'm',
     pro: 'PRO',
-    aprenderMais: 'Tap to unlock',
-    voltar: 'Back'
+    aprenderMais: 'Tap to unlock'
   },
   es: {
     titulo: 'Tú en el Espacio',
@@ -41,8 +39,7 @@ const TEXTOS = {
     cm: 'cm',
     m: 'm',
     pro: 'PRO',
-    aprenderMais: 'Toca para desbloquear',
-    voltar: 'Volver'
+    aprenderMais: 'Toca para desbloquear'
   }
 };
 
@@ -182,7 +179,7 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
   overlay.className = 'voce-no-espaco-overlay';
   overlay.innerHTML = `
     <div class="voce-no-espaco-card">
-      <button class="voce-no-espaco-fechar botao-fechar-overlay" aria-label="${tt('voltar')}"><span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${tt('voltar')}</span></button>
+      <button class="voce-no-espaco-fechar" aria-label="Fechar">✕</button>
       <h2 class="voce-no-espaco-titulo">${tt('titulo')}</h2>
 
       <div class="voce-no-espaco-controles">

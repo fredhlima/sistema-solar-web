@@ -190,7 +190,24 @@ export class SistemaSolar3D {
     if (this.camera) {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
+      this._aplicarDeslocamentoVisao();
     }
+  }
+
+  // UX (dock mobile): quando um painel cobre a fração ESQUERDA da tela, desloca
+  // a ótica para a direita para centralizar o astro na metade livre — sem zoom
+  // nem mexer na cena. fracaoEsquerda 0 = sem deslocamento.
+  setDeslocamentoVisao(fracaoEsquerda) {
+    this._deslocVisaoFrac = fracaoEsquerda || 0;
+    this._aplicarDeslocamentoVisao();
+  }
+  _aplicarDeslocamentoVisao() {
+    if (!this.camera) return;
+    const f = this._deslocVisaoFrac || 0;
+    const w = window.innerWidth, h = window.innerHeight;
+    if (f > 0) this.camera.setViewOffset(w, h, -f / 2 * w, 0, w, h);
+    else if (this.camera.view) this.camera.clearViewOffset();
+    this.camera.updateProjectionMatrix();
   }
 
   _criarCena() {
