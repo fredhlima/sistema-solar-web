@@ -1,3 +1,42 @@
+/* ---------------------------------------------------------------------------
+   SAFE-AREA — recorte de tela (notch, Dynamic Island, furo da câmera, borda
+   curva) e barras do sistema.
+
+   Os quatro insets ficam encapsulados em custom properties em vez de `env()`
+   solto pelo arquivo, por três motivos:
+
+   1. PISO. O Android pode reportar 0 num inset e ainda assim ter barra de
+      gestos ali; um `max()` garante folga mínima sem inventar espaço onde não
+      precisa.
+   2. TESTE. Nenhum teste consegue forjar `env()`, mas qualquer teste consegue
+      sobrescrever uma custom property — é o que torna possível a matriz de
+      recortes de tests/audit-safe-area.mjs (furo à esquerda, furo à direita,
+      notch largo, barra de gestos alta, 3 botões, borda curva).
+   3. UM LUGAR SÓ. Ajuste de fabricante entra aqui, não espalhado em 69 pontos.
+
+   Contexto Android: com targetSdk 36 o edge-to-edge é obrigatório (o
+   windowOptOutEdgeToEdgeEnforcement foi desativado em API 36) e o tema declara
+   `windowLayoutInDisplayCutoutMode=shortEdges` — ou seja, o app desenha atrás
+   das barras e DENTRO do recorte, e é este bloco que devolve a folga.
+   Em iOS o mecanismo é o mesmo: em paisagem a Dynamic Island vira inset
+   LATERAL (não superior) e a barra da Siri vira inset inferior.
+   --------------------------------------------------------------------------- */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Só em tela de toque: piso de 8px embaixo (regra do PLANO-QUALIDADE §3.2 para
+   o home indicator / barra de gestos). No desktop não há barra nenhuma e um
+   piso só criaria margem morta. */
+@media (pointer: coarse) {
+  :root {
+    --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  }
+}
+
 /* RESET E BASE */
 html, body {
   margin: 0;
@@ -63,8 +102,8 @@ button, input, select, textarea {
 /* TÍTULO (topo esquerdo) */
 .titulo {
   position: fixed;
-  top: calc(20px + env(safe-area-inset-top));
-  left: calc(20px + env(safe-area-inset-left));
+  top: calc(20px + var(--safe-top));
+  left: calc(20px + var(--safe-left));
   z-index: 10;
   pointer-events: none;
 }
@@ -99,8 +138,8 @@ button, input, select, textarea {
 /* BARRA DE AÇÕES (topo direito) */
 .barra-acoes {
   position: fixed;
-  top: calc(20px + env(safe-area-inset-top));
-  right: calc(20px + env(safe-area-inset-right));
+  top: calc(20px + var(--safe-top));
+  right: calc(20px + var(--safe-right));
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -224,8 +263,8 @@ button, input, select, textarea {
     flex-direction: column;
     gap: 8px;
     position: fixed;
-    top: calc(205px + env(safe-area-inset-top));
-    left: calc(12px + env(safe-area-inset-left));
+    top: calc(205px + var(--safe-top));
+    left: calc(12px + var(--safe-left));
     background: rgba(11, 16, 28, 0.92);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(120, 160, 255, 0.2);
@@ -240,10 +279,10 @@ button, input, select, textarea {
 /* PAINEL EXPLORAR (lateral esquerda) */
 .painel-explorar {
   position: fixed;
-  left: calc(20px + env(safe-area-inset-left));
+  left: calc(20px + var(--safe-left));
   /* 150px: abaixo do bloco de identidade (título + chip de nível) */
-  top: calc(150px + env(safe-area-inset-top));
-  bottom: calc(150px + env(safe-area-inset-bottom));
+  top: calc(150px + var(--safe-top));
+  bottom: calc(150px + var(--safe-bottom));
   width: 240px;
   z-index: 5;
   display: flex;
@@ -394,7 +433,7 @@ button, input, select, textarea {
 /* CONTROLES DE TEMPO (rodapé) */
 .controles-tempo {
   position: fixed;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  bottom: calc(20px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -518,7 +557,7 @@ button, input, select, textarea {
   top: 0;
   width: 420px;
   height: 100%;
-  padding-right: env(safe-area-inset-right);
+  padding-right: var(--safe-right);
   /* Acima da barra de ações (10): painel aberto é um drawer que cobre o
      que está atrás, evitando botões sobrepostos disputando o clique */
   z-index: 12;
@@ -822,8 +861,8 @@ button, input, select, textarea {
 /* TOUR GUIADO */
 .tour-card {
   position: fixed;
-  bottom: calc(100px + env(safe-area-inset-bottom));
-  left: calc(20px + env(safe-area-inset-left));
+  bottom: calc(100px + var(--safe-bottom));
+  left: calc(20px + var(--safe-left));
   z-index: 11; /* acima da barra de ações (10), abaixo dos drawers (12) */
   width: 320px;
   animation: slideInLeft 220ms ease;
@@ -960,12 +999,12 @@ button, input, select, textarea {
   }
 
   .barra-acoes {
-    left: calc(12px + env(safe-area-inset-left));
-    right: calc(12px + env(safe-area-inset-right));
+    left: calc(12px + var(--safe-left));
+    right: calc(12px + var(--safe-right));
     max-width: none;
     /* Abaixo do bloco de identidade (título + chip de nível, ~140px) —
        linha única rolável, nunca coluna vertical nem por cima do título */
-    top: calc(150px + env(safe-area-inset-top));
+    top: calc(150px + var(--safe-top));
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
@@ -984,7 +1023,7 @@ button, input, select, textarea {
 
   /* Explorar desce para baixo da barra rolável */
   .painel-explorar {
-    top: calc(205px + env(safe-area-inset-top));
+    top: calc(205px + var(--safe-top));
   }
 
   .botao, .toggle-escala {
@@ -1024,7 +1063,7 @@ button, input, select, textarea {
   top: 0;
   width: 420px;
   height: 100%;
-  padding-right: env(safe-area-inset-right);
+  padding-right: var(--safe-right);
   z-index: 12;
   display: flex;
   flex-direction: column;
@@ -1845,7 +1884,7 @@ button, input, select, textarea {
 /* Visualização vira um RAIL vertical no meio da borda direita */
 .ux-ousada .grupo-visualizacao {
   position: fixed;
-  right: calc(16px + env(safe-area-inset-right));
+  right: calc(16px + var(--safe-right));
   top: 50%;
   transform: translateY(-50%);
   flex-direction: column;
@@ -1902,8 +1941,8 @@ button, input, select, textarea {
 /* Utilidades soltas no canto topo-direito */
 .ux-ousada .grupo-utilidades {
   position: fixed;
-  top: calc(20px + env(safe-area-inset-top));
-  right: calc(20px + env(safe-area-inset-right));
+  top: calc(20px + var(--safe-top));
+  right: calc(20px + var(--safe-right));
   z-index: 10;
 }
 
@@ -1923,9 +1962,9 @@ button, input, select, textarea {
   /* Contêiner segue transparente; volta a alinhar à esquerda (linha rolável
      da fundação) em vez do centro do desktop */
   .ux-ousada .barra-acoes {
-    left: calc(12px + env(safe-area-inset-left));
-    right: calc(12px + env(safe-area-inset-right));
-    top: calc(150px + env(safe-area-inset-top));
+    left: calc(12px + var(--safe-left));
+    right: calc(12px + var(--safe-right));
+    top: calc(150px + var(--safe-top));
     justify-content: flex-start;
   }
   .ux-ousada .grupo-experiencias {
@@ -1940,7 +1979,7 @@ button, input, select, textarea {
     top: auto;
     right: auto;
     transform: none;
-    bottom: calc(96px + env(safe-area-inset-bottom));
+    bottom: calc(96px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     flex-direction: row;
@@ -1954,7 +1993,7 @@ button, input, select, textarea {
   .ux-ousada .grupo-visualizacao::-webkit-scrollbar { display: none; }
   /* Explorar para antes da toolbar inferior (que começa ~657px em 812 de altura) */
   .ux-ousada .painel-explorar {
-    bottom: calc(170px + env(safe-area-inset-bottom));
+    bottom: calc(170px + var(--safe-bottom));
   }
   .ux-ousada .grupo-visualizacao::before { display: none; }
   .ux-ousada .grupo-visualizacao .toggle-escala {
@@ -1978,8 +2017,8 @@ button, input, select, textarea {
     flex-direction: column;
     gap: 8px;
     position: fixed;
-    top: calc(205px + env(safe-area-inset-top));
-    left: calc(12px + env(safe-area-inset-left));
+    top: calc(205px + var(--safe-top));
+    left: calc(12px + var(--safe-left));
     background: rgba(11, 16, 28, 0.92);
     backdrop-filter: blur(14px);
     border: 1px solid rgba(120, 160, 255, 0.2);
@@ -2020,7 +2059,7 @@ button, input, select, textarea {
     top: 0;
     left: 0;
     right: 0;
-    height: calc(150px + env(safe-area-inset-top));
+    height: calc(150px + var(--safe-top));
     background: linear-gradient(to bottom,
       rgba(4, 6, 14, 0.88) 0%,
       rgba(4, 6, 14, 0.5) 60%,
@@ -2042,9 +2081,9 @@ button, input, select, textarea {
    a safe-area, além do tratamento de fundo já aplicado acima. */
 @media (max-width: 430px) {
   .titulo {
-    top: calc(8px + env(safe-area-inset-top));
-    left: calc(8px + env(safe-area-inset-left));
-    max-width: calc(100vw - 16px - env(safe-area-inset-right));
+    top: calc(8px + var(--safe-top));
+    left: calc(8px + var(--safe-left));
+    max-width: calc(100vw - 16px - var(--safe-right));
   }
 }
 
@@ -2109,8 +2148,8 @@ button, input, select, textarea {
      ficar legível sobre qualquer conteúdo atrás. */
   .botao-fechar-overlay {
     position: fixed !important;
-    top: calc(12px + env(safe-area-inset-top)) !important;
-    left: calc(12px + env(safe-area-inset-left)) !important;
+    top: calc(12px + var(--safe-top)) !important;
+    left: calc(12px + var(--safe-left)) !important;
     right: auto !important;
     bottom: auto !important;
     background: rgba(11, 16, 28, 0.85);
@@ -2151,11 +2190,11 @@ button, input, select, textarea {
   .quiz-card,
   .voce-no-espaco-card,
   .paywall-card {
-    padding-top: calc(60px + env(safe-area-inset-top)) !important;
+    padding-top: calc(60px + var(--safe-top)) !important;
   }
 
   .eventos-cabecalho {
-    padding-top: calc(60px + env(safe-area-inset-top));
+    padding-top: calc(60px + var(--safe-top));
   }
 }
 
@@ -2173,14 +2212,14 @@ body.modo-dock .paywall-overlay {
   justify-content: stretch !important;
   /* laterais: notch/Dynamic Island viram borda ESQUERDA/DIREITA em paisagem —
      sem isto o conteúdo das páginas colava na área de risco (iPhone do Fred) */
-  padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left) !important;
+  padding: 0 var(--safe-right) 0 var(--safe-left) !important;
 }
 
 /* Eventos é painel lateral direito no dock: respiro pro notch/ilha à direita
    e termina ACIMA da barra do dock — senão cobre o botão Experiências e o
    transporte (o painel está na camada z60, acima do dock desde a rodada 2). */
 body.modo-dock .painel-eventos {
-  padding-right: env(safe-area-inset-right);
+  padding-right: var(--safe-right);
   /* height:100% da regra base ignoraria o bottom — top+bottom mandam aqui */
   height: auto;
   bottom: var(--mdock-bar-h, 64px);
@@ -2195,13 +2234,16 @@ body.modo-dock .paywall-card {
   height: 100% !important;
   max-height: none !important;
   border-radius: 0 !important;
-  padding-top: calc(60px + env(safe-area-inset-top)) !important;
+  padding-top: calc(60px + var(--safe-top)) !important;
+  /* A barra da Siri/home indicator ocupa a borda inferior no iPhone em
+     paisagem. Todo conteúdo e CTA precisa terminar antes dela. */
+  padding-bottom: calc(12px + var(--safe-bottom)) !important;
 }
 
 body.modo-dock .botao-fechar-overlay {
   position: fixed !important;
-  top: calc(12px + env(safe-area-inset-top)) !important;
-  left: calc(12px + env(safe-area-inset-left)) !important;
+  top: calc(12px + var(--safe-top)) !important;
+  left: calc(12px + var(--safe-left)) !important;
   right: auto !important;
   bottom: auto !important;
   background: rgba(11, 16, 28, 0.85);
@@ -2225,7 +2267,7 @@ body.modo-dock .botao-fechar-overlay .fechar-texto { display: inline; }
 /* Mesmo respiro que o breakpoint ≤768px já dá: sem isto o «‹ Voltar» fixo
    cobre o título "EVENTOS" do painel no shell de dock (viewport > 768px). */
 body.modo-dock .eventos-cabecalho {
-  padding-top: calc(60px + env(safe-area-inset-top));
+  padding-top: calc(60px + var(--safe-top));
 }
 
 .vis-trigger, .info-saiba-btn { display: none; }
@@ -2240,8 +2282,8 @@ body.modo-dock .eventos-cabecalho {
 @media (orientation: landscape) and (max-height: 520px) {
   /* — Identidade: logo + nome + chip de nível numa ÚNICA linha (~34px) — */
   .ux-ousada .titulo {
-    top: calc(8px + env(safe-area-inset-top));
-    left: calc(10px + env(safe-area-inset-left));
+    top: calc(8px + var(--safe-top));
+    left: calc(10px + var(--safe-left));
     display: flex; align-items: center; gap: 10px;
   }
   .ux-ousada .titulo-secundario { display: none; }
@@ -2257,19 +2299,19 @@ body.modo-dock .eventos-cabecalho {
   .ux-ousada .progresso-chip-barra { width: 34px; }
 
   /* — Experiências no topo-centro (sem transform no pai) — */
-  .ux-ousada .barra-acoes { top: calc(10px + env(safe-area-inset-top)); left: 0; right: 0; justify-content: center; }
+  .ux-ousada .barra-acoes { top: calc(10px + var(--safe-top)); left: 0; right: 0; justify-content: center; }
   .ux-ousada .experiencias-itens.aberto {
-    top: calc(52px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+    top: calc(52px + var(--safe-top)); left: 50%; transform: translateX(-50%);
     max-height: calc(100vh - 120px); overflow-y: auto;
   }
 
   /* — Utilidades topo-dir — */
-  .ux-ousada .grupo-utilidades { position: fixed; top: calc(8px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); }
+  .ux-ousada .grupo-utilidades { position: fixed; top: calc(8px + var(--safe-top)); right: calc(12px + var(--safe-right)); }
 
   /* — EXPLORAR: peça principal — painel alto, lista respirando — */
   .ux-ousada .painel-explorar {
-    top: calc(50px + env(safe-area-inset-top));
-    bottom: calc(60px + env(safe-area-inset-bottom));
+    top: calc(50px + var(--safe-top));
+    bottom: calc(60px + var(--safe-bottom));
     width: 188px;
   }
   .ux-ousada .explorar-rodape { display: none; }  /* créditos ficam p/ desktop; aqui a lista é prioridade */
@@ -2277,7 +2319,7 @@ body.modo-dock .eventos-cabecalho {
   /* — VISUALIZAÇÃO: botão-ícone (borda dir, centro) + menu — */
   .ux-ousada .vis-trigger {
     display: flex; align-items: center; justify-content: center;
-    position: fixed; right: calc(12px + env(safe-area-inset-right)); top: 50%;
+    position: fixed; right: calc(12px + var(--safe-right)); top: 50%;
     transform: translateY(-50%);
     width: 46px; height: 46px; border-radius: 14px;
     color: #93a0b8; background: rgba(11, 16, 28, 0.7);
@@ -2292,7 +2334,7 @@ body.modo-dock .eventos-cabecalho {
   .ux-ousada .grupo-visualizacao { display: none; }
   .ux-ousada .grupo-visualizacao.menu-aberto {
     display: flex; position: fixed;
-    right: calc(66px + env(safe-area-inset-right)); top: 50%; left: auto; bottom: auto;
+    right: calc(66px + var(--safe-right)); top: 50%; left: auto; bottom: auto;
     transform: translateY(-50%);
     flex-direction: column; align-items: stretch; gap: 5px;
     width: 138px; max-width: none; overflow: visible; padding: 10px 8px;
@@ -2306,8 +2348,8 @@ body.modo-dock .eventos-cabecalho {
 
   /* — FICHA: card compacto (não a folha de 45% da tela) — */
   .ux-ousada .painel-info {
-    left: auto; right: calc(12px + env(safe-area-inset-right));
-    top: calc(50px + env(safe-area-inset-top)); bottom: auto;
+    left: auto; right: calc(12px + var(--safe-right));
+    top: calc(50px + var(--safe-top)); bottom: auto;
     width: 262px; max-height: calc(100vh - 116px);
     border-radius: 16px;
   }

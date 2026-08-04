@@ -5,7 +5,7 @@
 // FASE 1: dock + título + nível/engrenagem + HUD + transporte + calendário +
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
-import { t, trocarIdioma, getIdioma } from './i18n.js?v=22';
+import { t, trocarIdioma, getIdioma } from './i18n.js?v=27';
 
 const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESF = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -56,9 +56,16 @@ const GRUPOS_EXTRA = [
 const normalizar = (s) => (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 
 export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso }) {
-  // ---------- gating (exatamente conforme SPEC) ----------
+  // ---------- gating ----------
+  // Decisão do Fred (03/08/2026): TABLET TAMBÉM É BLOQUEADO em retrato. O gate
+  // tinha `max-width: 900px`, que pegava iPad de 820/834px mas deixava passar o
+  // iPad Pro 12,9" (1024px em retrato) — ele caía no layout de desktop dentro de
+  // uma tela alta e estreita. Sem limite de largura, qualquer tela de TOQUE em
+  // retrato vai para "Vire o aparelho", que é a premissa paisagem-only inteira,
+  // sem exceção por tamanho. Notebook com touchscreen não é afetado: `pointer`
+  // reflete o apontador PRIMÁRIO, que ali é o mouse/trackpad (`fine`).
   const mqDock = matchMedia('(pointer: coarse) and (orientation: landscape)');
-  const mqGirar = matchMedia('(pointer: coarse) and (orientation: portrait) and (max-width: 900px)');
+  const mqGirar = matchMedia('(pointer: coarse) and (orientation: portrait)');
   function aplicarModo() {
     document.body.classList.toggle('modo-dock', mqDock.matches);
     document.body.classList.toggle('modo-girar', mqGirar.matches);
@@ -72,7 +79,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   girar.id = 'mdock-girar';
   girar.setAttribute('aria-hidden', 'true');
   girar.innerHTML = `
-    <img class="mdock-girar-logo" src="assets/logo.png" alt="">
+    <img class="mdock-girar-logo" src="assets/logo.png?v=2" alt="">
     <div class="mdock-girar-icone">📱</div>
     <span class="mdock-girar-tag">${t('titulo') || 'SISTEMA SOLAR'}</span>
     <h2 class="mdock-girar-titulo">${t('mdockGirarTitulo')}</h2>
@@ -114,9 +121,12 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
           <div class="mdock-toggle" id="mdock-tg-rotulos"><div class="mdock-toggle-bolinha"></div></div>
         </div>
         <div class="mdock-settings-linha">
-          <span>${t('escalaReal')}</span>
+          <span>${t('mdockEscalaReal')}</span>
           <div class="mdock-toggle" id="mdock-tg-escala"><div class="mdock-toggle-bolinha"></div></div>
         </div>
+        <button class="mdock-settings-acao" id="mdock-acao-visao">
+          <span>${t('mdockVisaoGeral')}</span><span class="mdock-acao-seta">›</span>
+        </button>
         <div class="mdock-settings-linha" id="mdock-linha-musica">
           <span>${t('mdockMusica')}</span>
           <div class="mdock-toggle" id="mdock-tg-musica"><div class="mdock-toggle-bolinha"></div></div>
@@ -129,6 +139,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
             <span class="mdock-idioma-op" id="mdock-lang-es">ES</span>
           </div>
         </div>
+        <button class="mdock-settings-acao" id="mdock-acao-tutorial">
+          <span>${t('tutorialRever')}</span><span class="mdock-acao-seta">›</span>
+        </button>
       </div>
     </div>
 
@@ -544,6 +557,15 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   $('mdock-tg-rotulos').onclick = () => { const v = acoes.estadoVis(); acoes.setRotulos(!v.rotulos); render(); };
   $('mdock-tg-escala').onclick = () => { const v = acoes.estadoVis(); acoes.setEscala(v.escala === 'real' ? 'didatica' : 'real'); render(); };
   $('mdock-tg-musica').onclick = () => { document.getElementById('btn-musica')?.click(); render(); };
+  // Ações (não são toggles): fecham o Settings porque o resultado das duas
+  // acontece na cena, atrás do popover — deixá-lo aberto esconderia o efeito.
+  $('mdock-acao-visao').onclick = () => { acoes.visaoGeral?.(); estado.settingsOpen = false; render(); };
+  $('mdock-acao-tutorial').onclick = () => {
+    estado.settingsOpen = false;
+    render();
+    // proxy no botão "?" do desktop, que fica oculto no dock
+    document.getElementById('btn-tutorial')?.click();
+  };
   $('mdock-lang-pt').onclick = () => trocarIdioma('pt');
   $('mdock-lang-en').onclick = () => trocarIdioma('en');
   $('mdock-lang-es').onclick = () => trocarIdioma('es');

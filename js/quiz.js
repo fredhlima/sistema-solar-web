@@ -443,7 +443,7 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
           tentativa.pts = tentativa.erros === 0 ? 10 : 5;
           pontuacao += tentativa.pts;
           tentativas[pergunta.id] = tentativa;
-          progressoEvento('quiz-acerto', { pts: tentativa.pts });
+          progressoEvento('quiz-acerto', { pts: tentativa.pts, pacoteId: pacoteAtual?.id });
 
           btnOpcao.classList.add('correto');
           celebrar(btnOpcao);
@@ -595,7 +595,7 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
         tentativa.pts = tentativa.erros === 0 ? 10 : 5;
         pontuacao += tentativa.pts;
         tentativas[pergunta.id] = tentativa;
-        progressoEvento('quiz-acerto', { pts: tentativa.pts });
+        progressoEvento('quiz-acerto', { pts: tentativa.pts, pacoteId: pacoteAtual?.id });
 
         card.classList.add('encontrar-correto');
         celebrar(card);

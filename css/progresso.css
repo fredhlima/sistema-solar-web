@@ -272,6 +272,57 @@
 }
 
 /* Container e toasts */
+/* Badge inalcançável sem o Pro: continua visível (é gancho de conversão), mas
+   com selo, para a criança free não perseguir meta impossível achando que é
+   questão de esforço. O contêiner vira o ancestral posicionado do selo. */
+.progresso-badge.exige-pro { position: relative; }
+.progresso-badge-pro {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: rgba(255, 180, 84, .18);
+  border: 1px solid rgba(255, 180, 84, .45);
+  color: #ffb454;
+  font: 700 8.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: .08em;
+  pointer-events: none;
+}
+
+/* "+N XP" que sobe e some junto ao chip de nível. É o único feedback imediato do
+   ganho de XP — antes só a largura da barra mudava, o que ninguém percebe. Fica
+   em coordenadas de viewport porque o chip do desktop e o do dock vivem em
+   contêineres diferentes. */
+.progresso-ganho-xp {
+  position: fixed;
+  z-index: 27;
+  transform: translateX(-50%);
+  pointer-events: none;
+  font: 700 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #5cc8ff;
+  text-shadow: 0 0 10px rgba(92, 200, 255, .55), 0 1px 2px rgba(0, 0, 0, .8);
+  animation: progresso-ganho-xp 1100ms ease-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes progresso-ganho-xp {
+  0%   { opacity: 0; transform: translate(-50%, 2px)  scale(.85); }
+  18%  { opacity: 1; transform: translate(-50%, -2px) scale(1); }
+  70%  { opacity: 1; transform: translate(-50%, -14px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -26px) scale(1); }
+}
+
+/* Movimento é decorativo aqui: quem pede menos animação continua vendo o número,
+   só sem o deslocamento. */
+@media (prefers-reduced-motion: reduce) {
+  .progresso-ganho-xp { animation: progresso-ganho-xp-simples 1100ms ease-out forwards; }
+  @keyframes progresso-ganho-xp-simples {
+    0%, 80% { opacity: 1; transform: translateX(-50%); }
+    100%    { opacity: 0; transform: translateX(-50%); }
+  }
+}
+
 .progresso-toasts {
   position: fixed;
   bottom: 20px;

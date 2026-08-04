@@ -51,7 +51,7 @@ const FRASES = {
   terra: {
     pt: 'Seu planeta natal — o lar!',
     en: 'Your home planet — where you belong!',
-    es: 'Tu planeta de origen — tu hogar!'
+    es: '¡Tu planeta de origen — tu hogar!'
   },
   lua: {
     pt: 'Cada passo vira um salto de astronauta.',
@@ -59,9 +59,9 @@ const FRASES = {
     es: 'Cada paso se convierte en un salto de astronauta.'
   },
   sol: {
-    pt: 'Você seria instantaneamente vaporizando!',
+    pt: 'Você seria instantaneamente vaporizado!',
     en: 'You would vaporize instantly!',
-    es: 'Serías vaporizado al instante!'
+    es: '¡Serías vaporizado al instante!'
   },
   mercurio: {
     pt: 'Gravidade fraca — você saltaria bem alto.',
@@ -81,7 +81,7 @@ const FRASES = {
   jupiter: {
     pt: 'Você mal conseguiria levantar da cama!',
     en: 'You\'d barely lift off the ground!',
-    es: 'Apenas podrías levantarte!'
+    es: '¡Apenas podrías levantarte!'
   },
   saturno: {
     pt: 'Gravidade moderada — surpreendentemente confortável.',
@@ -101,7 +101,7 @@ const FRASES = {
   plutao: {
     pt: 'Você saltaria para longe e flutuaria para o espaço!',
     en: 'You\'d jump away and float into space!',
-    es: 'Saltarías y flotarías hacia el espacio!'
+    es: '¡Saltarías y flotarías hacia el espacio!'
   }
 };
 

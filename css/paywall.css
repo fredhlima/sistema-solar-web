@@ -198,3 +198,40 @@
   margin-top: 16px;
   line-height: 1.4;
 }
+
+/* Página única no dock em paisagem: benefícios e decisão ficam lado a lado
+   para caber até no iPhone SE sem uma área rolável. */
+body.modo-dock .paywall-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, .9fr);
+  grid-template-areas:
+    'badge badge'
+    'title title'
+    'subtitle subtitle'
+    'recip benefits'
+    'price benefits'
+    'anchor benefits'
+    'loss benefits'
+    'buy restore'
+    'footer footer';
+  column-gap: 16px;
+  row-gap: 3px;
+  align-content: center;
+  overflow: hidden !important;
+}
+
+body.modo-dock .paywall-badge { grid-area: badge; margin-bottom: 1px; padding: 3px 9px; font-size: 10px; }
+body.modo-dock .paywall-titulo { grid-area: title; font-size: 18px; margin: 0; }
+body.modo-dock .paywall-subtitulo { grid-area: subtitle; font-size: 11px; line-height: 1.25; margin: 0 0 2px; }
+body.modo-dock .paywall-reciprocidade { grid-area: recip; font-size: 10px; line-height: 1.25; padding: 6px 8px; margin: 0; }
+body.modo-dock .paywall-beneficios { grid-area: benefits; align-self: center; margin: 0; }
+body.modo-dock .paywall-beneficios li { font-size: 10px; line-height: 1.22; margin-bottom: 5px; padding-left: 14px; }
+body.modo-dock .paywall-beneficios li::before { width: 5px; height: 5px; top: 3px; }
+body.modo-dock .paywall-preco { grid-area: price; font-size: 15px; margin: 0; }
+body.modo-dock .paywall-ancora { grid-area: anchor; font-size: 10px; margin: 0; }
+body.modo-dock .paywall-perda { grid-area: loss; font-size: 10px; line-height: 1.2; margin: 0; }
+body.modo-dock .paywall-comprar,
+body.modo-dock .paywall-restaurar { align-self: center; font-size: 11px; padding: 8px 6px; margin: 0; }
+body.modo-dock .paywall-comprar { grid-area: buy; }
+body.modo-dock .paywall-restaurar { grid-area: restore; }
+body.modo-dock .paywall-rodape { grid-area: footer; font-size: 8px; line-height: 1.15; margin: 1px 0 0; }

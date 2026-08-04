@@ -1,6 +1,6 @@
 // Núcleo de internacionalização (pt = fonte; en/es = overlays com fallback).
 // Contratos descritos na SPEC.md, seção EXPANSÃO V3.
-import { UI_TEXTOS } from './traducoes-ui.js?v=18';
+import { UI_TEXTOS } from './traducoes-ui.js?v=22';
 
 const IDIOMAS = ['pt', 'en', 'es'];
 const CHAVE_STORAGE = 'sistema-solar-idioma';
@@ -41,6 +41,24 @@ export function t(chave, params) {
     }
   }
   return texto;
+}
+
+// Os verbos de interação mudam com o aparelho: no celular (modo-dock) não existe
+// roda de mouse nem clique, então "role para dar zoom e clique" instrui o gesto
+// errado. Quando existir uma variante `<chave>Toque` no dicionário, ela é usada
+// no modo-dock; senão cai no texto padrão, e a maioria das chaves (que não fala
+// de gesto nenhum) não precisa de variante.
+export function tToque(chave, params) {
+  if (document.body.classList.contains('modo-dock')) {
+    const dic = UI_TEXTOS[idiomaAtual] || {};
+    const base = UI_TEXTOS.pt || {};
+    // checa a existência direto no dicionário: t() devolve a própria chave
+    // quando não acha, então não dá pra usar t() como teste de existência
+    if (dic[chave + 'Toque'] !== undefined || base[chave + 'Toque'] !== undefined) {
+      return t(chave + 'Toque', params);
+    }
+  }
+  return t(chave, params);
 }
 
 export function ordinal(n) {

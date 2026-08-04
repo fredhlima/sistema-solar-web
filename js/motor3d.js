@@ -897,7 +897,11 @@ export class SistemaSolar3D {
     const PX_POR_UNIDADE = 25.6;
     sprite.scale.set(canvas.width / PX_POR_UNIDADE, canvas.height / PX_POR_UNIDADE, 1);
     sprite.userData.ehRotulo = true;
-    sprite.position.y = (raio || 1) + 2;
+    sprite.position.y = raio || 0;
+    // Ancoragem em espaço de sprite (constante em tela) — não aplique ao cinturão
+    if (corpo.tipo !== 'cinturao') {
+      sprite.center.set(0.5, -0.2);
+    }
 
     grupo.add(sprite);
     grupo.userData.rotuloSprite = sprite;
@@ -1349,7 +1353,7 @@ export class SistemaSolar3D {
       }
       const rotulo = fisico.grupoOrbita.userData.rotuloSprite;
       if (rotulo) {
-        rotulo.position.y = novaEscala.raio + 2;
+        rotulo.position.y = novaEscala.raio;
       }
 
       // Cauda/coma do cometa: criadas com o raio DIDÁTICO e nunca eram
@@ -1431,11 +1435,14 @@ export class SistemaSolar3D {
 
   setRotulosVisiveis(b) {
     this.rotulosVisiveis = b;
-    for (const [, fisico] of this.corposFisicos.entries()) {
-      if (fisico.grupoOrbita.userData.rotuloSprite) {
-        fisico.grupoOrbita.userData.rotuloSprite.visible = b;
+    if (!b) {
+      for (const [, fisico] of this.corposFisicos.entries()) {
+        if (fisico.grupoOrbita.userData.rotuloSprite) {
+          fisico.grupoOrbita.userData.rotuloSprite.visible = false;
+        }
       }
     }
+    // Quando b === true, deixe o passe do frame decidir (não force visible = true)
   }
 
   getDataSimulada() {
@@ -1680,16 +1687,169 @@ export class SistemaSolar3D {
       }
     }
 
-    // Visibilidade de rótulos de luas
-    for (const [id, fisico] of this.corposFisicos.entries()) {
-      const corpo = fisico.corpo;
-      const sprite = fisico.grupoOrbita.userData.rotuloSprite;
+  }
 
-      if (sprite && (corpo.tipo === 'lua' || corpo.tipo === 'sonda')) {
-        const posCorpo = new THREE.Vector3();
-        fisico.grupoOrbita.getWorldPosition(posCorpo);
-        const distCamera = this.camera.position.distanceTo(posCorpo);
-        sprite.visible = distCamera < 60 && this.rotulosVisiveis;
+  _atualizarRotulos() {
+    const ALTURA_ROTULO_PX = 22;
+    const FATOR_CINTURAO = 1.35;
+    const RAIO_MIN_PX = 3;
+    const MARGEM = { topo: 76, fundo: 72, lados: 8 };
+    const FOLGA_COLISAO_PX = 2;
+    // O corpo FOCADO cresce com o próprio corpo quando o usuário dá zoom além
+    // do enquadramento padrão de focar() — senão o nome fica minúsculo do lado
+    // de um planeta que ocupa a tela inteira (achado do Fred, 04/08/2026).
+    // Cresce só a partir de raioPx ~150 (planeta já grande em tela) e satura em
+    // ALTURA_FOCO_MAX_PX: o canvas-fonte do rótulo é rasterizado a 64px de
+    // altura (ver _criarRotulo), então acima disso a fonte volta a borrar —
+    // era exatamente o bug que a reforma de tamanho constante corrigiu.
+    const FATOR_FOCO_PX = 0.15;
+    const ALTURA_FOCO_MAX_PX = 44;
+
+    // 1. Se rótulos desativados, ocultar tudo
+    if (!this.rotulosVisiveis) {
+      for (const [, fisico] of this.corposFisicos.entries()) {
+        const sprite = fisico.grupoOrbita.userData.rotuloSprite;
+        if (sprite) sprite.visible = false;
+      }
+      return;
+    }
+
+    // 2. Medir o canvas
+    const larguraPx = this.renderer.domElement.clientWidth;
+    const alturaPx = this.renderer.domElement.clientHeight;
+    if (larguraPx === 0 || alturaPx === 0) return;
+
+    // 3. Fator de conversão mundo↔pixel
+    const tanMeioFov = Math.tan((this.camera.fov * Math.PI / 180) / 2);
+    const mundoPorPixel = (d) => (2 * d * tanMeioFov) / alturaPx;
+
+    // Reusar vetores para não alocar por frame: são 2 por corpo × 45 corpos ×
+    // 60 fps se alocar aqui dentro (ver comentário de alocação na L9)
+    if (!this._vetRotulo) this._vetRotulo = new THREE.Vector3();
+    if (!this._vetRotuloNdc) this._vetRotuloNdc = new THREE.Vector3();
+    const vetorPos = this._vetRotulo;
+    const vetorNdc = this._vetRotuloNdc;
+
+    const candidatos = [];
+    const PRIORIDADES = {
+      'estrela': 0,
+      'planeta': 1,
+      'planeta-anao': 2,
+      'cometa': 3,
+      'cinturao': 3,
+      'lua': 4,
+      'sonda': 4,
+      'asteroide': 5,
+    };
+
+    // 4. Processar cada corpo
+    for (const [id, fisico] of this.corposFisicos.entries()) {
+      const sprite = fisico.grupoOrbita.userData.rotuloSprite;
+      if (!sprite) continue;
+
+      // 4.b - Respeitar corpos ocultos
+      if (this._corposOcultos?.has(id)) {
+        sprite.visible = false;
+        continue;
+      }
+
+      // 4.c - Posição de mundo
+      sprite.getWorldPosition(vetorPos);
+
+      // 4.d - Distância à câmera
+      const d = this.camera.position.distanceTo(vetorPos);
+      const mpp = mundoPorPixel(d);
+
+      // 4.e - Escala constante em tela (corpo focado: cresce com o raio
+      // aparente, plano/lua/etc: fixa; cinturão: fixa, maior)
+      const raioPx = (fisico.escala?.raio || 0) / mpp;
+      let alvoPx;
+      if (fisico.isCinturao) {
+        alvoPx = ALTURA_ROTULO_PX * FATOR_CINTURAO;
+      } else if (id === this.corpoFocado) {
+        alvoPx = Math.min(ALTURA_FOCO_MAX_PX, Math.max(ALTURA_ROTULO_PX, raioPx * FATOR_FOCO_PX));
+      } else {
+        alvoPx = ALTURA_ROTULO_PX;
+      }
+      const alturaMundo = alvoPx * mpp;
+      const proporcao = sprite.material.map.image.width / sprite.material.map.image.height;
+      sprite.scale.set(alturaMundo * proporcao, alturaMundo, 1);
+
+      // 4.f - Corpo pequeno demais (exceto cinturão e focado)
+      if (!fisico.isCinturao && id !== this.corpoFocado && raioPx < RAIO_MIN_PX) {
+        sprite.visible = false;
+        continue;
+      }
+
+      // 4.g - Projeção para tela
+      const ndcPos = vetorNdc.copy(vetorPos).project(this.camera);
+      if (ndcPos.z > 1) {
+        sprite.visible = false;
+        continue;
+      }
+
+      const cx = (ndcPos.x * 0.5 + 0.5) * larguraPx;
+      const cy = (-ndcPos.y * 0.5 + 0.5) * alturaPx;
+
+      // Deslocar pelo center do sprite
+      const cyAjustado = cy - (fisico.isCinturao ? 0 : alvoPx * 0.7);
+      const larguraRetangulo = alvoPx * proporcao;
+
+      // 4.h - Guardar candidato
+      candidatos.push({
+        sprite,
+        id,
+        x: cx,
+        y: cyAjustado,
+        w: larguraRetangulo,
+        h: alvoPx,
+        d,
+        corpo: fisico.corpo,
+        prioridade: PRIORIDADES[fisico.corpo.tipo] ?? 6,
+      });
+    }
+
+    // 5 e 6. Ordenar por prioridade (crescente), depois por distância
+    candidatos.sort((a, b) => {
+      if (a.prioridade !== b.prioridade) return a.prioridade - b.prioridade;
+      return a.d - b.d;
+    });
+
+    // 7. Percorrer candidatos, mantendo lista de colocados
+    const colocados = [];
+    for (const cand of candidatos) {
+      const { sprite, x, y, w, h } = cand;
+
+      // Verificar se cabe na área segura
+      if (
+        x - w / 2 < MARGEM.lados ||
+        x + w / 2 > larguraPx - MARGEM.lados ||
+        y - h / 2 < MARGEM.topo ||
+        y + h / 2 > alturaPx - MARGEM.fundo
+      ) {
+        sprite.visible = false;
+        continue;
+      }
+
+      // Verificar colisão com já colocados
+      let colidiu = false;
+      for (const colocado of colocados) {
+        const dx = Math.abs(x - colocado.x);
+        const dy = Math.abs(y - colocado.y);
+        const minDx = (w + colocado.w) / 2 + FOLGA_COLISAO_PX;
+        const minDy = (h + colocado.h) / 2 + FOLGA_COLISAO_PX;
+
+        if (dx < minDx && dy < minDy) {
+          colidiu = true;
+          break;
+        }
+      }
+
+      if (colidiu) {
+        sprite.visible = false;
+      } else {
+        sprite.visible = true;
+        colocados.push(cand);
       }
     }
   }
@@ -1718,6 +1878,7 @@ export class SistemaSolar3D {
       }
 
       this.controls.update();
+      this._atualizarRotulos();
       this.renderer.render(this.scene, this.camera);
     };
 

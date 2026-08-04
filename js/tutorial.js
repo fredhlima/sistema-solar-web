@@ -1,4 +1,4 @@
-import { t } from './i18n.js?v=22';
+import { t, tToque } from './i18n.js?v=27';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 
@@ -28,6 +28,11 @@ export function iniciarTutorial() {
   if (grupoUtilidades) {
     const botaoTutorial = document.createElement('button');
     botaoTutorial.className = 'botao botao-tutorial';
+    // id para o dock do celular poder reabrir o tutorial clicando este botão
+    // (mesmo padrão de proxy do #btn-musica): a .grupo-utilidades inteira fica
+    // display:none no modo-dock, então sem essa ponte o tutorial era
+    // irrecuperável no aparelho — que é justamente a plataforma da loja.
+    botaoTutorial.id = 'btn-tutorial';
     botaoTutorial.textContent = '?';
     botaoTutorial.title = t('tutorialRever');
     botaoTutorial.setAttribute('aria-label', t('tutorialRever'));
@@ -146,7 +151,7 @@ function mostrarPasso() {
 
   // Atualizar título e texto
   cardElement.querySelector('.tutorial-card-titulo').textContent = t(passo.titulo);
-  cardElement.querySelector('.tutorial-card-texto').textContent = t(passo.texto);
+  cardElement.querySelector('.tutorial-card-texto').textContent = tToque(passo.texto);
 
   // Atualizar pontos
   const dots = cardElement.querySelectorAll('.tutorial-dot');

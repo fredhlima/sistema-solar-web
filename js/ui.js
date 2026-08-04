@@ -1,4 +1,4 @@
-import { t, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=23';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=27';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -206,7 +206,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const div = document.createElement('div');
     div.className = 'titulo';
     div.innerHTML = `
-      <img class="titulo-logo" src="assets/logo.png" alt="" aria-hidden="true">
+      <img class="titulo-logo" src="assets/logo.png?v=2" alt="" aria-hidden="true">
       <h1 class="titulo-principal">${t('titulo')}</h1>
       <p class="titulo-secundario">${t('subtitulo')}</p>
       <div id="slot-progresso" class="titulo-slot-progresso"></div>
@@ -1264,11 +1264,29 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     document.getElementById('painel-explorar').style.display = '';
   }
 
+  // A dica só faz sentido para quem ainda não sabe girar a cena. Antes ela
+  // aparecia em TODO carregamento, para sempre — na vigésima sessão o app ainda
+  // explicava o básico, e a criança já tinha aprendido na primeira. Agora vale
+  // pelas 3 primeiras sessões e depois some sozinha.
+  const CHAVE_DICAS = 'sistema-solar-dicas-vistas';
+  const MAX_DICAS = 3;
+  function deveMostrarDica() {
+    try {
+      const n = parseInt(localStorage.getItem(CHAVE_DICAS) || '0', 10) || 0;
+      if (n >= MAX_DICAS) return false;
+      localStorage.setItem(CHAVE_DICAS, String(n + 1));
+      return true;
+    } catch (e) {
+      return true; // sem storage: mostra, como fazia antes
+    }
+  }
+
   function criarToastDica() {
+    if (!deveMostrarDica()) return;
     const div = document.createElement('div');
     div.className = 'toast-dica';
     div.id = 'toast-dica';
-    div.textContent = t('toastDica');
+    div.textContent = tToque('toastDica');
     root.appendChild(div);
 
     estado.dicaMostrada = true;
@@ -1830,6 +1848,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     setRotulos: (v) => { estado.rotulosVisiveis = v; motor.setRotulosVisiveis(v); },
     setEscala: (m) => { estado.escalaAtual = m; motor.setEscala(m); },
     estadoVis: () => ({ orbitas: estado.orbitasVisiveis, rotulos: estado.rotulosVisiveis, escala: estado.escalaAtual }),
+    // Volta a enquadrar o sistema inteiro. Existia só no botão do desktop; sem
+    // isto, quem focasse um astro no celular não tinha como voltar a ver tudo.
+    visaoGeral: () => motor.visaoGeral(),
     // Favoritos (Efeito IKEA) — usados na lista/ficha do dock
     ehFavorito,
     alternarFavorito,

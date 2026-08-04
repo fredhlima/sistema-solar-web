@@ -730,3 +730,22 @@
   color: #ffb454;
   text-align: center;
 }
+
+/* ————— Página única SEM ROLAGEM na seleção de pacotes (dock paisagem) —————
+   Pedido do Fred (rodada 4): redimensionar os elementos pra tudo caber numa
+   tela de ~375-430px de altura, em vez de rolar. */
+body.modo-dock .quiz-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+}
+body.modo-dock .quiz-titulo-pacotes { font-size: 16px; margin-bottom: 2px; }
+body.modo-dock .quiz-titulo-pacotes::after { margin: 2px 0 8px; font-size: 11px; }
+body.modo-dock .quiz-grid-pacotes {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 10px;
+}
+body.modo-dock .quiz-pacote-card { padding: 10px 8px 8px; }
+body.modo-dock .quiz-pacote-icone {
+  width: 40px; height: 40px; font-size: 18px; margin-bottom: 6px;
+}

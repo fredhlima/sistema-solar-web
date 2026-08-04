@@ -2,6 +2,9 @@
 // Exporta iniciarProgresso({ dados })
 
 import { getIdioma } from './i18n.js';
+// só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
+// em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
+import { ITENS_GRATIS } from './premium.js';
 
 // Textos localizados (pt/en/es)
 const TEXTOS = {
@@ -28,7 +31,9 @@ const TEXTOS = {
     badgeAnelOuro: 'Anel de Ouro',
     badgeAnelOuroDesc: 'Conquistou primeira medalha ouro',
     badgeSabeTudo: 'Sabe Tudo',
-    badgeSabeTudoDesc: 'Ouro em todos os 5 pacotes',
+    badgeSabeTudoDesc: 'Ouro em todos os pacotes',
+    badgeExigePro: 'PRO',
+    badgeExigeProDica: 'precisa do Explorador Pro',
     badgeMaratonista: 'Maratonista',
     badgeMaratonistaDesc: 'Completou o tour guiado',
     badgeViajanteTempo: 'Viajante do Tempo',
@@ -69,7 +74,9 @@ const TEXTOS = {
     badgeAnelOuro: 'Golden Ring',
     badgeAnelOuroDesc: 'Won first gold medal',
     badgeSabeTudo: 'Knows All',
-    badgeSabeTudoDesc: 'Gold in all 5 quiz packs',
+    badgeSabeTudoDesc: 'Gold in every quiz pack',
+    badgeExigePro: 'PRO',
+    badgeExigeProDica: 'needs Explorer Pro',
     badgeMaratonista: 'Marathon Runner',
     badgeMaratonistaDesc: 'Completed the guided tour',
     badgeViajanteTempo: 'Time Traveler',
@@ -110,7 +117,9 @@ const TEXTOS = {
     badgeAnelOuro: 'Anillo de Oro',
     badgeAnelOuroDesc: 'Ganó primera medalla de oro',
     badgeSabeTudo: 'Lo Sabe Todo',
-    badgeSabeTudoDesc: 'Oro en los 5 paquetes',
+    badgeSabeTudoDesc: 'Oro en todos los paquetes',
+    badgeExigePro: 'PRO',
+    badgeExigeProDica: 'necesita Explorador Pro',
     badgeMaratonista: 'Maratonista',
     badgeMaratonistaDesc: 'Completó el tour guiado',
     badgeViajanteTempo: 'Viajero del Tiempo',
@@ -154,6 +163,17 @@ const NIVEIS = [
   { xp: 750, nome: 'nivel5', icone: '⚚' },
   { xp: 1000, nome: 'nivel6', icone: '★' }
 ];
+
+// Totais do jogo, preenchidos por iniciarProgresso a partir dos dados reais.
+// Ficam no módulo porque as condições de badge abaixo são avaliadas fora do
+// closure de iniciarProgresso. Os valores de reserva existem só para o caso de
+// alguém chamar verificarBadges sem ter iniciado a UI (testes em node).
+let totalPacotesQuiz = 6;
+let totalMissoesJogo = 10;
+
+// Quantas missões a badge "Engenheiro Espacial" pede. Constante para a condição
+// e o teste de "exige Pro" nunca saírem de sincronia.
+const MISSOES_PARA_ENGENHEIRO = 7;
 
 // Configuração de badges
 const BADGES = [
@@ -215,10 +235,15 @@ const BADGES = [
     nome: 'badgeSabeTudo',
     desc: 'badgeSabeTudoDesc',
     icone: '◇',
+    // "Todos os pacotes", derivado — antes era `>= 5` fixo, num jogo que já tem
+    // 6 pacotes; a badge era conquistável faltando um pacote e o texto dizia
+    // "todos os 5". Agora acompanha sozinha quando entrar um pacote novo.
     condicao: (estado) => {
       const ouroCount = Object.values(estado.medalhasPorPacote).filter(m => m === 'ouro').length;
-      return ouroCount >= 5;
-    }
+      return ouroCount >= totalPacotesQuiz;
+    },
+    // exige ouro em TODOS os pacotes, mas nem todo pacote é grátis
+    exigePro: () => (ITENS_GRATIS.quiz || []).length < totalPacotesQuiz
   },
   {
     id: 'maratonista',
@@ -239,7 +264,9 @@ const BADGES = [
     nome: 'badgeEngenheiroEspacial',
     desc: 'badgeEngenheiroEspacialDesc',
     icone: '⚙',
-    condicao: (estado) => estado.missoesVistas.length >= 7
+    condicao: (estado) => estado.missoesVistas.length >= MISSOES_PARA_ENGENHEIRO,
+    // só Apollo 11 é grátis: sem Pro não há como ver 7 missões
+    exigePro: () => (ITENS_GRATIS.missoes || []).length < MISSOES_PARA_ENGENHEIRO
   },
   {
     id: 'olho-no-ceu',
@@ -254,11 +281,23 @@ const BADGES = [
 function carregarEstado() {
   try {
     const json = localStorage.getItem('sistema-solar-progresso');
-    if (json) return JSON.parse(json);
+    if (json) return migrar(JSON.parse(json));
   } catch (e) {
     console.warn('Progresso: localStorage indisponível, usando memória', e);
   }
   return criarEstadoVazio();
+}
+
+// Completa estado salvo por versões anteriores. `pacotesConcluidos` nasceu junto
+// com o fim do XP refarmável: quem já jogava tem `medalhasPorPacote` preenchido,
+// e usar essas chaves como semente evita dar a ele mais um pagamento integral
+// por pacotes que ele já tinha concluído.
+function migrar(estado) {
+  if (!estado || typeof estado !== 'object') return criarEstadoVazio();
+  if (!Array.isArray(estado.pacotesConcluidos)) {
+    estado.pacotesConcluidos = Object.keys(estado.medalhasPorPacote || {});
+  }
+  return estado;
 }
 
 function criarEstadoVazio() {
@@ -273,6 +312,8 @@ function criarEstadoVazio() {
     missoesVistas: [],
     eventosViajados: [],
     medalhasPorPacote: {},
+    // pacotes de quiz já concluídos ao menos uma vez — repetição paga simbólico
+    pacotesConcluidos: [],
     unicos: {},
     badges: []
   };
@@ -332,7 +373,12 @@ function adicionarXp(estado, quantidade, dados) {
   return { badges, subiu, nivelAntes, nivelDepois };
 }
 
-export function iniciarProgresso({ dados }) {
+// `missoes` e `pacotesQuiz` entram para que os totais do painel de Conquistas
+// venham dos DADOS, não de números escritos à mão — que é como o painel passou a
+// mostrar "/5 pacotes" (são 6) e "/7 missões" (são 10), fazendo quem visse as 10
+// missões ler "10/7". Ambos são opcionais: sem eles o contador se esconde, o que
+// é melhor do que mentir.
+export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium }) {
   if (typeof document === 'undefined') {
     return {
       abrir: () => { throw new Error('Progresso: document não disponível em ambiente node'); }
@@ -341,6 +387,15 @@ export function iniciarProgresso({ dados }) {
 
   const root = document.getElementById('ui-root');
   if (!root) return {};
+
+  // Quem comprou o Pro alcança tudo — nenhum selo de "exige Pro" aparece.
+  const premiumAtivo = () => !!(premium && premium.ativo);
+
+  // Totais reais do jogo, para os contadores e para a badge "Sabe Tudo"
+  const totalMissoes = Array.isArray(missoes) ? missoes.length : 0;
+  const totalPacotes = Array.isArray(pacotesQuiz) ? pacotesQuiz.length : 0;
+  if (totalPacotes) totalPacotesQuiz = totalPacotes;
+  if (totalMissoes) totalMissoesJogo = totalMissoes;
 
   // Estado
   const estado = carregarEstado();
@@ -370,11 +425,11 @@ export function iniciarProgresso({ dados }) {
         </div>
         <div class="progresso-contador">
           <span class="progresso-contador-label">${tt('paineisConquistasPacotesOuro')}</span>
-          <span class="progresso-contador-valor"><strong class="progresso-ouro-atual">0</strong>/<strong class="progresso-ouro-total">5</strong></span>
+          <span class="progresso-contador-valor"><strong class="progresso-ouro-atual">0</strong>/<strong class="progresso-ouro-total">—</strong></span>
         </div>
         <div class="progresso-contador">
           <span class="progresso-contador-label">${tt('paineisConquistasMissoes')}</span>
-          <span class="progresso-contador-valor"><strong class="progresso-missoes-atual">0</strong>/<strong class="progresso-missoes-total">7</strong></span>
+          <span class="progresso-contador-valor"><strong class="progresso-missoes-atual">0</strong>/<strong class="progresso-missoes-total">—</strong></span>
         </div>
       </div>
     </div>
@@ -420,11 +475,18 @@ export function iniciarProgresso({ dados }) {
     badgesGrid.innerHTML = '';
     for (const badge of BADGES) {
       const conquistada = estado.badges.includes(badge.id);
+      // Badge que o jogador free NÃO consegue alcançar por mais que se esforce
+      // (exige conteúdo Pro) ganha selo. Antes ela aparecia igual às outras, com
+      // a dica de como obter e sem dizer que dependia de compra — criança free
+      // perseguindo meta impossível. A meta continua visível de propósito (é bom
+      // gancho de conversão), só deixou de ser desonesta.
+      const proInalcancavel = !conquistada && !premiumAtivo() && badge.exigePro && badge.exigePro();
       const elem = document.createElement('div');
-      elem.className = `progresso-badge ${conquistada ? 'conquistada' : 'futura'}`;
-      elem.title = tt(badge.desc);
+      elem.className = `progresso-badge ${conquistada ? 'conquistada' : 'futura'}${proInalcancavel ? ' exige-pro' : ''}`;
+      elem.title = proInalcancavel ? `${tt(badge.desc)} — ${tt('badgeExigeProDica')}` : tt(badge.desc);
       elem.innerHTML = `
         <div class="progresso-badge-icone">${badge.icone}</div>
+        ${proInalcancavel ? `<div class="progresso-badge-pro">${tt('badgeExigePro')}</div>` : ''}
         <div class="progresso-badge-nome">${tt(badge.nome)}</div>
         ${!conquistada ? `<div class="progresso-badge-dica">${tt(badge.desc)}</div>` : ''}
       `;
@@ -437,6 +499,10 @@ export function iniciarProgresso({ dados }) {
     overlay.querySelector('.progresso-visitados-total').textContent = dados.corpos.length;
     overlay.querySelector('.progresso-ouro-atual').textContent = ouroCount;
     overlay.querySelector('.progresso-missoes-atual').textContent = estado.missoesVistas.length;
+    // Totais derivados dos dados — nunca escritos à mão (ver comentário em
+    // iniciarProgresso). `totalPacotes`/`totalMissoes` vêm do closure.
+    overlay.querySelector('.progresso-ouro-total').textContent = totalPacotes || '—';
+    overlay.querySelector('.progresso-missoes-total').textContent = totalMissoes || '—';
   }
 
   // Listeners
@@ -448,6 +514,7 @@ export function iniciarProgresso({ dados }) {
       const res = adicionarXp(estado, 2, dados);
       salvarEstado(estado);
       atualizarUI();
+      mostrarGanhoXp(2);
       if (res.subiu) mostrarToast(`${tt('niveisSubiuNivel', { nivel: tt(NIVEIS[res.nivelDepois].nome) })}`);
       for (const badge of res.badges) {
         mostrarToast(`${tt('niveisNovaConquista', { badge: tt(badge.nome) })}`);
@@ -462,10 +529,24 @@ export function iniciarProgresso({ dados }) {
     let xpGanho = 0;
     const badgesAntigos = new Set(estado.badges);
 
+    // Repetir um pacote de quiz pagava XP integral, indefinidamente — dava para
+    // inflar o nível refazendo o mesmo pacote e os limiares perdiam o sentido.
+    // Agora a primeira conclusão de cada pacote paga cheio e as repetições pagam
+    // um valor simbólico: o botão "Repetir" continua existindo (rever pergunta é
+    // bom para aprender), só deixou de ser uma máquina de XP.
+    const jaConcluiu = (id) => !!id && Array.isArray(estado.pacotesConcluidos) && estado.pacotesConcluidos.includes(id);
+    const XP_REPETICAO_ACERTO = 1;
+    const XP_REPETICAO_PACOTE = 5;
+
     if (tipo === 'quiz-acerto') {
-      xpGanho = evt.detail.pts || 0;
+      xpGanho = jaConcluiu(evt.detail.pacoteId) ? XP_REPETICAO_ACERTO : (evt.detail.pts || 0);
     } else if (tipo === 'quiz-pacote') {
-      xpGanho = 20;
+      const repetindo = jaConcluiu(evt.detail.pacoteId);
+      xpGanho = repetindo ? XP_REPETICAO_PACOTE : 20;
+      if (!repetindo && evt.detail.pacoteId) {
+        if (!Array.isArray(estado.pacotesConcluidos)) estado.pacotesConcluidos = [];
+        estado.pacotesConcluidos.push(evt.detail.pacoteId);
+      }
       const pacoteId = evt.detail.pacoteId;
       const medalha = evt.detail.medalha; // 'bronze', 'prata', 'ouro' ou null (pct<50)
       const medalhaAnterior = estado.medalhasPorPacote[pacoteId];
@@ -507,6 +588,7 @@ export function iniciarProgresso({ dados }) {
       const res = adicionarXp(estado, xpGanho, dados);
       salvarEstado(estado);
       atualizarUI();
+      mostrarGanhoXp(xpGanho);
 
       if (res.subiu) {
         mostrarToast(`${tt('niveisSubiuNivel', { nivel: tt(NIVEIS[res.nivelDepois].nome) })}`);
@@ -524,10 +606,16 @@ export function iniciarProgresso({ dados }) {
   document.addEventListener('sim:selecao', onSelecao);
   document.addEventListener('sim:progresso', onProgresso);
 
-  // Toast
+  // Toast — no máximo 2 na tela ao mesmo tempo, mas o excedente ENFILEIRA em vez
+  // de ser descartado. Antes era `if (toastCount >= 2) return`, e o melhor
+  // momento do jogo era justamente o que perdia feedback: fechar um pacote com
+  // ouro dispara subida de nível + 2 badges de uma vez, e o 3º sumia calado.
+  const MAX_TOASTS = 2;
   let toastCount = 0;
+  const filaToasts = [];
+
   function mostrarToast(mensagem) {
-    if (toastCount >= 2) return; // Máximo 2 toasts
+    if (toastCount >= MAX_TOASTS) { filaToasts.push(mensagem); return; }
     toastCount++;
 
     const toast = document.createElement('div');
@@ -540,8 +628,41 @@ export function iniciarProgresso({ dados }) {
       setTimeout(() => {
         toast.remove();
         toastCount--;
+        if (filaToasts.length) mostrarToast(filaToasts.shift());
       }, 250);
     }, 3000);
+  }
+
+  // "+N XP" efêmero ancorado no chip de nível (ou no #mdock-nivel, no celular).
+  // Antes, ganhar XP não produzia NADA visível além da barra mudando de largura:
+  // para o público 7+ esse é o motor do loop, e ele estava mudo.
+  function mostrarGanhoXp(quantidade) {
+    if (!(quantidade > 0)) return;
+    // O dock é montado SEMPRE, inclusive no desktop, onde fica oculto com
+    // largura 0 — por isso a âncora se escolhe pelo que está de fato visível,
+    // não pela mera existência do elemento.
+    const candidatos = document.body.classList.contains('modo-dock')
+      ? ['#mdock-nivel', '.progresso-chip']
+      : ['.progresso-chip', '#mdock-nivel'];
+    let ancora = null;
+    let r = null;
+    for (const sel of candidatos) {
+      const el = document.querySelector(sel);
+      if (!el) continue;
+      const caixa = el.getBoundingClientRect();
+      if (caixa.width > 0 && caixa.height > 0) { ancora = el; r = caixa; break; }
+    }
+    if (!ancora) return;
+
+    const el = document.createElement('div');
+    el.className = 'progresso-ganho-xp';
+    el.textContent = `+${quantidade} XP`;
+    // posicionado em coordenadas de viewport para não depender do layout do
+    // ancestral (o chip do desktop e o do dock vivem em contêineres diferentes)
+    el.style.left = `${r.left + r.width / 2}px`;
+    el.style.top = `${r.bottom + 4}px`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
   }
 
   // Listeners de UI
