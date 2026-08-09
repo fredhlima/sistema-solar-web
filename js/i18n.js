@@ -1,6 +1,6 @@
 // Núcleo de internacionalização (pt = fonte; en/es = overlays com fallback).
 // Contratos descritos na SPEC.md, seção EXPANSÃO V3.
-import { UI_TEXTOS } from './traducoes-ui.js?v=22';
+import { UI_TEXTOS } from './traducoes-ui.js?v=23';
 
 const IDIOMAS = ['pt', 'en', 'es'];
 const CHAVE_STORAGE = 'sistema-solar-idioma';

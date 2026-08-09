@@ -5,7 +5,7 @@
 // FASE 1: dock + título + nível/engrenagem + HUD + transporte + calendário +
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
-import { t, trocarIdioma, getIdioma } from './i18n.js?v=27';
+import { t, trocarIdioma, getIdioma } from './i18n.js?v=28';
 
 const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const MESF = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];

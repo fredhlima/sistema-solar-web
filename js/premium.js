@@ -28,6 +28,21 @@ class PlayBillingProvider {
 
 const PROVIDER = 'mock';
 
+// v1.0 (teste fechado da Play Store, 08/08/2026): NÃO existe compra dentro do
+// app. Enquanto o Play Billing real não está integrado, seria desonesto — e
+// risco de reprovação — anunciar um Pro que não cobra nada (o PROVIDER acima
+// ainda é 'mock', que gera transação falsa).
+//
+// Com este interruptor ligado, todo o conteúdo fica liberado e o paywall se
+// torna inalcançável: `exigir()` e `exigirItem()` são os ÚNICOS pontos que o
+// abrem (paywall.js:183 registra a função por `definirPaywall`), e ambos
+// passam a retornar true. Os selos "PRO" também somem sozinhos, porque quiz,
+// você-no-espaço, eventos e badges derivam a marcação do mesmo estado.
+//
+// Para reativar o freemium: ponha `false` aqui E integre o billing real
+// (trocar PROVIDER, ver android/RELEASE.md e o HANDOFF de 08/08).
+const TUDO_LIBERADO = true;
+
 export function criarPremium() {
   let estado = { ativo: false, transacaoId: null, data: null };
   const listeners = new Set();
@@ -70,11 +85,13 @@ export function criarPremium() {
 
   return {
     get ativo() {
+      if (TUDO_LIBERADO) return true;
       return estado.ativo === true;
     },
 
     recurso(id) {
       // true se id NÃO é premium, OU se premium está ativo
+      if (TUDO_LIBERADO) return true;
       if (!RECURSOS_PREMIUM.includes(id)) {
         return true;
       }
@@ -96,6 +113,7 @@ export function criarPremium() {
     // Item específico dentro de um recurso premium (provinha):
     // liberado se o recurso todo está acessível OU o item está na lista grátis
     permitido(recursoId, itemId) {
+      if (TUDO_LIBERADO) return true;
       if (this.recurso(recursoId)) return true;
       return (ITENS_GRATIS[recursoId] || []).includes(itemId);
     },

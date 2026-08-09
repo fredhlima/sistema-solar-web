@@ -1,20 +1,20 @@
 import { DADOS } from './dados.js?v=22';
 import { SistemaSolar3D } from './motor3d.js?v=41';
-import { iniciarUI } from './ui.js?v=44';
-import { iniciarMobileDock } from './mobile-dock.js?v=15';
+import { iniciarUI } from './ui.js?v=45';
+import { iniciarMobileDock } from './mobile-dock.js?v=16';
 import { EVENTOS } from './eventos.js?v=9';
 import { MISSOES } from './missoes.js?v=12';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=4';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=27';
-import { criarPremium } from './premium.js?v=3';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=28';
+import { criarPremium } from './premium.js?v=4';
 import { iniciarPaywall } from './paywall.js?v=4';
 import { iniciarQuiz } from './quiz.js?v=11';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=4';
 import { iniciarProgresso } from './progresso.js?v=9';
-import { iniciarMusica } from './musica.js?v=9';
-import { iniciarTutorial } from './tutorial.js?v=4';
+import { iniciarMusica } from './musica.js?v=10';
+import { iniciarTutorial } from './tutorial.js?v=5';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();

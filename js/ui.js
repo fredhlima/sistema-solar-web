@@ -1,4 +1,4 @@
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=27';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=28';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
