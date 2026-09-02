@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco } from './palco.js?v=5';
+import { criarPalco, aplicarTexturaReal } from './palco.js?v=6';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -43,6 +43,8 @@ const TEXTOS = {
     minguanteConcava: 'Minguante côncava',
     iluminada: 'iluminada',
     praiaTitulo: 'Sua praia',
+    praiaLegenda: 'o ponto laranja girando com a Terra',
+    eixosLegenda: 'Linha azul: puxão da Lua. Linha amarela: puxão do Sol.',
     preamar: 'Maré alta',
     baixamar: 'Maré baixa',
     subindo: 'Enchendo',
@@ -74,6 +76,8 @@ const TEXTOS = {
     minguanteConcava: 'Waning crescent',
     iluminada: 'lit',
     praiaTitulo: 'Your beach',
+    praiaLegenda: 'the orange dot turning with Earth',
+    eixosLegenda: 'Blue line: the Moon’s pull. Yellow line: the Sun’s pull.',
     preamar: 'High tide',
     baixamar: 'Low tide',
     subindo: 'Rising',
@@ -105,6 +109,8 @@ const TEXTOS = {
     minguanteConcava: 'Menguante cóncava',
     iluminada: 'iluminada',
     praiaTitulo: 'Tu playa',
+    praiaLegenda: 'el punto naranja girando con la Tierra',
+    eixosLegenda: 'Línea azul: tirón de la Luna. Línea amarilla: tirón del Sol.',
     preamar: 'Marea alta',
     baixamar: 'Marea baja',
     subindo: 'Subiendo',
@@ -164,7 +170,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     // Com a câmera inclinada, a Lua caía pelo rodapé quando estava do mesmo
     // lado que ela. O z mínimo evita a degenerescência do OrbitControls quando
     // a câmera fica exatamente sobre o alvo; girar continua livre pelo mouse.
-    camera.position.set(0, 30, 0.01);
+    camera.position.set(0, 36, 0.01);
 
     const controls = new OrbitControls(camera, motor.canvas);
     controls.enableDamping = true;
@@ -194,12 +200,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     }));
     const terra = new THREE.Mesh(reg(new THREE.SphereGeometry(RAIO_TERRA, 64, 48)), matTerra);
     scene.add(terra);
-    new THREE.TextureLoader().load('texturas/terra.jpg?v=30', (t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      matTerra.map = t;
-      matTerra.needsUpdate = true;
-      reg(t);
-    }, undefined, () => { /* fica o procedural */ });
+    aplicarTexturaReal(motor.renderer, 'terra', matTerra, reg);
 
     // ————— oceano: elipsoide prolato alinhado ao eixo dos bojos —————
     const oceano = new THREE.Mesh(
@@ -217,12 +218,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     }));
     const lua = new THREE.Mesh(reg(new THREE.SphereGeometry(RAIO_LUA, 32, 24)), matLua);
     scene.add(lua);
-    new THREE.TextureLoader().load('texturas/lua.jpg?v=30', (t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      matLua.map = t;
-      matLua.needsUpdate = true;
-      reg(t);
-    }, undefined, () => {});
+    aplicarTexturaReal(motor.renderer, 'lua', matLua, reg);
 
     // Órbita da Lua
     const ptsOrbita = [];
@@ -234,11 +230,50 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       reg(new THREE.LineBasicMaterial({ color: 0x4a6fa8, transparent: true, opacity: 0.4 })),
     ));
 
-    // Direção do Sol: seta na borda, já que o Sol não cabe no enquadramento
-    const setaSol = new THREE.ArrowHelper(
-      new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 3.0, 0xffd479, 0.9, 0.5,
+    // O Sol, de verdade. Na proporção real ele estaria a 390× a distância da
+    // Lua e nunca caberia aqui — então entra na borda da cena, sob o mesmo
+    // selo "fora de escala" que vale para todo o palco. Sem ele, a metade
+    // solar da história (sizígia e quadratura) não tinha o que apontar.
+    const corpoSol = corpos.find((c) => c.id === 'sol') || { id: 'sol', aparencia: { tipo: 'estrela' } };
+    const matSol = reg(new THREE.MeshBasicMaterial({
+      map: reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoSol))),
+    }));
+    const sol = new THREE.Mesh(reg(new THREE.SphereGeometry(1.6, 40, 28)), matSol);
+    scene.add(sol);
+    aplicarTexturaReal(motor.renderer, 'sol', matSol, reg);
+
+    // Raios do Sol até a Terra: mostram de onde vem a segunda força de maré
+    const geoRaios = reg(new THREE.BufferGeometry());
+    geoRaios.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6 * 3), 3));
+    const raiosSol = new THREE.LineSegments(
+      geoRaios,
+      reg(new THREE.LineBasicMaterial({ color: 0xffd479, transparent: true, opacity: 0.35 })),
     );
-    scene.add(setaSol);
+    scene.add(raiosSol);
+
+    // Eixos das DUAS contribuições, para sizígia e quadratura ficarem visíveis
+    // em vez de só numéricas: em lua nova/cheia os dois se sobrepõem, nos
+    // quartos ficam a 90°. O comprimento é proporcional à amplitude de cada.
+    function criarEixoBojo(cor, opacidade) {
+      const g = reg(new THREE.BufferGeometry());
+      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(2 * 3), 3));
+      const linha = new THREE.Line(g, reg(new THREE.LineBasicMaterial({
+        color: cor, transparent: true, opacity: opacidade,
+      })));
+      scene.add(linha);
+      return { linha, g };
+    }
+    const eixoLua = criarEixoBojo(0x9ec5ff, 0.9);
+    const eixoSolBojo = criarEixoBojo(0xffd479, 0.85);
+
+    function atualizarEixoBojo(alvo, longitude, amplitude) {
+      const d = direcaoLongitude(longitude);
+      const r = RAIO_TERRA * (1.15 + amplitude * 1.05);
+      const pos = alvo.g.attributes.position;
+      pos.setXYZ(0, -d.x * r, 0, -d.z * r);
+      pos.setXYZ(1, d.x * r, 0, d.z * r);
+      pos.needsUpdate = true;
+    }
 
     // Marcador "sua praia"
     const praia = new THREE.Mesh(
@@ -302,10 +337,19 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       const dirSol = direcaoLongitude(lamSol);
       luzSol.position.copy(dirSol).multiplyScalar(50);
-      // Fica logo fora da órbita e aponta para dentro: indica de onde vem a
-      // luz sem competir com a Terra pelo centro da tela.
-      setaSol.setDirection(dirSol.clone().negate());
-      setaSol.position.copy(dirSol).multiplyScalar(RAIO_ORBITA_LUA + 4.2);
+      // O Sol fica na borda; os raios ligam ele à Terra, para a segunda
+      // força de maré ter de onde vir na tela.
+      const posSol = dirSol.clone().multiplyScalar(RAIO_ORBITA_LUA + 3.6);
+      sol.position.copy(posSol);
+      const pr = geoRaios.attributes.position;
+      for (let i = 0; i < 3; i++) {
+        const desloc = new THREE.Vector3(-dirSol.z, 0, dirSol.x).multiplyScalar((i - 1) * 1.5);
+        const a = posSol.clone().add(desloc).addScaledVector(dirSol, -1.6);
+        const bb = desloc.clone().addScaledVector(dirSol, RAIO_TERRA * 1.4);
+        pr.setXYZ(i * 2, a.x, a.y, a.z);
+        pr.setXYZ(i * 2 + 1, bb.x, bb.y, bb.z);
+      }
+      pr.needsUpdate = true;
 
       lua.position.copy(direcaoLongitude(lamLua).multiplyScalar(RAIO_ORBITA_LUA));
 
@@ -316,9 +360,14 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       oceano.scale.set(1 + e, 1 - e / 2, 1 - e / 2);
       oceano.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direcaoLongitude(eixoGraus));
 
-      // Rotação da Terra e a praia sobre ela
+      // Rotação da Terra e a praia sobre ela.
+      //
+      // O sinal importa e estava errado: uma rotação de +θ em Y leva um ponto
+      // de (1,0,0) para (cos θ, 0, −sin θ), que é exatamente direcaoLongitude(θ)
+      // — a mesma fórmula que posiciona a praia. Com `-anguloTerra` o globo
+      // girava para um lado e o marcador para o outro.
       const anguloTerra = (dias * 360) / (23.9345 / 24);
-      terra.rotation.y = -anguloTerra * RAD;
+      terra.rotation.y = anguloTerra * RAD;
       const lonPraia = anguloTerra % 360;
       const dirPraia = direcaoLongitude(lonPraia);
       praia.position.copy(dirPraia).multiplyScalar(RAIO_TERRA * (1 + e * 1.05));
@@ -326,6 +375,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // ψ: ângulo entre a praia e o eixo dos bojos
       const psi = ((lonPraia - eixoGraus) % 360 + 360) % 360;
       const altura = alturaRelativa(psi, amplitude);
+
+      // Cada corpo puxa por si; o oceano responde à soma. Ver os três ao
+      // mesmo tempo é o que explica a maré viva e a morta.
+      atualizarEixoBojo(eixoLua, lamLua, A_LUA);
+      atualizarEixoBojo(eixoSolBojo, lamSol, A_SOL);
 
       if (mostrarForcas) atualizarSetasForca(eixoGraus);
 
@@ -365,7 +419,9 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       cardForca.valor.textContent = `${num(pctDoMaximo, 0)}%`;
       const ehSizigia = amplitude > 1.38;
       const ehQuadratura = amplitude < 0.62;
-      cardForca.nota.textContent = ehSizigia ? tm('sizigia') : ehQuadratura ? tm('quadratura') : tm('intermediaria');
+      cardForca.nota.innerHTML =
+        `${ehSizigia ? tm('sizigia') : ehQuadratura ? tm('quadratura') : tm('intermediaria')}`
+        + `<br><span style="color:#9ec5ff">—</span> <span style="color:#ffd479">—</span> ${tm('eixosLegenda')}`;
       cardForca.raiz.classList.toggle('palco-card-alerta', ehSizigia || ehQuadratura);
       // Um marco por vez, como o modo Estações faz: progresso.js guarda os
       // ids distintos e a badge sai quando os dois apareceram.
@@ -382,7 +438,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       cardFase.nota.textContent = `${num(fracaoIluminada(dias) * 100, 0)}% ${tm('iluminada')}`;
 
       // Sua praia: medidor
-      cardPraia.titulo.textContent = tm('praiaTitulo');
+      // Bolinha na mesma cor do marcador na cena: sem isso, o ponto laranja
+      // girando não se identifica com o card que mostra a maré dele.
+      cardPraia.titulo.innerHTML =
+        `<span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')} `
+        + `<span style="text-transform:none;font-weight:400">— ${tm('praiaLegenda')}</span>`;
       cardPraia.valor.innerHTML = svgMedidor(altura);
       const subindo = alturaAnterior !== null && altura > alturaAnterior;
       const perto = Math.abs(altura) > amplitude * 0.75;

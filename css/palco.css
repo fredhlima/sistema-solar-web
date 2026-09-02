@@ -124,7 +124,9 @@ body.com-palco #mdock { display: none !important; }
 .palco-selo {
   grid-column: 1 / -1;
   grid-row: 2;
-  align-self: end;
+  /* No topo da área da cena, não no meio: o centro é onde os corpos ficam, e
+     o selo passava por cima do Sol. */
+  align-self: start;
   justify-self: center;
   font-size: 11px;
   letter-spacing: 0.1em;

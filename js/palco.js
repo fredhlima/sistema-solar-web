@@ -10,7 +10,39 @@
 // Este módulo não sabe nada sobre estações ou marés: cuida do overlay, do
 // ciclo de vida, do scrubber, do selo de escala, do roteiro guiado e da
 // acessibilidade. O conteúdo vem de quem chama, via `construirCena`.
+import * as THREE from 'three';
 import { getIdioma } from './i18n.js?v=30';
+
+// Versão das texturas reais — a MESMA de motor3d._carregarTexturasReais.
+// Se lá mudar, muda aqui: servir a mesma imagem sob dois ?v= diferentes faz o
+// navegador baixar o arquivo duas vezes.
+const V_TEXTURAS = 30;
+
+/**
+ * Aplica a textura real de um corpo sobre um material, com o mesmo tratamento
+ * da cena principal (colorSpace sRGB e anisotropia máxima do dispositivo).
+ * Se o arquivo não existir, o material fica com o que já tinha — a textura
+ * procedural — e o app segue funcionando offline, como o motor faz.
+ *
+ * @param {THREE.WebGLRenderer} renderer  para ler a anisotropia suportada
+ * @param {string} id                     id do corpo em dados.js ('sol', 'terra', 'lua')
+ * @param {THREE.Material} material       material a receber o mapa
+ * @param {function} [registrar]          recebe a textura, para o dispose do palco
+ */
+export function aplicarTexturaReal(renderer, id, material, registrar) {
+  new THREE.TextureLoader().load(
+    `texturas/${id}.jpg?v=${V_TEXTURAS}`,
+    (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      material.map = tex;
+      material.needsUpdate = true;
+      if (registrar) registrar(tex);
+    },
+    undefined,
+    () => { /* sem textura real: fica o procedural, como na cena principal */ },
+  );
+}
 
 const TEXTOS = {
   pt: {

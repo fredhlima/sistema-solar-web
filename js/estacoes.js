@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco } from './palco.js?v=5';
+import { criarPalco, aplicarTexturaReal } from './palco.js?v=6';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, distanciaSolarUA, declinacaoSolar,
@@ -192,12 +192,15 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     scene.add(new THREE.Points(geoEstrelas, matEstrelas));
 
     // ————— Sol —————
-    const texSol = reg(new THREE.CanvasTexture(criarTexturaCanvas({ id: 'sol', aparencia: { tipo: 'estrela' } })));
-    const sol = new THREE.Mesh(
-      reg(new THREE.SphereGeometry(RAIO_SOL, 48, 32)),
-      reg(new THREE.MeshBasicMaterial({ map: texSol })),
-    );
+    const corpoSol = corpos.find((c) => c.id === 'sol') || { id: 'sol', aparencia: { tipo: 'estrela' } };
+    const matSol = reg(new THREE.MeshBasicMaterial({
+      map: reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoSol))),
+    }));
+    const sol = new THREE.Mesh(reg(new THREE.SphereGeometry(RAIO_SOL, 48, 32)), matSol);
     scene.add(sol);
+    // Mesma textura real da cena principal (texturas/sol.jpg), com o mesmo
+    // tratamento de colorSpace e anisotropia.
+    aplicarTexturaReal(motor.renderer, 'sol', matSol, reg);
     // Mesma iluminação da cena principal (motor3d._criarIluminacao): ambiente
     // fraca para o lado noturno continuar legível, e PointLight com decay 0.
     scene.add(new THREE.AmbientLight(0x46546e, 0.55));
@@ -226,12 +229,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     // Textura real quando existir; o procedural acima é o fallback e o app
     // nunca depende do arquivo estar lá (mesmo contrato de motor3d).
-    new THREE.TextureLoader().load(`texturas/${corpoTerra.id}.jpg?v=30`, (t) => {
-      t.colorSpace = THREE.SRGBColorSpace;
-      matTerra.map = t;
-      matTerra.needsUpdate = true;
-      reg(t);
-    }, undefined, () => { /* sem textura real: fica o procedural */ });
+    aplicarTexturaReal(motor.renderer, corpoTerra.id, matTerra, reg);
 
     // Eixo: fixo no mundo, nunca acompanha a órbita — é o ponto do modo.
     const geoEixo = reg(new THREE.CylinderGeometry(0.018, 0.018, RAIO_TERRA * 5, 8));
@@ -305,6 +303,11 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       const i = CORPOS_EXTRA.indexOf(corpoAtual);
       corpoAtual = CORPOS_EXTRA[(i + 1) % CORPOS_EXTRA.length];
       obliquidade = corpoAtual.inclinacaoEixoGraus || 0;   // sempre de dados.js
+      // O corpo mudou: a textura tem de acompanhar, senão Urano fica com a
+      // cara da Terra.
+      matTerra.map = reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoAtual)));
+      matTerra.needsUpdate = true;
+      aplicarTexturaReal(motor.renderer, corpoAtual.id, matTerra, reg);
       atualizarHud();
     }
 
