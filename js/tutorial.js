@@ -1,4 +1,4 @@
-import { t, tToque } from './i18n.js?v=28';
+import { t, tToque } from './i18n.js?v=30';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 

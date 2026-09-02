@@ -42,6 +42,10 @@ const TEXTOS = {
     badgeEngenheiroEspacialDesc: '7 missões espaciais conhecidas',
     badgeOlhoNoCeu: 'Olho no Céu',
     badgeOlhoNoCeuDesc: 'Visitou o Hubble e o James Webb',
+    badgeEstacoes: 'Guardião das Estações',
+    badgeEstacoesDesc: 'Visitou os 4 marcos do ano',
+    badgeMares: 'Mestre das Marés',
+    badgeMaresDesc: 'Viu a maré de sizígia e a de quadratura',
     // UI
     niveisSubiuNivel: 'Subiu de nível: {nivel}',
     niveisNovaConquista: 'Nova conquista: {badge}',
@@ -85,6 +89,10 @@ const TEXTOS = {
     badgeEngenheiroEspacialDesc: '7 space missions discovered',
     badgeOlhoNoCeu: 'Eye on the Sky',
     badgeOlhoNoCeuDesc: 'Visited Hubble and James Webb',
+    badgeEstacoes: 'Guardian of the Seasons',
+    badgeEstacoesDesc: 'Visited the 4 milestones of the year',
+    badgeMares: 'Master of the Tides',
+    badgeMaresDesc: 'Saw both the spring tide and the neap tide',
     // UI
     niveisSubiuNivel: 'Leveled up: {nivel}',
     niveisNovaConquista: 'New achievement: {badge}',
@@ -128,6 +136,10 @@ const TEXTOS = {
     badgeEngenheiroEspacialDesc: '7 misiones espaciales conocidas',
     badgeOlhoNoCeu: 'Ojo en el Cielo',
     badgeOlhoNoCeuDesc: 'Visitó el Hubble y el James Webb',
+    badgeEstacoes: 'Guardián de las Estaciones',
+    badgeEstacoesDesc: 'Visitó los 4 hitos del año',
+    badgeMares: 'Maestro de las Mareas',
+    badgeMaresDesc: 'Vio la marea viva y la marea muerta',
     // UI
     niveisSubiuNivel: 'Subió de nivel: {nivel}',
     niveisNovaConquista: 'Nuevo logro: {badge}',
@@ -174,6 +186,13 @@ let totalMissoesJogo = 10;
 // Quantas missões a badge "Engenheiro Espacial" pede. Constante para a condição
 // e o teste de "exige Pro" nunca saírem de sincronia.
 const MISSOES_PARA_ENGENHEIRO = 7;
+
+// Os 4 marcos do ano (2 solstícios + 2 equinócios) que o modo Estações mostra.
+// Mesma razão da constante acima: a condição e o texto da badge não podem
+// discordar se um dia o modo passar a marcar outra coisa.
+const MARCOS_PARA_ESTACOES = 4;
+// Sizígia e quadratura: os dois extremos do ciclo, que é o que o modo ensina
+const MARCOS_PARA_MARES = 2;
 
 // Configuração de badges
 const BADGES = [
@@ -274,6 +293,28 @@ const BADGES = [
     desc: 'badgeOlhoNoCeuDesc',
     icone: '✧',
     condicao: (estado) => estado.corposVisitados.includes('hubble') && estado.corposVisitados.includes('jwst')
+  },
+  {
+    id: 'guardiao-das-estacoes',
+    nome: 'badgeEstacoes',
+    desc: 'badgeEstacoesDesc',
+    icone: '☀',
+    // só marcos DISTINTOS entram em `marcosEstacoes` (ver onProgresso), então
+    // contar o tamanho já é contar quantos dos 4 o jogador viu
+    condicao: (estado) => (estado.marcosEstacoes || []).length >= MARCOS_PARA_ESTACOES,
+    // Estações é a provinha grátis de 'estacoes-mares'; se o Fred trancar o modo
+    // ao final (D7 da SPEC), o selo aparece sozinho, sem editar esta condição
+    exigePro: () => !(ITENS_GRATIS['estacoes-mares'] || []).includes('estacoes')
+  },
+  {
+    id: 'mestre-das-mares',
+    nome: 'badgeMares',
+    desc: 'badgeMaresDesc',
+    icone: '☾',
+    condicao: (estado) => (estado.marcosMares || []).length >= MARCOS_PARA_MARES,
+    // Marés não está na provinha grátis, então esta badge nasce marcada como
+    // PRO — e deixa de ser sozinha se o Fred liberar o modo (D7 da SPEC)
+    exigePro: () => !(ITENS_GRATIS['estacoes-mares'] || []).includes('mares')
   }
 ];
 
@@ -297,6 +338,10 @@ function migrar(estado) {
   if (!Array.isArray(estado.pacotesConcluidos)) {
     estado.pacotesConcluidos = Object.keys(estado.medalhasPorPacote || {});
   }
+  // `marcosEstacoes` nasceu com o modo Estações: quem já jogava não tem o array
+  // no estado salvo, e sem esta linha o primeiro marco visto quebraria o push
+  if (!Array.isArray(estado.marcosEstacoes)) estado.marcosEstacoes = [];
+  if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
   return estado;
 }
 
@@ -311,6 +356,8 @@ function criarEstadoVazio() {
     corposVisitados: [],
     missoesVistas: [],
     eventosViajados: [],
+    marcosEstacoes: [],
+    marcosMares: [],
     medalhasPorPacote: {},
     // pacotes de quiz já concluídos ao menos uma vez — repetição paga simbólico
     pacotesConcluidos: [],
@@ -581,6 +628,14 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium }) {
       if (id && !estado.eventosViajados.includes(id)) {
         xpGanho = 5;
         estado.eventosViajados.push(id);
+      }
+    } else if (tipo === 'estacoes-marco') {
+      const id = evt.detail.id;
+      if (!Array.isArray(estado.marcosEstacoes)) estado.marcosEstacoes = [];
+  if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
+      if (id && !estado.marcosEstacoes.includes(id)) {
+        xpGanho = 5;
+        estado.marcosEstacoes.push(id);
       }
     }
 

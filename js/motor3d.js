@@ -62,6 +62,11 @@ export class SistemaSolar3D {
     // checar "é ESTA a missão que a câmera está seguindo agora", não apenas
     // "está visível" — visibilidade e seguimento são conceitos diferentes.
     this._seguirId = null;
+    // Palco (SPEC-estacoes-e-mares.md §2.2): cena alternativa renderizada pelo
+    // MESMO renderer. Enquanto != null, o loop desvia antes da física — a cena
+    // principal congela (tempoDias não avança) e nada dela é atualizado.
+    this._palco = null;
+    this._controlsAtivosAntesDoPalco = true;
   }
 
   iniciar() {
@@ -187,6 +192,7 @@ export class SistemaSolar3D {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.renderer.setSize(w, h);
+    if (this._palco && this._palco.aoRedimensionar) this._palco.aoRedimensionar(w, h);
     if (this.camera) {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
@@ -1090,10 +1096,45 @@ export class SistemaSolar3D {
       const dy = e.clientY - pointerDownPos.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist < 5) {
+      // Com o palco no ar o canvas pertence a ele: um clique não pode
+      // selecionar um astro da cena principal por baixo do overlay.
+      if (dist < 5 && !this._palco) {
         this._fazerPicking(e.clientX, e.clientY);
       }
     });
+  }
+
+  // ————— Palco (SPEC-estacoes-e-mares.md §2.2) —————
+  //
+  // Uma cena alternativa desenhada pelo MESMO renderer. Nunca um segundo
+  // contexto WebGL: dois contextos vivos é o cenário clássico de CONTEXT_LOST
+  // no Android de entrada, que é o público do app.
+  //
+  // O palco traz os próprios controles, ligados ao mesmo domElement, então os
+  // da cena principal precisam sair de cena enquanto ele vive.
+  montarPalco({ scene, camera, atualizar, aoRedimensionar }) {
+    this._controlsAtivosAntesDoPalco = this.controls.enabled;
+    this.controls.enabled = false;
+    this._palco = { scene, camera, atualizar, aoRedimensionar };
+    if (aoRedimensionar) aoRedimensionar(window.innerWidth, window.innerHeight);
+  }
+
+  desmontarPalco() {
+    this._palco = null;
+    this.controls.enabled = this._controlsAtivosAntesDoPalco;
+  }
+
+  get palcoAtivo() {
+    return this._palco !== null;
+  }
+
+  // Direção do polo norte de rotação de um corpo, no referencial da cena.
+  // Exposta para que um palco oriente o eixo pela MESMA regra da cena
+  // principal (obliquidade + azimute IAU, ver PLANO-EIXOS-ORBITAS.md): se o
+  // azimute de um corpo for corrigido em dados.js, os dois lugares mudam
+  // juntos em vez de divergirem em silêncio.
+  poloDoCorpo(corpo) {
+    return this._poloCena(corpo);
   }
 
   _fazerPicking(clientX, clientY) {
@@ -1863,6 +1904,15 @@ export class SistemaSolar3D {
       const agora = performance.now();
       const deltaSegundos = (agora - ultimoTempo) / 1000;
       ultimoTempo = agora;
+
+      // Palco ativo: renderiza a cena alternativa e sai. A cena principal fica
+      // intacta — inclusive tempoDias, que NÃO avança (ver SPEC §3: 10 minutos
+      // no modo Estações não podem jogar o simulador anos à frente).
+      if (this._palco) {
+        this._palco.atualizar(deltaSegundos);
+        this.renderer.render(this._palco.scene, this._palco.camera);
+        return;
+      }
 
       // velocidade está em dias/segundo
       this.tempoDias += this._velocidade * deltaSegundos;

@@ -1,18 +1,21 @@
+import * as THREE from 'three';
 import { DADOS } from './dados.js?v=22';
-import { SistemaSolar3D } from './motor3d.js?v=41';
-import { iniciarUI } from './ui.js?v=45';
+import { SistemaSolar3D } from './motor3d.js?v=43';
+import { iniciarUI } from './ui.js?v=47';
 import { iniciarMobileDock } from './mobile-dock.js?v=16';
-import { EVENTOS } from './eventos.js?v=9';
+import { EVENTOS } from './eventos.js?v=10';
 import { MISSOES } from './missoes.js?v=12';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=4';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=28';
-import { criarPremium } from './premium.js?v=4';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=30';
+import { criarPremium } from './premium.js?v=5';
 import { iniciarPaywall } from './paywall.js?v=4';
 import { iniciarQuiz } from './quiz.js?v=11';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=4';
-import { iniciarProgresso } from './progresso.js?v=9';
+import { iniciarEstacoes } from './estacoes.js?v=13';
+import { iniciarMares } from './mares.js?v=5';
+import { iniciarProgresso } from './progresso.js?v=11';
 import { iniciarMusica } from './musica.js?v=10';
 import { iniciarTutorial } from './tutorial.js?v=5';
 
@@ -42,10 +45,19 @@ iniciarPaywall({ premium, t });
 const audioCompartilhado = { obterCtx: () => null };
 const quiz = iniciarQuiz({ motor, dados: DADOS, premium, obterCtxCompartilhado: () => audioCompartilhado.obterCtx() });
 const voce = iniciarVoceNoEspaco({ dados: DADOS, premium });
+// Estações do Ano: palco 3D próprio, desenhado pelo mesmo renderer do motor
+// (ver SPEC-estacoes-e-mares.md). Criado antes da UI porque iniciarUI recebe
+// a ação de abrir, como já faz com quiz e você-no-espaço.
+// Os modos avisam o progresso pelo mesmo CustomEvent que a UI usa
+// (progresso.js escuta 'sim:progresso'), sem depender de importar ui.js.
+const aoProgresso = (tipo, extra) =>
+  document.dispatchEvent(new CustomEvent('sim:progresso', { detail: { tipo, ...(extra || {}) } }));
+const estacoes = iniciarEstacoes({ motor, dados: DADOS, premium, aoProgresso });
+const mares = iniciarMares({ motor, dados: DADOS, premium, aoProgresso });
 const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: QUIZ_PACOTES, premium });
 const acoesUI = iniciarUI({
   motor, dados: DADOS, eventos: EVENTOS, missoes: MISSOES, trajetorias, premium,
-  abrirQuiz: quiz.abrir, abrirVoce: voce.abrir,
+  abrirQuiz: quiz.abrir, abrirVoce: voce.abrir, abrirEstacoes: estacoes.abrir, abrirMares: mares.abrir,
 });
 // Música de fundo: depois da UI, para o botão ♫ entrar na .barra-acoes
 const musica = iniciarMusica();
@@ -83,6 +95,10 @@ window.__motor = motor;
 window.__trajetorias = trajetorias;
 window.__premium = premium;
 window.__progresso = progresso;
+window.__estacoes = estacoes;
+window.__mares = mares;
+// Exposto só para os testes de geometria da cena (tests/validacao-palco.mjs)
+window.__THREE_V3 = THREE.Vector3;
 window.__musica = musica;
 
 // Ponte de depuração via DOM (funciona mesmo em contextos JS isolados):

@@ -1,5 +1,5 @@
 // Premium: modelo freemium com persistência em localStorage (com fallback em memória para node)
-export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco'];
+export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco', 'estacoes-mares'];
 
 // "Provinha": itens liberados no free dentro de recursos premium — o usuário
 // prova o sabor (Apollo 11, pacote de quiz dos planetas, peso na Terra/Lua)
@@ -9,6 +9,7 @@ export const ITENS_GRATIS = {
   eventos: [],
   quiz: ['planetas'],
   'voce-no-espaco': ['terra', 'lua'],
+  'estacoes-mares': ['estacoes'],
 };
 
 const CHAVE_STORAGE = 'sistema-solar-premium';

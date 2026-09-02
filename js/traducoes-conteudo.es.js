@@ -2405,6 +2405,38 @@ export const TRADUCAO = {
     "perihelio-halley-2061": {
       "nome": "Retorno del Cometa Halley",
       "descricao": "El famoso Cometa Halley alcanza su perihelio — el paso más cercano al Sol. Será visible a simple vista durante semanas. La próxima oportunidad de ver este visitante después de 2061 será en 2136."
+    },
+    "equinocio-marco-2026": {
+      "nome": "Equinoccio de Marzo",
+      "descricao": "El día y la noche duran casi lo mismo en todo el mundo. El Sol cruza el ecuador rumbo al norte: empieza el otoño en el hemisferio sur y la primavera en el hemisferio norte."
+    },
+    "solsticio-junho-2026": {
+      "nome": "Solsticio de Junio",
+      "descricao": "El día más corto del año en el hemisferio sur y el más largo en el hemisferio norte. El eje inclinado de la Tierra deja el polo norte apuntando al Sol: empieza el invierno en Argentina y Chile, y el verano en España y México."
+    },
+    "equinocio-setembro-2026": {
+      "nome": "Equinoccio de Septiembre",
+      "descricao": "Otra vez el día y la noche son casi iguales en todo el planeta. El Sol cruza el ecuador, ahora rumbo al sur: empieza la primavera en el hemisferio sur y el otoño en el hemisferio norte."
+    },
+    "solsticio-dezembro-2026": {
+      "nome": "Solsticio de Diciembre",
+      "descricao": "El día más largo del año en el hemisferio sur y el más corto en el hemisferio norte. Ahora es el polo sur el que apunta al Sol: empieza el verano en Argentina y Chile, y el invierno en España y México."
+    },
+    "equinocio-marco-2027": {
+      "nome": "Equinoccio de Marzo",
+      "descricao": "Este día el Sol sale exactamente por el este y se pone exactamente por el oeste, en cualquier lugar del planeta. Empieza el otoño en el hemisferio sur y la primavera en el hemisferio norte."
+    },
+    "solsticio-junho-2027": {
+      "nome": "Solsticio de Junio",
+      "descricao": "El Sol llega a su punto más al norte del cielo: la noche más larga del año en el hemisferio sur y el día más largo en el hemisferio norte. Dentro del Círculo Polar Ártico el Sol ni siquiera se pone."
+    },
+    "equinocio-setembro-2027": {
+      "nome": "Equinoccio de Septiembre",
+      "descricao": "El día y la noche vuelven a empatar en todo el mundo. Empieza la primavera en el hemisferio sur y el otoño en el hemisferio norte — y desde aquí los días se van alargando en el sur."
+    },
+    "solsticio-dezembro-2027": {
+      "nome": "Solsticio de Diciembre",
+      "descricao": "El Sol llega a su punto más al sur del cielo: el día más largo del año en el hemisferio sur y el más corto en el hemisferio norte. En la Antártida el Sol no se pone; en el Ártico es de noche todo el día."
     }
   },
   "missoes": {

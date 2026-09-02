@@ -8,6 +8,14 @@ export const EVENTOS = [
     corpoFoco: null
   },
   {
+    id: 'equinocio-marco-2026',
+    nome: 'Equinócio de Março',
+    tipo: 'estacao',
+    dataISO: '2026-03-20',
+    descricao: 'Dia e noite duram quase o mesmo tempo no mundo inteiro. O Sol cruza o equador indo para o norte: começa o outono no Brasil e a primavera na Europa e nos Estados Unidos.',
+    corpoFoco: 'terra'
+  },
+  {
     id: 'liridas-2026',
     nome: 'Chuva de Meteoros Líridas',
     tipo: 'chuva-meteoros',
@@ -24,11 +32,35 @@ export const EVENTOS = [
     corpoFoco: null
   },
   {
+    id: 'solsticio-junho-2026',
+    nome: 'Solstício de Junho',
+    tipo: 'estacao',
+    dataISO: '2026-06-21',
+    descricao: 'O dia mais curto do ano no Brasil e o mais longo na Europa. O eixo inclinado da Terra deixa o polo norte virado para o Sol: começa o inverno no hemisfério sul e o verão no hemisfério norte.',
+    corpoFoco: 'terra'
+  },
+  {
     id: 'eclipse-solar-2026',
     nome: 'Eclipse Solar Total',
     tipo: 'eclipse',
     dataISO: '2026-08-12',
     descricao: 'Eclipse solar total visível da Espanha, Islândia e Groenlândia. Duração máxima de 2 minutos e 18 segundos. Um espetáculo celeste raro.',
+    corpoFoco: 'terra'
+  },
+  {
+    id: 'equinocio-setembro-2026',
+    nome: 'Equinócio de Setembro',
+    tipo: 'estacao',
+    dataISO: '2026-09-23',
+    descricao: 'De novo dia e noite quase iguais no planeta inteiro. O Sol cruza o equador, agora indo para o sul: começa a primavera no Brasil e o outono no hemisfério norte.',
+    corpoFoco: 'terra'
+  },
+  {
+    id: 'solsticio-dezembro-2026',
+    nome: 'Solstício de Dezembro',
+    tipo: 'estacao',
+    dataISO: '2026-12-21',
+    descricao: 'O dia mais longo do ano no Brasil e o mais curto na Europa. Agora é o polo sul que está virado para o Sol: começa o verão no hemisfério sul e o inverno no hemisfério norte.',
     corpoFoco: 'terra'
   },
   {
@@ -38,6 +70,22 @@ export const EVENTOS = [
     dataISO: '2027-02-19',
     descricao: 'Marte em oposição — o planeta mais brilhante e próximo da Terra. Ideal para observação com telescópios. Menor distância de aproximação.',
     corpoFoco: 'marte'
+  },
+  {
+    id: 'equinocio-marco-2027',
+    nome: 'Equinócio de Março',
+    tipo: 'estacao',
+    dataISO: '2027-03-20',
+    descricao: 'Neste dia o Sol nasce exatamente a leste e se põe exatamente a oeste, em qualquer lugar do planeta. Começa o outono no hemisfério sul e a primavera no hemisfério norte.',
+    corpoFoco: 'terra'
+  },
+  {
+    id: 'solsticio-junho-2027',
+    nome: 'Solstício de Junho',
+    tipo: 'estacao',
+    dataISO: '2027-06-21',
+    descricao: 'O Sol chega ao ponto mais ao norte do céu: é a noite mais longa do ano no Brasil e o dia mais longo na Europa. Dentro do Círculo Polar Ártico o Sol nem chega a se pôr.',
+    corpoFoco: 'terra'
   },
   {
     id: 'conjuncao-venus-jupiter-2027',
@@ -53,6 +101,22 @@ export const EVENTOS = [
     tipo: 'eclipse',
     dataISO: '2027-08-02',
     descricao: 'O eclipse solar total mais longo do século XXI: 6 minutos e 23 segundos de escuridão total sobre Luxor, no Egito. A faixa de totalidade cruza o sul da Espanha e o norte da África. Um recorde que só será batido em 2114.',
+    corpoFoco: 'terra'
+  },
+  {
+    id: 'equinocio-setembro-2027',
+    nome: 'Equinócio de Setembro',
+    tipo: 'estacao',
+    dataISO: '2027-09-23',
+    descricao: 'Dia e noite empatam outra vez no mundo todo. Começa a primavera no hemisfério sul e o outono no hemisfério norte — e, a partir daqui, os dias vão ficando mais longos no Brasil.',
+    corpoFoco: 'terra'
+  },
+  {
+    id: 'solsticio-dezembro-2027',
+    nome: 'Solstício de Dezembro',
+    tipo: 'estacao',
+    dataISO: '2027-12-22',
+    descricao: 'O Sol chega ao ponto mais ao sul do céu: é o dia mais longo do ano no Brasil e o mais curto na Europa. Na Antártida o Sol não se põe; no Ártico é noite o dia inteiro.',
     corpoFoco: 'terra'
   },
   {

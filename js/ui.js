@@ -1,4 +1,4 @@
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=28';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=30';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -7,7 +7,7 @@ function formatarDataParaTela(date) {
   return mqDataCompacta.matches ? formatarDataCompacta(date) : formatarDataLonga(date);
 }
 
-export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce }) {
+export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce, abrirEstacoes, abrirMares }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
   // rail vertical de Visualização + barra de comando central de Experiências.
   // O CSS segue escopado em .ux-ousada.
@@ -360,6 +360,32 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         abrirVoce();
       };
       itensExp.appendChild(btnVoce);
+    }
+
+    // Estações do Ano (Experiências)
+    if (abrirEstacoes) {
+      const btnEstacoes = document.createElement('button');
+      btnEstacoes.className = 'botao';
+      btnEstacoes.id = 'btn-estacoes';
+      btnEstacoes.innerHTML = t('btnEstacoes');
+      btnEstacoes.onclick = () => {
+        progressoEvento('abriu-estacoes');
+        abrirEstacoes();
+      };
+      itensExp.appendChild(btnEstacoes);
+    }
+
+    // Marés (Experiências)
+    if (abrirMares) {
+      const btnMares = document.createElement('button');
+      btnMares.className = 'botao';
+      btnMares.id = 'btn-mares';
+      btnMares.innerHTML = t('btnMares');
+      btnMares.onclick = () => {
+        progressoEvento('abriu-mares');
+        abrirMares();
+      };
+      itensExp.appendChild(btnMares);
     }
 
     // Tour button (Experiências) — com realce pulsante para atrair o primeiro
@@ -1118,12 +1144,37 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     // Card compacto no celular deitado: detalhes ficam atrás deste botão.
     // fichaSaibaMais ≠ saibaMais: a chave antiga carrega o selo "(11+)" do
     // conteúdo avançado, que não cabe aqui.
+    if (corpo.id === 'terra' && abrirEstacoes) {
+      html += `<button class="botao info-modo-btn" id="info-estacoes-btn">${t('estacoesTerraBotao')}</button>`;
+    }
+    if (corpo.id === 'lua' && abrirMares) {
+      html += `<button class="botao info-modo-btn" id="info-mares-btn">${t('maresLuaBotao')}</button>`;
+    }
+
     html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
 
     conteudo.innerHTML = html;
 
     const btnSaiba = document.getElementById('info-saiba-btn');
     if (btnSaiba) btnSaiba.onclick = () => painel.classList.toggle('expandido');
+
+    // Porta de entrada contextual (SPEC-estacoes-e-mares.md §7.1): a pergunta
+    // aparece onde a curiosidade nasce, não só numa lista de experiências.
+    const btnEstacoesInfo = conteudo.querySelector('#info-estacoes-btn');
+    if (btnEstacoesInfo && abrirEstacoes) {
+      btnEstacoesInfo.onclick = () => {
+        progressoEvento('abriu-estacoes');
+        abrirEstacoes();
+      };
+    }
+
+    const btnMaresInfo = conteudo.querySelector('#info-mares-btn');
+    if (btnMaresInfo && abrirMares) {
+      btnMaresInfo.onclick = () => {
+        progressoEvento('abriu-mares');
+        abrirMares();
+      };
+    }
 
     // Favoritar: alterna estado, persiste e atualiza o marcador na lista
     const favBtn = conteudo.querySelector('#info-fav-btn');
@@ -1432,6 +1483,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       btn.onclick = () => {
         if (!premiumExigir('eventos')) return;
         progressoEvento('evento-viagem', { id: evento.id });
+        // Solstícios e equinócios abrem o modo Estações naquela data. O
+        // comportamento deriva do tipo — não há campo extra no evento
+        // (SPEC-estacoes-e-mares.md §8.1).
+        if (evento.tipo === 'estacao' && abrirEstacoes) {
+          progressoEvento('estacoes-marco', { id: evento.id });
+          abrirEstacoes({ data: evento.dataISO });
+          return;
+        }
         motor.irParaData(evento.dataISO);
         if (evento.corpoFoco) {
           motor.focar(evento.corpoFoco);

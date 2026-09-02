@@ -1,0 +1,303 @@
+/* Palco: overlay dos modos didáticos com cena própria (Estações, Marés).
+   Ver SPEC-estacoes-e-mares.md §7.
+
+   Diferente dos outros overlays do app, este NÃO cobre a tela com um painel:
+   a cena 3D atrás precisa ficar visível e manipulável. Por isso a raiz é
+   pointer-events:none e só os controles recebem eventos — os OrbitControls do
+   palco escutam o canvas, que está por baixo. */
+
+.palco-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Acima da barra de ações (10) e dos drawers (12), como os demais modais */
+  z-index: 13;
+  pointer-events: none;
+  padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right))
+           calc(12px + var(--safe-bottom)) calc(16px + var(--safe-left));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+  color: #e8edf7;
+  font-size: 13px;
+}
+
+.palco-overlay[hidden] { display: none; }
+
+/* Tudo que é interativo ou legível volta a capturar o ponteiro */
+.palco-topo,
+.palco-hud > *,
+.palco-selo,
+.palco-rodape,
+.palco-roteiro { pointer-events: auto; }
+
+/* Com o palco no ar, a UI do simulador sai de cena inteira. O palco tem os
+   próprios controles e o próprio relógio; deixar os do app por baixo criaria
+   dois relógios na tela e o título do palco colidindo com o header (SPEC §3).
+   Esconder #ui-root cobre a UI de desktop de uma vez — ela nasce toda lá
+   dentro. O dock mobile é a exceção: mobile-dock.js monta #mdock direto no
+   body (linha 190), fora do ui-root, então precisa da própria regra — sem ela
+   o celular ficava com dois relógios e dois títulos na mesma tela. */
+body.com-palco #ui-root,
+body.com-palco .tutorial-overlay,
+body.com-palco #mdock { display: none !important; }
+
+/* ————— topo ————— */
+
+.palco-topo {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.palco-titulo {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* ————— HUD lateral ————— */
+
+.palco-hud {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-content: start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: 100%;
+}
+
+.palco-hud-esq { grid-column: 1; justify-self: start; }
+.palco-hud-dir { grid-column: 2; justify-self: end; align-items: flex-end; }
+
+/* Fundo semi-opaco atrás de texto sobre a cena 3D: sem isso o contraste
+   depende do que estiver renderizado atrás, e AA deixa de ser garantido. */
+.palco-card {
+  background: rgba(11, 16, 28, 0.88);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 12px;
+  padding: 10px 12px;
+  max-width: 260px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.palco-card-titulo {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93a0b8;
+  margin: 0 0 6px;
+}
+
+.palco-card-valor {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.palco-card-nota {
+  color: #93a0b8;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 4px;
+}
+
+.palco-card-alerta {
+  border-color: rgba(255, 196, 92, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 196, 92, 0.25);
+}
+
+.palco-card svg { display: block; max-width: 100%; }
+
+/* ————— selo "fora de escala" (SPEC §7.2: permanente, nunca escondido) ————— */
+
+.palco-selo {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: end;
+  justify-self: center;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #93a0b8;
+  background: rgba(11, 16, 28, 0.7);
+  border: 1px solid rgba(120, 160, 255, 0.14);
+  border-radius: 999px;
+  padding: 3px 12px;
+  white-space: nowrap;
+}
+
+/* ————— rodapé: tempo e escala ————— */
+
+.palco-rodape {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(11, 16, 28, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.palco-btn {
+  background: rgba(120, 160, 255, 0.12);
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  color: #e8edf7;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  /* 44px de alvo de toque (SPEC §7.3) */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.palco-btn:hover:not(:disabled) { background: rgba(120, 160, 255, 0.22); }
+.palco-btn:disabled { opacity: 0.45; cursor: default; }
+
+.palco-scrubber {
+  flex: 1;
+  min-width: 120px;
+  height: 44px;
+  accent-color: #7aa2ff;
+  cursor: pointer;
+}
+
+.palco-legenda {
+  min-width: 190px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #cbd5e8;
+}
+
+/* ————— roteiro guiado ————— */
+
+.palco-roteiro {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: end;
+  justify-self: center;
+  width: min(560px, 100%);
+  background: rgba(11, 16, 28, 0.95);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  margin-bottom: 40px;
+}
+
+.palco-roteiro[hidden] { display: none; }
+
+.palco-roteiro-texto {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.palco-roteiro-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.palco-roteiro-passo {
+  font-size: 12px;
+  color: #93a0b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.palco-roteiro-pular,
+.palco-roteiro-proximo {
+  background: rgba(120, 160, 255, 0.12);
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  color: #e8edf7;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.palco-roteiro-proximo {
+  background: rgba(120, 160, 255, 0.28);
+  font-weight: 600;
+}
+
+.palco-roteiro-pular { color: #93a0b8; }
+.palco-roteiro-pular:hover { color: #e8edf7; }
+
+/* ————— telas curtas / dock em paisagem (SPEC §7.3) —————
+   O centro fica livre para a cena: HUD nas laterais, nada no meio. */
+
+@media (max-height: 520px) {
+  .palco-overlay { gap: 8px; font-size: 12px; }
+  .palco-titulo { font-size: 15px; }
+  .palco-card { max-width: 200px; padding: 8px 10px; }
+  .palco-card-valor { font-size: 16px; }
+  .palco-roteiro { margin-bottom: 8px; padding: 12px 14px; }
+  .palco-roteiro-texto { font-size: 14px; margin-bottom: 8px; }
+  .palco-legenda { min-width: 0; }
+}
+
+@media (max-width: 720px) {
+  .palco-legenda { display: none; }
+}
+
+/* Sem animação automática quando o sistema pede menos movimento: o scrubber
+   passa a ser o único motor do tempo (SPEC §7.4). */
+@media (prefers-reduced-motion: reduce) {
+  .palco-overlay * { transition: none !important; animation: none !important; }
+}
+
+/* Porta de entrada contextual dentro do painel de info de um astro
+   (SPEC §7.1): "Por que existem estações?" no painel da Terra. */
+.info-modo-btn {
+  display: block;
+  width: 100%;
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* ————— dock mobile —————
+   No modo dock o app fixa o «‹ Voltar» no canto superior esquerdo
+   (estilos.css:2243, position:fixed) — é a convenção de todos os overlays.
+   O título do palco precisa sair de baixo dele. */
+body.modo-dock .palco-topo { padding-left: 108px; }
+
+body.modo-dock .palco-titulo {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* Em 390px de altura, três cards por lado não cabem. Compacta o suficiente
+   para o conteúdo caber sem rolagem no dock típico. */
+body.modo-dock .palco-card {
+  padding: 6px 9px;
+  max-width: 172px;
+  border-radius: 9px;
+}
+
+body.modo-dock .palco-card-titulo { font-size: 9px; margin-bottom: 3px; }
+body.modo-dock .palco-card-valor { font-size: 14px; }
+body.modo-dock .palco-card-nota { font-size: 10px; line-height: 1.3; }
+body.modo-dock .palco-card svg { height: 52px; }
+body.modo-dock .palco-hud { gap: 6px; }
+body.modo-dock .palco-rodape { padding: 5px 10px; gap: 8px; }
+body.modo-dock .palco-btn { min-height: 40px; min-width: 40px; padding: 0 11px; font-size: 12px; }
+body.modo-dock .palco-scrubber { height: 40px; }
