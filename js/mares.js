@@ -11,13 +11,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal } from './palco.js?v=6';
+import { criarPalco, aplicarTexturaReal, areaSegura, raioSeguro, distanciaParaEnquadrar } from './palco.js?v=7';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
   nomeDaFase, mareCombinada, alturaRelativa, intervaloEntrePreamaresHoras,
   diaLunarHoras, formatarHoras, MES_SINODICO_DIAS, A_SOL, A_LUA,
-} from './mares-calc.js?v=1';
+  classificarMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
+} from './mares-calc.js?v=2';
 
 const RAD = Math.PI / 180;
 
@@ -44,7 +45,13 @@ const TEXTOS = {
     iluminada: 'iluminada',
     praiaTitulo: 'Sua praia',
     praiaLegenda: 'o ponto laranja girando com a Terra',
-    eixosLegenda: 'Linha azul: puxão da Lua. Linha amarela: puxão do Sol.',
+    escalaForca: 'vezes a maré mais fraca do mês',
+    reguaMorta: 'morta',
+    reguaViva: 'viva',
+    legendaLua: 'Lua',
+    legendaSol: 'Sol',
+    eixosNota: 'As linhas mostram para onde cada um puxa. Quando apontam junto, a maré é forte.',
+    curvaNota: 'A curva cobre 26 horas na sua praia, com o agora no meio: duas marés altas e duas baixas.',
     preamar: 'Maré alta',
     baixamar: 'Maré baixa',
     subindo: 'Enchendo',
@@ -77,7 +84,13 @@ const TEXTOS = {
     iluminada: 'lit',
     praiaTitulo: 'Your beach',
     praiaLegenda: 'the orange dot turning with Earth',
-    eixosLegenda: 'Blue line: the Moon’s pull. Yellow line: the Sun’s pull.',
+    escalaForca: 'times the month’s weakest tide',
+    reguaMorta: 'neap',
+    reguaViva: 'spring',
+    legendaLua: 'Moon',
+    legendaSol: 'Sun',
+    eixosNota: 'The lines show where each one pulls. When they point together, the tide is strong.',
+    curvaNota: 'The curve covers 26 hours at your beach, with now in the middle: two high tides and two low ones.',
     preamar: 'High tide',
     baixamar: 'Low tide',
     subindo: 'Rising',
@@ -110,7 +123,13 @@ const TEXTOS = {
     iluminada: 'iluminada',
     praiaTitulo: 'Tu playa',
     praiaLegenda: 'el punto naranja girando con la Tierra',
-    eixosLegenda: 'Línea azul: tirón de la Luna. Línea amarilla: tirón del Sol.',
+    escalaForca: 'veces la marea más débil del mes',
+    reguaMorta: 'muerta',
+    reguaViva: 'viva',
+    legendaLua: 'Luna',
+    legendaSol: 'Sol',
+    eixosNota: 'Las líneas muestran hacia dónde tira cada uno. Cuando apuntan juntas, la marea es fuerte.',
+    curvaNota: 'La curva cubre 26 horas en tu playa, con el ahora en el medio: dos mareas altas y dos bajas.',
     preamar: 'Marea alta',
     baixamar: 'Marea baja',
     subindo: 'Subiendo',
@@ -176,7 +195,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.minDistance = 6;
-    controls.maxDistance = 70;
+    controls.maxDistance = 120;
 
     // Mesma iluminação da cena principal (motor3d._criarIluminacao)
     scene.add(new THREE.AmbientLight(0x46546e, 0.55));
@@ -282,6 +301,41 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     );
     scene.add(praia);
 
+    // Enquadramento. A primeira versão mandava caber o círculo inteiro,
+    // incluindo o Sol no raio fixo de 12,6 — e a câmera recuava de 36 para
+    // 43,9, encolhendo a Terra em 22%. A Terra é o SUJEITO da cena: os dois
+    // bojos são o que se veio ver, e a 60 px de diâmetro eles somem.
+    //
+    // O que precisa caber de verdade é a órbita da Lua, cujo raio significa
+    // alguma coisa. O Sol só indica uma DIREÇÃO: pode ceder distância e se
+    // acomodar na borda livre, desde que nunca entre na órbita da Lua.
+    const RAIO_SOL_MIN = RAIO_ORBITA_LUA + 1.5;      // piso: fora da órbita
+    const RAIO_SOL_MAX = RAIO_ORBITA_LUA + 3.6;      // o que se usava fixo
+    const RAIO_DISCO_SOL = 1.6;
+    // Enquadrar por este raio garante que raioSeguro nunca devolva menos que
+    // RAIO_SOL_MIN em direção nenhuma — é o que torna o piso sempre atendível.
+    const RAIO_DA_CENA = RAIO_SOL_MIN + RAIO_DISCO_SOL;
+
+    let areaAtual = null;
+
+    function enquadrar() {
+      const overlay = document.getElementById('palco-mares');
+      if (!overlay || overlay.hidden) return;
+      areaAtual = areaSegura(overlay);
+      camera.position.setLength(distanciaParaEnquadrar(camera, RAIO_DA_CENA, areaAtual));
+      camera.updateProjectionMatrix();
+      controls.update();
+    }
+
+    /** Raio em que o Sol cabe inteiro na faixa livre, nesta direção. */
+    function raioDoSol(dirSol) {
+      if (!areaAtual) return RAIO_SOL_MAX;
+      // Folga do disco: raioSeguro só enxerga o centro, então pede-se o raio
+      // do centro + disco e desconta-se o disco do resultado.
+      const comFolga = raioSeguro(camera, dirSol, RAIO_SOL_MAX + RAIO_DISCO_SOL, areaAtual);
+      return Math.max(RAIO_SOL_MIN, Math.min(RAIO_SOL_MAX, comFolga - RAIO_DISCO_SOL));
+    }
+
     // ————— vetores de força diferencial (só no "Saiba mais") —————
     // Mostram o que a fórmula diz: para fora nas duas pontas, para dentro nos
     // lados. É a resposta rigorosa, e por isso fica fora da superfície.
@@ -301,13 +355,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     const btnForcas = document.createElement('button');
     btnForcas.className = 'palco-btn';
-    btnForcas.style.alignSelf = 'flex-end';
     btnForcas.onclick = () => {
       mostrarForcas = !mostrarForcas;
       cardForcas.raiz.hidden = !mostrarForcas;
       atualizarHud();
     };
-    ctx.hudDir.appendChild(btnForcas);
+    ctx.rodapeAcoes.appendChild(btnForcas);
     const cardForcas = criarCard(ctx.hudDir);
     cardForcas.raiz.hidden = true;
 
@@ -339,7 +392,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       luzSol.position.copy(dirSol).multiplyScalar(50);
       // O Sol fica na borda; os raios ligam ele à Terra, para a segunda
       // força de maré ter de onde vir na tela.
-      const posSol = dirSol.clone().multiplyScalar(RAIO_ORBITA_LUA + 3.6);
+      const posSol = dirSol.clone().multiplyScalar(raioDoSol(dirSol));
       sol.position.copy(posSol);
       const pr = geoRaios.attributes.position;
       for (let i = 0; i < 3; i++) {
@@ -355,8 +408,9 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       // Oceano deformado: prolato ao longo do eixo dos bojos. O eixo é o do
       // conjunto Lua+Sol, não o da Lua — por isso em fase intermediária ele
-      // fica ENTRE os dois.
-      const e = EXAGERO_BOJO * amplitude;
+      // fica ENTRE os dois. Em escala real, não há exagero — o oceano fica
+      // esférico.
+      const e = escalaRealAtiva ? 0 : EXAGERO_BOJO * amplitude;
       oceano.scale.set(1 + e, 1 - e / 2, 1 - e / 2);
       oceano.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direcaoLongitude(eixoGraus));
 
@@ -381,7 +435,14 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       atualizarEixoBojo(eixoLua, lamLua, A_LUA);
       atualizarEixoBojo(eixoSolBojo, lamSol, A_SOL);
 
-      if (mostrarForcas) atualizarSetasForca(eixoGraus);
+      // Com a escala real no ar, TUDO que é exagero tem de sumir: o bojo, as
+      // setas e as linhas de eixo (cujo comprimento é proporcional ao exagero).
+      // Senão o botão que existe pra provar honestidade vira a prova do contrário.
+      if (mostrarForcas && !escalaRealAtiva) atualizarSetasForca(eixoGraus);
+      else setasForca.forEach((s) => { s.visible = false; });
+
+      eixoLua.linha.visible = !escalaRealAtiva;
+      eixoSolBojo.linha.visible = !escalaRealAtiva;
 
       controls.update();
       atualizarHud(lamSol, lamLua, amplitude, altura, psi);
@@ -397,12 +458,102 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         const psi = (i * 360) / setasForca.length;
         const h = alturaRelativa(psi, 1);
         const paraFora = h >= 0;
-        seta.position.copy(dir).multiplyScalar(RAIO_TERRA * 1.06);
-        seta.setDirection(paraFora ? dir : dir.clone().negate());
-        seta.setLength(0.35 + Math.abs(h) * 1.5, 0.28, 0.16);
+        const comprimento = 0.35 + Math.abs(h) * 1.5;
+
+        if (paraFora) {
+          // Seta para fora: nasce na superfície, aponta para fora
+          seta.position.copy(dir).multiplyScalar(RAIO_TERRA * 1.06);
+          seta.setDirection(dir);
+        } else {
+          // Seta para dentro: a cauda passa a estar deslocada para fora e o
+          // corpo termina na superfície, apontando para o centro. Assim a seta
+          // inteira fica FORA do globo opaco, não invisível dentro dele.
+          seta.position.copy(dir).multiplyScalar(RAIO_TERRA * 1.06 + comprimento);
+          seta.setDirection(dir.clone().negate());
+        }
+
+        seta.setLength(comprimento, 0.28, 0.16);
         seta.setColor(paraFora ? 0x7ad4ff : 0x8a97b5);
         seta.visible = true;
       });
+    }
+
+    // Régua horizontal mostrando a escala de força da maré de quadratura (morta)
+    // até sizígia (viva), com o marcador na posição atual.
+    function svgRegua(amplitude) {
+      const t = Math.max(0, Math.min(1, (forcaRelativaAMinima(amplitude) - 1) / (AMP_SIZIGIA / AMP_QUADRATURA - 1)));
+      const x = 6 + t * 108;
+      return `<svg viewBox="0 0 120 26" width="100%" height="26" xmlns="http://www.w3.org/2000/svg">
+        <line x1="6" y1="9" x2="114" y2="9" stroke="#3a4a68" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="${x}" cy="9" r="5" fill="#7aa2ff" stroke="#0b101c" stroke-width="1.5"/>
+        <text x="6" y="24" font-size="9" fill="#93a0b8">${tm('reguaMorta')}</text>
+        <text x="114" y="24" font-size="9" fill="#93a0b8" text-anchor="end">${tm('reguaViva')}</text>
+      </svg>`;
+    }
+
+    // Curva da maré ao longo de 26 horas, mostrando dois ciclos de alta/baixa.
+    function svgCurvaMare(dias, altura, amplitude) {
+      const pontos = curvaDaPraia(dias, 26, 96);
+      if (pontos.length === 0) return '';
+
+      // Mapeia coordenadas dos pontos para a viewport SVG
+      const maxAmplitude = AMP_SIZIGIA;
+      const xs = pontos.map((p, i) => 4 + (i / (pontos.length - 1)) * 112);
+      const ys = pontos.map((p) => {
+        const frac = Math.max(-1, Math.min(1, p.altura / maxAmplitude));
+        return 30 - (frac * 24);
+      }).map((y) => Math.max(4, Math.min(56, y)));
+
+      // Cria a polilinha da curva
+      let points = '';
+      for (let i = 0; i < xs.length; i++) {
+        points += `${xs[i]},${ys[i]} `;
+      }
+
+      // Encontra o ponto mais próximo de t=0 (agora) no array
+      let indiceCentro = Math.round(pontos.length / 2);
+      let melhorI = indiceCentro;
+      let melhorDist = Math.abs(pontos[indiceCentro].h);
+      for (let i = 0; i < pontos.length; i++) {
+        const dist = Math.abs(pontos[i].h);
+        if (dist < melhorDist) {
+          melhorDist = dist;
+          melhorI = i;
+        }
+      }
+
+      // Encontra os dois maiores máximos locais em y (mínimos em altura, já que y cresce para baixo)
+      const maximos = [];
+      for (let i = 1; i < ys.length - 1; i++) {
+        if (ys[i] < ys[i - 1] && ys[i] < ys[i + 1]) {
+          maximos.push(i);
+        }
+      }
+      maximos.sort((a, b) => ys[a] - ys[b]);
+      const marcarX = maximos.slice(0, 2).map((i) => xs[i]);
+
+      // Determina o estado atual para o aria-label
+      const subindoAgora = alturaAnterior !== null && altura > alturaAnterior;
+      const pertoAgora = Math.abs(altura) > amplitude * 0.75;
+      const estadoLabel = pertoAgora
+        ? (altura > 0 ? tm('preamar') : tm('baixamar'))
+        : (subindoAgora ? tm('subindo') : tm('descendo'));
+
+      // SVG
+      let svg = `<svg viewBox="0 0 120 60" width="100%" height="60" role="img" aria-label="${estadoLabel}. ${num(forcaRelativaAMinima(amplitude), 1)} ${tm('escalaForca')}" xmlns="http://www.w3.org/2000/svg">
+        <line x1="4" y1="30" x2="116" y2="30" stroke="#3a4a68" stroke-width="1" stroke-dasharray="3 3"/>
+        <polyline points="${points.trim()}" fill="none" stroke="#4d9fe0" stroke-width="2" stroke-linejoin="round"/>`;
+
+      // Marcador do ponto atual (instante central) em laranja
+      svg += `<circle cx="${xs[melhorI]}" cy="${ys[melhorI]}" r="3.5" fill="#ff8a5c"/>`;
+
+      // Marcas nos maiores máximos
+      for (const mx of marcarX) {
+        svg += `<line x1="${mx}" y1="4" x2="${mx}" y2="56" stroke="#4d9fe0" stroke-width="1" opacity="0.35"/>`;
+      }
+
+      svg += '</svg>';
+      return svg;
     }
 
     function atualizarHud(lamSol, lamLua, amplitude, altura, psi) {
@@ -413,19 +564,29 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         return atualizarHud(s, l, m.amplitude, alturaRelativa(0, m.amplitude), 0);
       }
 
-      // Força da maré: sizígia, quadratura ou o meio do caminho
-      const pctDoMaximo = (amplitude / (A_LUA + A_SOL)) * 100;
+      // Força da maré: classificação usando a mesma régua que a fase lunar
+      // para que os dois rótulos nunca se contradigam (mudança 1).
+      const classe = classificarMare(dias);
+      const classeTexto = classe === 'sizigia' ? tm('sizigia')
+        : classe === 'quadratura' ? tm('quadratura') : tm('intermediaria');
+
       cardForca.titulo.textContent = tm('forcaTitulo');
-      cardForca.valor.textContent = `${num(pctDoMaximo, 0)}%`;
-      const ehSizigia = amplitude > 1.38;
-      const ehQuadratura = amplitude < 0.62;
-      cardForca.nota.innerHTML =
-        `${ehSizigia ? tm('sizigia') : ehQuadratura ? tm('quadratura') : tm('intermediaria')}`
-        + `<br><span style="color:#9ec5ff">—</span> <span style="color:#ffd479">—</span> ${tm('eixosLegenda')}`;
-      cardForca.raiz.classList.toggle('palco-card-alerta', ehSizigia || ehQuadratura);
+      // Mudança 2: força como múltiplo da maré mais fraca (quadratura)
+      // Mudança 3: regra horizontal e legenda de cores incluídas no valor
+      const valorHTML = `<div>${num(forcaRelativaAMinima(amplitude), 1)}×</div>`
+        + `<div class="palco-card-sub">${tm('escalaForca')}</div>`
+        + svgRegua(amplitude)
+        + `<div class="palco-legenda-cores" title="${tm('eixosNota')}">`
+        + `<span><i style="background:#9ec5ff"></i>${tm('legendaLua')}</span>`
+        + `<span><i style="background:#ffd479"></i>${tm('legendaSol')}</span>`
+        + `</div><p style="font-size:10px;color:#93a0b8;margin:4px 0 0;line-height:1.25">${tm('eixosNota')}</p>`;
+      cardForca.valor.innerHTML = valorHTML;
+      cardForca.nota.textContent = classeTexto;
+      cardForca.raiz.classList.toggle('palco-card-alerta', classe === 'sizigia' || classe === 'quadratura');
+
       // Um marco por vez, como o modo Estações faz: progresso.js guarda os
       // ids distintos e a badge sai quando os dois apareceram.
-      const marcoAtual = ehSizigia ? 'sizigia' : ehQuadratura ? 'quadratura' : null;
+      const marcoAtual = classe === 'sizigia' ? 'sizigia' : classe === 'quadratura' ? 'quadratura' : null;
       if (marcoAtual && !marcosVistos.has(marcoAtual)) {
         marcosVistos.add(marcoAtual);
         if (aoProgresso) aoProgresso('mares-marco', { id: marcoAtual });
@@ -437,19 +598,20 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       cardFase.valor.textContent = tm(fase);
       cardFase.nota.textContent = `${num(fracaoIluminada(dias) * 100, 0)}% ${tm('iluminada')}`;
 
-      // Sua praia: medidor
+      // Sua praia: curva de 26 horas com dois ciclos (mudança 4)
       // Bolinha na mesma cor do marcador na cena: sem isso, o ponto laranja
       // girando não se identifica com o card que mostra a maré dele.
       cardPraia.titulo.innerHTML =
         `<span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')} `
         + `<span style="text-transform:none;font-weight:400">— ${tm('praiaLegenda')}</span>`;
-      cardPraia.valor.innerHTML = svgMedidor(altura);
+      cardPraia.valor.innerHTML = svgCurvaMare(dias, altura, amplitude);
       const subindo = alturaAnterior !== null && altura > alturaAnterior;
       const perto = Math.abs(altura) > amplitude * 0.75;
+      const estado = perto
+        ? (altura > 0 ? tm('preamar') : tm('baixamar'))
+        : (subindo ? tm('subindo') : tm('descendo'));
       if (!escalaRealAtiva) {
-        cardPraia.nota.textContent = perto
-          ? (altura > 0 ? tm('preamar') : tm('baixamar'))
-          : (subindo ? tm('subindo') : tm('descendo'));
+        cardPraia.nota.innerHTML = `<div style="font-size:10px;color:#93a0b8;margin-bottom:4px">${tm('curvaNota')}</div>${estado}`;
       }
 
       // Ritmo
@@ -472,20 +634,21 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         ctx.legenda.textContent = data.toLocaleDateString(idioma === 'pt' ? 'pt-BR' : idioma);
       }
       ctx.scrubber.value = String(Math.round((elongacao(dias) / 360) * 1000));
+
+      // Mudança 5: anuncia o estado da maré a cada frame (com freio de 1s embutido)
+      if (ctx.anunciar) {
+        const classe = classificarMare(dias);
+        const classeTexto = classe === 'sizigia' ? tm('sizigia')
+          : classe === 'quadratura' ? tm('quadratura') : tm('intermediaria');
+        const subindoAgora = alturaAnterior !== null && altura > alturaAnterior;
+        const pertoAgora = Math.abs(altura) > amplitude * 0.75;
+        const estadoAgora = pertoAgora
+          ? (altura > 0 ? tm('preamar') : tm('baixamar'))
+          : (subindoAgora ? tm('subindo') : tm('descendo'));
+        ctx.anunciar(`${estadoAgora}. ${classeTexto}.`);
+      }
     }
 
-    // Medidor vertical: a altura relativa da maré na praia, agora.
-    function svgMedidor(altura) {
-      const max = A_LUA + A_SOL;
-      const frac = Math.max(-1, Math.min(1, altura / max));
-      const meio = 32;
-      const h = Math.abs(frac) * 30;
-      const y = frac >= 0 ? meio - h : meio;
-      return `<svg viewBox="0 0 120 66" width="100%" height="64" role="img" aria-hidden="true">
-        <line x1="10" y1="${meio}" x2="110" y2="${meio}" stroke="#4a6fa8" stroke-width="1.5" stroke-dasharray="3 3"/>
-        <rect x="44" y="${y}" width="32" height="${Math.max(2, h)}" rx="3" fill="${frac >= 0 ? '#4d9fe0' : '#8a97b5'}"/>
-      </svg>`;
-    }
 
     function escalaReal() {
       if (escalaRealAtiva) return;
@@ -517,11 +680,16 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       [ctx.hudEsq, ctx.hudDir].forEach((h) => { while (h.firstChild) h.removeChild(h.firstChild); });
     }
 
+    // Adiado: quando construirCena roda, o overlay ainda está hidden e os
+    // cards ainda não têm texto — medir aí devolveria uma área segura falsa.
+    requestAnimationFrame(() => requestAnimationFrame(enquadrar));
+
     return {
       scene, camera, atualizar, dispose, escalaReal, aoScrubber,
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        enquadrar();
       },
       aoEntrarSandbox: () => { if (aoProgresso) aoProgresso('mares-abriu'); },
     };

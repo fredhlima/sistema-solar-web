@@ -55,6 +55,7 @@ const TEXTOS = {
     pular: 'Pular',
     comecar: 'Explorar livremente',
     passo: 'Passo {n} de {t}',
+    linhaDoTempo: 'Linha do tempo',
   },
   en: {
     voltar: 'Back',
@@ -66,6 +67,7 @@ const TEXTOS = {
     pular: 'Skip',
     comecar: 'Explore freely',
     passo: 'Step {n} of {t}',
+    linhaDoTempo: 'Timeline',
   },
   es: {
     voltar: 'Volver',
@@ -77,6 +79,7 @@ const TEXTOS = {
     pular: 'Saltar',
     comecar: 'Explorar libremente',
     passo: 'Paso {n} de {t}',
+    linhaDoTempo: 'Línea de tiempo',
   },
 };
 
@@ -93,6 +96,139 @@ export function movimentoReduzido() {
   } catch (e) {
     return false;
   }
+}
+
+// ————— área segura da cena —————
+//
+// O HUD é um overlay sobre a cena INTEIRA, mas a cena era enquadrada como se a
+// tela toda estivesse livre. O resultado, medido no modo Marés: o Sol nascia
+// dentro do card "Fase da Lua" e a Lua passava por trás da barra de controles.
+//
+// A saída não é empurrar cada corpo para fora do HUD um a um — isso troca um
+// defeito por outro (o Sol puxado para dentro invadiria a órbita da Lua). É
+// enquadrar a cena INTEIRA na faixa livre: se o círculo que contém tudo cabe,
+// nenhum corpo pode cair sob a interface, venha de que direção vier.
+
+/** Margem, em px, entre a cena e a borda de qualquer elemento da interface. */
+const MARGEM_AREA_SEGURA = 10;
+
+/**
+ * Retângulo livre da tela, em NDC (x e y de −1 a 1, y para cima).
+ *
+ * O roteiro guiado NÃO entra na conta: é um painel temporário por cima da cena,
+ * e descontá-lo faria o enquadramento saltar no instante em que o roteiro
+ * terminasse.
+ *
+ * @param {HTMLElement} overlay  a raiz `.palco-overlay`
+ */
+export function areaSegura(overlay) {
+  const L = window.innerWidth;
+  const A = window.innerHeight;
+  let esq = 0;
+  let dir = L;
+  let topo = 0;
+  let base = A;
+
+  // As colunas do HUD medidas pelos CARDS, não pelo contêiner: uma coluna sem
+  // card tem retângulo de largura zero encostado na borda, e usá-lo comeria
+  // metade da tela por nada.
+  const uniao = (seletor, aplicar) => {
+    overlay.querySelectorAll(seletor).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) aplicar(r);
+    });
+  };
+
+  uniao('.palco-hud-esq .palco-card', (r) => { esq = Math.max(esq, r.right); });
+  uniao('.palco-hud-dir .palco-card', (r) => { dir = Math.min(dir, r.left); });
+  uniao('.palco-topo, .palco-selo', (r) => { topo = Math.max(topo, r.bottom); });
+  uniao('.palco-rodape', (r) => { base = Math.min(base, r.top); });
+
+  const m = MARGEM_AREA_SEGURA;
+  const xEsq = Math.min(esq + m, L);
+  const xDir = Math.max(dir - m, 0);
+  const yTopo = Math.min(topo + m, A);
+  const yBase = Math.max(base - m, 0);
+
+  return {
+    xMin: (xEsq / L) * 2 - 1,
+    xMax: (xDir / L) * 2 - 1,
+    yMin: 1 - (yBase / A) * 2,
+    yMax: 1 - (yTopo / A) * 2,
+  };
+}
+
+/**
+ * Maior raio, até `raioDesejado`, em que o ponto `direcao · raio` no plano y=0
+ * ainda projeta dentro da área segura.
+ *
+ * Serve para um corpo que só precisa indicar uma DIREÇÃO e pode ceder distância
+ * — o Sol das Marés é o caso. Quem depende do raio para significar alguma coisa
+ * (a órbita da Lua) não usa isto: usa `distanciaParaEnquadrar`.
+ *
+ * O chamador deve passar um `raioDesejado` já folgado do tamanho aparente do
+ * corpo, e subtrair essa folga do resultado — aqui só se trata do centro.
+ */
+export function raioSeguro(camera, direcao, raioDesejado, area) {
+  const ponto = new THREE.Vector3();
+  const dentro = (t) => {
+    ponto.copy(direcao).multiplyScalar(t).project(camera);
+    return ponto.x >= area.xMin && ponto.x <= area.xMax
+      && ponto.y >= area.yMin && ponto.y <= area.yMax;
+  };
+  if (dentro(raioDesejado)) return raioDesejado;
+  let lo = 0;
+  let hi = raioDesejado;
+  for (let i = 0; i < 16; i++) {
+    const meio = (lo + hi) / 2;
+    if (dentro(meio)) lo = meio; else hi = meio;
+  }
+  return lo;
+}
+
+/**
+ * Menor distância da câmera, na direção que ela já aponta, em que um círculo de
+ * `raioMundo` no plano y=0 projeta INTEIRO dentro da área segura.
+ *
+ * Busca binária sobre amostras do círculo, e não álgebra de projeção fechada:
+ * é monotônica (afastar a câmera só pode fazer o círculo caber mais), custa
+ * ~18 iterações uma vez por abertura, e não tem como errar o espaço de
+ * coordenadas — que é o erro clássico deste projeto.
+ */
+export function distanciaParaEnquadrar(camera, raioMundo, area, amostras = 32) {
+  if (!(area.xMax > area.xMin) || !(area.yMax > area.yMin)) {
+    return camera.position.length();          // área degenerada: não mexe
+  }
+
+  const direcao = camera.position.clone().normalize();
+  const original = camera.position.clone();
+  const ponto = new THREE.Vector3();
+
+  const cabe = (distancia) => {
+    camera.position.copy(direcao).multiplyScalar(distancia);
+    camera.updateMatrixWorld(true);
+    for (let i = 0; i < amostras; i++) {
+      const a = (i / amostras) * Math.PI * 2;
+      ponto.set(Math.cos(a) * raioMundo, 0, Math.sin(a) * raioMundo).project(camera);
+      if (ponto.x < area.xMin || ponto.x > area.xMax
+        || ponto.y < area.yMin || ponto.y > area.yMax) return false;
+    }
+    return true;
+  };
+
+  let lo = raioMundo * 0.5;
+  let hi = raioMundo * 20;
+  const encontrou = cabe(hi);
+  if (encontrou) {
+    for (let i = 0; i < 18; i++) {
+      const meio = (lo + hi) / 2;
+      if (cabe(meio)) hi = meio; else lo = meio;
+    }
+  }
+
+  camera.position.copy(original);
+  camera.updateMatrixWorld(true);
+  return encontrou ? hi : raioMundo * 20;
 }
 
 /**
@@ -128,10 +264,11 @@ export function criarPalco(cfg) {
     overlay.hidden = true;
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', `palco-${id}-titulo`);
 
     overlay.innerHTML = `
       <div class="palco-topo">
-        <h2 class="palco-titulo"></h2>
+        <h2 class="palco-titulo" id="palco-${id}-titulo"></h2>
         <button class="palco-fechar botao-fechar-overlay" type="button">
           <span class="fechar-icone">✕</span><span class="fechar-texto">‹ </span>
         </button>
@@ -143,8 +280,10 @@ export function criarPalco(cfg) {
         <button class="palco-btn palco-play" type="button">⏸</button>
         <input class="palco-scrubber" type="range" min="0" max="1000" value="0" step="1">
         <div class="palco-legenda"></div>
+        <div class="palco-rodape-acoes"></div>
         <button class="palco-btn palco-escala" type="button"></button>
       </div>
+      <div class="palco-sr" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="palco-roteiro" hidden>
         <p class="palco-roteiro-texto"></p>
         <div class="palco-roteiro-acoes">
@@ -164,6 +303,8 @@ export function criarPalco(cfg) {
     ref.play = overlay.querySelector('.palco-play');
     ref.scrubber = overlay.querySelector('.palco-scrubber');
     ref.legenda = overlay.querySelector('.palco-legenda');
+    ref.rodapeAcoes = overlay.querySelector('.palco-rodape-acoes');
+    ref.sr = overlay.querySelector('.palco-sr');
     ref.escala = overlay.querySelector('.palco-escala');
     ref.roteiro = overlay.querySelector('.palco-roteiro');
     ref.roteiroTexto = overlay.querySelector('.palco-roteiro-texto');
@@ -204,6 +345,13 @@ export function criarPalco(cfg) {
 
   const ref = {};
 
+  // Observador da legenda para sincronizar com aria-valuetext do scrubber
+  let observadorLegenda = null;
+
+  // Estado do anúncio com freio
+  let ultimoAnuncio = '';
+  let ultimoAnuncioEm = 0;
+
   // Foco preso dentro do diálogo enquanto ele existe (SPEC §7.4).
   function prenderFoco(e) {
     const focaveis = [...overlay.querySelectorAll('button, input, select, [tabindex]:not([tabindex="-1"])')]
@@ -220,12 +368,38 @@ export function criarPalco(cfg) {
     }
   }
 
+  // ————— acessibilidade —————
+
+  /**
+   * Anuncia um estado para leitores de tela. Só escreve se o texto MUDOU e se
+   * passou pelo menos 1 s desde o último anúncio: os valores do HUD mudam a
+   * cada quadro, e uma região aria-live atualizada 60×/s é inutilizável.
+   */
+  function anunciar(texto) {
+    if (!texto || texto === ultimoAnuncio) return;
+    const agora = Date.now();
+    if (agora - ultimoAnuncioEm < 1000) return;
+    ultimoAnuncio = texto;
+    ultimoAnuncioEm = agora;
+    ref.sr.textContent = texto;
+  }
+
+  /** Marca as colunas do HUD que têm conteúdo além do visível, para o CSS
+   *  poder mostrar que dá pra rolar. */
+  function marcarRolagemDoHud() {
+    [ref.hudEsq, ref.hudDir].forEach((h) => {
+      if (!h) return;
+      h.classList.toggle('palco-hud-rola', h.scrollHeight > h.clientHeight + 1);
+    });
+  }
+
   // ————— textos dependentes de idioma (reaplicados a cada abertura) —————
 
   function aplicarTextos() {
     ref.titulo.textContent = cfg.titulo();
     ref.fechar.setAttribute('aria-label', tp('voltar'));
     ref.fechar.querySelector('.fechar-texto').textContent = `‹ ${tp('voltar')}`;
+    ref.scrubber.setAttribute('aria-label', tp('linhaDoTempo'));
     ref.selo.textContent = tp('foraDeEscala');
     ref.selo.title = tp('foraDeEscala');
     ref.escala.textContent = tp('verEscalaReal');
@@ -312,6 +486,10 @@ export function criarPalco(cfg) {
     dataInicial = motor.getDataSimulada();
     if (opcoes.data) motor.irParaData(opcoes.data);
 
+    // Inicializa o estado do anúncio
+    ultimoAnuncio = '';
+    ultimoAnuncioEm = 0;
+
     cena = cfg.construirCena({
       motor,
       hudEsq: ref.hudEsq,
@@ -320,6 +498,8 @@ export function criarPalco(cfg) {
       scrubber: ref.scrubber,
       dataInicial: motor.getDataSimulada(),
       tocando: () => tocando && !movimentoReduzido(),
+      anunciar,
+      rodapeAcoes: ref.rodapeAcoes,
     });
 
     // Quem chega por uma data específica (um solstício no painel de Eventos)
@@ -334,25 +514,57 @@ export function criarPalco(cfg) {
       aoRedimensionar: cena.aoRedimensionar,
     });
 
+    // Observador da legenda para sincronizar com aria-valuetext
+    observadorLegenda = new MutationObserver(() => {
+      const t = ref.legenda.textContent || '';
+      if (t && ref.scrubber.getAttribute('aria-valuetext') !== t) {
+        ref.scrubber.setAttribute('aria-valuetext', t);
+      }
+    });
+    observadorLegenda.observe(ref.legenda, { childList: true, characterData: true, subtree: true });
+
     document.addEventListener('keydown', aoTeclar, true);
     overlay.hidden = false;
     document.body.classList.add('com-palco');
     ref.fechar.focus();
     aberto = true;
 
+    // Marca rolagem do HUD e registra listener de resize
+    // Atrasa para permitir recálculo do layout (as medidas não são precisas se
+    // chamado sincronamente).
+    requestAnimationFrame(() => marcarRolagemDoHud());
+    window.addEventListener('resize', aoRedimensionarPalco);
+
     if (opcoes.roteiro === false || jaViu()) encerrarRoteiro();
     else iniciarRoteiro();
+  }
+
+  function aoRedimensionarPalco() {
+    marcarRolagemDoHud();
   }
 
   function fechar() {
     if (!aberto) return;
     document.removeEventListener('keydown', aoTeclar, true);
+    window.removeEventListener('resize', aoRedimensionarPalco);
+
+    // Desliga o observador da legenda
+    if (observadorLegenda) {
+      observadorLegenda.disconnect();
+      observadorLegenda = null;
+    }
+
     motor.desmontarPalco();
 
     // Libera o que a cena alocou. O renderer é compartilhado e sobrevive:
     // vazar aqui degrada o app inteiro, não só este modo (SPEC §2.2).
     if (cena && cena.dispose) cena.dispose();
     cena = null;
+
+    // Limpa o ponto de extensão do rodapé
+    while (ref.rodapeAcoes.firstChild) {
+      ref.rodapeAcoes.removeChild(ref.rodapeAcoes.firstChild);
+    }
 
     // Devolve o simulador exatamente ao estado anterior (SPEC §3): o ISO
     // COMPLETO, não só a data. irParaData usa Date.parse, que aceita a hora —

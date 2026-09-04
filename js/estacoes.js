@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal } from './palco.js?v=6';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=7';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, distanciaSolarUA, declinacaoSolar,
@@ -25,9 +25,12 @@ const UA_KM = 149.6e6;
 const ANO_DIAS = 365.2422;
 
 // Geometria do palco (unidades de cena, fora de escala por projeto)
-const RAIO_ORBITA = 14;
+// A razão órbita:Terra passou de 16,5:1 para 6,25:1; Sol:Terra de 2,6:1 para 1,375:1.
+// Isso torna a Terra visível e seu eixo inclinado legível no didático, sem afetar
+// a proporção Sol—Terra (Sol continua visivelmente maior).
+const RAIO_ORBITA = 10;
 const RAIO_SOL = 2.2;
-const RAIO_TERRA = 0.85;
+const RAIO_TERRA = 1.6;
 
 const TEXTOS = {
   pt: {
@@ -42,6 +45,8 @@ const TEXTOS = {
     luzNota: 'A mesma luz espalhada por {n}× mais área aquece {n}× menos cada ponto.',
     luzPino: 'Sol a pino: máximo de energia por área.',
     luzSemSol: 'Hoje o Sol não nasce nesta latitude.',
+    raioSolarAlt: 'Sol a {z} graus do zênite: a mesma luz se espalha por {e} vezes mais chão.',
+    raioSolarAltNoite: 'O Sol não chega a nascer nesta latitude, nesta data.',
     distTitulo: 'Distância até o Sol',
     distMilhoes: 'milhões de km',
     distPerielio: 'Mais perto do Sol — e é verão no Brasil.',
@@ -49,10 +54,13 @@ const TEXTOS = {
     distNota: 'A distância varia apenas 3,4% ao longo do ano. Não é ela que produz as estações.',
     eixoTitulo: 'Inclinação do eixo',
     eixoNota: 'O eixo aponta sempre para o mesmo ponto do céu, o ano inteiro.',
-    marcoEquinocioMarco: 'Equinócio de março',
-    marcoSolsticioJunho: 'Solstício de junho',
-    marcoEquinocioSetembro: 'Equinócio de setembro',
-    marcoSolsticioDezembro: 'Solstício de dezembro',
+    proximoMarco: 'Próximo marco: {m}, em {d} dias.',
+    proximoMarcoHoje: 'Próximo marco: {m} — é hoje.',
+    marcoEquinocioMarco: 'equinócio de março',
+    marcoSolsticioJunho: 'solstício de junho',
+    marcoEquinocioSetembro: 'equinócio de setembro',
+    marcoSolsticioDezembro: 'solstício de dezembro',
+    anuncioEstado: 'Norte: {n}. Sul: {s}. Dia claro: {h} horas.',
     outroCorpo: 'Em outros planetas',
     escalaLegenda: 'Tamanhos e distância em proporção real. A Terra é o ponto menor.',
     passo1: 'A Terra gira inclinada. Seu eixo forma um ângulo de {obl} graus.',
@@ -73,6 +81,8 @@ const TEXTOS = {
     luzNota: 'The same light spread over {n}× more area warms each point {n}× less.',
     luzPino: 'Sun overhead: maximum energy per area.',
     luzSemSol: 'Today the Sun does not rise at this latitude.',
+    raioSolarAlt: 'Sun {z} degrees from the zenith: the same light spreads over {e} times more ground.',
+    raioSolarAltNoite: 'The Sun does not rise at this latitude on this date.',
     distTitulo: 'Distance to the Sun',
     distMilhoes: 'million km',
     distPerielio: 'Closer to the Sun — and it is summer in the southern hemisphere.',
@@ -80,10 +90,13 @@ const TEXTOS = {
     distNota: 'The distance varies only 3.4% across the year. It is not what produces the seasons.',
     eixoTitulo: 'Axial tilt',
     eixoNota: 'The axis points at the same spot in the sky, all year long.',
+    proximoMarco: 'Next milestone: {m}, in {d} days.',
+    proximoMarcoHoje: 'Next milestone: {m} — it is today.',
     marcoEquinocioMarco: 'March equinox',
     marcoSolsticioJunho: 'June solstice',
     marcoEquinocioSetembro: 'September equinox',
     marcoSolsticioDezembro: 'December solstice',
+    anuncioEstado: 'North: {n}. South: {s}. Daylight: {h} hours.',
     outroCorpo: 'On other planets',
     escalaLegenda: 'Sizes and distance in true proportion. Earth is the smaller dot.',
     passo1: 'Earth spins tilted. Its axis forms an angle of {obl} degrees.',
@@ -104,6 +117,8 @@ const TEXTOS = {
     luzNota: 'La misma luz repartida en {n}× más área calienta {n}× menos cada punto.',
     luzPino: 'Sol en lo alto: máxima energía por área.',
     luzSemSol: 'Hoy el Sol no sale en esta latitud.',
+    raioSolarAlt: 'Sol a {z} grados del cenit: la misma luz se reparte por {e} veces más suelo.',
+    raioSolarAltNoite: 'El Sol no llega a salir en esta latitud, en esta fecha.',
     distTitulo: 'Distancia al Sol',
     distMilhoes: 'millones de km',
     distPerielio: 'Más cerca del Sol — y es verano en el hemisferio sur.',
@@ -111,10 +126,13 @@ const TEXTOS = {
     distNota: 'La distancia varía solo 3,4% a lo largo del año. No es ella la que produce las estaciones.',
     eixoTitulo: 'Inclinación del eje',
     eixoNota: 'El eje apunta siempre al mismo punto del cielo, todo el año.',
-    marcoEquinocioMarco: 'Equinoccio de marzo',
-    marcoSolsticioJunho: 'Solsticio de junio',
-    marcoEquinocioSetembro: 'Equinoccio de septiembre',
-    marcoSolsticioDezembro: 'Solsticio de diciembre',
+    proximoMarco: 'Próximo hito: {m}, en {d} días.',
+    proximoMarcoHoje: 'Próximo hito: {m} — es hoy.',
+    marcoEquinocioMarco: 'equinoccio de marzo',
+    marcoSolsticioJunho: 'solsticio de junio',
+    marcoEquinocioSetembro: 'equinoccio de septiembre',
+    marcoSolsticioDezembro: 'solsticio de diciembre',
+    anuncioEstado: 'Norte: {n}. Sur: {s}. Luz del día: {h} horas.',
     outroCorpo: 'En otros planetas',
     escalaLegenda: 'Tamaños y distancia en proporción real. La Tierra es el punto menor.',
     passo1: 'La Tierra gira inclinada. Su eje forma un ángulo de {obl} grados.',
@@ -166,6 +184,8 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     let latitude = -23;                       // default: Brasil (SPEC §4.3b)
     let dias = diasDesdeJ2000(ctx.dataInicial);
     let escalaRealAtiva = false;
+    let marcoProx = MARCOS[0];                // valor padrão
+    let distDoMarco = 0;                      // distância em graus
     const marcosVistos = new Set();
 
     const scene = new THREE.Scene();
@@ -179,6 +199,18 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     controls.dampingFactor = 0.06;
     controls.minDistance = 4;
     controls.maxDistance = 90;
+
+    // Enquadrar a órbita + Terra na faixa livre: se esse círculo cabe,
+    // nenhum corpo pode cair sob o HUD em nenhum ponto do ano (SPEC §6.2).
+    const RAIO_DA_CENA = RAIO_ORBITA + RAIO_TERRA + 0.5;
+    function enquadrar() {
+      const overlay = document.getElementById('palco-estacoes');
+      if (!overlay || overlay.hidden) return;
+      const area = areaSegura(overlay);
+      camera.position.setLength(distanciaParaEnquadrar(camera, RAIO_DA_CENA, area));
+      camera.updateProjectionMatrix();
+      controls.update();
+    }
 
     // ————— estrelas de fundo —————
     const posEstrelas = new Float32Array(1500 * 3);
@@ -259,13 +291,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     });
 
     // ————— HUD —————
-    const cardNorte = criarCard(ctx.hudEsq);
-    const cardSul = criarCard(ctx.hudEsq);
-    const cardLuz = criarCard(ctx.hudDir);
-    const cardDist = criarCard(ctx.hudDir);
-    const cardEixo = criarCard(ctx.hudDir);
-
-    // Slider de latitude: move os dois hemisférios ao mesmo tempo, simétricos.
+    // Latitude no topo da coluna esquerda (SPEC §3c: é o controle, não só leitura)
     const linhaLat = document.createElement('div');
     linhaLat.className = 'palco-card';
     linhaLat.innerHTML = `
@@ -278,13 +304,35 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     inputLat.setAttribute('aria-label', te('latitude'));
     inputLat.oninput = () => { latitude = -Number(inputLat.value); atualizarHud(); };
 
-    // Extra multiplanetário (SPEC §4.5), fora do fluxo principal.
+    // Dois hemisférios juntos em tela curta (SPEC §3c)
+    const cardDuplo = document.createElement('div');
+    cardDuplo.className = 'palco-card palco-card-duplo';
+    ctx.hudEsq.appendChild(cardDuplo);
+    // Vão ser preenchidos dinamicamente, então criarCard não faz sentido aqui;
+    // montar manualmente para que o pai seja o card-duplo
+    const criarHemisferio = (pai) => {
+      const bloco = document.createElement('div');
+      pai.appendChild(bloco);
+      return {
+        titulo: (() => { const e = document.createElement('p'); e.className = 'palco-card-titulo'; bloco.appendChild(e); return e; })(),
+        valor: (() => { const e = document.createElement('div'); e.className = 'palco-card-valor'; bloco.appendChild(e); return e; })(),
+        nota: (() => { const e = document.createElement('p'); e.className = 'palco-card-nota'; bloco.appendChild(e); return e; })(),
+      };
+    };
+    const cardNorte = criarHemisferio(cardDuplo);
+    const cardSul = criarHemisferio(cardDuplo);
+
+    // HUD direita: luz, distância, eixo
+    const cardLuz = criarCard(ctx.hudDir);
+    const cardDist = criarCard(ctx.hudDir);
+    const cardEixo = criarCard(ctx.hudDir);
+
+    // Extra multiplanetário (SPEC §4.5): botão no rodapé, não na coluna
     const btnExtra = document.createElement('button');
     btnExtra.className = 'palco-btn';
-    btnExtra.style.alignSelf = 'flex-end';
     btnExtra.textContent = te('outroCorpo');
     btnExtra.onclick = trocarCorpo;
-    ctx.hudDir.appendChild(btnExtra);
+    ctx.rodapeAcoes.appendChild(btnExtra);
 
     function criarCard(pai) {
       const el = document.createElement('div');
@@ -335,16 +383,24 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // Terminador de frente para o Sol
       terminador.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().negate().normalize());
 
-      const marcoProx = marcos.reduce((a, b) => {
+      // `db < da`, não `>`. A comparação estava invertida desde a Fase 1 e o
+      // reduce devolvia o marco MAIS DISTANTE: em λ=100° (dez dias depois do
+      // solstício de junho) ele escolhia o solstício de dezembro, a 170°.
+      // Três consequências, todas invisíveis até este modo passar a NOMEAR o
+      // marco na tela: a bolinha destacada na órbita era a do lado oposto, o
+      // texto anunciava o marco errado, e `distDoMarco` — sempre ≥ 90° — nunca
+      // caía abaixo de 2, de modo que o progresso `estacoes-marco` jamais
+      // disparava de dentro do modo.
+      marcoProx = marcos.reduce((a, b) => {
         const da = Math.abs(((lambda - a.lambda + 540) % 360) - 180);
         const db = Math.abs(((lambda - b.lambda + 540) % 360) - 180);
-        return db > da ? b : a;
+        return db < da ? b : a;
       });
       marcos.forEach((m) => { m.mat.opacity = m === marcoProx ? 1 : 0.45; });
 
       // Chegar perto de um marco dentro do modo também conta para a badge —
       // não só clicar no evento correspondente no painel de Eventos.
-      const distDoMarco = Math.abs(((lambda - marcoProx.lambda + 540) % 360) - 180);
+      distDoMarco = Math.abs(((lambda - marcoProx.lambda + 540) % 360) - 180);
       if (distDoMarco < 2 && !marcosVistos.has(marcoProx.id)) {
         marcosVistos.add(marcoProx.id);
         if (aoProgresso) aoProgresso('estacoes-marco', { id: marcoProx.id });
@@ -369,7 +425,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // A causa física: quanto a luz se espalha
       const esp = espalhamentoDaLuz(latitude, dec);
       cardLuz.titulo.textContent = te('luzTitulo');
-      cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec));
+      cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec), esp);
       cardLuz.nota.textContent = !isFinite(esp)
         ? te('luzSemSol')
         : esp < 1.05 ? te('luzPino') : te('luzNota').replace(/\{n\}/g, num(esp, 1));
@@ -390,10 +446,38 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
       cardEixo.titulo.textContent = te('eixoTitulo');
       cardEixo.valor.textContent = `${num(obliquidade, 2)}°`;
-      cardEixo.nota.textContent = corpoAtual === corpoTerra
-        ? te('eixoNota')
+
+      // Mapeia o id do marco para a chave de texto correspondente
+      const CHAVE_DO_MARCO = {
+        'equinocio-marco': 'marcoEquinocioMarco',
+        'solsticio-junho': 'marcoSolsticioJunho',
+        'equinocio-setembro': 'marcoEquinocioSetembro',
+        'solsticio-dezembro': 'marcoSolsticioDezembro',
+      };
+
+      // Calcula a distância em dias e monta o texto do próximo marco
+      const diasDoMarco = Math.round(distDoMarco * (ANO_DIAS / 360));
+      const nomeMarco = te(CHAVE_DO_MARCO[marcoProx.id] || 'marcoEquinocioMarco');
+      const textoMarco = diasDoMarco === 0
+        ? te('proximoMarcoHoje').replace('{m}', nomeMarco)
+        : te('proximoMarco').replace('{m}', nomeMarco).replace('{d}', String(diasDoMarco));
+
+      const notaEixo = corpoAtual === corpoTerra
+        ? `${te('eixoNota')} · ${textoMarco}`
         : `${corpoAtual.nome} — ${te('eixoNota')}`;
+      cardEixo.nota.textContent = notaEixo;
       btnExtra.textContent = `${te('outroCorpo')} (${corpoAtual.nome})`;
+
+      // Anúncio de estado: os hemisférios e a duração do dia
+      const estN = estacaoDoHemisferio(lambda, 'norte');
+      const estS = estacaoDoHemisferio(lambda, 'sul');
+      const horasN = duracaoDoDia(Math.abs(latitude), dec);
+      if (ctx.anunciar) {
+        ctx.anunciar(te('anuncioEstado')
+          .replace('{n}', te(estN))
+          .replace('{s}', te(estS))
+          .replace('{h}', num(horasN, 1)));
+      }
 
       // Enquanto "ver em escala real" está no ar, a legenda pertence a ele: o
       // loop roda a cada frame e sobrescrevia a mensagem antes de alguém ler.
@@ -414,12 +498,19 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     // Diagrama do ângulo da luz: dois feixes de mesma largura, um a pino e
     // outro no ângulo do dia, sobre a mesma superfície.
-    function svgRaioSolar(zenitalGraus) {
+    function svgRaioSolar(zenitalGraus, espalhamento) {
       const z = Math.min(80, Math.max(0, zenitalGraus));
       const largura = 26;
       const espalhada = largura / Math.cos(z * RAD);
       const cx = 110;
-      return `<svg viewBox="0 0 220 96" width="100%" height="80" role="img" aria-hidden="true">
+      // Monta o aria-label descritivo. Se o espalhamento for Infinity (Sol não nasce),
+      // usa a chave alternativa.
+      const ariaLabel = !isFinite(espalhamento)
+        ? te('raioSolarAltNoite')
+        : te('raioSolarAlt')
+          .replace('{z}', num(z, 0))
+          .replace('{e}', num(espalhamento, 1));
+      return `<svg viewBox="0 0 220 96" width="100%" height="80" role="img" aria-label="${ariaLabel}">
         <line x1="10" y1="80" x2="210" y2="80" stroke="#4a6fa8" stroke-width="2"/>
         <rect x="20" y="8" width="${largura}" height="60" fill="#ffd479" opacity="0.28"/>
         <rect x="20" y="72" width="${largura}" height="8" fill="#ffd479"/>
@@ -469,13 +560,29 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       [ctx.hudEsq, ctx.hudDir].forEach((h) => { while (h.firstChild) h.removeChild(h.firstChild); });
     }
 
+    // Adiado por dois RAF: o overlay ainda está hidden e os cards ainda não
+    // têm texto quando construirCena roda, e medir aí devolveria uma área
+    // segura falsa.
+    //
+    // Fica AQUI, na montagem, e não em `aoEntrarSandbox`. O sandbox só começa
+    // quando o roteiro guiado termina — então enquadrar de lá deixava a
+    // PRIMEIRA abertura, que é a que traz o roteiro de 5 passos, com a cena
+    // sem enquadramento nenhum. É a mesma disciplina de `mares.js`.
+    requestAnimationFrame(() => requestAnimationFrame(enquadrar));
+
     return {
       scene, camera, atualizar, dispose, escalaReal, aoScrubber, irParaLambda,
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
+        enquadrar();
       },
-      aoEntrarSandbox: () => { if (aoProgresso) aoProgresso('estacoes-abriu'); },
+      aoEntrarSandbox: () => {
+        // Reenquadra ao sair do roteiro: o painel do roteiro não entra na área
+        // segura, mas os cards do HUD podem ter mudado de altura no caminho.
+        requestAnimationFrame(enquadrar);
+        if (aoProgresso) aoProgresso('estacoes-abriu');
+      },
       _marcos: marcos,
     };
   }

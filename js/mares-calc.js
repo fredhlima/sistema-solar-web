@@ -131,3 +131,64 @@ export function formatarHoras(horas) {
   const m = Math.round((horas - h) * 60);
   return `${h}h${String(m).padStart(2, '0')}`;
 }
+
+// —— Classificação de maré ——
+
+/**
+ * Classifica a maré a partir da MESMA faixa que nomeia a fase da Lua, para que
+ * os dois rótulos nunca se contradigam na tela. Classificar por limiar de
+ * amplitude (o que se fazia antes) usava uma régua diferente da fase e
+ * divergia em 12,3% do mês sinódico.
+ */
+export function classificarMare(n) {
+  const fase = nomeDaFase(n);
+  if (fase === 'nova' || fase === 'cheia') return 'sizigia';
+  if (fase === 'quartoCrescente' || fase === 'quartoMinguante') return 'quadratura';
+  return 'intermediaria';
+}
+
+// —— Escala de força ancorada na maré mais fraca ——
+
+/**
+ * Amplitude da maré de quadratura: os dois vetores de ângulo duplo ficam a
+ * 180° um do outro, então a resultante é a DIFERENÇA das amplitudes.
+ * Derivado, nunca escrito à mão.
+ */
+export const AMP_QUADRATURA = Math.abs(A_LUA - A_SOL);   // 0.5404
+
+/** Idem para a sizígia: os dois vetores alinhados, resultante = soma. */
+export const AMP_SIZIGIA = A_LUA + A_SOL;                // 1.4596
+
+/**
+ * A amplitude atual expressa como múltiplo da maré mais fraca do mês.
+ * 1,00 na quadratura e 2,70 na sizígia — o "2,7×" é o número que o modo
+ * existe para tornar memorável.
+ */
+export function forcaRelativaAMinima(amplitude) {
+  return amplitude / AMP_QUADRATURA;
+}
+
+// —— Curva da praia ——
+
+/**
+ * Altura relativa da maré na praia ao longo de uma janela de tempo centrada
+ * em `n` (dias desde J2000). Devolve `passos + 1` pontos.
+ *
+ * @param {number} n       instante central, em dias desde J2000
+ * @param {number} horas   largura total da janela, em horas
+ * @param {number} passos  número de subdivisões
+ * @returns {{h: number, altura: number}[]}  `h` em horas relativas ao centro
+ *          (de -horas/2 a +horas/2), `altura` a altura relativa da maré
+ */
+export function curvaDaPraia(n, horas = 26, passos = 96) {
+  const pontos = [];
+  for (let i = 0; i <= passos; i++) {
+    const dh = (i / passos) * horas - horas / 2;
+    const nn = n + dh / 24;
+    const { amplitude, eixoGraus } = mareCombinada(longitudeLunar(nn), longitudeSolar(nn));
+    const lon = ((nn * 360) / (DIA_SIDERAL_HORAS / 24)) % 360;
+    const psi = ((lon - eixoGraus) % 360 + 360) % 360;
+    pontos.push({ h: dh, altura: alturaRelativa(psi, amplitude) });
+  }
+  return pontos;
+}

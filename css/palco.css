@@ -64,6 +64,52 @@ body.com-palco #mdock { display: none !important; }
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
 }
 
+/* O botão de fechar contava só com a classe compartilhada
+   `.botao-fechar-overlay`, que em estilos.css existe apenas dentro de
+   `@media (max-width: 768px)` e de `body.modo-dock`. O palco nunca roda
+   abaixo de 768px — no celular o retrato é bloqueado e a paisagem passa de
+   768 —, então no desktop ele caía no estilo PADRÃO DO NAVEGADOR: caixa
+   cinza de 23×26 px, borda `outset` preta e ✕ preto sobre a cena escura.
+   Além de destoar, era menos da metade dos 44px de alvo de toque que a
+   SPEC §7.3 exige e que todo o resto do palco respeita. */
+.palco-fechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  background: rgba(11, 16, 28, 0.7);
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  border-radius: 999px;
+  color: #e8edf7;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.palco-fechar:hover {
+  background: rgba(120, 160, 255, 0.22);
+  border-color: rgba(120, 160, 255, 0.4);
+}
+
+.palco-fechar:focus-visible {
+  outline: 2px solid #7aa2ff;
+  outline-offset: 2px;
+}
+
+/* No dock a regra compartilhada prende o botão no topo-ESQUERDA e troca o ✕
+   por "‹ Voltar" — bem em cima do título do palco, que já mora ali. O palco
+   tem barra de topo própria, então aqui ele volta ao fluxo, à direita. */
+body.modo-dock .palco-fechar {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+}
+
 /* ————— HUD lateral ————— */
 
 .palco-hud {
@@ -78,6 +124,12 @@ body.com-palco #mdock { display: none !important; }
 
 .palco-hud-esq { grid-column: 1; justify-self: start; }
 .palco-hud-dir { grid-column: 2; justify-self: end; align-items: flex-end; }
+
+/* Esmaecimento na borda inferior quando ainda há card abaixo do visível. */
+.palco-hud-rola {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent 100%);
+}
 
 /* Fundo semi-opaco atrás de texto sobre a cena 3D: sem isso o contraste
    depende do que estiver renderizado atrás, e AA deixa de ser garantido. */
@@ -115,6 +167,35 @@ body.com-palco #mdock { display: none !important; }
 .palco-card-alerta {
   border-color: rgba(255, 196, 92, 0.5);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 196, 92, 0.25);
+}
+
+.palco-card-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #93a0b8;
+  margin: 2px 0 4px;
+  line-height: 1.25;
+}
+
+.palco-legenda-cores {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #cbd5e8;
+}
+
+.palco-legenda-cores span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.palco-legenda-cores i {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
 }
 
 .palco-card svg { display: block; max-width: 100%; }
@@ -185,6 +266,24 @@ body.com-palco #mdock { display: none !important; }
   color: #cbd5e8;
 }
 
+.palco-rodape-acoes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ————— acessibilidade: região aria-live ————— */
+
+.palco-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ————— roteiro guiado ————— */
 
 .palco-roteiro {
@@ -246,10 +345,30 @@ body.com-palco #mdock { display: none !important; }
 /* ————— telas curtas / dock em paisagem (SPEC §7.3) —————
    O centro fica livre para a cena: HUD nas laterais, nada no meio. */
 
+/* Dois hemisférios lado a lado em tela curta (SPEC §3c). Lado a lado é o
+   ponto: a lição é que os dois hemisférios vivem estações OPOSTAS, e a
+   comparação se faz melhor em paralelo que empilhada. */
+.palco-card-duplo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  max-width: 260px;
+}
+
+/* "Hemisfério Norte" quebra em duas linhas e "Hemisfério Sul" não, o que
+   empurrava o valor de uma coluna para baixo do da outra. Reservar duas
+   linhas de título alinha os dois valores sem depender do idioma — em en/es
+   os nomes têm comprimentos diferentes dos do pt. */
+.palco-card-duplo .palco-card-titulo {
+  min-height: 2.2em;
+}
+
 @media (max-height: 520px) {
   .palco-overlay { gap: 8px; font-size: 12px; }
   .palco-titulo { font-size: 15px; }
   .palco-card { max-width: 200px; padding: 8px 10px; }
+  .palco-card-duplo { padding: 8px 10px; max-width: 200px; }
   .palco-card-valor { font-size: 16px; }
   .palco-roteiro { margin-bottom: 8px; padding: 12px 14px; }
   .palco-roteiro-texto { font-size: 14px; margin-bottom: 8px; }
