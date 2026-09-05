@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=8';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=9';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -86,9 +86,15 @@ const TEXTOS = {
     descendo: 'Vazando',
     ritmoTitulo: 'Ritmo',
     ritmoNota: 'Entre uma maré alta e a seguinte passam {i}. Não são 12 h porque, enquanto a Terra gira, a Lua também avança — a Terra precisa girar um pouco mais para reencontrá-la.',
-    saibaMais: 'Saiba mais: as forças',
-    saibaMenos: 'Ocultar as forças',
+    saibaMais: 'Por que dois bojos?',
+    saibaMenos: 'Ocultar a explicação',
     forcasNota: 'Não é a gravidade da Lua que levanta a água: é a DIFERENÇA dela entre o lado próximo, o centro e o lado distante da Terra. Essa diferença cai com o cubo da distância. Por isso a Lua, muito menor, puxa a maré com o dobro da força do Sol.',
+    puxaoPerto: 'perto',
+    puxaoCentro: 'centro',
+    puxaoLonge: 'longe',
+    bojoOpostoTitulo: 'O bojo do lado oposto',
+    bojoOpostoCurto: 'A Lua puxa o lado PRÓXIMO mais forte que o centro, e o centro mais forte que o lado DISTANTE.',
+    bojoOpostoLongo: 'Do lado próximo, a água é puxada para longe da Terra. Do lado distante acontece o contrário: a TERRA é puxada para longe da água, que fica para trás. Nos dois casos sobra água nas pontas — dois bojos, não um. Não é a Lua levantando o mar dos dois lados: é ela esticando a Terra inteira.',
     razaoNota: 'Maré da Lua: {r}× a do Sol',
     escalaLegenda: 'Em escala real o bojo tem cerca de 0,5 m numa Terra de 12.742 km.',
     escalaNota: 'O mar sobe menos que a sua altura — e ainda assim move oceanos inteiros.',
@@ -125,9 +131,15 @@ const TEXTOS = {
     descendo: 'Falling',
     ritmoTitulo: 'Rhythm',
     ritmoNota: 'Between one high tide and the next, {i} go by. Not 12 h, because while Earth turns the Moon also moves ahead — Earth has to turn a little further to meet it again.',
-    saibaMais: 'Learn more: the forces',
-    saibaMenos: 'Hide the forces',
+    saibaMais: 'Why two bulges?',
+    saibaMenos: 'Hide the explanation',
     forcasNota: 'It is not the Moon’s gravity that lifts the water: it is the DIFFERENCE in it between the near side, the centre and the far side of Earth. That difference falls with the cube of distance. This is why the Moon, far smaller, pulls the tide twice as strongly as the Sun.',
+    puxaoPerto: 'near',
+    puxaoCentro: 'centre',
+    puxaoLonge: 'far',
+    bojoOpostoTitulo: 'The bulge on the far side',
+    bojoOpostoCurto: 'The Moon pulls the NEAR side harder than the centre, and the centre harder than the FAR side.',
+    bojoOpostoLongo: 'On the near side, the water is pulled away from Earth. On the far side the opposite happens: the EARTH is pulled away from the water, which is left behind. Either way water piles up at both ends — two bulges, not one. It is not the Moon lifting the sea on both sides: it is the Moon stretching the whole Earth.',
     razaoNota: 'Moon’s tide: {r}× the Sun’s',
     escalaLegenda: 'At true scale the bulge is about 0.5 m on an Earth 12,742 km across.',
     escalaNota: 'The sea rises less than your own height — and still moves entire oceans.',
@@ -164,9 +176,15 @@ const TEXTOS = {
     descendo: 'Bajando',
     ritmoTitulo: 'Ritmo',
     ritmoNota: 'Entre una marea alta y la siguiente pasan {i}. No son 12 h porque, mientras la Tierra gira, la Luna también avanza — la Tierra debe girar un poco más para reencontrarla.',
-    saibaMais: 'Saber más: las fuerzas',
-    saibaMenos: 'Ocultar las fuerzas',
+    saibaMais: '¿Por qué dos abultamientos?',
+    saibaMenos: 'Ocultar la explicación',
     forcasNota: 'No es la gravedad de la Luna la que levanta el agua: es la DIFERENCIA de ella entre el lado cercano, el centro y el lado lejano de la Tierra. Esa diferencia cae con el cubo de la distancia. Por eso la Luna, mucho menor, tira de la marea con el doble de fuerza que el Sol.',
+    puxaoPerto: 'cerca',
+    puxaoCentro: 'centro',
+    puxaoLonge: 'lejos',
+    bojoOpostoTitulo: 'El abultamiento del lado opuesto',
+    bojoOpostoCurto: 'La Luna tira del lado CERCANO más fuerte que del centro, y del centro más que del lado LEJANO.',
+    bojoOpostoLongo: 'En el lado cercano, el agua es atraída lejos de la Tierra. En el lado lejano pasa lo contrario: es la TIERRA la que es atraída lejos del agua, que se queda atrás. En ambos casos sobra agua en las puntas — dos abultamientos, no uno. No es la Luna levantando el mar de los dos lados: es ella estirando la Tierra entera.',
     razaoNota: 'Marea de la Luna: {r}× la del Sol',
     escalaLegenda: 'En escala real el abultamiento mide unos 0,5 m en una Tierra de 12.742 km.',
     escalaNota: 'El mar sube menos que tu propia altura — y aun así mueve océanos enteros.',
@@ -379,7 +397,24 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       atualizarHud();
     };
     ctx.rodapeAcoes.appendChild(btnForcas);
-    const cardForcas = criarCard(ctx.hudDir);
+    // A explicação NÃO é um card de coluna: com diagrama e texto ela passa de
+    // 330px e era sempre a última da pilha, então cortava — justamente a
+    // resposta que a pessoa acabou de pedir. Vira painel central sobre a cena,
+    // como o roteiro guiado, onde há espaço. Mantém a classe `palco-card` para
+    // herdar o fundo e o contraste (e para os testes acharem por ela).
+    const cardForcas = (() => {
+      const el = document.createElement('div');
+      el.className = 'palco-card palco-explicacao';
+      el.innerHTML = '<p class="palco-card-titulo"></p><div class="palco-card-valor"></div><p class="palco-card-nota"></p>';
+      (document.getElementById('palco-mares') || document.body).appendChild(el);
+      descartaveis.push({ dispose: () => el.remove() });
+      return {
+        raiz: el,
+        titulo: el.querySelector('.palco-card-titulo'),
+        valor: el.querySelector('.palco-card-valor'),
+        nota: el.querySelector('.palco-card-nota'),
+      };
+    })();
     cardForcas.raiz.hidden = true;
 
     function criarCard(pai) {
@@ -498,6 +533,39 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     // Régua horizontal mostrando a escala de força da maré de quadratura (morta)
     // até sizígia (viva), com o marcador na posição atual.
+    /**
+     * Diagrama da resposta: por que há bojo do lado oposto.
+     *
+     * Duas linhas. Em cima, os TRÊS puxões da Lua sobre pontos diferentes da
+     * Terra, com comprimentos decrescentes — perto, centro, longe. Embaixo, o
+     * resultado: a Terra esticada nas duas pontas. Separar as duas linhas foi
+     * deliberado; desenhar as setas por cima do globo deixava tudo ilegível
+     * num card de 260px.
+     */
+    function svgTresPuxoes() {
+      const puxoes = [
+        { x: 8, comp: 30, rot: tm('puxaoPerto') },
+        { x: 8, comp: 21, rot: tm('puxaoCentro') },
+        { x: 8, comp: 13, rot: tm('puxaoLonge') },
+      ];
+      const linhas = puxoes.map((s, k) => {
+        const y = 10 + k * 13;
+        return `<line x1="${s.x}" y1="${y}" x2="${s.x + s.comp}" y2="${y}" stroke="#9ec5ff" stroke-width="2.2"/>
+          <path d="M${s.x + s.comp} ${y} l-5 -3.5 v7 z" fill="#9ec5ff"/>
+          <text x="${s.x + 36}" y="${y + 3}" font-size="8" fill="#93a0b8">${s.rot}</text>`;
+      }).join('');
+      return `<svg viewBox="0 0 120 82" width="100%" height="82" role="img"
+        aria-label="${tm('bojoOpostoCurto')}">
+        ${linhas}
+        <circle cx="96" cy="23" r="6" fill="#cbd5e8"/>
+        <text x="96" y="40" font-size="8" fill="#93a0b8" text-anchor="middle">${tm('legendaLua')}</text>
+        <line x1="6" y1="52" x2="114" y2="52" stroke="#25324a" stroke-width="1"/>
+        <ellipse cx="46" cy="67" rx="26" ry="12" fill="none" stroke="#5fb8ff" stroke-width="1.6"/>
+        <circle cx="46" cy="67" r="11" fill="none" stroke="#4a6fa8" stroke-width="1.4"/>
+        <circle cx="100" cy="67" r="5" fill="#cbd5e8"/>
+      </svg>`;
+    }
+
     function svgRegua(amplitude) {
       const t = Math.max(0, Math.min(1, (forcaRelativaAMinima(amplitude) - 1) / (AMP_SIZIGIA / AMP_QUADRATURA - 1)));
       const x = 6 + t * 108;
@@ -641,9 +709,19 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       // Saiba mais
       btnForcas.textContent = mostrarForcas ? tm('saibaMenos') : tm('saibaMais');
-      cardForcas.titulo.textContent = tm('saibaMais');
-      cardForcas.valor.textContent = tm('razaoNota').replace('{r}', num(A_LUA / A_SOL, 1));
-      cardForcas.nota.textContent = tm('forcasNota');
+      cardForcas.titulo.textContent = tm('bojoOpostoTitulo');
+      // O diagrama é a resposta; o texto só a põe em palavras. Três setas de
+      // comprimentos diferentes sobre a Terra e a Lua mostram o mecanismo
+      // inteiro: o puxão cai com a distância, e é a DIFERENÇA entre eles que
+      // sobra. Sem isto, "o outro bojo" ficava sendo uma afirmação a decorar.
+      cardForcas.valor.innerHTML = svgTresPuxoes()
+        + `<div class="palco-card-sub">${tm('bojoOpostoCurto')}</div>`
+        + `<div style="font-size:15px;font-weight:600">${tm('razaoNota').replace('{r}', num(A_LUA / A_SOL, 1))}</div>`;
+      // O essencial — diagrama + frase curta — fica sempre. Os dois parágrafos
+      // de aprofundamento são `palco-nota-longa`: somem em tela baixa, onde
+      // senão o card corta justamente no meio da resposta.
+      cardForcas.nota.innerHTML = `<p style="margin:0 0 6px">${tm('bojoOpostoLongo')}</p>`
+        + `<p style="margin:0">${tm('forcasNota')}</p>`;
 
       // Ver comentário equivalente em estacoes.js: com "ver em escala real"
       // ligado, a legenda é dele, não da data.

@@ -195,21 +195,32 @@ export function raioSeguro(camera, direcao, raioDesejado, area) {
  * ~18 iterações uma vez por abertura, e não tem como errar o espaço de
  * coordenadas — que é o erro clássico deste projeto.
  */
-export function distanciaParaEnquadrar(camera, raioMundo, area, amostras = 32) {
+export function distanciaParaEnquadrar(camera, raioMundo, area, amostras = 32, centro = null) {
   if (!(area.xMax > area.xMin) || !(area.yMax > area.yMin)) {
     return camera.position.length();          // área degenerada: não mexe
   }
 
-  const direcao = camera.position.clone().normalize();
+  // Quando o círculo está fora da origem, a câmera também tem de ser deslocada
+  // A PARTIR DELE — senão a busca mede uma geometria que não é a que vai
+  // existir, e o enquadramento muda sozinho conforme o alvo se move.
+  const base = centro || new THREE.Vector3();
+  const direcao = camera.position.clone().sub(base).normalize();
   const original = camera.position.clone();
   const ponto = new THREE.Vector3();
 
   const cabe = (distancia) => {
-    camera.position.copy(direcao).multiplyScalar(distancia);
+    camera.position.copy(base).addScaledVector(direcao, distancia);
     camera.updateMatrixWorld(true);
     for (let i = 0; i < amostras; i++) {
       const a = (i / amostras) * Math.PI * 2;
-      ponto.set(Math.cos(a) * raioMundo, 0, Math.sin(a) * raioMundo).project(camera);
+      ponto.set(Math.cos(a) * raioMundo, 0, Math.sin(a) * raioMundo);
+      // O círculo pode não estar na origem: quando a câmera olha para um corpo
+      // em órbita, o que precisa caber é um círculo em volta DELE. Enquadrar um
+      // círculo da origem com a câmera apontada para outro ponto afasta a
+      // câmera muito além do necessário — o erro custou 40% do tamanho da Terra
+      // no modo Estações antes de ser medido.
+      if (centro) ponto.add(centro);
+      ponto.project(camera);
       if (ponto.x < area.xMin || ponto.x > area.xMax
         || ponto.y < area.yMin || ponto.y > area.yMax) return false;
     }

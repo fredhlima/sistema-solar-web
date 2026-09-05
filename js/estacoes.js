@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=8';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=9';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, distanciaSolarUA, declinacaoSolar,
@@ -224,9 +224,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
   // Corpos oferecidos no extra "e nos outros planetas?" (SPEC §4.5). A
   // obliquidade vem de dados.js — nenhum dado novo entra por aqui.
   // Agora com os 8 planetas em ordem: mercurio, venus, terra, marte, jupiter, saturno, urano, netuno
-  const CORPOS_EXTRA = ['mercurio', 'venus', 'terra', 'marte', 'jupiter', 'saturno', 'urano', 'netuno']
-    .map((id) => corpos.find((c) => c.id === id))
-    .filter(Boolean);
 
   function construirCena(ctx) {
     const descartaveis = [];
@@ -246,7 +243,11 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     let marcoProx = MARCOS[0];                // valor padrão
     let distDoMarco = 0;                      // distância em graus
     const marcosVistos = new Set();
-    let seguindo = false;                     // se a câmera está seguindo o planeta
+    // A Terra é o sujeito do modo, não o Sol: a câmera nasce centrada NELA.
+    // Antes o alvo era a origem, e o planeta ficava correndo pela borda de uma
+    // cena cujo centro era o Sol — o oposto do que o modo quer contar. Quem
+    // preferir a vista do sistema inteiro toca no vazio e a câmera solta.
+    let seguindo = true;
     const listanersDosque = [];               // registra listeners para remover em dispose()
     const ORIGEM = new THREE.Vector3();       // alvo de câmera quando não está seguindo
 
@@ -312,13 +313,36 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
      * seletor, é quem manda no ajuste; a Terra fica exatamente onde estava.
      */
     const orbitaDoCorpo = () => RAIO_ORBITA + raioDeCena(corpoAtual) - RAIO_TERRA;
-    const raioDaCena = () => orbitaDoCorpo() + raioDeCena(corpoAtual) + 0.5;
+    // Com a câmera centrada na Terra, o que precisa caber não é a órbita: é a
+    // distância até o Sol mais o disco dele, porque o Sol passa a ser o objeto
+    // mais distante do centro da tela. Solta (alvo na origem), volta a ser a
+    // órbita inteira.
+    // Centrada na Terra, o círculo que precisa caber é em volta DELA e tem o
+    // raio da distância até o Sol mais o disco dele — o Sol é o objeto mais
+    // longe do centro da tela. Solta, volta a ser a órbita inteira na origem.
+    const raioDaCena = () => (seguindo
+      ? orbitaDoCorpo() + RAIO_SOL
+      : orbitaDoCorpo() + raioDeCena(corpoAtual) + 0.5);
     function enquadrar() {
       const overlay = document.getElementById('palco-estacoes');
       if (!overlay || overlay.hidden) return;
       const area = areaSegura(overlay);
-      camera.position.setLength(distanciaParaEnquadrar(camera, raioDaCena(), area));
+      // A posição vem do CÁLCULO, não de `grupoTerra.position`: no primeiro
+      // enquadramento o laço ainda não rodou e o grupo está na origem, o que
+      // dava uma distância diferente durante o roteiro guiado e um salto
+      // quando ele terminava.
+      const centro = seguindo ? posicaoDaTerra(dias).pos : null;
+      const dist = distanciaParaEnquadrar(camera, raioDaCena(), area, 32, centro);
+      if (centro) {
+        const dir = camera.position.clone().sub(centro).normalize();
+        camera.position.copy(centro).addScaledVector(dir, dist);
+      } else {
+        camera.position.setLength(dist);
+      }
       camera.updateProjectionMatrix();
+      // Sem isto o alvo começa na origem e o lerp leva ~1 s para chegar na
+      // Terra: a primeira coisa que a pessoa vê é a cena deslizando.
+      if (seguindo) controls.target.copy(grupoTerra.position);
       controls.update();
     }
 
@@ -490,21 +514,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     };
     ctx.rodapeAcoes.appendChild(btnVerDia);
 
-    // Extra multiplanetário (SPEC §4.5): seletor de planeta no rodapé, não na coluna
-    const selectPlaneta = document.createElement('select');
-    selectPlaneta.className = 'palco-select';
-    selectPlaneta.setAttribute('aria-label', te('outroCorpo'));
-    // Popula com os 8 planetas
-    CORPOS_EXTRA.forEach((corpo) => {
-      const opt = document.createElement('option');
-      opt.value = corpo.id;
-      opt.textContent = corpo.nome || corpo.id;
-      selectPlaneta.appendChild(opt);
-    });
-    selectPlaneta.value = corpoAtual.id;
-    selectPlaneta.onchange = (evt) => selecionarCorpo(evt.target.value);
-    ctx.rodapeAcoes.appendChild(selectPlaneta);
-
     function criarCard(pai) {
       const el = document.createElement('div');
       el.className = 'palco-card';
@@ -516,25 +525,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
         valor: el.querySelector('.palco-card-valor'),
         nota: el.querySelector('.palco-card-nota'),
       };
-    }
-
-    function selecionarCorpo(id) {
-      corpoAtual = CORPOS_EXTRA.find((c) => c.id === id) || corpoAtual;
-      obliquidade = corpoAtual.inclinacaoEixoGraus || 0;   // sempre de dados.js
-      // Fator de compressão para este corpo (raiz cúbica do raio real)
-      fatorCorpo = raioDeCena(corpoAtual) / RAIO_TERRA;
-      grupoTerra.scale.setScalar(fatorCorpo);
-      // O corpo mudou: a textura tem de acompanhar, senão Urano fica com a
-      // cara da Terra.
-      matTerra.map = reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoAtual)));
-      matTerra.needsUpdate = true;
-      aplicarTexturaReal(motor.renderer, corpoAtual.id, matTerra, reg);
-      // Nuvens só aparecem na Terra
-      nuvens.visible = (corpoAtual.id === 'terra');
-      // Atualiza o valor do select para refletir o corpo atual
-      selectPlaneta.value = corpoAtual.id;
-      enquadrar();
-      atualizarHud();
     }
 
     // ————— atualização por frame —————
@@ -584,8 +574,15 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       terminador.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().negate().normalize());
 
       // Câmera segue o planeta com lerp suave (independente de FPS)
+      // A câmera ACOMPANHA o alvo: aplica-se a ela o mesmo deslocamento do
+      // alvo, preservando o afastamento e o ângulo que a pessoa escolheu. Sem
+      // isso a câmera fica presa no lugar enquanto a Terra corre a órbita, e o
+      // planeta muda de tamanho ao longo do ano — além de o enquadramento
+      // calculado na abertura deixar de valer meia órbita depois.
       const alvo = seguindo ? grupoTerra.position : ORIGEM;
+      const alvoAnterior = controls.target.clone();
       controls.target.lerp(alvo, 1 - Math.pow(0.001, dt));
+      camera.position.add(controls.target.clone().sub(alvoAnterior));
       controls.update();
 
       // `db < da`, não `>`. A comparação estava invertida desde a Fase 1 e o

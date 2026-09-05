@@ -296,6 +296,27 @@ body.modo-dock .palco-fechar {
   white-space: nowrap;
 }
 
+/* Painel da explicação: mesmo lugar e mesmo peso do roteiro guiado — centro da
+   cena, sobre ela. Um card de coluna não serve para conteúdo com diagrama:
+   passava de 330px e era sempre o último da pilha, então cortava. */
+.palco-explicacao {
+  /* Fora do grid, de propósito: como item de grid o `max-height: 100%`
+     resolvia contra uma altura que não é a da faixa livre e o painel saía com
+     37px de altura para 376px de conteúdo. Posicionado contra o overlay, que é
+     `position: fixed`, o cálculo é determinístico. */
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100% - 32px));
+  max-height: calc(100% - 150px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  max-width: none;
+  z-index: 2;
+}
+
 /* ————— roteiro guiado ————— */
 
 .palco-roteiro {
