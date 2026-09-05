@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=19';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=20';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, distanciaSolarUA, declinacaoSolar,
@@ -47,9 +47,21 @@ const RAIO_TERRA = 1.6;
  */
 export const GEOMETRIA = { RAIO_ORBITA, RAIO_SOL, RAIO_TERRA };
 
+// Selo do módulo no cabeçalho: a luz do Sol chegando num planeta de eixo
+// inclinado — a causa das estações num desenho só. As duas tentativas
+// anteriores falharam em 20px: o eixo atravessando o disco lia como o símbolo
+// de "proibido", e a órbita com o Sol no meio virava um olho.
+const ICONE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">'
+  + '<circle cx="13" cy="12.5" r="5.6" fill="none" stroke="currentColor" stroke-width="1.6"/>'
+  + '<path d="M15.2 7.2 16.3 4.6M10.8 17.8 9.7 20.4" stroke="currentColor"'
+  + ' stroke-width="1.6" stroke-linecap="round"/>'
+  + '<path d="M2.4 9.5h3.2M2.4 12.5h3.2M2.4 15.5h3.2" stroke="currentColor"'
+  + ' stroke-width="1.5" stroke-linecap="round" opacity=".75"/></svg>';
+
 const TEXTOS = {
   pt: {
     titulo: 'Estações do Ano',
+    subtitulo: 'Por que existe verão e inverno',
     norte: 'Hemisfério Norte',
     sul: 'Hemisfério Sul',
     primavera: 'Primavera', verao: 'Verão', outono: 'Outono', inverno: 'Inverno',
@@ -96,6 +108,7 @@ const TEXTOS = {
   },
   en: {
     titulo: 'Seasons of the Year',
+    subtitulo: 'Why summer and winter exist',
     norte: 'Northern Hemisphere',
     sul: 'Southern Hemisphere',
     primavera: 'Spring', verao: 'Summer', outono: 'Autumn', inverno: 'Winter',
@@ -142,6 +155,7 @@ const TEXTOS = {
   },
   es: {
     titulo: 'Estaciones del Año',
+    subtitulo: 'Por qué existen el verano y el invierno',
     norte: 'Hemisferio Norte',
     sul: 'Hemisferio Sur',
     primavera: 'Primavera', verao: 'Verano', outono: 'Otoño', inverno: 'Invierno',
@@ -243,13 +257,15 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     let marcoProx = MARCOS[0];                // valor padrão
     let distDoMarco = 0;                      // distância em graus
     const marcosVistos = new Set();
-    // A Terra é o sujeito do modo, não o Sol: a câmera nasce centrada NELA.
-    // Antes o alvo era a origem, e o planeta ficava correndo pela borda de uma
-    // cena cujo centro era o Sol — o oposto do que o modo quer contar. Quem
-    // preferir a vista do sistema inteiro toca no vazio e a câmera solta.
-    let seguindo = true;
-    const listanersDosque = [];               // registra listeners para remover em dispose()
-    const ORIGEM = new THREE.Vector3();       // alvo de câmera quando não está seguindo
+    // A Terra é o sujeito do modo, não o Sol, e a câmera fica SEMPRE centrada
+    // nela — não há mais o modo "solto", com o alvo na origem.
+    //
+    // Existia um alternador: tocar na Terra prendia a câmera, tocar no vazio
+    // soltava. No celular ele virava um defeito. O `pointerdown` que abre uma
+    // pinça de zoom quase nunca acerta o disco da Terra, que é pequeno, então
+    // o gesto de dar zoom desprendia a câmera sem que ninguém pedisse: a cena
+    // deslizava sozinha para recentrar no Sol no meio da pinça. Era o "fica
+    // pulando de maneira involuntária" que o Fred descreveu.
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05070f);
@@ -265,41 +281,10 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     controls.dampingFactor = 0.06;
     controls.minDistance = 4;
     controls.maxDistance = 90;
-
-    // Raycaster para detectar clique no planeta
-    const raycaster = new THREE.Raycaster();
-    const ndc = new THREE.Vector2();
-    let posicaoPointerDown = null;
-    // Listener pointerdown: registra posição e testa se acertou o planeta
-    const onPointerDown = (evt) => {
-      const rect = motor.canvas.getBoundingClientRect();
-      posicaoPointerDown = { x: evt.clientX, y: evt.clientY };
-      ndc.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
-      ndc.y = -((evt.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(ndc, camera);
-      const intersecoes = raycaster.intersectObject(terra, false);
-      seguindo = intersecoes.length > 0;
-    };
-    // Listener pointerup: valida se foi toque real (não arrasto > 6px)
-    const onPointerUp = (evt) => {
-      if (!posicaoPointerDown || !seguindo) {
-        seguindo = false;
-        posicaoPointerDown = null;
-        return;
-      }
-      const distancia = Math.sqrt(
-        Math.pow(evt.clientX - posicaoPointerDown.x, 2) +
-        Math.pow(evt.clientY - posicaoPointerDown.y, 2)
-      );
-      if (distancia > 6) {
-        seguindo = false;
-      }
-      posicaoPointerDown = null;
-    };
-    motor.canvas.addEventListener('pointerdown', onPointerDown);
-    motor.canvas.addEventListener('pointerup', onPointerUp);
-    listanersDosque.push({ el: motor.canvas, tipo: 'pointerdown', fn: onPointerDown });
-    listanersDosque.push({ el: motor.canvas, tipo: 'pointerup', fn: onPointerUp });
+    // Sem arrastar o alvo: o pan tiraria a Terra do centro e o laço a puxaria
+    // de volta no quadro seguinte — a câmera brigando com o dedo. Girar e dar
+    // zoom continuam livres. Mesma decisão do modo Marés.
+    controls.enablePan = false;
 
     // Enquadrar a órbita + corpo na faixa livre: se esse círculo cabe,
     // nenhum corpo pode cair sob o HUD em nenhum ponto do ano (SPEC §6.2).
@@ -313,16 +298,10 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
      * seletor, é quem manda no ajuste; a Terra fica exatamente onde estava.
      */
     const orbitaDoCorpo = () => RAIO_ORBITA + raioDeCena(corpoAtual) - RAIO_TERRA;
-    // Com a câmera centrada na Terra, o que precisa caber não é a órbita: é a
-    // distância até o Sol mais o disco dele, porque o Sol passa a ser o objeto
-    // mais distante do centro da tela. Solta (alvo na origem), volta a ser a
-    // órbita inteira.
-    // Centrada na Terra, o círculo que precisa caber é em volta DELA e tem o
-    // raio da distância até o Sol mais o disco dele — o Sol é o objeto mais
-    // longe do centro da tela. Solta, volta a ser a órbita inteira na origem.
-    const raioDaCena = () => (seguindo
-      ? orbitaDoCorpo() + RAIO_SOL
-      : orbitaDoCorpo() + raioDeCena(corpoAtual) + 0.5);
+    // Com a câmera centrada na Terra, o círculo que precisa caber não é a
+    // órbita: é a distância até o Sol mais o disco dele, porque o Sol passa a
+    // ser o objeto mais distante do centro da tela.
+    const raioDaCena = () => orbitaDoCorpo() + RAIO_SOL;
     function enquadrar() {
       const overlay = document.getElementById('palco-estacoes');
       if (!overlay || overlay.hidden) return;
@@ -331,18 +310,14 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // enquadramento o laço ainda não rodou e o grupo está na origem, o que
       // dava uma distância diferente durante o roteiro guiado e um salto
       // quando ele terminava.
-      const centro = seguindo ? posicaoDaTerra(dias).pos : null;
+      const centro = posicaoDaTerra(dias).pos;
       const dist = distanciaParaEnquadrar(camera, raioDaCena(), area, 32, centro);
-      if (centro) {
-        const dir = camera.position.clone().sub(centro).normalize();
-        camera.position.copy(centro).addScaledVector(dir, dist);
-      } else {
-        camera.position.setLength(dist);
-      }
+      const dir = camera.position.clone().sub(centro).normalize();
+      camera.position.copy(centro).addScaledVector(dir, dist);
       camera.updateProjectionMatrix();
       // Sem isto o alvo começa na origem e o lerp leva ~1 s para chegar na
       // Terra: a primeira coisa que a pessoa vê é a cena deslizando.
-      if (seguindo) controls.target.copy(grupoTerra.position);
+      controls.target.copy(grupoTerra.position);
       controls.update();
     }
 
@@ -386,6 +361,10 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     // ————— Terra —————
     const grupoTerra = new THREE.Group();
+    // Nome só para o teste: é por ele que `validacao-palco.mjs` acha o planeta
+    // para conferir que a câmera não o larga (o Sol é a maior esfera da cena,
+    // então "a maior" não serve como regra aqui).
+    grupoTerra.name = 'planeta-palco';
     scene.add(grupoTerra);
 
     const texTerra = reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoTerra)));
@@ -579,7 +558,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // isso a câmera fica presa no lugar enquanto a Terra corre a órbita, e o
       // planeta muda de tamanho ao longo do ano — além de o enquadramento
       // calculado na abertura deixar de valer meia órbita depois.
-      const alvo = seguindo ? grupoTerra.position : ORIGEM;
+      const alvo = grupoTerra.position;
       const alvoAnterior = controls.target.clone();
       controls.target.lerp(alvo, 1 - Math.pow(0.001, dt));
       camera.position.add(controls.target.clone().sub(alvoAnterior));
@@ -856,8 +835,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     function dispose() {
       controls.dispose();
-      // Remove listeners de pointerdown/pointerup para detecção de toque
-      listanersDosque.forEach((l) => l.el.removeEventListener(l.tipo, l.fn));
       descartaveis.forEach((o) => { if (o && o.dispose) o.dispose(); });
       [ctx.hudEsq, ctx.hudDir].forEach((h) => { while (h.firstChild) h.removeChild(h.firstChild); });
     }
@@ -904,6 +881,8 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     motor,
     id: 'estacoes',
     titulo: () => te('titulo'),
+    subtitulo: () => te('subtitulo'),
+    icone: ICONE,
     construirCena,
     roteiro,
   });

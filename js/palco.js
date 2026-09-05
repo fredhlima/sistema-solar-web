@@ -424,6 +424,8 @@ export function distanciaParaEnquadrar(camera, raioMundo, area, amostras = 32, c
  * @param {object} cfg.motor        instância de SistemaSolar3D
  * @param {string} cfg.id           identificador curto ('estacoes', 'mares')
  * @param {function} cfg.titulo     () => string, avaliada a cada abertura (idioma)
+ * @param {function} [cfg.subtitulo] () => string, a linha de apoio do cabeçalho
+ * @param {string} [cfg.icone]      SVG inline do selo do módulo (usa currentColor)
  * @param {function} cfg.construirCena  (palco) => { scene, camera, atualizar,
  *                                       aoRedimensionar, dispose, escalaReal? }
  * @param {function} [cfg.roteiro]  () => [{ texto, aoEntrar? }]
@@ -458,7 +460,13 @@ export function criarPalco(cfg) {
 
     overlay.innerHTML = `
       <div class="palco-topo">
-        <h2 class="palco-titulo" id="palco-${id}-titulo"></h2>
+        <div class="palco-marca">
+          <span class="palco-marca-icone" aria-hidden="true">${cfg.icone || ''}</span>
+          <div>
+            <h2 class="palco-titulo" id="palco-${id}-titulo"></h2>
+            <p class="palco-subtitulo"></p>
+          </div>
+        </div>
         <button class="palco-fechar botao-fechar-overlay" type="button">
           <span class="fechar-icone">✕</span><span class="fechar-texto">‹ </span>
         </button>
@@ -487,6 +495,8 @@ export function criarPalco(cfg) {
 
     ref.fechar = overlay.querySelector('.palco-fechar');
     ref.titulo = overlay.querySelector('.palco-titulo');
+    ref.subtitulo = overlay.querySelector('.palco-subtitulo');
+    ref.marca = overlay.querySelector('.palco-marca-icone');
     ref.hudEsq = overlay.querySelector('.palco-hud-esq');
     ref.hudDir = overlay.querySelector('.palco-hud-dir');
     ref.selo = overlay.querySelector('.palco-selo');
@@ -604,6 +614,13 @@ export function criarPalco(cfg) {
 
   function aplicarTextos() {
     ref.titulo.textContent = cfg.titulo();
+    // O subtítulo diz do que o módulo trata, na linguagem do cabeçalho do app
+    // (nome em caixa alta + linha de apoio). Sem ele o palco entrava com um
+    // texto solto no canto, sem nada que o ligasse ao resto da interface.
+    const sub = cfg.subtitulo ? cfg.subtitulo() : '';
+    ref.subtitulo.textContent = sub;
+    ref.subtitulo.hidden = !sub;
+    ref.marca.hidden = !cfg.icone;
     ref.fechar.setAttribute('aria-label', tp('voltar'));
     ref.fechar.querySelector('.fechar-texto').textContent = `‹ ${tp('voltar')}`;
     ref.scrubber.setAttribute('aria-label', tp('linhaDoTempo'));

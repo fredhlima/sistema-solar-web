@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=19';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=20';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -89,9 +89,17 @@ export const GEOMETRIA = {
   RAIO_OCEANO,
 };
 
+// Selo do módulo no cabeçalho: Lua sobre duas linhas de água. Herda a cor do
+// disco por `currentColor`, como os demais ícones do palco.
+const ICONE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">'
+  + '<path d="M16.2 2.6a5.2 5.2 0 1 0 4.9 6.8 4.1 4.1 0 0 1-4.9-6.8z" fill="currentColor"/>'
+  + '<path d="M2.4 15.6q2.4-3 4.8 0t4.8 0 4.8 0 4.8 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>'
+  + '<path d="M2.4 19.8q2.4-3 4.8 0t4.8 0 4.8 0 4.8 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".5"/></svg>';
+
 const TEXTOS = {
   pt: {
     titulo: 'Marés',
+    subtitulo: 'Por que o mar sobe e desce',
     mareTitulo: 'A maré agora',
     ritmoCurto: 'maré alta a cada {i}',
     sizigia: 'Maré de sizígia — a mais forte',
@@ -144,6 +152,7 @@ const TEXTOS = {
   },
   en: {
     titulo: 'Tides',
+    subtitulo: 'Why the sea rises and falls',
     mareTitulo: 'The tide now',
     ritmoCurto: 'high tide every {i}',
     sizigia: 'Spring tide — the strongest',
@@ -196,6 +205,7 @@ const TEXTOS = {
   },
   es: {
     titulo: 'Mareas',
+    subtitulo: 'Por qué el mar sube y baja',
     mareTitulo: 'La marea ahora',
     ritmoCurto: 'marea alta cada {i}',
     sizigia: 'Marea viva — la más fuerte',
@@ -968,6 +978,8 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     motor,
     id: 'mares',
     titulo: () => tm('titulo'),
+    subtitulo: () => tm('subtitulo'),
+    icone: ICONE,
     construirCena,
     roteiro,
   });
