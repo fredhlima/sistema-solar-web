@@ -251,6 +251,18 @@ body.modo-dock .palco-fechar {
 .palco-btn:hover:not(:disabled) { background: rgba(120, 160, 255, 0.22); }
 .palco-btn:disabled { opacity: 0.45; cursor: default; }
 
+.palco-select {
+  background: rgba(120, 160, 255, 0.12);
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  color: #e8edf7;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 13px;
+  min-height: 44px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
 .palco-scrubber {
   flex: 1;
   min-width: 120px;

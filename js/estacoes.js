@@ -28,9 +28,24 @@ const ANO_DIAS = 365.2422;
 // A razão órbita:Terra passou de 16,5:1 para 6,25:1; Sol:Terra de 2,6:1 para 1,375:1.
 // Isso torna a Terra visível e seu eixo inclinado legível no didático, sem afetar
 // a proporção Sol—Terra (Sol continua visivelmente maior).
+// Sol agora é 5,5 (3,4× o raio da Terra, deixando folga na órbita).
 const RAIO_ORBITA = 10;
-const RAIO_SOL = 2.2;
+// O Sol precisa ser claramente o corpo grande — mas há um teto GEOMÉTRICO que
+// não tem a ver com estética: a câmera é inclinada, então a órbita projeta uma
+// elipse de semi-eixo menor `RAIO_ORBITA · sen(elevação)`. Se o raio do Sol
+// passa disso, a metade distante da órbita inteira fica ATRÁS dele e o planeta
+// — o sujeito do modo — desaparece por meio ano.
+// Com 5,5 e a câmera a 30° isso acontecia: menor = 4,99 contra 5,5 do Sol.
+// 3,4 com a câmera a 48° dá folga até para Júpiter (3,4 + 3,53 = 6,93 < 7,43).
+const RAIO_SOL = 3.4;
 const RAIO_TERRA = 1.6;
+
+/**
+ * Geometria do palco, exposta para os testes. Sem isto o teste acha cada corpo
+ * pelo raio literal e todo ajuste didático de proporção reprova teste que não
+ * tem defeito nenhum — foi o que aconteceu ao mexer no tamanho do Sol.
+ */
+export const GEOMETRIA = { RAIO_ORBITA, RAIO_SOL, RAIO_TERRA };
 
 const TEXTOS = {
   pt: {
@@ -155,6 +170,16 @@ function num(valor, casas) {
   return getIdioma() === 'en' ? texto : texto.replace('.', ',');
 }
 
+// Raio de cena de um corpo. A proporção real com o Sol (109×) não cabe em
+// tela — a Terra viraria um pixel. A compressão por expoente 1/3 preserva a
+// ORDEM (Júpiter > Netuno > Terra > Marte > Mercúrio) e a sensação de
+// grandeza, sem fazer os pequenos sumirem. É exagero declarado, como o resto
+// do palco: o selo "fora de escala" e o "ver em escala real" continuam lá.
+function raioDeCena(corpo) {
+  const razao = (corpo.raioKm || 6371) / 6371;
+  return RAIO_TERRA * Math.pow(razao, 1 / 3);
+}
+
 // Direção de uma longitude eclíptica no plano da cena (Y = norte eclíptico).
 function direcaoLongitude(lambdaGraus) {
   const a = lambdaGraus * RAD;
@@ -168,7 +193,8 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
   // Corpos oferecidos no extra "e nos outros planetas?" (SPEC §4.5). A
   // obliquidade vem de dados.js — nenhum dado novo entra por aqui.
-  const CORPOS_EXTRA = ['terra', 'marte', 'urano', 'venus']
+  // Agora com os 8 planetas em ordem: mercurio, venus, terra, marte, jupiter, saturno, urano, netuno
+  const CORPOS_EXTRA = ['mercurio', 'venus', 'terra', 'marte', 'jupiter', 'saturno', 'urano', 'netuno']
     .map((id) => corpos.find((c) => c.id === id))
     .filter(Boolean);
 
@@ -181,18 +207,25 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     // constante local. Duas fontes de verdade para o mesmo número acabam
     // divergindo, e aqui ele aparece na tela.
     let obliquidade = corpoTerra.inclinacaoEixoGraus || OBLIQUIDADE_TERRA;
+    let fatorCorpo = 1;                       // fator de escala do corpo (compressão por raiz cúbica)
     let latitude = -23;                       // default: Brasil (SPEC §4.3b)
     let dias = diasDesdeJ2000(ctx.dataInicial);
     let escalaRealAtiva = false;
     let marcoProx = MARCOS[0];                // valor padrão
     let distDoMarco = 0;                      // distância em graus
     const marcosVistos = new Set();
+    let seguindo = false;                     // se a câmera está seguindo o planeta
+    const listanersDosque = [];               // registra listeners para remover em dispose()
+    const ORIGEM = new THREE.Vector3();       // alvo de câmera quando não está seguindo
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05070f);
 
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 400);
-    camera.position.set(0, 19, 33);
+    // Elevação de ~48°, não os ~30° de antes: quanto mais rasante a câmera, mais
+// achatada a elipse da órbita e mais cedo o planeta some atrás do Sol. Ver a
+// conta no comentário de RAIO_SOL.
+    camera.position.set(0, 28, 25);
 
     const controls = new OrbitControls(camera, motor.canvas);
     controls.enableDamping = true;
@@ -200,14 +233,59 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     controls.minDistance = 4;
     controls.maxDistance = 90;
 
-    // Enquadrar a órbita + Terra na faixa livre: se esse círculo cabe,
+    // Raycaster para detectar clique no planeta
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    let posicaoPointerDown = null;
+    // Listener pointerdown: registra posição e testa se acertou o planeta
+    const onPointerDown = (evt) => {
+      const rect = motor.canvas.getBoundingClientRect();
+      posicaoPointerDown = { x: evt.clientX, y: evt.clientY };
+      ndc.x = ((evt.clientX - rect.left) / rect.width) * 2 - 1;
+      ndc.y = -((evt.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(ndc, camera);
+      const intersecoes = raycaster.intersectObject(terra, false);
+      seguindo = intersecoes.length > 0;
+    };
+    // Listener pointerup: valida se foi toque real (não arrasto > 6px)
+    const onPointerUp = (evt) => {
+      if (!posicaoPointerDown || !seguindo) {
+        seguindo = false;
+        posicaoPointerDown = null;
+        return;
+      }
+      const distancia = Math.sqrt(
+        Math.pow(evt.clientX - posicaoPointerDown.x, 2) +
+        Math.pow(evt.clientY - posicaoPointerDown.y, 2)
+      );
+      if (distancia > 6) {
+        seguindo = false;
+      }
+      posicaoPointerDown = null;
+    };
+    motor.canvas.addEventListener('pointerdown', onPointerDown);
+    motor.canvas.addEventListener('pointerup', onPointerUp);
+    listanersDosque.push({ el: motor.canvas, tipo: 'pointerdown', fn: onPointerDown });
+    listanersDosque.push({ el: motor.canvas, tipo: 'pointerup', fn: onPointerUp });
+
+    // Enquadrar a órbita + corpo na faixa livre: se esse círculo cabe,
     // nenhum corpo pode cair sob o HUD em nenhum ponto do ano (SPEC §6.2).
-    const RAIO_DA_CENA = RAIO_ORBITA + RAIO_TERRA + 0.5;
+    // RAIO_DA_CENA agora é dinâmico: depende do tamanho do corpo atual.
+    /**
+     * Raio da órbita do corpo atual. Não é fixo: um corpo maior precisa de
+     * órbita mais larga para não passar POR TRÁS do Sol na metade distante.
+     * A conta é a mesma do teto do Sol — a órbita projeta uma elipse de
+     * semi-eixo menor `raio · sen(elevação)`, e o planeta some quando esse
+     * valor fica abaixo de `RAIO_SOL + raio do planeta`. Júpiter, o maior do
+     * seletor, é quem manda no ajuste; a Terra fica exatamente onde estava.
+     */
+    const orbitaDoCorpo = () => RAIO_ORBITA + raioDeCena(corpoAtual) - RAIO_TERRA;
+    const raioDaCena = () => orbitaDoCorpo() + raioDeCena(corpoAtual) + 0.5;
     function enquadrar() {
       const overlay = document.getElementById('palco-estacoes');
       if (!overlay || overlay.hidden) return;
       const area = areaSegura(overlay);
-      camera.position.setLength(distanciaParaEnquadrar(camera, RAIO_DA_CENA, area));
+      camera.position.setLength(distanciaParaEnquadrar(camera, raioDaCena(), area));
       camera.updateProjectionMatrix();
       controls.update();
     }
@@ -243,7 +321,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     const pontosOrbita = [];
     for (let i = 0; i <= 256; i++) {
       const lam = (i / 256) * 360;
-      const r = RAIO_ORBITA * (1 - E_TERRA * E_TERRA) / (1 + E_TERRA * Math.cos((lam - 282.94) * RAD));
+      const r = orbitaDoCorpo() * (1 - E_TERRA * E_TERRA) / (1 + E_TERRA * Math.cos((lam - 282.94) * RAD));
       pontosOrbita.push(direcaoLongitude(lam + 180).multiplyScalar(r));
     }
     const geoOrbita = reg(new THREE.BufferGeometry().setFromPoints(pontosOrbita));
@@ -258,6 +336,32 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     const matTerra = reg(new THREE.MeshStandardMaterial({ map: texTerra, roughness: 0.85, metalness: 0.02 }));
     const terra = new THREE.Mesh(reg(new THREE.SphereGeometry(RAIO_TERRA, 64, 48)), matTerra);
     grupoTerra.add(terra);
+
+    // Nuvens da Terra: mesh irmão, escalado 1.015 para flutuar acima
+    const geoNuvens = reg(new THREE.SphereGeometry(RAIO_TERRA * 1.015, 64, 48));
+    const matNuvens = reg(new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      opacity: 0.85,
+      transparent: true,
+      roughness: 1,
+      depthWrite: false,
+    }));
+    const nuvens = new THREE.Mesh(geoNuvens, matNuvens);
+    grupoTerra.add(nuvens);
+    // Carrega textura de nuvens se existir; se não, apenas não aplica (mesmo contrato de motor3d)
+    const carregarNuvens = () => {
+      const loader = new THREE.TextureLoader();
+      loader.load('texturas/terra_nuvens.jpg?v=30', (texNuvens) => {
+        texNuvens.colorSpace = THREE.SRGBColorSpace;
+        texNuvens.anisotropy = motor.renderer.capabilities.getMaxAnisotropy();
+        matNuvens.alphaMap = reg(texNuvens);
+        matNuvens.needsUpdate = true;
+      }, undefined, () => {
+        // Erro no load: simplesmente não aplica (app não depende do arquivo)
+      });
+    };
+    carregarNuvens();
+    nuvens.visible = (corpoAtual.id === 'terra');
 
     // Textura real quando existir; o procedural acima é o fallback e o app
     // nunca depende do arquivo estar lá (mesmo contrato de motor3d).
@@ -285,7 +389,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     const marcos = MARCOS.map((m) => {
       const mat = reg(new THREE.MeshBasicMaterial({ color: 0x9ec5ff, transparent: true, opacity: 0.75 }));
       const mesh = new THREE.Mesh(geoMarco, mat);
-      mesh.position.copy(direcaoLongitude(m.lambda + 180).multiplyScalar(RAIO_ORBITA));
+      mesh.position.copy(direcaoLongitude(m.lambda + 180).multiplyScalar(orbitaDoCorpo()));
       scene.add(mesh);
       return { ...m, mesh, mat };
     });
@@ -327,12 +431,20 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     const cardDist = criarCard(ctx.hudDir);
     const cardEixo = criarCard(ctx.hudDir);
 
-    // Extra multiplanetário (SPEC §4.5): botão no rodapé, não na coluna
-    const btnExtra = document.createElement('button');
-    btnExtra.className = 'palco-btn';
-    btnExtra.textContent = te('outroCorpo');
-    btnExtra.onclick = trocarCorpo;
-    ctx.rodapeAcoes.appendChild(btnExtra);
+    // Extra multiplanetário (SPEC §4.5): seletor de planeta no rodapé, não na coluna
+    const selectPlaneta = document.createElement('select');
+    selectPlaneta.className = 'palco-select';
+    selectPlaneta.setAttribute('aria-label', te('outroCorpo'));
+    // Popula com os 8 planetas
+    CORPOS_EXTRA.forEach((corpo) => {
+      const opt = document.createElement('option');
+      opt.value = corpo.id;
+      opt.textContent = corpo.nome || corpo.id;
+      selectPlaneta.appendChild(opt);
+    });
+    selectPlaneta.value = corpoAtual.id;
+    selectPlaneta.onchange = (evt) => selecionarCorpo(evt.target.value);
+    ctx.rodapeAcoes.appendChild(selectPlaneta);
 
     function criarCard(pai) {
       const el = document.createElement('div');
@@ -347,15 +459,22 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       };
     }
 
-    function trocarCorpo() {
-      const i = CORPOS_EXTRA.indexOf(corpoAtual);
-      corpoAtual = CORPOS_EXTRA[(i + 1) % CORPOS_EXTRA.length];
+    function selecionarCorpo(id) {
+      corpoAtual = CORPOS_EXTRA.find((c) => c.id === id) || corpoAtual;
       obliquidade = corpoAtual.inclinacaoEixoGraus || 0;   // sempre de dados.js
+      // Fator de compressão para este corpo (raiz cúbica do raio real)
+      fatorCorpo = raioDeCena(corpoAtual) / RAIO_TERRA;
+      grupoTerra.scale.setScalar(fatorCorpo);
       // O corpo mudou: a textura tem de acompanhar, senão Urano fica com a
       // cara da Terra.
       matTerra.map = reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoAtual)));
       matTerra.needsUpdate = true;
       aplicarTexturaReal(motor.renderer, corpoAtual.id, matTerra, reg);
+      // Nuvens só aparecem na Terra
+      nuvens.visible = (corpoAtual.id === 'terra');
+      // Atualiza o valor do select para refletir o corpo atual
+      selectPlaneta.value = corpoAtual.id;
+      enquadrar();
       atualizarHud();
     }
 
@@ -363,7 +482,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     function posicaoDaTerra(n) {
       const lambda = longitudeSolar(n);
-      const r = RAIO_ORBITA * distanciaSolarUA(n);
+      const r = orbitaDoCorpo() * distanciaSolarUA(n);
       return { lambda, pos: direcaoLongitude(lambda + 180).multiplyScalar(r) };
     }
 
@@ -380,8 +499,16 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       eixo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirEixo);
       terra.quaternion.copy(eixo.quaternion);
 
+      // Nuvens giram continuamente, independente do resto (velocidade constante)
+      nuvens.rotation.y += dt * 0.06;
+
       // Terminador de frente para o Sol
       terminador.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().negate().normalize());
+
+      // Câmera segue o planeta com lerp suave (independente de FPS)
+      const alvo = seguindo ? grupoTerra.position : ORIGEM;
+      controls.target.lerp(alvo, 1 - Math.pow(0.001, dt));
+      controls.update();
 
       // `db < da`, não `>`. A comparação estava invertida desde a Fase 1 e o
       // reduce devolvia o marco MAIS DISTANTE: em λ=100° (dez dias depois do
@@ -406,7 +533,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
         if (aoProgresso) aoProgresso('estacoes-marco', { id: marcoProx.id });
       }
 
-      controls.update();
       atualizarHud(lambda, dias);
     }
 
@@ -426,6 +552,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       const esp = espalhamentoDaLuz(latitude, dec);
       cardLuz.titulo.textContent = te('luzTitulo');
       cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec), esp);
+      cardLuz.nota.className = 'palco-card-nota palco-nota-longa';
       cardLuz.nota.textContent = !isFinite(esp)
         ? te('luzSemSol')
         : esp < 1.05 ? te('luzPino') : te('luzNota').replace(/\{n\}/g, num(esp, 1));
@@ -441,6 +568,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       cardDist.valor.textContent = `${num(milhoes, 1)} ${te('distMilhoes')}`;
       const perto = ua < 0.9845;
       const longe = ua > 1.0155;
+      cardDist.nota.className = 'palco-card-nota palco-nota-longa';
       cardDist.nota.textContent = perto ? te('distPerielio') : longe ? te('distAfelio') : te('distNota');
       cardDist.raiz.classList.toggle('palco-card-alerta', perto || longe);
 
@@ -466,7 +594,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
         ? `${te('eixoNota')} · ${textoMarco}`
         : `${corpoAtual.nome} — ${te('eixoNota')}`;
       cardEixo.nota.textContent = notaEixo;
-      btnExtra.textContent = `${te('outroCorpo')} (${corpoAtual.nome})`;
 
       // Anúncio de estado: os hemisférios e a duração do dia
       const estN = estacaoDoHemisferio(lambda, 'norte');
@@ -525,9 +652,11 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     function escalaReal() {
       if (escalaRealAtiva) return;
       escalaRealAtiva = true;
-      const escalaTerraReal = (6371 / UA_KM) * RAIO_ORBITA / RAIO_TERRA;
-      const escalaSolReal = (695700 / UA_KM) * RAIO_ORBITA / RAIO_SOL;
+      // O raio efetivo do corpo agora é RAIO_TERRA × fatorCorpo (após a compressão)
+      const escalaTerraReal = ((corpoAtual.raioKm || 6371) / UA_KM) * orbitaDoCorpo() / (RAIO_TERRA * fatorCorpo);
+      const escalaSolReal = (695700 / UA_KM) * orbitaDoCorpo() / RAIO_SOL;
       terra.scale.setScalar(escalaTerraReal);
+      nuvens.visible = false;
       eixo.visible = false;
       terminador.visible = false;
       sol.scale.setScalar(escalaSolReal);
@@ -535,7 +664,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       ctx.legenda.textContent = te('escalaLegenda');
       return () => {
         terra.scale.setScalar(1);
-        sol.scale.setScalar(1);
+        nuvens.visible = (corpoAtual.id === 'terra');
         eixo.visible = true;
         terminador.visible = true;
         marcos.forEach((m) => { m.mesh.visible = true; });
@@ -556,6 +685,8 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
     function dispose() {
       controls.dispose();
+      // Remove listeners de pointerdown/pointerup para detecção de toque
+      listanersDosque.forEach((l) => l.el.removeEventListener(l.tipo, l.fn));
       descartaveis.forEach((o) => { if (o && o.dispose) o.dispose(); });
       [ctx.hudEsq, ctx.hudDir].forEach((h) => { while (h.firstChild) h.removeChild(h.firstChild); });
     }
