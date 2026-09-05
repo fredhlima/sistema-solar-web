@@ -1879,6 +1879,22 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     abrirQuiz,
     abrirVoce,
     iniciarTour,
+    // Estações e Marés precisam sair daqui para o dock existir.
+    //
+    // No celular o app entra em `modo-dock` e o `#ui-root` inteiro fica
+    // escondido — e as DUAS portas de entrada destes modos (o botão da barra
+    // Experiências e o botão contextual nos painéis da Terra e da Lua) moram
+    // lá dentro. Sem estas duas linhas, os dois modos carregam, funcionam e
+    // ficam INALCANÇÁVEIS em qualquer telefone, que é o público do app.
+    //
+    // Vão embrulhadas no mesmo evento de progresso que os botões do desktop
+    // disparam, para o XP contar igual nos dois shells.
+    abrirEstacoes: abrirEstacoes
+      ? () => { progressoEvento('abriu-estacoes'); abrirEstacoes(); }
+      : undefined,
+    abrirMares: abrirMares
+      ? () => { progressoEvento('abriu-mares'); abrirMares(); }
+      : undefined,
     // Exclusividade de janelas (dock): fecha qualquer página/overlay aberto —
     // eventos, card de missão, comparador, quiz, você-no-espaço, paywall —
     // antes de outra superfície abrir. Quiz/você/paywall são módulos externos

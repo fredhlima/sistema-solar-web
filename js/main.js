@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=22';
 import { SistemaSolar3D } from './motor3d.js?v=43';
-import { iniciarUI } from './ui.js?v=47';
-import { iniciarMobileDock } from './mobile-dock.js?v=16';
+import { iniciarUI } from './ui.js?v=48';
+import { iniciarMobileDock } from './mobile-dock.js?v=17';
 import { EVENTOS } from './eventos.js?v=10';
 import { MISSOES } from './missoes.js?v=12';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real

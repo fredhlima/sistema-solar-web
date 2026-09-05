@@ -45,6 +45,8 @@ const SVG_EVENTOS = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" strok
 const SVG_COMPARAR = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6"><circle cx="8" cy="14" r="3.5"/><circle cx="16.5" cy="11" r="6"/></svg>`;
 const SVG_QUIZ = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.7 9a3.3 3.3 0 016.4-1.1c.8 2-1 3.1-2 4-.7.6-1.1 1.2-1.1 2.2"/><circle cx="12" cy="18.4" r=".95" fill="currentColor" stroke="none"/></svg>`;
 const SVG_VOCE = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c2.8 2 4.2 4.8 4.2 8.6L12 15.5 7.8 11.6C7.8 7.8 9.2 5 12 3z"/><path d="M8.6 14.5l-2 4M15.4 14.5l2 4"/><circle cx="12" cy="9" r="1.2"/></svg>`;
+const SVG_ESTACOES = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.8"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></svg>`;
+const SVG_MARES = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 2.8a7.6 7.6 0 100 12.4 9 9 0 010-12.4z"/><path d="M2.5 19c1.3 0 1.3 1.4 2.6 1.4S6.4 19 7.7 19s1.3 1.4 2.6 1.4S11.6 19 12.9 19s1.3 1.4 2.6 1.4S16.8 19 18.1 19s1.3 1.4 2.6 1.4"/></svg>`;
 
 const GRUPOS_EXTRA = [
   ['planeta-anao', 'grupoAnoes', 'Anões'],
@@ -501,7 +503,19 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     if (estado.sel) montarFicha(shell, estado.sel); else montarLista(shell);
   }
 
-  // ---------- Experiências: 5 botões (conteúdo estático) ----------
+  // ---------- Experiências: os modos didáticos ----------
+  //
+  // Estações e Marés faltavam aqui. Como o dock esconde o `#ui-root` inteiro,
+  // e as duas portas de entrada desses modos moram lá (o botão da barra
+  // Experiências e o contextual nos painéis da Terra e da Lua), eles ficavam
+  // carregados e funcionando mas SEM NENHUMA forma de abrir no celular — que
+  // é o público do app. A `SPEC-estacoes-e-mares.md` §7.1 já pedia a entrada
+  // pelo dock; ela nunca chegou a ser feita, e nenhum teste cobria este
+  // caminho porque os testes miravam os ids do desktop (`btn-estacoes`).
+  //
+  // A ordem espelha a do desktop: os dois modos vêm depois de "Você no
+  // Espaço". `filter(Boolean)` protege o caso de `iniciarUI` ter sido montado
+  // sem eles.
   function montarExperiencias(shell) {
     const wrap = document.createElement('div');
     wrap.className = 'mdock-xp-lista';
@@ -511,7 +525,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       { label: t('btnTamanhos'), icone: SVG_COMPARAR, acao: acoes.abrirComparador },
       { label: t('btnQuiz'), icone: SVG_QUIZ, acao: acoes.abrirQuiz },
       { label: t('btnVoce'), icone: SVG_VOCE, acao: acoes.abrirVoce },
-    ].forEach((it) => {
+      acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes },
+      acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares },
+    ].filter(Boolean).forEach((it) => {
       const b = document.createElement('button');
       b.className = 'mdock-xp-btn' + (it.tour ? ' mdock-xp-btn-tour' : '');
       b.innerHTML = it.icone;
