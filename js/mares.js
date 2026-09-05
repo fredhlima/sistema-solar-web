@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=18';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=19';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -92,11 +92,11 @@ export const GEOMETRIA = {
 const TEXTOS = {
   pt: {
     titulo: 'Marés',
-    forcaTitulo: 'Força da maré',
+    mareTitulo: 'A maré agora',
+    ritmoCurto: 'maré alta a cada {i}',
     sizigia: 'Maré de sizígia — a mais forte',
     quadratura: 'Maré de quadratura — a mais fraca',
     intermediaria: 'Entre a mais forte e a mais fraca',
-    faseTitulo: 'Fase da Lua',
     nova: 'Nova', quartoCrescente: 'Quarto crescente', cheia: 'Cheia',
     quartoMinguante: 'Quarto minguante', crescenteConcava: 'Crescente côncava',
     crescenteGibosa: 'Crescente gibosa', minguanteGibosa: 'Minguante gibosa',
@@ -115,7 +115,9 @@ const TEXTOS = {
     camada_sol: 'Só o Sol',
     camada_ambos: 'Os dois',
     irSizigia: 'Ir para lua nova',
+    irSizigiaCurto: 'Lua nova',
     irQuadratura: 'Ir para o quarto',
+    irQuadraturaCurto: 'Quarto',
     solEscala: 'O Sol está {d}× mais longe e {t}× maior que a Lua. Aqui foi aproximado {c}× para caber na tela: no céu real os dois parecem do mesmo tamanho, e é por isso que há eclipses totais.',
     eixosNota: 'As linhas mostram para onde cada um puxa. Quando apontam junto, a maré é forte.',
     curvaNota: 'A curva cobre 26 horas na sua praia, com o agora no meio: duas marés altas e duas baixas.',
@@ -123,7 +125,6 @@ const TEXTOS = {
     baixamar: 'Maré baixa',
     subindo: 'Enchendo',
     descendo: 'Vazando',
-    ritmoTitulo: 'Ritmo',
     ritmoNota: 'Entre uma maré alta e a seguinte passam {i}. Não são 12 h porque, enquanto a Terra gira, a Lua também avança — a Terra precisa girar um pouco mais para reencontrá-la.',
     saibaMais: 'Por que dois bojos?',
     saibaMenos: 'Ocultar a explicação',
@@ -143,11 +144,11 @@ const TEXTOS = {
   },
   en: {
     titulo: 'Tides',
-    forcaTitulo: 'Tidal force',
+    mareTitulo: 'The tide now',
+    ritmoCurto: 'high tide every {i}',
     sizigia: 'Spring tide — the strongest',
     quadratura: 'Neap tide — the weakest',
     intermediaria: 'Between the strongest and the weakest',
-    faseTitulo: 'Moon phase',
     nova: 'New', quartoCrescente: 'First quarter', cheia: 'Full',
     quartoMinguante: 'Last quarter', crescenteConcava: 'Waxing crescent',
     crescenteGibosa: 'Waxing gibbous', minguanteGibosa: 'Waning gibbous',
@@ -166,7 +167,9 @@ const TEXTOS = {
     camada_sol: 'Sun only',
     camada_ambos: 'Both',
     irSizigia: 'Go to new Moon',
+    irSizigiaCurto: 'New Moon',
     irQuadratura: 'Go to first quarter',
+    irQuadraturaCurto: 'Quarter',
     solEscala: 'The Sun is {d}× farther and {t}× larger than the Moon. Here it was brought {c}× closer to fit: in the real sky the two look the same size, which is why total eclipses happen.',
     eixosNota: 'The lines show where each one pulls. When they point together, the tide is strong.',
     curvaNota: 'The curve covers 26 hours at your beach, with now in the middle: two high tides and two low ones.',
@@ -174,7 +177,6 @@ const TEXTOS = {
     baixamar: 'Low tide',
     subindo: 'Rising',
     descendo: 'Falling',
-    ritmoTitulo: 'Rhythm',
     ritmoNota: 'Between one high tide and the next, {i} go by. Not 12 h, because while Earth turns the Moon also moves ahead — Earth has to turn a little further to meet it again.',
     saibaMais: 'Why two bulges?',
     saibaMenos: 'Hide the explanation',
@@ -194,11 +196,11 @@ const TEXTOS = {
   },
   es: {
     titulo: 'Mareas',
-    forcaTitulo: 'Fuerza de la marea',
+    mareTitulo: 'La marea ahora',
+    ritmoCurto: 'marea alta cada {i}',
     sizigia: 'Marea viva — la más fuerte',
     quadratura: 'Marea muerta — la más débil',
     intermediaria: 'Entre la más fuerte y la más débil',
-    faseTitulo: 'Fase de la Luna',
     nova: 'Nueva', quartoCrescente: 'Cuarto creciente', cheia: 'Llena',
     quartoMinguante: 'Cuarto menguante', crescenteConcava: 'Creciente cóncava',
     crescenteGibosa: 'Creciente gibosa', minguanteGibosa: 'Menguante gibosa',
@@ -217,7 +219,9 @@ const TEXTOS = {
     camada_sol: 'Solo el Sol',
     camada_ambos: 'Los dos',
     irSizigia: 'Ir a luna nueva',
+    irSizigiaCurto: 'Luna nueva',
     irQuadratura: 'Ir al cuarto',
+    irQuadraturaCurto: 'Cuarto',
     solEscala: 'El Sol está {d}× más lejos y es {t}× mayor que la Luna. Aquí fue acercado {c}× para caber: en el cielo real los dos se ven del mismo tamaño, y por eso hay eclipses totales.',
     eixosNota: 'Las líneas muestran hacia dónde tira cada uno. Cuando apuntan juntas, la marea es fuerte.',
     curvaNota: 'La curva cubre 26 horas en tu playa, con el ahora en el medio: dos mareas altas y dos bajas.',
@@ -225,7 +229,6 @@ const TEXTOS = {
     baixamar: 'Marea baja',
     subindo: 'Subiendo',
     descendo: 'Bajando',
-    ritmoTitulo: 'Ritmo',
     ritmoNota: 'Entre una marea alta y la siguiente pasan {i}. No son 12 h porque, mientras la Tierra gira, la Luna también avanza — la Tierra debe girar un poco más para reencontrarla.',
     saibaMais: '¿Por qué dos abultamientos?',
     saibaMenos: 'Ocultar la explicación',
@@ -445,10 +448,17 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     }
 
     // ————— HUD —————
-    const cardForca = criarCard(ctx.hudEsq);
-    const cardFase = criarCard(ctx.hudEsq);
+    // Um card por coluna, não quatro.
+    //
+    // Com "Força da maré" + "Fase da Lua" à esquerda e "Sua praia" + "Ritmo" à
+    // direita, o celular ficava com quatro caixas espremidas e o texto de cada
+    // uma cortado. Fase e força são a MESMA informação vista de dois ângulos
+    // (a fase determina o ângulo entre Lua e Sol, que determina a força), e o
+    // ritmo é uma leitura da curva da praia. Juntando, cada coluna tem um card
+    // compacto — e todo o texto explicativo migra para o painel "Saiba mais",
+    // que é largo e tem espaço para ele.
+    const cardMare = criarCard(ctx.hudEsq);
     const cardPraia = criarCard(ctx.hudDir);
-    const cardRitmo = criarCard(ctx.hudDir);
 
     // ————— seletor de camada —————
     // Três estados em vez de um interruptor: o usuário isola cada força e
@@ -473,6 +483,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     // ————— atalhos de fase —————
     // Dois toques valem mais que três frases: em lua nova as linhas coincidem
     // e a maré vai ao máximo; no quarto elas cruzam a 90° e vai ao mínimo.
+    //
+    // Moram no RODAPÉ, não na coluna: os dois pulam no tempo, exatamente como
+    // a barra de datas ao lado deles. Na coluna, eram um terceiro bloco
+    // empilhado sobre o card — em paisagem de celular sobrava altura para dois,
+    // e o card da maré é que fechava para caber.
     const atalhos = document.createElement('div');
     atalhos.className = 'palco-atalhos';
     const btnSizigia = document.createElement('button');
@@ -484,7 +499,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     });
     btnSizigia.onclick = () => irParaElongacao(0);
     btnQuadratura.onclick = () => irParaElongacao(90);
-    ctx.hudEsq.appendChild(atalhos);
+    ctx.rodapeAcoes.appendChild(atalhos);
 
     /** Move o tempo até a Lua estar na elongação pedida (0 = nova, 90 = quarto). */
     function irParaElongacao(alvoGraus) {
@@ -802,34 +817,27 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       const classeTexto = classe === 'sizigia' ? tm('sizigia')
         : classe === 'quadratura' ? tm('quadratura') : tm('intermediaria');
 
-      cardForca.titulo.textContent = tm('forcaTitulo');
-      // Mudança 2: força como múltiplo da maré mais fraca (quadratura)
-      // Mudança 3: regra horizontal e legenda de cores incluídas no valor
-      const valorHTML = `<div>${num(forcaRelativaAMinima(amplitude), 1)}×</div>`
+      cardMare.titulo.textContent = tm('mareTitulo');
+
+      const fase = nomeDaFase(dias);
+      const notaCamada = camada === 'lua' ? tm('notaSoLua')
+        : camada === 'sol' ? tm('notaSoSol') : null;
+
+      cardMare.valor.innerHTML = `<div>${num(forcaRelativaAMinima(amplitude), 1)}×</div>`
         + `<div class="palco-card-sub">${tm('escalaForca')}</div>`
         + svgRegua(amplitude)
         + `<div class="palco-legenda-cores" title="${tm('eixosNota')}">`
         + `<span><i style="background:#9ec5ff"></i>${tm('legendaLua')}</span>`
         + `<span><i style="background:#ffd479"></i>${tm('legendaSol')}</span>`
-        + `</div><p class="palco-nota-longa">${tm('eixosNota')}</p>`;
-      cardForca.valor.innerHTML = valorHTML;
-      // Com uma força isolada em cena, "sizígia" e "quadratura" não querem
-      // dizer nada — as duas palavras descrevem a RELAÇÃO entre a Lua e o Sol.
-      // O card explica o que está sendo mostrado em vez de classificar o que
-      // não existe naquele momento.
-      const notaCamada = camada === 'lua' ? tm('notaSoLua')
-        : camada === 'sol' ? tm('notaSoSol') : null;
+        + `</div>`;
 
-      // A escala do Sol é um compromisso, e o card diz qual: sem isso a cena
-      // afirma em silêncio que o Sol é 1,6× a Lua no céu, o que é falso.
-      cardForca.nota.textContent = notaCamada || `${classeTexto}. ${tm('solEscala')
-        .replace('{d}', num(KM_SOL_ORBITA / KM_LUA_ORBITA, 0))
-        .replace('{t}', num(KM_SOL_RAIO / KM_LUA_RAIO, 0))
-        .replace('{c}', num(COMPRESSAO_SOL, 0))
-        .replace('{f}', num(FIDELIDADE_SOL, 1))}`;
-      // Alerta só vale para a classificação real, com as duas forças em cena
-      if (notaCamada) cardForca.raiz.classList.remove('palco-card-alerta');
-      cardForca.raiz.classList.toggle('palco-card-alerta', classe === 'sizigia' || classe === 'quadratura');
+      // Uma linha, não um parágrafo: a classificação da maré e a fase que a
+      // explica. O resto do texto vive no painel "Saiba mais".
+      cardMare.nota.textContent = notaCamada
+        || `${classeTexto} · ${tm(fase)}, ${num(fracaoIluminada(dias) * 100, 0)}% ${tm('iluminada')}`;
+
+      cardMare.raiz.classList.toggle('palco-card-alerta',
+        !notaCamada && (classe === 'sizigia' || classe === 'quadratura'));
 
       // Um marco por vez, como o modo Estações faz: progresso.js guarda os
       // ids distintos e a badge sai quando os dois apareceram.
@@ -839,17 +847,13 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         if (aoProgresso) aoProgresso('mares-marco', { id: marcoAtual });
       }
 
-      // Fase da Lua
-      const fase = nomeDaFase(dias);
-      cardFase.titulo.textContent = tm('faseTitulo');
-      cardFase.valor.textContent = tm(fase);
-      cardFase.nota.textContent = `${num(fracaoIluminada(dias) * 100, 0)}% ${tm('iluminada')}`;
-
       // Sua praia: curva de 26 horas com dois ciclos (mudança 4)
       // Bolinha na mesma cor do marcador na cena: sem isso, o ponto laranja
       // girando não se identifica com o card que mostra a maré dele.
+      // Bolinha e nome num span só: soltos, viravam dois itens do flex do
+      // título e o `space-between` mandava um para cada ponta do card.
       cardPraia.titulo.innerHTML =
-        `<span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')} `
+        `<span><span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')}</span>`
         + `<span class="palco-titulo-extra">— ${tm('praiaLegenda')}</span>`;
       cardPraia.valor.innerHTML = svgCurvaMare(dias, altura, amplitude);
       const subindo = alturaAnterior !== null && altura > alturaAnterior;
@@ -857,16 +861,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       const estado = perto
         ? (altura > 0 ? tm('preamar') : tm('baixamar'))
         : (subindo ? tm('subindo') : tm('descendo'));
-      {
-        cardPraia.nota.innerHTML = `<div class="palco-nota-longa">${tm('curvaNota')}</div>${estado}`;
-      }
-
-      // Ritmo
       const intervalo = formatarHoras(intervaloEntrePreamaresHoras());
-      cardRitmo.titulo.textContent = tm('ritmoTitulo');
-      cardRitmo.valor.textContent = intervalo;
-      cardRitmo.nota.className = 'palco-card-nota palco-nota-longa';
-      cardRitmo.nota.textContent = tm('ritmoNota').replace('{i}', intervalo);
+      // O ritmo era um card só para si, mas é uma leitura desta mesma curva:
+      // as duas cristas que aparecem no gráfico estão a 12h25 uma da outra.
+      cardPraia.nota.innerHTML = `<div class="palco-nota-longa">${tm('curvaNota')}</div>`
+        + `${estado} · ${tm('ritmoCurto').replace('{i}', intervalo)}`;
 
       // Saiba mais
       botoesCamada.forEach((b) => {
@@ -875,8 +874,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         b.classList.toggle('ativo', ativo);
         b.setAttribute('aria-pressed', String(ativo));
       });
-      btnSizigia.textContent = tm('irSizigia');
-      btnQuadratura.textContent = tm('irQuadratura');
+      // No rodapé, ao lado da barra de datas, o rótulo curto basta — e o longo
+      // continua no aria-label, para quem ouve a tela em vez de ver.
+      btnSizigia.textContent = tm('irSizigiaCurto');
+      btnSizigia.setAttribute('aria-label', tm('irSizigia'));
+      btnQuadratura.textContent = tm('irQuadraturaCurto');
+      btnQuadratura.setAttribute('aria-label', tm('irQuadratura'));
 
       btnForcas.textContent = mostrarForcas ? tm('saibaMenos') : tm('saibaMais');
       cardForcas.titulo.textContent = tm('bojoOpostoTitulo');
@@ -890,8 +893,18 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // O essencial — diagrama + frase curta — fica sempre. Os dois parágrafos
       // de aprofundamento são `palco-nota-longa`: somem em tela baixa, onde
       // senão o card corta justamente no meio da resposta.
+      // O painel recebeu o texto que antes espremia os cards das colunas: a
+      // explicação das linhas coloridas, o ritmo de 12h25 e a escala do Sol.
+      // Aqui há largura para eles; lá não havia.
       cardForcas.nota.innerHTML = `<p style="margin:0 0 6px">${tm('bojoOpostoLongo')}</p>`
-        + `<p style="margin:0">${tm('forcasNota')}</p>`;
+        + `<p style="margin:0 0 6px">${tm('forcasNota')}</p>`
+        + `<p style="margin:0 0 6px">${tm('eixosNota')}</p>`
+        + `<p style="margin:0 0 6px">${tm('ritmoNota').replace('{i}', formatarHoras(intervaloEntrePreamaresHoras()))}</p>`
+        + `<p style="margin:0">${tm('solEscala')
+          .replace('{d}', num(KM_SOL_ORBITA / KM_LUA_ORBITA, 0))
+          .replace('{t}', num(KM_SOL_RAIO / KM_LUA_RAIO, 0))
+          .replace('{c}', num(COMPRESSAO_SOL, 0))
+          .replace('{f}', num(FIDELIDADE_SOL, 1))}</p>`;
 
       // Ver comentário equivalente em estacoes.js: com "ver em escala real"
       // ligado, a legenda é dele, não da data.

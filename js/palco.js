@@ -90,9 +90,6 @@ const SVG_PAUSA = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="
 const SVG_TOCAR = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">'
   + '<path d="M8 5.2a1.1 1.1 0 0 1 1.68-.94l9 6.8a1.1 1.1 0 0 1 0 1.88l-9 6.8A1.1 1.1 0 0 1 8 18.8z" fill="currentColor"/></svg>';
 
-const SVG_CHEVRON = '<svg class="palco-card-chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">'
-  + '<path d="M6 9.5 12 15.5 18 9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
 // ————— cards colapsáveis —————
 //
 // Medido nos 5 aparelhos-alvo: em paisagem, três cards abertos numa coluna não
@@ -113,10 +110,11 @@ const ALTURA_PARA_COLAPSAR = 520;
 // (412 px) cabia num caso e não no outro. Em vez de adivinhar, mede-se: abre o
 // primeiro e, se a coluna transbordar, fecha também.
 
-function aplicarColapso(overlay) {
+function aplicarColapso(overlay, ajustarCompacto) {
   const colapsar = window.innerHeight <= ALTURA_PARA_COLAPSAR;
+  const colunas = [...overlay.querySelectorAll('.palco-hud')];
 
-  overlay.querySelectorAll('.palco-hud').forEach((coluna) => {
+  colunas.forEach((coluna) => {
     const cards = [...coluna.querySelectorAll('.palco-card')]
       .filter((c) => c.querySelector('.palco-card-titulo'));
 
@@ -129,7 +127,10 @@ function aplicarColapso(overlay) {
         titulo.dataset.colapsavel = '1';
         titulo.setAttribute('role', 'button');
         titulo.setAttribute('tabindex', '0');
-        titulo.insertAdjacentHTML('beforeend', SVG_CHEVRON);
+        // A seta de abrir/fechar é `::after` no CSS, não um <svg> inserido
+        // aqui: os modos reescrevem `titulo.textContent`/`innerHTML` a cada
+        // quadro para atualizar o texto, e um nó filho seria apagado no
+        // primeiro update — o card ficava colapsável sem nada que dissesse.
 
         const alternar = () => {
           const vaiAbrir = card.classList.contains('palco-card-colapsado');
@@ -169,19 +170,32 @@ function aplicarColapso(overlay) {
       // baixas, nenhum. Não mexe em card que o usuário já abriu.
       if (!card.dataset.tocado) marcar(card, colapsar && i > 0);
     });
+  });
 
-    // Verificação por medição, no quadro SEGUINTE: aqui o overlay pode ainda
-    // não ter sido exibido e as alturas seriam todas zero — foi o que fez a
-    // primeira versão deste ajuste piorar o corte em vez de resolver.
-    // Se, com o primeiro aberto, a coluna não couber, ele fecha também. Só o
-    // primeiro é candidato (os demais já estão fechados) e um card que o
-    // usuário abriu nunca é mexido.
-    if (colapsar && cards.length && !cards[0].dataset.tocado) {
-      requestAnimationFrame(() => {
-        if (cards[0].dataset.tocado) return;
-        if (coluna.scrollHeight > coluna.clientHeight + 2) marcar(cards[0], true);
-      });
-    }
+  // Verificação por medição, no quadro SEGUINTE: aqui o overlay pode ainda não
+  // ter sido exibido e as alturas seriam todas zero — foi o que fez a primeira
+  // versão deste ajuste piorar o corte em vez de resolver.
+  //
+  // A ordem importa. Encolher (modo compacto) é menos destrutivo do que
+  // esconder: o card compacto perde os parágrafos de aprofundamento, o card
+  // fechado perde o gráfico e a legenda, que são o miolo. Então tenta-se
+  // encolher PRIMEIRO e só se ainda não couber é que o primeiro card fecha.
+  // Invertido, como estava, o iPhone 15 fechava o card da maré por 24px que o
+  // compacto teria resolvido sozinho.
+  if (!colapsar) return;
+  requestAnimationFrame(() => {
+    if (ajustarCompacto) ajustarCompacto();
+    colunas.forEach((coluna) => {
+      const cards = [...coluna.querySelectorAll('.palco-card')]
+        .filter((c) => c.querySelector('.palco-card-titulo'));
+      // Só o primeiro é candidato (os demais já estão fechados) e um card que
+      // o usuário abriu nunca é mexido.
+      if (!cards.length || cards[0].dataset.tocado) return;
+      if (coluna.scrollHeight > coluna.clientHeight + 2) marcar(cards[0], true);
+    });
+    // Fechar um card pode ter tirado a coluna do transbordo: reavalia, para não
+    // ficar compacto (ou com o esmaecimento de rolagem) sem precisar.
+    if (ajustarCompacto) ajustarCompacto();
   });
 }
 
@@ -600,7 +614,7 @@ export function criarPalco(cfg) {
     // Nas Marés ele foi retirado — o bojo em escala real simplesmente
     // desaparece, e o efeito virou ruído em vez de argumento.
     ref.escala.hidden = !(cena && cena.escalaReal);
-    aplicarColapso(overlay);
+    aplicarColapso(overlay, marcarRolagemDoHud);
     ref.roteiroPular.textContent = tp('pular');
     ref.roteiroProximo.textContent = tp('proximo');
     atualizarBotaoPlay();
@@ -756,7 +770,7 @@ export function criarPalco(cfg) {
 
   function aoRedimensionarPalco() {
     // Girar o aparelho pode cruzar o limiar de altura nos dois sentidos
-    aplicarColapso(overlay);
+    aplicarColapso(overlay, marcarRolagemDoHud);
     marcarRolagemDoHud();
   }
 

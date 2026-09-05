@@ -20,7 +20,14 @@
   box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
+  /* 4 linhas explícitas: título · cena+HUD · roteiro · rodapé. A 3ª existe
+     para o roteiro guiado ter faixa própria — sem ela o roteiro dividiria a
+     linha da cena com o HUD e os dois se sobrepunham em tela baixa. Com o
+     roteiro `hidden` a linha some (auto = 0). Enquanto as linhas eram três e
+     o HUD não declarava a sua, o auto-placement o jogava para uma linha
+     IMPLÍCITA depois do `1fr` (o selo já ocupava a linha 2 inteira): o `1fr`
+     virava um vão vazio no topo e os cards desciam para o meio da tela. */
+  grid-template-rows: auto 1fr auto auto;
   gap: 12px;
   color: #e8edf7;
   font-size: 13px;
@@ -50,6 +57,7 @@ body.com-palco #mdock { display: none !important; }
 
 .palco-topo {
   grid-column: 1 / -1;
+  grid-row: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -120,6 +128,10 @@ body.modo-dock .palco-fechar {
   overflow-y: auto;
   overscroll-behavior: contain;
   max-height: 100%;
+  grid-row: 2;
+  /* Colado no topo da faixa da cena, logo abaixo do título: esticado, o HUD
+     centralizava os cards na vertical e sobrava tela vazia em cima. */
+  align-self: start;
 }
 
 .palco-hud-esq { grid-column: 1; justify-self: start; }
@@ -224,6 +236,7 @@ body.modo-dock .palco-fechar {
 
 .palco-rodape {
   grid-column: 1 / -1;
+  grid-row: 4;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -364,7 +377,7 @@ body.modo-dock .palco-fechar {
 
 .palco-roteiro {
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 3;
   align-self: end;
   justify-self: center;
   width: min(560px, 100%);
@@ -374,7 +387,6 @@ body.modo-dock .palco-fechar {
   border-radius: 14px;
   padding: 16px 18px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
-  margin-bottom: 40px;
 }
 
 .palco-roteiro[hidden] { display: none; }
@@ -448,7 +460,24 @@ body.modo-dock .palco-fechar {
   margin: 4px 0 0;
 }
 
-.palco-titulo-extra { text-transform: none; font-weight: 400; }
+/* O complemento do título ganha a própria linha. Como item flex ao lado do
+   nome, o `space-between` do título empurrava um para cada canto: o card da
+   praia abria com "SUA PRAIA" quebrado em duas linhas de um lado e a
+   explicação do ponto laranja do outro. */
+.palco-titulo-extra {
+  text-transform: none;
+  font-weight: 400;
+  /* Linha própria, depois do nome e da seta (que é `order: 0`). */
+  order: 1;
+  flex: 1 0 100%;
+}
+
+.palco-card-titulo[role="button"] { flex-wrap: wrap; }
+
+/* Fechado, o complemento do título some e o título divide a linha com o valor:
+   sem isto a seta não cabia ao lado do nome e caía para uma segunda linha,
+   dentro de um card que existe justamente para ocupar uma só. */
+.palco-card-colapsado .palco-card-titulo[role="button"] { flex-wrap: nowrap; }
 
 /* ————— modo compacto: ligado por medição, não por breakpoint —————
 
@@ -466,6 +495,13 @@ body.modo-dock .palco-fechar {
    transbordo real. Um `@media (max-height:...)` seria um chute: a altura que
    basta em pt não basta em es, onde o mesmo texto ocupa mais linhas. */
 .palco-compacto .palco-nota-longa { display: none; }
+/* Aperta o cabeçalho e o gráfico antes de esconder qualquer coisa: no iPhone SE
+   faltavam 12px para o card da maré caber aberto, e sem isto ele fechava. */
+.palco-compacto .palco-card-titulo[role="button"] {
+  min-height: 20px;
+  padding: 2px 0;
+  margin-bottom: 4px;
+}
 .palco-compacto .palco-titulo-extra { display: none; }
 .palco-compacto .palco-card svg { height: 48px; }
 .palco-compacto .palco-hud { gap: 8px; }
@@ -517,14 +553,23 @@ body.modo-dock .palco-titulo {
    para o conteúdo caber sem rolagem no dock típico. */
 body.modo-dock .palco-card {
   padding: 6px 9px;
-  max-width: 172px;
+  /* Era 172px, com a coluna esquerda carregando três blocos empilhados. Com um
+     card por coluna sobra largura: 196px tira uma quebra de linha das notas e
+     faz caber "Só a Lua" no seletor sem reticências. A coluna tem ~374px no
+     menor alvo (780px de largura), então nem encosta no selo central. */
+  max-width: 196px;
   border-radius: 9px;
 }
 
 body.modo-dock .palco-card-titulo { font-size: 9px; margin-bottom: 3px; }
 body.modo-dock .palco-card-valor { font-size: 14px; }
 body.modo-dock .palco-card-nota { font-size: 10px; line-height: 1.3; }
-body.modo-dock .palco-card svg { height: 52px; }
+/* `max-height`, não `height`: a régua da força tem viewBox 120×26 e a curva da
+   praia 120×60. Altura fixa igual para as duas dava 19px de vazio embaixo da
+   régua — e, por especificidade, anulava o `.palco-compacto` (0-2-1) que tenta
+   encolher os gráficos quando a coluna não cabe. */
+body.modo-dock .palco-card svg { max-height: 52px; height: auto; }
+body.modo-dock .palco-compacto .palco-card svg { max-height: 30px; }
 body.modo-dock .palco-hud { gap: 6px; }
 body.modo-dock .palco-rodape { padding: 5px 10px; gap: 8px; }
 body.modo-dock .palco-btn { min-height: 40px; min-width: 40px; padding: 0 11px; font-size: 12px; }
@@ -568,13 +613,26 @@ body.modo-dock .palco-scrubber { height: 40px; }
   border-radius: 6px;
 }
 
-.palco-card-chevron {
+/* Seta de abrir/fechar desenhada em CSS. Ver o comentário em palco.js: como
+   nó do DOM ela sumia no primeiro update de texto do card. */
+.palco-card-titulo[role="button"]::after {
+  content: '';
+  order: 0;
   flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  border-radius: 1px;
   opacity: 0.7;
+  transform: translateY(-2px) rotate(45deg);
   transition: transform 0.18s ease;
 }
 
-.palco-card-colapsado .palco-card-chevron { transform: rotate(-90deg); }
+.palco-card-colapsado .palco-card-titulo[role="button"]::after {
+  transform: translateY(-1px) rotate(-45deg);
+}
 
 /* Colapsado NÃO é "só o título": o valor principal continua visível, agora
    numa linha com ele. Um card fechado que esconde o número que o justifica
@@ -584,7 +642,7 @@ body.modo-dock .palco-scrubber { height: 40px; }
 .palco-card-colapsado .palco-card-sub,
 .palco-card-colapsado .palco-lat,
 .palco-card-colapsado input,
-.palco-card-colapsado svg:not(.palco-card-chevron) { display: none; }
+.palco-card-colapsado svg { display: none; }
 
 .palco-card-colapsado {
   display: flex;
@@ -647,7 +705,7 @@ body.modo-dock .palco-scrubber { height: 40px; }
 .palco-card-colapsado .palco-card-valor br { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .palco-card-chevron { transition: none; }
+  .palco-card-titulo[role="button"]::after { transition: none; }
 }
 
 /* ————— seletor de camada —————
@@ -698,11 +756,11 @@ body.modo-dock .palco-scrubber { height: 40px; }
 
 /* Atalhos de configuração: levam direto à sizígia e à quadratura, que é onde
    a soma das duas forças fica evidente. */
+/* Mora no rodapé (ver mares.js): sem largura máxima de coluna, portanto — o
+   rodapé é quem distribui o espaço entre os grupos de botões. */
 .palco-atalhos {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
-  max-width: 260px;
 }
 
 .palco-btn-pequeno {
@@ -712,8 +770,11 @@ body.modo-dock .palco-scrubber { height: 40px; }
   font-size: 12px;
 }
 
-body.modo-dock .palco-segmentado,
-body.modo-dock .palco-atalhos { max-width: 200px; }
+/* Largura fixa, não só máxima: a coluna se dimensiona pelo filho mais largo, e
+   com o card fechado ela encolhia para 170px — aí "Só a Lua" saía com
+   reticências. Fixando, a coluna também para de mudar de largura quando o
+   usuário abre e fecha o card. */
+body.modo-dock .palco-segmentado { max-width: 196px; min-width: 196px; }
 
 body.modo-dock .palco-segmento { min-height: 32px; font-size: 11px; padding: 0 5px; }
 body.modo-dock .palco-btn-pequeno { min-height: 32px; font-size: 11px; padding: 0 8px; }
