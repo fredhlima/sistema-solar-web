@@ -56,6 +56,16 @@ const TEXTOS = {
     duracaoDia: 'Dia claro',
     horas: 'h',
     latitude: 'Latitude',
+    diaNoiteTitulo: 'Onde o Sol não se põe',
+    faixaDeLuzAlt: 'Horas de luz por latitude. No polo norte {n} h, no equador {e} h, no polo sul {s} h.',
+    solDaMeiaNoiteNorte: 'No Polo Norte o Sol não se põe. No Polo Sul, a noite não termina.',
+    solDaMeiaNoiteSul: 'No Polo Sul o Sol não se põe. No Polo Norte, a noite não termina.',
+    diaNoiteEquinocio: 'Perto dos equinócios, o dia e a noite duram quase o mesmo em toda parte.',
+    verUmDia: 'Ver um dia',
+    pararDia: 'Parar o dia',
+    relogioDia: '{h} — {estado}',
+    estaDeDia: 'de dia a {lat}',
+    estaDeNoite: 'de noite a {lat}',
     luzTitulo: 'Ângulo da luz solar',
     luzNota: 'A mesma luz espalhada por {n}× mais área aquece {n}× menos cada ponto.',
     luzPino: 'Sol a pino: máximo de energia por área.',
@@ -92,6 +102,16 @@ const TEXTOS = {
     duracaoDia: 'Daylight',
     horas: 'h',
     latitude: 'Latitude',
+    diaNoiteTitulo: 'Where the Sun never sets',
+    faixaDeLuzAlt: 'Hours of daylight by latitude. North Pole {n} h, Equator {e} h, South Pole {s} h.',
+    solDaMeiaNoiteNorte: 'At the North Pole the Sun never sets. At the South Pole, night never ends.',
+    solDaMeiaNoiteSul: 'At the South Pole the Sun never sets. At the North Pole, night never ends.',
+    diaNoiteEquinocio: 'Near the equinoxes, day and night last almost the same everywhere.',
+    verUmDia: 'See one day',
+    pararDia: 'Stop the day',
+    relogioDia: '{h} — {estado}',
+    estaDeDia: 'daytime at {lat}',
+    estaDeNoite: 'nighttime at {lat}',
     luzTitulo: 'Angle of sunlight',
     luzNota: 'The same light spread over {n}× more area warms each point {n}× less.',
     luzPino: 'Sun overhead: maximum energy per area.',
@@ -128,6 +148,16 @@ const TEXTOS = {
     duracaoDia: 'Luz del día',
     horas: 'h',
     latitude: 'Latitud',
+    diaNoiteTitulo: 'Donde el Sol no se pone',
+    faixaDeLuzAlt: 'Horas de luz por latitud. Polo norte {n} h, Ecuador {e} h, Polo sur {s} h.',
+    solDaMeiaNoiteNorte: 'En el Polo Norte el Sol no se pone. En el Polo Sur, la noche no termina.',
+    solDaMeiaNoiteSul: 'En el Polo Sur el Sol no se pone. En el Polo Norte, la noche no termina.',
+    diaNoiteEquinocio: 'Cerca de los equinoccios, el día y la noche duran casi lo mismo en todas partes.',
+    verUmDia: 'Ver un día',
+    pararDia: 'Parar el día',
+    relogioDia: '{h} — {estado}',
+    estaDeDia: 'de día a {lat}',
+    estaDeNoite: 'de noche a {lat}',
     luzTitulo: 'Ángulo de la luz solar',
     luzNota: 'La misma luz repartida en {n}× más área calienta {n}× menos cada punto.',
     luzPino: 'Sol en lo alto: máxima energía por área.',
@@ -210,6 +240,8 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     let fatorCorpo = 1;                       // fator de escala do corpo (compressão por raiz cúbica)
     let latitude = -23;                       // default: Brasil (SPEC §4.3b)
     let dias = diasDesdeJ2000(ctx.dataInicial);
+    let modoDia = false;                      // se o modo "Ver um dia" está ativo
+    let anguloDia = 0;                        // ângulo de rotação diária em radianos
     let escalaRealAtiva = false;
     let marcoProx = MARCOS[0];                // valor padrão
     let distDoMarco = 0;                      // distância em graus
@@ -426,10 +458,37 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     const cardNorte = criarHemisferio(cardDuplo);
     const cardSul = criarHemisferio(cardDuplo);
 
-    // HUD direita: luz, distância, eixo
+    // HUD direita: faixa de luz, luz, distância, eixo
+    const cardFaixaDeLuz = criarCard(ctx.hudDir);
     const cardLuz = criarCard(ctx.hudDir);
     const cardDist = criarCard(ctx.hudDir);
-    const cardEixo = criarCard(ctx.hudDir);
+    // O card do eixo vai para a coluna ESQUERDA. Com a faixa de luz nova, a
+    // direita ficou com 4 cards somando 305px contra 161px da esquerda, e em
+    // tela baixa o card do eixo — que carrega o "próximo marco" — era o que
+    // cortava. Equilibrar as duas colunas resolve sem esconder nada: 259 e
+    // 207, contra ~260 disponíveis em 1000×460.
+    const cardEixo = criarCard(ctx.hudEsq);
+
+    // Botão "Ver um dia": modo que congela o ano e faz a Terra girar
+    const btnVerDia = document.createElement('button');
+    btnVerDia.className = 'palco-btn';
+    btnVerDia.textContent = te('verUmDia');
+    btnVerDia.style.minWidth = '88px';
+    btnVerDia.onclick = () => {
+      modoDia = !modoDia;
+      btnVerDia.textContent = modoDia ? te('pararDia') : te('verUmDia');
+      if (modoDia) {
+        const dec = declinacaoSolar(longitudeSolar(dias), obliquidade);
+        let nota = te('diaNoiteEquinocio');
+        if (duracaoDoDia(85, dec) >= 23.9) nota = te('solDaMeiaNoiteNorte');
+        else if (duracaoDoDia(-85, dec) >= 23.9) nota = te('solDaMeiaNoiteSul');
+        ctx.anunciar(nota);
+      } else {
+        anguloDia = 0;
+        atualizarHud();
+      }
+    };
+    ctx.rodapeAcoes.appendChild(btnVerDia);
 
     // Extra multiplanetário (SPEC §4.5): seletor de planeta no rodapé, não na coluna
     const selectPlaneta = document.createElement('select');
@@ -487,7 +546,16 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     }
 
     function atualizar(dt, tocando) {
-      if (tocando) dias += dt * (ANO_DIAS / 24);   // um ano em ~24 s
+      // No modo dia, o ano congela; caso contrário, avança normalmente
+      if (tocando && !modoDia) dias += dt * (ANO_DIAS / 24);   // um ano em ~24 s
+
+      // No modo dia, a rotação diária avança; caso contrário, zera
+      if (modoDia) {
+        anguloDia += dt * (Math.PI * 2 / 8);   // uma volta em 8 s
+      } else {
+        anguloDia = 0;
+      }
+
       const { lambda, pos } = posicaoDaTerra(dias);
 
       grupoTerra.position.copy(pos);
@@ -497,10 +565,20 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // de dados.js), a mesma regra que orienta o corpo na cena principal.
       const dirEixo = motor.poloDoCorpo(corpoAtual);
       eixo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirEixo);
-      terra.quaternion.copy(eixo.quaternion);
 
-      // Nuvens giram continuamente, independente do resto (velocidade constante)
-      nuvens.rotation.y += dt * 0.06;
+      // No modo dia, a Terra gira em torno de seu eixo
+      if (modoDia) {
+        const qEixo = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirEixo);
+        eixo.quaternion.copy(qEixo);
+        const qGiro = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), anguloDia);
+        terra.quaternion.copy(qEixo).multiply(qGiro);
+        nuvens.quaternion.copy(qEixo).multiply(
+          new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), anguloDia * 1.03));
+      } else {
+        terra.quaternion.copy(eixo.quaternion);
+        // Nuvens giram continuamente, independente do resto (velocidade constante)
+        nuvens.rotation.y += dt * 0.06;
+      }
 
       // Terminador de frente para o Sol
       terminador.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().negate().normalize());
@@ -547,6 +625,45 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
       linhaLat.querySelector('.palco-card-titulo').textContent = te('latitude');
       linhaLat.querySelector('.palco-card-nota').textContent = `${Math.abs(latitude)}° N / ${Math.abs(latitude)}° S`;
+
+      // Card "Onde o Sol não se põe": faixa de luz por latitude
+      cardFaixaDeLuz.titulo.textContent = te('diaNoiteTitulo');
+      cardFaixaDeLuz.valor.innerHTML = svgFaixaDeLuz(dec);
+
+      // A nota muda dependendo do estado
+      if (modoDia) {
+        // No modo dia, mostra a hora e o estado (dia/noite)
+        const hora = ((anguloDia / (Math.PI * 2)) * 24) % 24;
+        const hh = String(Math.floor(hora)).padStart(2, '0');
+        const mm = String(Math.floor((hora % 1) * 60)).padStart(2, '0');
+        const horaFormatada = `${hh}h${mm}`;
+
+        // Calcula se está de dia ou noite usando a mesma fórmula de duracaoDoDia
+        const H = anguloDia - Math.PI;  // ângulo horário a partir do meio-dia
+        const estaDeDia = Math.cos(H) > -Math.tan(latitude * RAD) * Math.tan(dec * RAD);
+        // O relógio precisa dizer QUAL hemisfério, senão ele contradiz o card
+        // ao lado: o slider é de 0 a 66 sem sinal e a latitude interna é do
+        // hemisfério sul (padrão Brasil), então "de noite na sua latitude"
+        // aparecia ao lado de "Hemisfério Norte · Verão · 22,2 h de dia claro".
+        // A física estava certa; faltava dizer de quem se estava falando.
+        const rotuloLat = `${Math.abs(Math.round(latitude))}° ${latitude < 0 ? 'S' : 'N'}`;
+        const estado = (estaDeDia ? te('estaDeDia') : te('estaDeNoite')).replace('{lat}', rotuloLat);
+
+        const textoRelogio = te('relogioDia')
+          .replace('{h}', horaFormatada)
+          .replace('{estado}', estado);
+        cardFaixaDeLuz.nota.className = 'palco-card-nota';
+        cardFaixaDeLuz.nota.textContent = textoRelogio;
+
+        ctx.anunciar(textoRelogio);
+      } else {
+        // Modo normal: nota explicativa
+        cardFaixaDeLuz.nota.className = 'palco-card-nota palco-nota-longa';
+        let nota = te('diaNoiteEquinocio');
+        if (duracaoDoDia(85, dec) >= 23.9) nota = te('solDaMeiaNoiteNorte');
+        else if (duracaoDoDia(-85, dec) >= 23.9) nota = te('solDaMeiaNoiteSul');
+        cardFaixaDeLuz.nota.textContent = nota;
+      }
 
       // A causa física: quanto a luz se espalha
       const esp = espalhamentoDaLuz(latitude, dec);
@@ -621,6 +738,63 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       card.titulo.textContent = rotulo;
       card.valor.textContent = te(est);
       card.nota.textContent = `${te('duracaoDia')}: ${num(horas, 1)} ${te('horas')}`;
+    }
+
+    // SVG da faixa de luz por latitude: mostra quantas horas de luz cada latitude
+    // recebe na data atual, permitindo ver onde o Sol não se põe e onde a noite
+    // não termina.
+    function svgFaixaDeLuz(dec) {
+      // Para cada latitude, calcula a duração do dia
+      const alturaSvg = 96;
+      const larguraSvg = 120;
+      const larguraBarra = 108;
+      const areaY = 4;
+      const areaAltura = 88;
+
+      // Monta os <rect> de luz para cada latitude em passos de 4°
+      let rects = '<rect x="6" y="4" width="108" height="88" fill="#101a2e"/>';
+      for (let lat = 90; lat >= -90; lat -= 4) {
+        const horas = duracaoDoDia(lat, dec);
+        const larguraFaixa = (horas / 24) * larguraBarra;
+        // Mapeia latitude: +90 → y=4, -90 → y=92
+        const y = areaY + (90 - lat) / 180 * areaAltura;
+        const altura = 2.2;
+        rects += `<rect x="6" y="${y}" width="${larguraFaixa}" height="${altura}" fill="#ffd479"/>`;
+      }
+
+      // Linhas de referência tracejadas
+      let linhas = '';
+      // Equador (lat 0)
+      const yEquador = areaY + (90 - 0) / 180 * areaAltura;
+      linhas += `<line x1="6" y1="${yEquador}" x2="114" y2="${yEquador}" stroke="#4a6fa8" stroke-dasharray="2,2" stroke-width="0.5"/>`;
+
+      // Círculos polares em +66.56 e -66.56
+      const yNorte = areaY + (90 - 66.56) / 180 * areaAltura;
+      const ySul = areaY + (90 - (-66.56)) / 180 * areaAltura;
+      linhas += `<line x1="6" y1="${yNorte}" x2="114" y2="${yNorte}" stroke="#4a6fa8" stroke-dasharray="2,2" stroke-width="0.5"/>`;
+      linhas += `<text x="116" y="${yNorte + 1}" font-size="7" fill="#93a0b8">66°</text>`;
+      linhas += `<line x1="6" y1="${ySul}" x2="114" y2="${ySul}" stroke="#4a6fa8" stroke-dasharray="2,2" stroke-width="0.5"/>`;
+      linhas += `<text x="116" y="${ySul + 1}" font-size="7" fill="#93a0b8">-66°</text>`;
+
+      // Marca na latitude escolhida pelo usuário
+      const yUsuario = areaY + (90 - latitude) / 180 * areaAltura;
+      const marcador = `<line x1="6" y1="${yUsuario}" x2="114" y2="${yUsuario}" stroke="#ff8a5c" stroke-width="1.2"/>`;
+
+      // Eixo: N no topo, S embaixo
+      const eixoTexto = `<text x="2" y="8" font-size="7" fill="#93a0b8">N</text>
+        <text x="2" y="95" font-size="7" fill="#93a0b8">S</text>`;
+
+      const ariaLabel = te('faixaDeLuzAlt')
+        .replace('{n}', num(duracaoDoDia(85, dec), 0))
+        .replace('{e}', num(duracaoDoDia(0, dec), 0))
+        .replace('{s}', num(duracaoDoDia(-85, dec), 0));
+
+      return `<svg viewBox="0 0 120 96" width="100%" height="96" role="img" aria-label="${ariaLabel}">
+        ${rects}
+        ${linhas}
+        ${marcador}
+        ${eixoTexto}
+      </svg>`;
     }
 
     // Diagrama do ângulo da luz: dois feixes de mesma largura, um a pino e
