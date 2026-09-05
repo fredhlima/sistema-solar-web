@@ -72,6 +72,9 @@ const COMPRESSAO_SOL = (KM_SOL_ORBITA / KM_LUA_ORBITA) / (RAIO_ORBITA_SOL / RAIO
 // Exagero do bojo. O real é ~0,5 m numa Terra de 12.742 km — 1 parte em 25
 // milhões. Sem exagero não há o que ver; daí o selo e o "ver em escala real".
 const EXAGERO_BOJO = 0.24;
+/** Raio da casca de água. Constante própria porque o marcador da praia
+    precisa dela para pousar exatamente sobre a superfície do oceano. */
+const RAIO_OCEANO = RAIO_TERRA * 1.005;
 
 /**
  * A geometria do palco, exposta para os testes.
@@ -83,7 +86,7 @@ const EXAGERO_BOJO = 0.24;
  */
 export const GEOMETRIA = {
   RAIO_TERRA, RAIO_ORBITA_LUA, RAIO_LUA, RAIO_SOL, RAIO_ORBITA_SOL, EXAGERO_BOJO,
-  RAIO_OCEANO: RAIO_TERRA * 1.005,
+  RAIO_OCEANO,
 };
 
 const TEXTOS = {
@@ -289,6 +292,13 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     camera.position.set(0, 36, 0.01);
 
     const controls = new OrbitControls(camera, motor.canvas);
+    // A Terra é o assunto deste modo, e fica fixa no centro: arrastar move a
+    // câmera EM VOLTA dela (girar, ver de cima, ver de lado) e a roda aproxima
+    // ou afasta, mas nada tira a Terra do meio. Sem isto, um arrasto lateral
+    // empurrava o planeta para fora do quadro e a cena perdia o sujeito —
+    // liberdade que não servia a nada aqui.
+    controls.enablePan = false;
+    controls.target.set(0, 0, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.minDistance = 6;
@@ -320,7 +330,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     // ————— oceano: elipsoide prolato alinhado ao eixo dos bojos —————
     const oceano = new THREE.Mesh(
-      reg(new THREE.SphereGeometry(RAIO_TERRA * 1.005, 64, 48)),
+      reg(new THREE.SphereGeometry(RAIO_OCEANO, 64, 48)),
       reg(new THREE.MeshStandardMaterial({
         color: 0x5fb8ff, transparent: true, opacity: 0.6,
         roughness: 0.2, metalness: 0.15,
@@ -500,7 +510,16 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     const cardForcas = (() => {
       const el = document.createElement('div');
       el.className = 'palco-card palco-explicacao';
-      el.innerHTML = '<p class="palco-card-titulo"></p><div class="palco-card-valor"></div><p class="palco-card-nota"></p>';
+      // Botão de fechar no próprio painel: com ele aberto sobre a cena, o
+      // caminho de saída tem de estar onde o olho já está, e não só na barra
+      // de baixo. O botão do rodapé continua funcionando.
+      el.innerHTML = '<button class="palco-explicacao-fechar" type="button">'
+        + '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">'
+        + '<path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>'
+        + '</svg></button>'
+        + '<p class="palco-card-titulo"></p>'
+        + '<div class="palco-explicacao-corpo">'
+        + '<div class="palco-card-valor"></div><p class="palco-card-nota"></p></div>';
       (document.getElementById('palco-mares') || document.body).appendChild(el);
       descartaveis.push({ dispose: () => el.remove() });
       return {
@@ -511,6 +530,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       };
     })();
     cardForcas.raiz.hidden = true;
+    cardForcas.raiz.querySelector('.palco-explicacao-fechar').onclick = () => {
+      mostrarForcas = false;
+      cardForcas.raiz.hidden = true;
+      atualizarHud();
+    };
 
     function criarCard(pai) {
       const el = document.createElement('div');
@@ -578,11 +602,31 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       terra.rotation.y = anguloTerra * RAD;
       const lonPraia = anguloTerra % 360;
       const dirPraia = direcaoLongitude(lonPraia);
-      praia.position.copy(dirPraia).multiplyScalar(RAIO_TERRA * (1 + e * 1.05));
-
       // ψ: ângulo entre a praia e o eixo dos bojos
       const psi = ((lonPraia - eixoGraus) % 360 + 360) % 360;
       const altura = alturaRelativa(psi, amplitude);
+
+      // O marcador tem de ficar SOBRE a água, e a água é um elipsoide.
+      //
+      // Antes ele era posto num raio fixo — RAIO_TERRA × (1 + e), a altura do
+      // BOJO — independentemente de onde estivesse. Onde a maré está alta isso
+      // coincide com a superfície; a 90° dali o oceano está em (1 − e/2) e o
+      // marcador ficava boiando acima dele. E como `e` depende da amplitude,
+      // trocar de camada (só a Lua / só o Sol / os dois) mudava o tamanho da
+      // discrepância — foi assim que o defeito apareceu.
+      //
+      // O raio de um elipsoide de semi-eixos a e b, na direção que faz ângulo
+      // ψ com o eixo maior, é ab / √((b·cosψ)² + (a·sinψ)²). Usando o mesmo a
+      // e b que deformam a malha do oceano, o marcador fica exatamente na
+      // superfície para qualquer exagero e qualquer camada.
+      const psiRad = psi * RAD;
+      const semiMaior = RAIO_OCEANO * (1 + e);
+      const semiMenor = RAIO_OCEANO * (1 - e / 2);
+      const raioNaPraia = (semiMaior * semiMenor) / Math.hypot(
+        semiMenor * Math.cos(psiRad),
+        semiMaior * Math.sin(psiRad),
+      );
+      praia.position.copy(dirPraia).multiplyScalar(raioNaPraia);
 
       // Cada corpo puxa por si; o oceano responde à soma. Ver os três ao
       // mesmo tempo é o que explica a maré viva e a morta.

@@ -308,13 +308,56 @@ body.modo-dock .palco-fechar {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(420px, calc(100% - 32px));
+  /* Era 420px: numa tela de 2000px o painel virava uma coluna estreita e alta,
+     com o texto quebrando a cada cinco palavras e rolagem para ler o resto.
+     Mais largo, o mesmo conteúdo cabe sem rolar e a leitura fica confortável. */
+  width: min(860px, calc(100% - 32px));
   max-height: calc(100% - 150px);
   overflow-y: auto;
   overscroll-behavior: contain;
   pointer-events: auto;
   max-width: none;
   z-index: 2;
+  padding-top: 34px;   /* espaço para o botão de fechar */
+}
+
+/* Em tela larga o diagrama vai ao lado do texto: usa a horizontal que sobra e
+   encurta a altura, em vez de empilhar tudo numa coluna comprida. */
+.palco-explicacao-corpo { display: grid; gap: 14px 20px; }
+
+@media (min-width: 720px) {
+  .palco-explicacao-corpo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}
+
+.palco-explicacao .palco-card-nota {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.palco-explicacao-fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 160, 255, 0.22);
+  background: rgba(120, 160, 255, 0.12);
+  color: #e8edf7;
+  cursor: pointer;
+}
+
+.palco-explicacao-fechar:hover { background: rgba(120, 160, 255, 0.24); }
+
+.palco-explicacao-fechar:focus-visible {
+  outline: 2px solid rgba(158, 197, 255, 0.9);
+  outline-offset: 2px;
 }
 
 /* ————— roteiro guiado ————— */
