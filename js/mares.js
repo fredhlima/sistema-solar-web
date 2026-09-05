@@ -70,8 +70,29 @@ const FIDELIDADE_SOL = (Math.atan(RAIO_SOL / RAIO_ORBITA_SOL) / Math.atan(RAIO_L
 /** Quantas vezes a distância Sol–Terra foi encurtada para caber na tela. */
 const COMPRESSAO_SOL = (KM_SOL_ORBITA / KM_LUA_ORBITA) / (RAIO_ORBITA_SOL / RAIO_ORBITA_LUA);
 // Exagero do bojo. O real é ~0,5 m numa Terra de 12.742 km — 1 parte em 25
-// milhões. Sem exagero não há o que ver; daí o selo e o "ver em escala real".
-const EXAGERO_BOJO = 0.24;
+// milhões. Sem exagero não há o que ver; daí o selo.
+//
+// Era 0,24, com a deformação repartida entre esticar as pontas (1+e) e afinar
+// a cintura (1−e/2). O problema é que a cintura AFUNDAVA na esfera sólida da
+// Terra: na sizígia o oceano chegava a 0,83 do raio, contra 1,005 da Terra, e
+// o planeta furava a água. Como o marcador da praia anda sobre o oceano, ele
+// entrava e saía do planeta ao longo do giro — foi o que o Fred viu.
+//
+// Agora a cintura fica fixa em RAIO_OCEANO e só as pontas crescem (ver
+// `escalaDoBojo`). Para o bojo não ficar maior na tela do que já estava, o
+// exagero caiu para 0,145: na sizígia a ponta dá 1,355 × RAIO_OCEANO, o mesmo
+// alcance máximo de antes. A razão sizígia/quadratura da ALTURA do bojo acima
+// da esfera continua ~2,8, contra 2,70 da física.
+const EXAGERO_BOJO = 0.145;
+
+/**
+ * Quanto o oceano estica ao longo do eixo dos bojos, em múltiplos do raio da
+ * casca de água. Os outros dois eixos ficam em 1 — a cintura não encolhe.
+ */
+function escalaDoBojo(amplitude) {
+  const e = EXAGERO_BOJO * amplitude;
+  return (1 + e) / (1 - e / 2);
+}
 /** Raio da casca de água. Constante própria porque o marcador da praia
     precisa dela para pousar exatamente sobre a superfície do oceano. */
 const RAIO_OCEANO = RAIO_TERRA * 1.005;
@@ -86,6 +107,7 @@ const RAIO_OCEANO = RAIO_TERRA * 1.005;
  */
 export const GEOMETRIA = {
   RAIO_TERRA, RAIO_ORBITA_LUA, RAIO_LUA, RAIO_SOL, RAIO_ORBITA_SOL, EXAGERO_BOJO,
+  escalaDoBojo,
   RAIO_OCEANO,
 };
 
@@ -611,10 +633,9 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       // Oceano deformado: prolato ao longo do eixo dos bojos. O eixo é o do
       // conjunto Lua+Sol, não o da Lua — por isso em fase intermediária ele
-      // fica ENTRE os dois. Em escala real, não há exagero — o oceano fica
-      // esférico.
-      const e = EXAGERO_BOJO * amplitude;
-      oceano.scale.set(1 + e, 1 - e / 2, 1 - e / 2);
+      // fica ENTRE os dois.
+      const alongamento = escalaDoBojo(amplitude);
+      oceano.scale.set(alongamento, 1, 1);
       oceano.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direcaoLongitude(eixoGraus));
 
       // Rotação da Terra e a praia sobre ela.
@@ -645,8 +666,8 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // e b que deformam a malha do oceano, o marcador fica exatamente na
       // superfície para qualquer exagero e qualquer camada.
       const psiRad = psi * RAD;
-      const semiMaior = RAIO_OCEANO * (1 + e);
-      const semiMenor = RAIO_OCEANO * (1 - e / 2);
+      const semiMaior = RAIO_OCEANO * alongamento;
+      const semiMenor = RAIO_OCEANO;
       const raioNaPraia = (semiMaior * semiMenor) / Math.hypot(
         semiMenor * Math.cos(psiRad),
         semiMaior * Math.sin(psiRad),

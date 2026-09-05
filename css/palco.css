@@ -380,15 +380,22 @@ body.modo-dock .palco-fechar {
 
 @media (min-width: 720px) {
   .palco-explicacao-corpo {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    /* O diagrama pede pouca largura; o texto, muita — ele corre em duas
+       colunas próprias, e colunas estreitas demais anulam o ganho de altura
+       (a 190px por coluna, o texto só dobra de linhas). */
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
     align-items: start;
   }
 }
 
 .palco-explicacao .palco-card-nota {
   font-size: 13px;
-  line-height: 1.55;
+  /* 1,5 e não 1,55: sobravam 11px de rolagem no iPhone 15, e o corte no
+     último parágrafo lê como defeito, não como "tem mais abaixo". */
+  line-height: 1.5;
 }
+
+.palco-explicacao .palco-card-nota p { margin-bottom: 5px; }
 
 .palco-explicacao-fechar {
   position: absolute;
@@ -826,3 +833,55 @@ body.modo-dock .palco-segmentado { max-width: 196px; min-width: 196px; }
 
 body.modo-dock .palco-segmento { min-height: 32px; font-size: 11px; padding: 0 5px; }
 body.modo-dock .palco-btn-pequeno { min-height: 32px; font-size: 11px; padding: 0 8px; }
+
+
+/* ————— o painel "Saiba mais" não é um card de coluna —————
+
+   Ele nasce com `class="palco-card palco-explicacao"` para herdar fundo, borda
+   e tipografia, mas as regras de LARGURA dos cards não valem para ele: em modo
+   dock `body.modo-dock .palco-card` fixa 196px e, em tela baixa, a media query
+   fixa 200px. As duas ganham de `.palco-explicacao` (0-1-0 contra 0-2-1 e
+   empate perdido por ordem), e o resultado no celular era a explicação inteira
+   espremida em 196px, com o texto quebrado em duas colunas de 100px.
+
+   Estas regras vêm por último e com a mesma especificidade da do dock, então
+   ganham no desempate por ordem. Ficam no fim do arquivo de propósito. */
+body .palco-card.palco-explicacao {
+  max-width: none;
+  /* `box-sizing` é herdado de ninguém: só `.palco-overlay` declara border-box.
+     Sem isto, os 36px de padding + 2px de borda entravam POR FORA da largura
+     calculada e o painel passava 6px da tela no iPhone 15. */
+  box-sizing: border-box;
+  width: min(860px, calc(100% - 32px));
+  /* 16px em cima, não 34: o X mora só no canto direito, então quem precisa
+     desviar dele é o título, não o painel inteiro. Os 18px que sobram são o
+     que faltava para o texto caber sem rolar no iPhone 15. */
+  padding: 16px 18px;
+  border-radius: 16px;
+  /* Sobrepõe os cards das colunas, não divide espaço com eles: desfoque atrás
+     e sombra funda para a leitura não competir com a cena nem com o HUD. */
+  backdrop-filter: blur(16px);
+  background: rgba(9, 13, 24, 0.95);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.65);
+  z-index: 5;
+}
+
+body .palco-card.palco-explicacao .palco-card-titulo { padding-right: 46px; }
+
+/* O painel é superfície de LEITURA, não HUD: no celular os cards caem para
+   10px (`body.modo-dock .palco-card-nota`) e essa regra vinha junto por
+   especificidade. 12px com entrelinha larga é o mínimo honesto para uma
+   criança ler num celular — e o painel rola, que é o que painel de texto faz. */
+body .palco-card.palco-explicacao .palco-card-nota {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Sem `columns` aqui, embora a largura convide: num contêiner de altura fixa
+   com `overflow-y`, o multicol transborda para o LADO, criando colunas que a
+   rolagem vertical não alcança — o texto sumia de vez em vez de rolar. A
+   largura já vem da proporção do grid ao lado. */
+
+/* O `.palco-compacto` esconde as notas longas para caber nas colunas — mas o
+   painel largo é justamente onde o texto longo deve aparecer. */
+.palco-compacto .palco-explicacao .palco-nota-longa { display: block; }
