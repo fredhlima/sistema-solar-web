@@ -384,11 +384,28 @@ export function criarPalco(cfg) {
     ref.sr.textContent = texto;
   }
 
-  /** Marca as colunas do HUD que têm conteúdo além do visível, para o CSS
-   *  poder mostrar que dá pra rolar. */
+  /**
+   * Ajusta o HUD ao espaço que existe, medindo em vez de adivinhar.
+   *
+   * Duas passadas. Na primeira, mede SEM o modo compacto: se alguma coluna
+   * transborda, liga `.palco-compacto`, que esconde a prosa secundária dos
+   * cards (o CSS decide o quê). Na segunda, marca com esmaecimento a coluna
+   * que ainda assim sobra, para ficar claro que rola.
+   *
+   * Por que não um `@media (max-height:...)`: a altura que basta em português
+   * não basta em espanhol, onde o mesmo texto ocupa mais linhas. E remover
+   * sempre o compacto antes de medir evita a histerese — a decisão é tomada
+   * do zero a cada resize, nunca em cima do estado anterior.
+   */
   function marcarRolagemDoHud() {
-    [ref.hudEsq, ref.hudDir].forEach((h) => {
-      if (!h) return;
+    if (!overlay) return;
+    const colunas = [ref.hudEsq, ref.hudDir].filter(Boolean);
+    const transborda = () => colunas.some((h) => h.scrollHeight > h.clientHeight + 1);
+
+    overlay.classList.remove('palco-compacto');
+    if (transborda()) overlay.classList.add('palco-compacto');
+
+    colunas.forEach((h) => {
       h.classList.toggle('palco-hud-rola', h.scrollHeight > h.clientHeight + 1);
     });
   }
@@ -532,7 +549,13 @@ export function criarPalco(cfg) {
     // Marca rolagem do HUD e registra listener de resize
     // Atrasa para permitir recálculo do layout (as medidas não são precisas se
     // chamado sincronamente).
-    requestAnimationFrame(() => marcarRolagemDoHud());
+    // Duas medições: uma no quadro seguinte, quando o HUD já foi preenchido
+    // pelo primeiro `atualizar`, e outra meio segundo depois — os cards ainda
+    // mudam de altura quando o texto final entra (fase da Lua, estação) e a
+    // fonte termina de carregar. Sem a segunda, uma tela no limite decide o
+    // compacto com base numa altura que ainda ia crescer.
+    requestAnimationFrame(() => requestAnimationFrame(marcarRolagemDoHud));
+    setTimeout(marcarRolagemDoHud, 500);
     window.addEventListener('resize', aoRedimensionarPalco);
 
     if (opcoes.roteiro === false || jaViu()) encerrarRoteiro();

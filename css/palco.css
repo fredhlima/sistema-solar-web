@@ -364,6 +364,37 @@ body.modo-dock .palco-fechar {
   min-height: 2.2em;
 }
 
+/* Nota explicativa secundária: some em tela curta (ver o bloco abaixo). */
+.palco-nota-longa {
+  font-size: 10px;
+  color: #93a0b8;
+  line-height: 1.25;
+  margin: 4px 0 0;
+}
+
+.palco-titulo-extra { text-transform: none; font-weight: 400; }
+
+/* ————— modo compacto: ligado por medição, não por breakpoint —————
+
+   Em tela baixa o HUD não cabia: o conteúdo somava 282px de um lado e 293 do
+   outro contra ~207 disponíveis, e os cards de baixo — Fase da Lua e Ritmo —
+   ficavam cortados atrás do esmaecimento. Rolava, mas ninguém rola o que
+   parece cortado: lia-se como informação perdida.
+
+   A saída é cortar o SECUNDÁRIO em vez de deixar o primário inacessível. Some
+   a prosa explicativa; ficam o número, a régua, a curva, a fase e o ritmo —
+   que é o que a pessoa veio ver. A explicação inteira continua no "Saiba
+   mais", que mora no rodapé fixo e é alcançável.
+
+   Quem liga a classe é `marcarRolagemDoHud` em palco.js, DEPOIS de medir o
+   transbordo real. Um `@media (max-height:...)` seria um chute: a altura que
+   basta em pt não basta em es, onde o mesmo texto ocupa mais linhas. */
+.palco-compacto .palco-nota-longa { display: none; }
+.palco-compacto .palco-titulo-extra { display: none; }
+.palco-compacto .palco-card svg { height: 48px; }
+.palco-compacto .palco-hud { gap: 8px; }
+.palco-compacto .palco-card { padding: 8px 10px; }
+
 @media (max-height: 520px) {
   .palco-overlay { gap: 8px; font-size: 12px; }
   .palco-titulo { font-size: 15px; }

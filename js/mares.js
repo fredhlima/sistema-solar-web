@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, raioSeguro, distanciaParaEnquadrar } from './palco.js?v=7';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=8';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -23,12 +23,40 @@ import {
 const RAD = Math.PI / 180;
 
 // Geometria do palco (unidades de cena, fora de escala por projeto)
-const RAIO_TERRA = 2.0;
-const RAIO_ORBITA_LUA = 9.0;
-const RAIO_LUA = 0.8;
+// A Terra é o sujeito e o Sol precisa parecer o corpo grande — as duas coisas
+// puxam para lados opostos, porque o que cabe na tela é o círculo INTEIRO da
+// cena. A saída foi reescalar tudo em vez de escolher: com a órbita da Lua
+// mais justa, sobra raio para a Terra E para o Sol dentro do mesmo círculo.
+const RAIO_TERRA = 3.0;
+const RAIO_ORBITA_LUA = 8.0;
+const RAIO_LUA = 0.75;
+// O Sol tinha raio 1,6 — MENOR que a Terra (2,0). Numa cena onde ele é a
+// segunda força de maré, isso lia errado: parecia um corpo de porte igual ou
+// menor. O real é 109× o raio da Terra e não cabe em tela nenhuma; 3,4 é o
+// exagero que ainda cabe e já mostra quem é o corpo grande.
+const RAIO_SOL = 5.0;
+// Distância FIXA do Sol. Antes era recalculada por quadro contra a área livre
+// da tela, e como a projeção muda quando a câmera gira, o Sol deslizava para
+// perto e para longe enquanto o usuário arrastava — parecia bug porque era.
+// A borda interna fica em 14,2 − 5,0 = 9,2, com folga de 0,45 sobre a órbita
+// da Lua (8,0 + 0,75): o Sol nunca invade a órbita.
+const RAIO_ORBITA_SOL = 14.2;
 // Exagero do bojo. O real é ~0,5 m numa Terra de 12.742 km — 1 parte em 25
 // milhões. Sem exagero não há o que ver; daí o selo e o "ver em escala real".
 const EXAGERO_BOJO = 0.24;
+
+/**
+ * A geometria do palco, exposta para os testes.
+ *
+ * Sem isto, `validacao-palco.mjs` precisa achar cada corpo pelo raio literal
+ * (`g.radius === 1.6`) — e todo ajuste didático de proporção quebra testes que
+ * não têm nada de errado. Com a constante exportada, o teste pergunta em vez
+ * de adivinhar.
+ */
+export const GEOMETRIA = {
+  RAIO_TERRA, RAIO_ORBITA_LUA, RAIO_LUA, RAIO_SOL, RAIO_ORBITA_SOL, EXAGERO_BOJO,
+  RAIO_OCEANO: RAIO_TERRA * 1.005,
+};
 
 const TEXTOS = {
   pt: {
@@ -257,7 +285,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     const matSol = reg(new THREE.MeshBasicMaterial({
       map: reg(new THREE.CanvasTexture(criarTexturaCanvas(corpoSol))),
     }));
-    const sol = new THREE.Mesh(reg(new THREE.SphereGeometry(1.6, 40, 28)), matSol);
+    const sol = new THREE.Mesh(reg(new THREE.SphereGeometry(RAIO_SOL, 48, 32)), matSol);
     scene.add(sol);
     aplicarTexturaReal(motor.renderer, 'sol', matSol, reg);
 
@@ -296,7 +324,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     // Marcador "sua praia"
     const praia = new THREE.Mesh(
-      reg(new THREE.SphereGeometry(0.17, 16, 12)),
+      reg(new THREE.SphereGeometry(RAIO_TERRA * 0.085, 16, 12)),
       reg(new THREE.MeshBasicMaterial({ color: 0xff8a5c })),
     );
     scene.add(praia);
@@ -309,12 +337,11 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     // O que precisa caber de verdade é a órbita da Lua, cujo raio significa
     // alguma coisa. O Sol só indica uma DIREÇÃO: pode ceder distância e se
     // acomodar na borda livre, desde que nunca entre na órbita da Lua.
-    const RAIO_SOL_MIN = RAIO_ORBITA_LUA + 1.5;      // piso: fora da órbita
-    const RAIO_SOL_MAX = RAIO_ORBITA_LUA + 3.6;      // o que se usava fixo
-    const RAIO_DISCO_SOL = 1.6;
-    // Enquadrar por este raio garante que raioSeguro nunca devolva menos que
-    // RAIO_SOL_MIN em direção nenhuma — é o que torna o piso sempre atendível.
-    const RAIO_DA_CENA = RAIO_SOL_MIN + RAIO_DISCO_SOL;
+    // Tudo o que precisa caber: o Sol no seu raio fixo, mais o disco dele.
+    // Como a câmera nasce de topo puro — o ângulo em que este círculo projeta
+    // MAIOR —, enquadrar aqui cobre o pior caso: girar depois só achata a
+    // elipse, nunca aumenta. Por isso nada precisa ser recalculado por quadro.
+    const RAIO_DA_CENA = RAIO_ORBITA_SOL + RAIO_SOL;
 
     let areaAtual = null;
 
@@ -327,21 +354,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       controls.update();
     }
 
-    /** Raio em que o Sol cabe inteiro na faixa livre, nesta direção. */
-    function raioDoSol(dirSol) {
-      if (!areaAtual) return RAIO_SOL_MAX;
-      // Folga do disco: raioSeguro só enxerga o centro, então pede-se o raio
-      // do centro + disco e desconta-se o disco do resultado.
-      const comFolga = raioSeguro(camera, dirSol, RAIO_SOL_MAX + RAIO_DISCO_SOL, areaAtual);
-      return Math.max(RAIO_SOL_MIN, Math.min(RAIO_SOL_MAX, comFolga - RAIO_DISCO_SOL));
-    }
-
     // ————— vetores de força diferencial (só no "Saiba mais") —————
     // Mostram o que a fórmula diz: para fora nas duas pontas, para dentro nos
     // lados. É a resposta rigorosa, e por isso fica fora da superfície.
     const setasForca = [];
     for (let i = 0; i < 12; i++) {
-      const seta = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0x9ec5ff, 0.28, 0.16);
+      const seta = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0x9ec5ff, RAIO_TERRA * 0.14, RAIO_TERRA * 0.08);
       seta.visible = false;
       scene.add(seta);
       setasForca.push(seta);
@@ -392,12 +410,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       luzSol.position.copy(dirSol).multiplyScalar(50);
       // O Sol fica na borda; os raios ligam ele à Terra, para a segunda
       // força de maré ter de onde vir na tela.
-      const posSol = dirSol.clone().multiplyScalar(raioDoSol(dirSol));
+      const posSol = dirSol.clone().multiplyScalar(RAIO_ORBITA_SOL);
       sol.position.copy(posSol);
       const pr = geoRaios.attributes.position;
       for (let i = 0; i < 3; i++) {
-        const desloc = new THREE.Vector3(-dirSol.z, 0, dirSol.x).multiplyScalar((i - 1) * 1.5);
-        const a = posSol.clone().add(desloc).addScaledVector(dirSol, -1.6);
+        const desloc = new THREE.Vector3(-dirSol.z, 0, dirSol.x).multiplyScalar((i - 1) * RAIO_SOL * 0.62);
+        const a = posSol.clone().add(desloc).addScaledVector(dirSol, -RAIO_SOL);
         const bb = desloc.clone().addScaledVector(dirSol, RAIO_TERRA * 1.4);
         pr.setXYZ(i * 2, a.x, a.y, a.z);
         pr.setXYZ(i * 2 + 1, bb.x, bb.y, bb.z);
@@ -458,7 +476,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         const psi = (i * 360) / setasForca.length;
         const h = alturaRelativa(psi, 1);
         const paraFora = h >= 0;
-        const comprimento = 0.35 + Math.abs(h) * 1.5;
+        const comprimento = RAIO_TERRA * (0.175 + Math.abs(h) * 0.75);
 
         if (paraFora) {
           // Seta para fora: nasce na superfície, aponta para fora
@@ -472,7 +490,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
           seta.setDirection(dir.clone().negate());
         }
 
-        seta.setLength(comprimento, 0.28, 0.16);
+        seta.setLength(comprimento, RAIO_TERRA * 0.14, RAIO_TERRA * 0.08);
         seta.setColor(paraFora ? 0x7ad4ff : 0x8a97b5);
         seta.visible = true;
       });
@@ -579,7 +597,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         + `<div class="palco-legenda-cores" title="${tm('eixosNota')}">`
         + `<span><i style="background:#9ec5ff"></i>${tm('legendaLua')}</span>`
         + `<span><i style="background:#ffd479"></i>${tm('legendaSol')}</span>`
-        + `</div><p style="font-size:10px;color:#93a0b8;margin:4px 0 0;line-height:1.25">${tm('eixosNota')}</p>`;
+        + `</div><p class="palco-nota-longa">${tm('eixosNota')}</p>`;
       cardForca.valor.innerHTML = valorHTML;
       cardForca.nota.textContent = classeTexto;
       cardForca.raiz.classList.toggle('palco-card-alerta', classe === 'sizigia' || classe === 'quadratura');
@@ -603,7 +621,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // girando não se identifica com o card que mostra a maré dele.
       cardPraia.titulo.innerHTML =
         `<span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')} `
-        + `<span style="text-transform:none;font-weight:400">— ${tm('praiaLegenda')}</span>`;
+        + `<span class="palco-titulo-extra">— ${tm('praiaLegenda')}</span>`;
       cardPraia.valor.innerHTML = svgCurvaMare(dias, altura, amplitude);
       const subindo = alturaAnterior !== null && altura > alturaAnterior;
       const perto = Math.abs(altura) > amplitude * 0.75;
@@ -611,13 +629,14 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         ? (altura > 0 ? tm('preamar') : tm('baixamar'))
         : (subindo ? tm('subindo') : tm('descendo'));
       if (!escalaRealAtiva) {
-        cardPraia.nota.innerHTML = `<div style="font-size:10px;color:#93a0b8;margin-bottom:4px">${tm('curvaNota')}</div>${estado}`;
+        cardPraia.nota.innerHTML = `<div class="palco-nota-longa">${tm('curvaNota')}</div>${estado}`;
       }
 
       // Ritmo
       const intervalo = formatarHoras(intervaloEntrePreamaresHoras());
       cardRitmo.titulo.textContent = tm('ritmoTitulo');
       cardRitmo.valor.textContent = intervalo;
+      cardRitmo.nota.className = 'palco-card-nota palco-nota-longa';
       cardRitmo.nota.textContent = tm('ritmoNota').replace('{i}', intervalo);
 
       // Saiba mais
