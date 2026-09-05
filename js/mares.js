@@ -11,14 +11,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=30';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=9';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=18';
 import { criarTexturaCanvas } from './texturas.js?v=4';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
   nomeDaFase, mareCombinada, alturaRelativa, intervaloEntrePreamaresHoras,
   diaLunarHoras, formatarHoras, MES_SINODICO_DIAS, A_SOL, A_LUA,
   classificarMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
-} from './mares-calc.js?v=2';
+} from './mares-calc.js?v=3';
 
 const RAD = Math.PI / 180;
 
@@ -34,13 +34,41 @@ const RAIO_LUA = 0.75;
 // segunda força de maré, isso lia errado: parecia um corpo de porte igual ou
 // menor. O real é 109× o raio da Terra e não cabe em tela nenhuma; 3,4 é o
 // exagero que ainda cabe e já mostra quem é o corpo grande.
-const RAIO_SOL = 5.0;
-// Distância FIXA do Sol. Antes era recalculada por quadro contra a área livre
-// da tela, e como a projeção muda quando a câmera gira, o Sol deslizava para
-// perto e para longe enquanto o usuário arrastava — parecia bug porque era.
-// A borda interna fica em 14,2 − 5,0 = 9,2, com folga de 0,45 sobre a órbita
-// da Lua (8,0 + 0,75): o Sol nunca invade a órbita.
-const RAIO_ORBITA_SOL = 14.2;
+const RAIO_SOL = 4.0;
+// Distância e tamanho do Sol — um compromisso MEDIDO, não escolhido a olho.
+//
+// O fato que rege isto: o Sol está 389× mais longe que a Lua e é 400× maior.
+// As duas razões quase se cancelam, então vistos da Terra os dois têm
+// praticamente o mesmo tamanho — 0,533° contra 0,518° — e é isso que torna
+// possível um eclipse total.
+//
+// Reproduzir essa razão aqui é possível, e foi testado: com o Sol a 36 u a
+// proporção sai exata (1,03×). Mas o enquadramento tem de caber a cena
+// inteira, e a Terra cai para 7,5% do raio dela — no celular, 26 px. Um
+// modo sobre marés em que a Terra é um ponto não ensina nada.
+//
+// O que foi feito, então: o Sol vai o mais longe que a legibilidade permite,
+// e o quanto se perde fica escrito no card em vez de escondido.
+//
+//   antes:  raio 5,0 a 14,2 u  →  Sol 3,62× a Lua  (Terra em 15,6% da cena)
+//   agora:  raio 4,0 a 26,0 u  →  Sol 1,63× a Lua  (Terra em 10,0%)
+//   real:                          Sol 1,03× a Lua
+//
+// A distância continua FIXA. Antes era recalculada por quadro contra a área
+// livre da tela e, como a projeção muda quando a câmera gira, o Sol deslizava
+// para perto e para longe enquanto o usuário arrastava — parecia bug porque era.
+const KM_LUA_ORBITA = 384400;
+const KM_LUA_RAIO = 1737.4;
+const KM_SOL_ORBITA = 149.6e6;
+const KM_SOL_RAIO = 696000;
+
+const RAIO_ORBITA_SOL = 26.0;
+
+/** Quantas vezes o Sol da cena parece maior que a Lua, contra 1,03 do céu real. */
+const FIDELIDADE_SOL = (Math.atan(RAIO_SOL / RAIO_ORBITA_SOL) / Math.atan(RAIO_LUA / RAIO_ORBITA_LUA));
+
+/** Quantas vezes a distância Sol–Terra foi encurtada para caber na tela. */
+const COMPRESSAO_SOL = (KM_SOL_ORBITA / KM_LUA_ORBITA) / (RAIO_ORBITA_SOL / RAIO_ORBITA_LUA);
 // Exagero do bojo. O real é ~0,5 m numa Terra de 12.742 km — 1 parte em 25
 // milhões. Sem exagero não há o que ver; daí o selo e o "ver em escala real".
 const EXAGERO_BOJO = 0.24;
@@ -78,6 +106,14 @@ const TEXTOS = {
     reguaViva: 'viva',
     legendaLua: 'Lua',
     legendaSol: 'Sol',
+    notaSoLua: 'Só a força da Lua. Sozinha, ela já estica o oceano nas duas pontas — os dois bojos são dela.',
+    notaSoSol: 'Só a força do Sol. Faz a mesma coisa que a Lua, com 46% da força — por isso ele muda a maré, mas não manda nela.',
+    camada_lua: 'Só a Lua',
+    camada_sol: 'Só o Sol',
+    camada_ambos: 'Os dois',
+    irSizigia: 'Ir para lua nova',
+    irQuadratura: 'Ir para o quarto',
+    solEscala: 'O Sol está {d}× mais longe e {t}× maior que a Lua. Aqui foi aproximado {c}× para caber na tela: no céu real os dois parecem do mesmo tamanho, e é por isso que há eclipses totais.',
     eixosNota: 'As linhas mostram para onde cada um puxa. Quando apontam junto, a maré é forte.',
     curvaNota: 'A curva cobre 26 horas na sua praia, com o agora no meio: duas marés altas e duas baixas.',
     preamar: 'Maré alta',
@@ -96,8 +132,6 @@ const TEXTOS = {
     bojoOpostoCurto: 'A Lua puxa o lado PRÓXIMO mais forte que o centro, e o centro mais forte que o lado DISTANTE.',
     bojoOpostoLongo: 'Do lado próximo, a água é puxada para longe da Terra. Do lado distante acontece o contrário: a TERRA é puxada para longe da água, que fica para trás. Nos dois casos sobra água nas pontas — dois bojos, não um. Não é a Lua levantando o mar dos dois lados: é ela esticando a Terra inteira.',
     razaoNota: 'Maré da Lua: {r}× a do Sol',
-    escalaLegenda: 'Em escala real o bojo tem cerca de 0,5 m numa Terra de 12.742 km.',
-    escalaNota: 'O mar sobe menos que a sua altura — e ainda assim move oceanos inteiros.',
     passo1: 'A Lua puxa a água da Terra. Do lado voltado para ela, o mar sobe.',
     passo2: 'E do lado oposto o mar também sobe. São dois bojos, não um.',
     passo3: 'A razão: a Lua não puxa a Terra inteira por igual. O lado próximo é puxado mais que o centro, e o centro mais que o lado distante. Essa diferença estica a água nas duas pontas.',
@@ -123,6 +157,14 @@ const TEXTOS = {
     reguaViva: 'spring',
     legendaLua: 'Moon',
     legendaSol: 'Sun',
+    notaSoLua: 'The Moon’s pull alone. By itself it already stretches the ocean at both ends — both bulges are hers.',
+    notaSoSol: 'The Sun’s pull alone. It does the same as the Moon with 46% of the force — enough to change the tide, not to rule it.',
+    camada_lua: 'Moon only',
+    camada_sol: 'Sun only',
+    camada_ambos: 'Both',
+    irSizigia: 'Go to new Moon',
+    irQuadratura: 'Go to first quarter',
+    solEscala: 'The Sun is {d}× farther and {t}× larger than the Moon. Here it was brought {c}× closer to fit: in the real sky the two look the same size, which is why total eclipses happen.',
     eixosNota: 'The lines show where each one pulls. When they point together, the tide is strong.',
     curvaNota: 'The curve covers 26 hours at your beach, with now in the middle: two high tides and two low ones.',
     preamar: 'High tide',
@@ -141,8 +183,6 @@ const TEXTOS = {
     bojoOpostoCurto: 'The Moon pulls the NEAR side harder than the centre, and the centre harder than the FAR side.',
     bojoOpostoLongo: 'On the near side, the water is pulled away from Earth. On the far side the opposite happens: the EARTH is pulled away from the water, which is left behind. Either way water piles up at both ends — two bulges, not one. It is not the Moon lifting the sea on both sides: it is the Moon stretching the whole Earth.',
     razaoNota: 'Moon’s tide: {r}× the Sun’s',
-    escalaLegenda: 'At true scale the bulge is about 0.5 m on an Earth 12,742 km across.',
-    escalaNota: 'The sea rises less than your own height — and still moves entire oceans.',
     passo1: 'The Moon pulls Earth’s water. On the side facing it, the sea rises.',
     passo2: 'And on the opposite side the sea rises too. There are two bulges, not one.',
     passo3: 'The reason: the Moon does not pull the whole Earth equally. The near side is pulled more than the centre, and the centre more than the far side. That difference stretches the water at both ends.',
@@ -168,6 +208,14 @@ const TEXTOS = {
     reguaViva: 'viva',
     legendaLua: 'Luna',
     legendaSol: 'Sol',
+    notaSoLua: 'Solo la fuerza de la Luna. Ella sola ya estira el océano en los dos extremos — los dos abultamientos son suyos.',
+    notaSoSol: 'Solo la fuerza del Sol. Hace lo mismo que la Luna con el 46% de la fuerza — cambia la marea, pero no manda en ella.',
+    camada_lua: 'Solo la Luna',
+    camada_sol: 'Solo el Sol',
+    camada_ambos: 'Los dos',
+    irSizigia: 'Ir a luna nueva',
+    irQuadratura: 'Ir al cuarto',
+    solEscala: 'El Sol está {d}× más lejos y es {t}× mayor que la Luna. Aquí fue acercado {c}× para caber: en el cielo real los dos se ven del mismo tamaño, y por eso hay eclipses totales.',
     eixosNota: 'Las líneas muestran hacia dónde tira cada uno. Cuando apuntan juntas, la marea es fuerte.',
     curvaNota: 'La curva cubre 26 horas en tu playa, con el ahora en el medio: dos mareas altas y dos bajas.',
     preamar: 'Marea alta',
@@ -186,8 +234,6 @@ const TEXTOS = {
     bojoOpostoCurto: 'La Luna tira del lado CERCANO más fuerte que del centro, y del centro más que del lado LEJANO.',
     bojoOpostoLongo: 'En el lado cercano, el agua es atraída lejos de la Tierra. En el lado lejano pasa lo contrario: es la TIERRA la que es atraída lejos del agua, que se queda atrás. En ambos casos sobra agua en las puntas — dos abultamientos, no uno. No es la Luna levantando el mar de los dos lados: es ella estirando la Tierra entera.',
     razaoNota: 'Marea de la Luna: {r}× la del Sol',
-    escalaLegenda: 'En escala real el abultamiento mide unos 0,5 m en una Tierra de 12.742 km.',
-    escalaNota: 'El mar sube menos que tu propia altura — y aun así mueve océanos enteros.',
     passo1: 'La Luna tira del agua de la Tierra. En el lado que la mira, el mar sube.',
     passo2: 'Y en el lado opuesto el mar también sube. Son dos abultamientos, no uno.',
     passo3: 'La razón: la Luna no tira de toda la Tierra por igual. El lado cercano recibe más tirón que el centro, y el centro más que el lado lejano. Esa diferencia estira el agua en los dos extremos.',
@@ -222,7 +268,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     let dias = diasDesdeJ2000(ctx.dataInicial);
     let mostrarForcas = false;
-    let escalaRealAtiva = false;
+    // Camada de bojo em exibição: 'ambos' (o real), 'lua' ou 'sol'.
+    // Ver as duas forças isoladas e depois somadas é o que explica a maré
+    // viva e a morta — em quadratura uma cancela a outra porque estão a 90°,
+    // e em sizígia se somam porque apontam junto. Com os dois sempre
+    // sobrepostos, o usuário vê só o resultado e tem de acreditar na conta.
+    let camada = 'ambos';
     let alturaAnterior = null;
     const marcosVistos = new Set();
 
@@ -389,6 +440,50 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     const cardPraia = criarCard(ctx.hudDir);
     const cardRitmo = criarCard(ctx.hudDir);
 
+    // ————— seletor de camada —————
+    // Três estados em vez de um interruptor: o usuário isola cada força e
+    // depois vê a soma. É a diferença entre "confie na conta" e "veja por quê".
+    const seletorCamada = document.createElement('div');
+    seletorCamada.className = 'palco-segmentado';
+    seletorCamada.setAttribute('role', 'group');
+    const botoesCamada = ['lua', 'sol', 'ambos'].map((qual) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'palco-segmento';
+      b.dataset.camada = qual;
+      b.onclick = () => {
+        camada = qual;
+        atualizarHud();
+      };
+      seletorCamada.appendChild(b);
+      return b;
+    });
+    ctx.hudEsq.appendChild(seletorCamada);
+
+    // ————— atalhos de fase —————
+    // Dois toques valem mais que três frases: em lua nova as linhas coincidem
+    // e a maré vai ao máximo; no quarto elas cruzam a 90° e vai ao mínimo.
+    const atalhos = document.createElement('div');
+    atalhos.className = 'palco-atalhos';
+    const btnSizigia = document.createElement('button');
+    const btnQuadratura = document.createElement('button');
+    [btnSizigia, btnQuadratura].forEach((b) => {
+      b.type = 'button';
+      b.className = 'palco-btn palco-btn-pequeno';
+      atalhos.appendChild(b);
+    });
+    btnSizigia.onclick = () => irParaElongacao(0);
+    btnQuadratura.onclick = () => irParaElongacao(90);
+    ctx.hudEsq.appendChild(atalhos);
+
+    /** Move o tempo até a Lua estar na elongação pedida (0 = nova, 90 = quarto). */
+    function irParaElongacao(alvoGraus) {
+      const atual = elongacao(dias);
+      const delta = ((alvoGraus - atual + 540) % 360) - 180;
+      dias += delta * (MES_SINODICO_DIAS / 360);
+      atualizarHud();
+    }
+
     const btnForcas = document.createElement('button');
     btnForcas.className = 'palco-btn';
     btnForcas.onclick = () => {
@@ -439,7 +534,13 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       const lamSol = longitudeSolar(dias);
       const lamLua = longitudeLunar(dias);
-      const { amplitude, eixoGraus } = mareCombinada(lamLua, lamSol);
+      // A maré da camada escolhida. 'lua' e 'sol' passam a MESMA longitude nos
+      // dois argumentos, o que zera a contribuição do outro corpo sem precisar
+      // de um segundo caminho de cálculo — é a mesma função de sempre.
+      const mare = camada === 'lua' ? mareCombinada(lamLua, lamLua, 1, 0)
+        : camada === 'sol' ? mareCombinada(lamSol, lamSol, 0, 1)
+          : mareCombinada(lamLua, lamSol);
+      const { amplitude, eixoGraus } = mare;
 
       const dirSol = direcaoLongitude(lamSol);
       luzSol.position.copy(dirSol).multiplyScalar(50);
@@ -463,7 +564,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // conjunto Lua+Sol, não o da Lua — por isso em fase intermediária ele
       // fica ENTRE os dois. Em escala real, não há exagero — o oceano fica
       // esférico.
-      const e = escalaRealAtiva ? 0 : EXAGERO_BOJO * amplitude;
+      const e = EXAGERO_BOJO * amplitude;
       oceano.scale.set(1 + e, 1 - e / 2, 1 - e / 2);
       oceano.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direcaoLongitude(eixoGraus));
 
@@ -491,11 +592,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // Com a escala real no ar, TUDO que é exagero tem de sumir: o bojo, as
       // setas e as linhas de eixo (cujo comprimento é proporcional ao exagero).
       // Senão o botão que existe pra provar honestidade vira a prova do contrário.
-      if (mostrarForcas && !escalaRealAtiva) atualizarSetasForca(eixoGraus);
+      if (mostrarForcas) atualizarSetasForca(eixoGraus);
       else setasForca.forEach((s) => { s.visible = false; });
 
-      eixoLua.linha.visible = !escalaRealAtiva;
-      eixoSolBojo.linha.visible = !escalaRealAtiva;
+      // A linha de cada corpo só aparece quando a força dele está em cena
+      eixoLua.linha.visible = camada !== 'sol';
+      eixoSolBojo.linha.visible = camada !== 'lua';
 
       controls.update();
       atualizarHud(lamSol, lamLua, amplitude, altura, psi);
@@ -667,7 +769,22 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         + `<span><i style="background:#ffd479"></i>${tm('legendaSol')}</span>`
         + `</div><p class="palco-nota-longa">${tm('eixosNota')}</p>`;
       cardForca.valor.innerHTML = valorHTML;
-      cardForca.nota.textContent = classeTexto;
+      // Com uma força isolada em cena, "sizígia" e "quadratura" não querem
+      // dizer nada — as duas palavras descrevem a RELAÇÃO entre a Lua e o Sol.
+      // O card explica o que está sendo mostrado em vez de classificar o que
+      // não existe naquele momento.
+      const notaCamada = camada === 'lua' ? tm('notaSoLua')
+        : camada === 'sol' ? tm('notaSoSol') : null;
+
+      // A escala do Sol é um compromisso, e o card diz qual: sem isso a cena
+      // afirma em silêncio que o Sol é 1,6× a Lua no céu, o que é falso.
+      cardForca.nota.textContent = notaCamada || `${classeTexto}. ${tm('solEscala')
+        .replace('{d}', num(KM_SOL_ORBITA / KM_LUA_ORBITA, 0))
+        .replace('{t}', num(KM_SOL_RAIO / KM_LUA_RAIO, 0))
+        .replace('{c}', num(COMPRESSAO_SOL, 0))
+        .replace('{f}', num(FIDELIDADE_SOL, 1))}`;
+      // Alerta só vale para a classificação real, com as duas forças em cena
+      if (notaCamada) cardForca.raiz.classList.remove('palco-card-alerta');
       cardForca.raiz.classList.toggle('palco-card-alerta', classe === 'sizigia' || classe === 'quadratura');
 
       // Um marco por vez, como o modo Estações faz: progresso.js guarda os
@@ -696,7 +813,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       const estado = perto
         ? (altura > 0 ? tm('preamar') : tm('baixamar'))
         : (subindo ? tm('subindo') : tm('descendo'));
-      if (!escalaRealAtiva) {
+      {
         cardPraia.nota.innerHTML = `<div class="palco-nota-longa">${tm('curvaNota')}</div>${estado}`;
       }
 
@@ -708,6 +825,15 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       cardRitmo.nota.textContent = tm('ritmoNota').replace('{i}', intervalo);
 
       // Saiba mais
+      botoesCamada.forEach((b) => {
+        b.textContent = tm(`camada_${b.dataset.camada}`);
+        const ativo = b.dataset.camada === camada;
+        b.classList.toggle('ativo', ativo);
+        b.setAttribute('aria-pressed', String(ativo));
+      });
+      btnSizigia.textContent = tm('irSizigia');
+      btnQuadratura.textContent = tm('irQuadratura');
+
       btnForcas.textContent = mostrarForcas ? tm('saibaMenos') : tm('saibaMais');
       cardForcas.titulo.textContent = tm('bojoOpostoTitulo');
       // O diagrama é a resposta; o texto só a põe em palavras. Três setas de
@@ -725,7 +851,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       // Ver comentário equivalente em estacoes.js: com "ver em escala real"
       // ligado, a legenda é dele, não da data.
-      if (!escalaRealAtiva) {
+      {
         const data = new Date(new Date('2000-01-01T12:00:00Z').getTime() + dias * 86400000);
         const idioma = getIdioma();
         ctx.legenda.textContent = data.toLocaleDateString(idioma === 'pt' ? 'pt-BR' : idioma);
@@ -747,21 +873,6 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     }
 
 
-    function escalaReal() {
-      if (escalaRealAtiva) return;
-      escalaRealAtiva = true;
-      // Bojo de ~0,5 m num raio de 6.371 km: 7,8e-8 do raio. Some da tela, e
-      // é exatamente esse o argumento.
-      oceano.scale.set(1, 1, 1);
-      setasForca.forEach((s) => { s.visible = false; });
-      ctx.legenda.textContent = tm('escalaLegenda');
-      cardPraia.nota.textContent = tm('escalaNota');
-      return () => {
-        escalaRealAtiva = false;
-        if (mostrarForcas) setasForca.forEach((s) => { s.visible = true; });
-      };
-    }
-
     function aoScrubber(fracao) {
       // O scrubber varre o mês sinódico: a fase da Lua, e com ela a força.
       const alvo = fracao * 360;
@@ -782,7 +893,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     requestAnimationFrame(() => requestAnimationFrame(enquadrar));
 
     return {
-      scene, camera, atualizar, dispose, escalaReal, aoScrubber,
+      scene, camera, atualizar, dispose, aoScrubber,
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();

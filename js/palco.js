@@ -83,6 +83,167 @@ const TEXTOS = {
   },
 };
 
+const SVG_PAUSA = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">'
+  + '<rect x="6.5" y="4.5" width="4" height="15" rx="1.4" fill="currentColor"/>'
+  + '<rect x="13.5" y="4.5" width="4" height="15" rx="1.4" fill="currentColor"/></svg>';
+
+const SVG_TOCAR = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">'
+  + '<path d="M8 5.2a1.1 1.1 0 0 1 1.68-.94l9 6.8a1.1 1.1 0 0 1 0 1.88l-9 6.8A1.1 1.1 0 0 1 8 18.8z" fill="currentColor"/></svg>';
+
+const SVG_CHEVRON = '<svg class="palco-card-chevron" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">'
+  + '<path d="M6 9.5 12 15.5 18 9.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// ————— cards colapsáveis —————
+//
+// Medido nos 5 aparelhos-alvo: em paisagem, três cards abertos numa coluna não
+// cabem em 360–430 px de altura. O HUD tem overflow-y:auto, então o conteúdo
+// não some — fica escondido abaixo da dobra, que é pior: ninguém rola um HUD
+// lateral sobre uma cena 3D.
+//
+// A saída é a mesma coisa que o Fred pediu por outro motivo ("o quadro ficou
+// pequeno, deixaria maior ao clicar"): colapsar por padrão onde a tela é
+// baixa, e abrir ao toque. Um aberto por vez em cada coluna garante que a
+// coluna nunca exceda a altura da tela, em nenhum aparelho.
+
+/** Abaixo desta altura de viewport, os cards nascem colapsados. */
+const ALTURA_PARA_COLAPSAR = 520;
+// Não há um segundo limiar de altura para decidir se o primeiro card nasce
+// aberto: limiar fixo erra, porque o que decide não é a altura da tela, é a
+// altura do CARD — "Força da maré" abre com 182 px, "Ritmo" com 90. Um Pixel 8
+// (412 px) cabia num caso e não no outro. Em vez de adivinhar, mede-se: abre o
+// primeiro e, se a coluna transbordar, fecha também.
+
+function aplicarColapso(overlay) {
+  const colapsar = window.innerHeight <= ALTURA_PARA_COLAPSAR;
+
+  overlay.querySelectorAll('.palco-hud').forEach((coluna) => {
+    const cards = [...coluna.querySelectorAll('.palco-card')]
+      .filter((c) => c.querySelector('.palco-card-titulo'));
+
+    cards.forEach((card, i) => {
+      const titulo = card.querySelector('.palco-card-titulo');
+
+      // O gatilho é só o título: o card inteiro não serve porque alguns
+      // contêm slider (latitude) e clicar para arrastar fecharia o card.
+      if (!titulo.dataset.colapsavel) {
+        titulo.dataset.colapsavel = '1';
+        titulo.setAttribute('role', 'button');
+        titulo.setAttribute('tabindex', '0');
+        titulo.insertAdjacentHTML('beforeend', SVG_CHEVRON);
+
+        const alternar = () => {
+          const vaiAbrir = card.classList.contains('palco-card-colapsado');
+          // Um aberto por vez nesta coluna
+          if (vaiAbrir) {
+            cards.forEach((outro) => {
+              if (outro !== card) marcar(outro, true);
+            });
+          }
+          marcar(card, !vaiAbrir);
+          // A partir daqui o estado é escolha do usuário: um resize não pode
+          // fechar o card que ele acabou de abrir para ler.
+          card.dataset.tocado = '1';
+          // Aberto em tela baixa, o card pode passar da coluna. Rolar até ele é
+          // aceitável porque a rolagem virou consequência de um toque — o que
+          // não se pode é esconder conteúdo que ninguém pediu para esconder.
+          if (!vaiAbrir) return;
+          requestAnimationFrame(() => {
+            if (coluna.scrollHeight > coluna.clientHeight) {
+              card.scrollIntoView({
+                block: 'nearest',
+                behavior: movimentoReduzido() ? 'auto' : 'smooth',
+              });
+            }
+          });
+        };
+        titulo.addEventListener('click', alternar);
+        titulo.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            alternar();
+          }
+        });
+      }
+
+      // Estado inicial: em tela baixa só o primeiro fica aberto; nas mais
+      // baixas, nenhum. Não mexe em card que o usuário já abriu.
+      if (!card.dataset.tocado) marcar(card, colapsar && i > 0);
+    });
+
+    // Verificação por medição, no quadro SEGUINTE: aqui o overlay pode ainda
+    // não ter sido exibido e as alturas seriam todas zero — foi o que fez a
+    // primeira versão deste ajuste piorar o corte em vez de resolver.
+    // Se, com o primeiro aberto, a coluna não couber, ele fecha também. Só o
+    // primeiro é candidato (os demais já estão fechados) e um card que o
+    // usuário abriu nunca é mexido.
+    if (colapsar && cards.length && !cards[0].dataset.tocado) {
+      requestAnimationFrame(() => {
+        if (cards[0].dataset.tocado) return;
+        if (coluna.scrollHeight > coluna.clientHeight + 2) marcar(cards[0], true);
+      });
+    }
+  });
+}
+
+function marcar(card, colapsado) {
+  card.classList.toggle('palco-card-colapsado', colapsado);
+  const t = card.querySelector('.palco-card-titulo');
+  if (t) t.setAttribute('aria-expanded', String(!colapsado));
+  if (colapsado) atualizarResumo(card);
+}
+
+/**
+ * O texto que o card mostra fechado.
+ *
+ * Esconder o `.palco-card-valor` por CSS não serve: em uns cards o número é
+ * texto direto, em outros ele divide o elemento com um slider, uma legenda ou
+ * um SVG de gráfico. Regra de CSS que escondesse os filhos apagava o número
+ * junto ("Força da maré" ficava sem o valor); regra que os mostrasse trazia o
+ * slider de volta. Extrair o primeiro trecho de texto resolve os dois casos,
+ * seja qual for a estrutura de dentro.
+ */
+function atualizarResumo(card) {
+  const valor = card.querySelector('.palco-card-valor');
+  if (!valor) return;
+  let resumo = card.querySelector('.palco-card-resumo');
+  if (!resumo) {
+    resumo = document.createElement('span');
+    resumo.className = 'palco-card-resumo';
+    resumo.setAttribute('aria-hidden', 'true');   // o valor real segue no DOM
+    card.appendChild(resumo);
+  }
+  resumo.textContent = primeiroTexto(valor)
+    || primeiroTexto(card.querySelector('.palco-card-nota'))
+    || '';
+}
+
+/**
+ * O primeiro trecho de texto DIRETO de um elemento.
+ *
+ * `textContent` não serve: ele cola tudo o que houver dentro, e "2,4×" seguido
+ * da legenda virava "2,4×vezes a maré mais fraca do mês", que transbordava o
+ * card fechado. O número que interessa é sempre o primeiro nó de texto; o resto
+ * é explicação, que só aparece com o card aberto.
+ */
+function primeiroTexto(el) {
+  if (!el) return '';
+  for (const no of el.childNodes) {
+    if (no.nodeType === Node.TEXT_NODE) {
+      const t = no.textContent.trim();
+      if (t) return t.length > 22 ? `${t.slice(0, 21)}…` : t;
+    }
+  }
+  // Sem texto solto (o valor é um gráfico, por exemplo): tenta o primeiro filho
+  const filho = el.firstElementChild;
+  const t = filho ? (filho.textContent || '').trim() : '';
+  return t.length > 22 ? `${t.slice(0, 21)}…` : t;
+}
+
+/** Mantém o resumo em dia enquanto o card está fechado (o valor muda por frame). */
+function atualizarResumosColapsados(overlay) {
+  overlay.querySelectorAll('.palco-card-colapsado').forEach(atualizarResumo);
+}
+
 function tp(chave) {
   const idioma = getIdioma();
   return (TEXTOS[idioma] && TEXTOS[idioma][chave]) || TEXTOS.pt[chave] || chave;
@@ -265,6 +426,10 @@ export function criarPalco(cfg) {
   let elementoFocoAnterior = null;
   let passos = [];
   let passoAtual = -1;
+  // O resumo do card fechado não precisa de 60 fps: a cada 6 quadros (~10×/s)
+  // o número acompanha a cena sem custar leitura de textContent por quadro.
+  const QUADROS_ENTRE_RESUMOS = 6;
+  let quadrosAteResumo = 0;
 
   // ————— construção do overlay (uma vez) —————
 
@@ -288,7 +453,7 @@ export function criarPalco(cfg) {
       <div class="palco-hud palco-hud-dir"></div>
       <div class="palco-selo" title=""></div>
       <div class="palco-rodape">
-        <button class="palco-btn palco-play" type="button">⏸</button>
+        <button class="palco-btn palco-btn-icone palco-play" type="button"></button>
         <input class="palco-scrubber" type="range" min="0" max="1000" value="0" step="1">
         <div class="palco-legenda"></div>
         <div class="palco-rodape-acoes"></div>
@@ -431,13 +596,20 @@ export function criarPalco(cfg) {
     ref.selo.textContent = tp('foraDeEscala');
     ref.selo.title = tp('foraDeEscala');
     ref.escala.textContent = tp('verEscalaReal');
+    // Só aparece onde faz sentido: a cena declara `escalaReal` ou o botão some.
+    // Nas Marés ele foi retirado — o bojo em escala real simplesmente
+    // desaparece, e o efeito virou ruído em vez de argumento.
+    ref.escala.hidden = !(cena && cena.escalaReal);
+    aplicarColapso(overlay);
     ref.roteiroPular.textContent = tp('pular');
     ref.roteiroProximo.textContent = tp('proximo');
     atualizarBotaoPlay();
   }
 
   function atualizarBotaoPlay() {
-    ref.play.textContent = tocando ? '⏸' : '▶';
+    // SVG em vez de emoji: o emoji muda de forma, peso e cor conforme a
+    // plataforma (no Android sai colorido) e não herda currentColor.
+    ref.play.innerHTML = tocando ? SVG_PAUSA : SVG_TOCAR;
     ref.play.setAttribute('aria-label', tocando ? tp('pausar') : tp('tocar'));
   }
 
@@ -538,7 +710,16 @@ export function criarPalco(cfg) {
     motor.montarPalco({
       scene: cena.scene,
       camera: cena.camera,
-      atualizar: (dt) => cena.atualizar(dt, tocando && !movimentoReduzido()),
+      atualizar: (dt) => {
+        cena.atualizar(dt, tocando && !movimentoReduzido());
+        // O card fechado mostra um resumo do valor, e o valor muda por quadro.
+        // Sem isto ele congelaria no número de quando foi fechado.
+        quadrosAteResumo -= 1;
+        if (quadrosAteResumo <= 0) {
+          quadrosAteResumo = QUADROS_ENTRE_RESUMOS;
+          atualizarResumosColapsados(overlay);
+        }
+      },
       aoRedimensionar: cena.aoRedimensionar,
     });
 
@@ -574,6 +755,8 @@ export function criarPalco(cfg) {
   }
 
   function aoRedimensionarPalco() {
+    // Girar o aparelho pode cruzar o limiar de altura nos dois sentidos
+    aplicarColapso(overlay);
     marcarRolagemDoHud();
   }
 

@@ -78,9 +78,12 @@ export function nomeDaFase(n) {
  * Devolve { amplitude, eixoGraus }, com eixoGraus na mesma convenção de
  * longitude eclíptica usada no resto do app.
  */
-export function mareCombinada(lambdaLua, lambdaSol) {
-  const x = A_LUA * Math.cos(2 * lambdaLua * RAD) + A_SOL * Math.cos(2 * lambdaSol * RAD);
-  const y = A_LUA * Math.sin(2 * lambdaLua * RAD) + A_SOL * Math.sin(2 * lambdaSol * RAD);
+export function mareCombinada(lambdaLua, lambdaSol, pesoLua = 1, pesoSol = 1) {
+  // Os pesos existem para o modo poder mostrar UMA das forças isolada
+  // (pesoSol = 0 dá a maré só da Lua) sem um segundo caminho de cálculo.
+  // Com os dois em 1 — o padrão — nada muda em relação à versão anterior.
+  const x = pesoLua * A_LUA * Math.cos(2 * lambdaLua * RAD) + pesoSol * A_SOL * Math.cos(2 * lambdaSol * RAD);
+  const y = pesoLua * A_LUA * Math.sin(2 * lambdaLua * RAD) + pesoSol * A_SOL * Math.sin(2 * lambdaSol * RAD);
   const amplitude = Math.hypot(x, y);
   const eixoGraus = ((Math.atan2(y, x) * DEG) / 2 + 360) % 360;
   return { amplitude, eixoGraus };

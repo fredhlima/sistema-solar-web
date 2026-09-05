@@ -486,3 +486,191 @@ body.modo-dock .palco-hud { gap: 6px; }
 body.modo-dock .palco-rodape { padding: 5px 10px; gap: 8px; }
 body.modo-dock .palco-btn { min-height: 40px; min-width: 40px; padding: 0 11px; font-size: 12px; }
 body.modo-dock .palco-scrubber { height: 40px; }
+
+
+/* Botão só de ícone: o SVG centralizado herda a cor do botão (currentColor),
+   ao contrário do emoji, que trazia a própria e mudava de forma por
+   plataforma. */
+.palco-btn-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.palco-btn-icone svg { display: block; }
+
+/* ————— cards colapsáveis —————
+   Em paisagem de celular, três cards abertos numa coluna não cabem em 360–430px
+   de altura: o conteúdo ficava escondido abaixo da dobra do HUD, e ninguém rola
+   um HUD lateral sobre uma cena 3D. Colapsados por padrão em tela baixa, e o
+   toque no título abre — que é também o "quadro maior ao clicar". */
+
+.palco-card-titulo[role="button"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  /* alvo de toque confortável sem inflar o card fechado */
+  min-height: 26px;
+  margin: -2px 0 6px;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.palco-card-titulo[role="button"]:focus-visible {
+  outline: 2px solid rgba(158, 197, 255, 0.9);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.palco-card-chevron {
+  flex: 0 0 auto;
+  opacity: 0.7;
+  transition: transform 0.18s ease;
+}
+
+.palco-card-colapsado .palco-card-chevron { transform: rotate(-90deg); }
+
+/* Colapsado NÃO é "só o título": o valor principal continua visível, agora
+   numa linha com ele. Um card fechado que esconde o número que o justifica
+   obriga a abrir todos para achar o que se procura. O que sai são a nota, o
+   gráfico e os controles — o detalhe, não a informação. */
+.palco-card-colapsado .palco-card-nota,
+.palco-card-colapsado .palco-card-sub,
+.palco-card-colapsado .palco-lat,
+.palco-card-colapsado input,
+.palco-card-colapsado svg:not(.palco-card-chevron) { display: none; }
+
+.palco-card-colapsado {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.palco-card-colapsado .palco-card-titulo {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  /* Uma linha só. Sem isto "Força da maré" quebrava em três linhas e o valor
+     ao lado passava por cima do texto. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* O título cede espaço ao resumo, mas nunca some: sem o piso, um valor
+     longo ("Minguante côncava") reduzia "Fase da Lua" a "FASE D". */
+  min-width: 5.5em;
+}
+
+/* Legendas que explicam o card ("— o ponto laranja girando com a Terra") só
+   fazem sentido com ele aberto. */
+.palco-card-colapsado .palco-titulo-extra { display: none; }
+
+/* O valor real sai inteiro do fluxo quando fechado; quem aparece é o
+   .palco-card-resumo, montado em JS a partir do texto dele (ver atualizarResumo
+   em palco.js). O valor pode conter slider, legenda ou SVG, e nenhuma regra de
+   CSS acertava os dois casos ao mesmo tempo. */
+.palco-card-colapsado .palco-card-valor { display: none; }
+
+.palco-card-resumo { display: none; }
+
+.palco-card-colapsado .palco-card-resumo {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #e8edf7;
+}
+
+/* O card fechado nunca transborda a própria caixa */
+.palco-card-colapsado { overflow: hidden; }
+
+.palco-card-colapsado .palco-card-valor {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* O valor pode conter marcação (SVG de medidor, <br>): no colapsado só o
+   texto interessa, e ele não pode quebrar a linha. */
+.palco-card-colapsado .palco-card-valor br { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .palco-card-chevron { transition: none; }
+}
+
+/* ————— seletor de camada —————
+   Três estados exclusivos (só a Lua / só o Sol / os dois). Segmentado em vez
+   de três botões soltos porque a escolha é de UM entre três, e o controle
+   precisa mostrar qual está ativo sem depender de cor apenas. */
+.palco-segmentado {
+  display: flex;
+  background: rgba(11, 16, 28, 0.88);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+  max-width: 260px;
+}
+
+.palco-segmento {
+  flex: 1 1 0;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #93a0b8;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palco-segmento:hover { color: #e8edf7; }
+
+.palco-segmento.ativo {
+  background: rgba(120, 160, 255, 0.24);
+  color: #e8edf7;
+  font-weight: 600;
+  /* Não só cor: o segmento ativo também ganha peso e contorno, para o estado
+     continuar legível em daltonismo e em tela sob sol. */
+  box-shadow: inset 0 0 0 1px rgba(158, 197, 255, 0.45);
+}
+
+.palco-segmento:focus-visible {
+  outline: 2px solid rgba(158, 197, 255, 0.9);
+  outline-offset: 2px;
+}
+
+/* Atalhos de configuração: levam direto à sizígia e à quadratura, que é onde
+   a soma das duas forças fica evidente. */
+.palco-atalhos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 260px;
+}
+
+.palco-btn-pequeno {
+  min-height: 36px;
+  min-width: 0;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+body.modo-dock .palco-segmentado,
+body.modo-dock .palco-atalhos { max-width: 200px; }
+
+body.modo-dock .palco-segmento { min-height: 32px; font-size: 11px; padding: 0 5px; }
+body.modo-dock .palco-btn-pequeno { min-height: 32px; font-size: 11px; padding: 0 8px; }
