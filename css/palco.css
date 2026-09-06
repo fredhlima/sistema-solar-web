@@ -60,8 +60,10 @@ body.com-palco #mdock { display: none !important; }
   grid-row: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  /* Tudo encostado à direita, junto do «‹ Voltar»: à esquerda o título ficava
+     em terra de ninguém — nem no canto, nem alinhado com o card de baixo. */
+  justify-content: flex-end;
+  gap: 14px;
 }
 
 /* O cabeçalho do palco fala a mesma língua do cabeçalho do app (`.titulo` em
@@ -221,6 +223,19 @@ body.modo-dock .palco-fechar {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 196, 92, 0.25);
 }
 
+/* Linha de leitura dentro do `.palco-card-valor`: mesmo bloco do número
+   grande, mas em texto corrido — para quando o "valor" do card é uma frase.
+   No corpo de 20px, "Hemisfério Norte: Inverno · 10,6 h de dia claro" quebrava
+   em quatro linhas. */
+.palco-card-valor .palco-linha {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.palco-card-valor .palco-linha b { font-weight: 600; }
+body.modo-dock .palco-card-valor .palco-linha { font-size: 11px; }
+
 .palco-card-sub {
   font-size: 11px;
   font-weight: 400;
@@ -379,14 +394,28 @@ body.modo-dock .palco-fechar {
 .palco-explicacao-corpo { display: grid; gap: 14px 20px; }
 
 @media (min-width: 720px) {
+  /* Diagrama estreito + duas colunas de texto. Em coluna única o mesmo
+     conteúdo passava de 450px de altura numa janela de 241 no iPhone 15;
+     repartido, a rolagem cai pela metade e o painel largo ganha função. */
   .palco-explicacao-corpo {
-    /* O diagrama pede pouca largura; o texto, muita — ele corre em duas
-       colunas próprias, e colunas estreitas demais anulam o ganho de altura
-       (a 190px por coluna, o texto só dobra de linhas). */
-    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1.38fr);
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
   }
 }
+
+/* Título de tópico dentro do painel: o aprofundamento tem seis blocos, e sem
+   marcação ninguém varre o texto para achar o que procura. */
+.palco-topico {
+  margin: 12px 0 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ec5ff;
+}
+
+.palco-topico:first-child { margin-top: 0; }
+.palco-explicacao .palco-card-nota p { margin: 0 0 6px; }
 
 .palco-explicacao .palco-card-nota {
   font-size: 13px;
@@ -589,10 +618,11 @@ body.modo-dock .palco-fechar {
 }
 
 /* ————— dock mobile —————
-   No modo dock o app fixa o «‹ Voltar» no canto superior esquerdo
-   (estilos.css:2243, position:fixed) — é a convenção de todos os overlays.
-   O título do palco precisa sair de baixo dele. */
-body.modo-dock .palco-topo { padding-left: 108px; }
+   Havia aqui um `padding-left: 108px` para o título sair de baixo do «‹ Voltar»
+   que o app fixa no canto superior esquerdo em modo dock (estilos.css:2243).
+   Ele não faz mais sentido: `body.modo-dock .palco-fechar` já devolve o botão
+   ao fluxo (position: static), e o botão do palco vive à direita. O recuo só
+   empurrava o título para o meio da tela. */
 
 body.modo-dock .palco-titulo {
   font-size: 14px;
@@ -867,6 +897,14 @@ body .palco-card.palco-explicacao {
 }
 
 body .palco-card.palco-explicacao .palco-card-titulo { padding-right: 46px; }
+
+/* Barra de rolagem visível: com seis tópicos o painel passa da tela em
+   paisagem de celular, e a barra é o que diz que há mais texto abaixo. */
+body .palco-card.palco-explicacao::-webkit-scrollbar { width: 8px; }
+body .palco-card.palco-explicacao::-webkit-scrollbar-thumb {
+  background: rgba(158, 197, 255, 0.35);
+  border-radius: 4px;
+}
 
 /* O painel é superfície de LEITURA, não HUD: no celular os cards caem para
    10px (`body.modo-dock .palco-card-nota`) e essa regra vinha junto por

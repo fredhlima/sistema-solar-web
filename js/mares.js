@@ -18,7 +18,8 @@ import {
   nomeDaFase, mareCombinada, alturaRelativa, intervaloEntrePreamaresHoras,
   diaLunarHoras, formatarHoras, MES_SINODICO_DIAS, A_SOL, A_LUA,
   classificarMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
-} from './mares-calc.js?v=3';
+  DIA_SIDERAL_HORAS, AVANCO_LUA_GRAUS_DIA,
+} from './mares-calc.js?v=4';
 
 const RAD = Math.PI / 180;
 
@@ -155,7 +156,14 @@ const TEXTOS = {
     baixamar: 'Maré baixa',
     subindo: 'Enchendo',
     descendo: 'Vazando',
-    ritmoNota: 'Entre uma maré alta e a seguinte passam {i}. Não são 12 h porque, enquanto a Terra gira, a Lua também avança — a Terra precisa girar um pouco mais para reencontrá-la.',
+    ritmoLongo: 'Se a Lua ficasse parada no céu, a maré alta viria a cada 12 h — meia volta da Terra. Mas a Lua anda: avança {g}° por dia na órbita, no mesmo sentido em que a Terra gira. Quando a Terra completa uma volta ({ds}), a Lua já saiu do lugar, e a Terra precisa girar mais {a} minutos para reencontrá-la. Esse é o dia lunar: {dl}. Como os bojos são dois, a sua praia cruza um deles a cada metade disso — {i}.',
+    alturaNota: 'Esta cena mostra a FORÇA da maré, que é a mesma para o planeta inteiro. A altura da água não é: depende do formato da costa e do fundo do mar. No litoral do Sudeste a maré sobe cerca de 1,5 metro; em São Luís, no Maranhão, passa de 6; na baía de Fundy, no Canadá, onde a água entra por um funil, chega a 16 — a maior do mundo.',
+    topicoBojos: 'Dois bojos, não um',
+    topicoDiferenca: 'É a diferença, não a força',
+    topicoRitmo: 'Por que 12h25, e não 12 h',
+    topicoAltura: 'A altura depende da sua costa',
+    topicoLinhas: 'As linhas na cena',
+    topicoSol: 'O Sol nesta tela',
     saibaMais: 'Por que dois bojos?',
     saibaMenos: 'Ocultar a explicação',
     forcasNota: 'Não é a gravidade da Lua que levanta a água: é a DIFERENÇA dela entre o lado próximo, o centro e o lado distante da Terra. Essa diferença cai com o cubo da distância. Por isso a Lua, muito menor, puxa a maré com o dobro da força do Sol.',
@@ -208,7 +216,14 @@ const TEXTOS = {
     baixamar: 'Low tide',
     subindo: 'Rising',
     descendo: 'Falling',
-    ritmoNota: 'Between one high tide and the next, {i} go by. Not 12 h, because while Earth turns the Moon also moves ahead — Earth has to turn a little further to meet it again.',
+    ritmoLongo: 'If the Moon stood still in the sky, high tide would come every 12 h — half a turn of the Earth. But the Moon moves: it advances {g}° a day along its orbit, the same way the Earth spins. By the time the Earth completes one turn ({ds}), the Moon has moved on, and the Earth needs {a} more minutes to catch up with it. That is the lunar day: {dl}. Since there are two bulges, your beach crosses one every half of that — {i}.',
+    alturaNota: 'This scene shows the tidal FORCE, which is the same for the whole planet. The height of the water is not: it depends on the shape of the coast and the sea floor. On Brazil’s southeast coast the tide rises about 1.5 metres; in São Luís, to the north, over 6; in the Bay of Fundy, in Canada, where the water funnels in, it reaches 16 — the highest in the world.',
+    topicoBojos: 'Two bulges, not one',
+    topicoDiferenca: 'It is the difference, not the pull',
+    topicoRitmo: 'Why 12h25, and not 12 h',
+    topicoAltura: 'Height depends on your coast',
+    topicoLinhas: 'The lines in the scene',
+    topicoSol: 'The Sun on this screen',
     saibaMais: 'Why two bulges?',
     saibaMenos: 'Hide the explanation',
     forcasNota: 'It is not the Moon’s gravity that lifts the water: it is the DIFFERENCE in it between the near side, the centre and the far side of Earth. That difference falls with the cube of distance. This is why the Moon, far smaller, pulls the tide twice as strongly as the Sun.',
@@ -261,7 +276,14 @@ const TEXTOS = {
     baixamar: 'Marea baja',
     subindo: 'Subiendo',
     descendo: 'Bajando',
-    ritmoNota: 'Entre una marea alta y la siguiente pasan {i}. No son 12 h porque, mientras la Tierra gira, la Luna también avanza — la Tierra debe girar un poco más para reencontrarla.',
+    ritmoLongo: 'Si la Luna estuviera quieta en el cielo, la marea alta llegaría cada 12 h — media vuelta de la Tierra. Pero la Luna se mueve: avanza {g}° por día en su órbita, en el mismo sentido en que gira la Tierra. Cuando la Tierra completa una vuelta ({ds}), la Luna ya cambió de lugar, y la Tierra necesita girar {a} minutos más para reencontrarla. Ese es el día lunar: {dl}. Como hay dos abultamientos, tu playa cruza uno cada mitad de eso — {i}.',
+    alturaNota: 'Esta escena muestra la FUERZA de la marea, que es la misma para todo el planeta. La altura del agua no: depende de la forma de la costa y del fondo del mar. En el sudeste de Brasil la marea sube cerca de 1,5 metro; en São Luís, al norte, pasa de 6; en la bahía de Fundy, en Canadá, donde el agua entra por un embudo, llega a 16 — la mayor del mundo.',
+    topicoBojos: 'Dos abultamientos, no uno',
+    topicoDiferenca: 'Es la diferencia, no la fuerza',
+    topicoRitmo: 'Por qué 12h25 y no 12 h',
+    topicoAltura: 'La altura depende de tu costa',
+    topicoLinhas: 'Las líneas en la escena',
+    topicoSol: 'El Sol en esta pantalla',
     saibaMais: '¿Por qué dos abultamientos?',
     saibaMenos: 'Ocultar la explicación',
     forcasNota: 'No es la gravedad de la Luna la que levanta el agua: es la DIFERENCIA de ella entre el lado cercano, el centro y el lado lejano de la Tierra. Esa diferencia cae con el cubo de la distancia. Por eso la Luna, mucho menor, tira de la marea con el doble de fuerza que el Sol.',
@@ -566,14 +588,16 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         + '</svg></button>'
         + '<p class="palco-card-titulo"></p>'
         + '<div class="palco-explicacao-corpo">'
-        + '<div class="palco-card-valor"></div><p class="palco-card-nota"></p></div>';
+        + '<div class="palco-card-valor"></div>'
+        + '<div class="palco-card-nota"></div><div class="palco-card-nota"></div></div>';
       (document.getElementById('palco-mares') || document.body).appendChild(el);
       descartaveis.push({ dispose: () => el.remove() });
       return {
         raiz: el,
         titulo: el.querySelector('.palco-card-titulo'),
         valor: el.querySelector('.palco-card-valor'),
-        nota: el.querySelector('.palco-card-nota'),
+        nota: el.querySelectorAll('.palco-card-nota')[0],
+        nota2: el.querySelectorAll('.palco-card-nota')[1],
       };
     })();
     cardForcas.raiz.hidden = true;
@@ -927,15 +951,28 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       // O painel recebeu o texto que antes espremia os cards das colunas: a
       // explicação das linhas coloridas, o ritmo de 12h25 e a escala do Sol.
       // Aqui há largura para eles; lá não havia.
-      cardForcas.nota.innerHTML = `<p style="margin:0 0 6px">${tm('bojoOpostoLongo')}</p>`
-        + `<p style="margin:0 0 6px">${tm('forcasNota')}</p>`
-        + `<p style="margin:0 0 6px">${tm('eixosNota')}</p>`
-        + `<p style="margin:0 0 6px">${tm('ritmoNota').replace('{i}', formatarHoras(intervaloEntrePreamaresHoras()))}</p>`
-        + `<p style="margin:0">${tm('solEscala')
+      // Duas colunas de texto ao lado do diagrama. Com tópicos: o painel é o
+      // lugar do aprofundamento, e texto corrido de seis parágrafos ninguém
+      // varre com o olho para achar a parte que interessa.
+      const topico = (chave) => `<p class="palco-topico">${tm(chave)}</p>`;
+      const par = (texto) => `<p>${texto}</p>`;
+
+      cardForcas.nota.innerHTML = topico('topicoBojos') + par(tm('bojoOpostoLongo'))
+        + topico('topicoDiferenca') + par(tm('forcasNota'))
+        + topico('topicoRitmo') + par(tm('ritmoLongo')
+          .replace('{g}', num(AVANCO_LUA_GRAUS_DIA, 1))
+          .replace('{ds}', formatarHoras(DIA_SIDERAL_HORAS))
+          .replace('{a}', num((diaLunarHoras() - DIA_SIDERAL_HORAS) * 60, 0))
+          .replace('{dl}', formatarHoras(diaLunarHoras()))
+          .replace('{i}', intervalo));
+
+      cardForcas.nota2.innerHTML = topico('topicoAltura') + par(tm('alturaNota'))
+        + topico('topicoLinhas') + par(tm('eixosNota'))
+        + topico('topicoSol') + par(tm('solEscala')
           .replace('{d}', num(KM_SOL_ORBITA / KM_LUA_ORBITA, 0))
           .replace('{t}', num(KM_SOL_RAIO / KM_LUA_RAIO, 0))
           .replace('{c}', num(COMPRESSAO_SOL, 0))
-          .replace('{f}', num(FIDELIDADE_SOL, 1))}</p>`;
+          .replace('{f}', num(FIDELIDADE_SOL, 1)));
 
       // Ver comentário equivalente em estacoes.js: com "ver em escala real"
       // ligado, a legenda é dele, não da data.

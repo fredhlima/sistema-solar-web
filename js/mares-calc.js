@@ -110,7 +110,10 @@ export function alturaRelativa(psiGraus, amplitude = 1) {
 
 export const DIA_SIDERAL_HORAS = 23.9345;
 export const MES_SINODICO_DIAS = 29.530589;
-const TAXA_LUA_GRAUS_HORA = 13.176396 / 24;
+/** Quanto a Lua avança na órbita por dia, em graus. É o que faz o dia lunar
+    ser mais longo que o sideral — e a maré atrasar todo dia. */
+export const AVANCO_LUA_GRAUS_DIA = 13.176396;
+const TAXA_LUA_GRAUS_HORA = AVANCO_LUA_GRAUS_DIA / 24;
 
 /**
  * Intervalo entre duas preamares, em horas. Não é 12 h porque, enquanto a

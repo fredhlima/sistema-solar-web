@@ -65,8 +65,6 @@ const TEXTOS = {
     norte: 'Hemisfério Norte',
     sul: 'Hemisfério Sul',
     primavera: 'Primavera', verao: 'Verão', outono: 'Outono', inverno: 'Inverno',
-    duracaoDia: 'Dia claro',
-    horas: 'h',
     latitude: 'Latitude',
     diaNoiteTitulo: 'Onde o Sol não se põe',
     faixaDeLuzAlt: 'Horas de luz por latitude. No polo norte {n} h, no equador {e} h, no polo sul {s} h.',
@@ -78,19 +76,33 @@ const TEXTOS = {
     relogioDia: '{h} — {estado}',
     estaDeDia: 'de dia a {lat}',
     estaDeNoite: 'de noite a {lat}',
-    luzTitulo: 'Ângulo da luz solar',
+    luzTitulo: 'A luz que chega aí',
     luzNota: 'A mesma luz espalhada por {n}× mais área aquece {n}× menos cada ponto.',
     luzPino: 'Sol a pino: máximo de energia por área.',
     luzSemSol: 'Hoje o Sol não nasce nesta latitude.',
     raioSolarAlt: 'Sol a {z} graus do zênite: a mesma luz se espalha por {e} vezes mais chão.',
     raioSolarAltNoite: 'O Sol não chega a nascer nesta latitude, nesta data.',
-    distTitulo: 'Distância até o Sol',
-    distMilhoes: 'milhões de km',
     distPerielio: 'Mais perto do Sol — e é verão no Brasil.',
     distAfelio: 'Mais longe do Sol — e é inverno no Brasil.',
-    distNota: 'A distância varia apenas 3,4% ao longo do ano. Não é ela que produz as estações.',
-    eixoTitulo: 'Inclinação do eixo',
-    eixoNota: 'O eixo aponta sempre para o mesmo ponto do céu, o ano inteiro.',
+    ondeTitulo: 'Onde você está',
+    norteCurto: 'Norte',
+    sulCurto: 'Sul',
+    proximoMarcoAmanha: 'Próximo marco: {m}, amanhã.',
+    linhaHemisferio: '{h}: {est} · {n} h de dia claro',
+    eixoLinha: 'Eixo inclinado {o}°',
+    distLinha: 'Sol a {d} milhões de km',
+    saibaMais: 'Por que existe verão?',
+    saibaMenos: 'Ocultar a explicação',
+    topicoInclinacao: 'É a inclinação, não a distância',
+    inclinacaoLongo: 'O eixo da Terra é inclinado {o}° e aponta sempre para o mesmo ponto do céu. Meio ano ele está voltado para o Sol, meio ano para o lado contrário. Quem está inclinado na direção do Sol recebe a luz de cima, concentrada; quem está do outro lado recebe a mesma luz espalhada por mais chão — e esquenta menos. Nada disso tem a ver com estar mais perto ou mais longe.',
+    topicoPolos: 'Onde o Sol não se põe',
+    polosLongo: 'Acima de 66,5° de latitude — os círculos polares — há dias em que o Sol não chega a se pôr, e outros em que não chega a nascer. É a inclinação do eixo levando um polo inteiro para dentro da luz e o outro para dentro da sombra.',
+    topicoDistancia: 'A Terra chega a ficar mais perto?',
+    distanciaLongo: 'Chega, e o efeito é o contrário do que parece. Em 4 de janeiro a Terra está a {min} milhões de km do Sol; em 5 de julho, a {max}. São {dif} milhões de km de diferença — {pct}% — e {ene}% a mais de energia chegando em janeiro. Só que janeiro é VERÃO no hemisfério sul e INVERNO no norte, ao mesmo tempo. Se fosse a distância que manda, o ano inteiro seria igual nos dois lados.',
+    distanciaBarras: 'Em cima, só o trecho entre a menor e a maior distância. Embaixo, o mesmo trecho na escala que começa do zero — os 5 milhões somem dentro dos 150.',
+    rotuloJaneiro: 'jan',
+    rotuloJulho: 'jul',
+    rotuloHoje: 'hoje',
     proximoMarco: 'Próximo marco: {m}, em {d} dias.',
     proximoMarcoHoje: 'Próximo marco: {m} — é hoje.',
     marcoEquinocioMarco: 'equinócio de março',
@@ -99,7 +111,6 @@ const TEXTOS = {
     marcoSolsticioDezembro: 'solstício de dezembro',
     anuncioEstado: 'Norte: {n}. Sul: {s}. Dia claro: {h} horas.',
     outroCorpo: 'Em outros planetas',
-    escalaLegenda: 'Tamanhos e distância em proporção real. A Terra é o ponto menor.',
     passo1: 'A Terra gira inclinada. Seu eixo forma um ângulo de {obl} graus.',
     passo2: 'Essa inclinação não muda. Ao longo de toda a órbita, o eixo continua apontando para o mesmo ponto do céu.',
     passo3: 'Quando um hemisfério se inclina na direção do Sol, a luz chega de cima e aquece mais. Quando se inclina para o lado oposto, a luz chega inclinada e se espalha por mais área, aquecendo menos. É isso que produz o verão e o inverno.',
@@ -112,8 +123,6 @@ const TEXTOS = {
     norte: 'Northern Hemisphere',
     sul: 'Southern Hemisphere',
     primavera: 'Spring', verao: 'Summer', outono: 'Autumn', inverno: 'Winter',
-    duracaoDia: 'Daylight',
-    horas: 'h',
     latitude: 'Latitude',
     diaNoiteTitulo: 'Where the Sun never sets',
     faixaDeLuzAlt: 'Hours of daylight by latitude. North Pole {n} h, Equator {e} h, South Pole {s} h.',
@@ -125,19 +134,33 @@ const TEXTOS = {
     relogioDia: '{h} — {estado}',
     estaDeDia: 'daytime at {lat}',
     estaDeNoite: 'nighttime at {lat}',
-    luzTitulo: 'Angle of sunlight',
+    luzTitulo: 'The light that reaches you',
     luzNota: 'The same light spread over {n}× more area warms each point {n}× less.',
     luzPino: 'Sun overhead: maximum energy per area.',
     luzSemSol: 'Today the Sun does not rise at this latitude.',
     raioSolarAlt: 'Sun {z} degrees from the zenith: the same light spreads over {e} times more ground.',
     raioSolarAltNoite: 'The Sun does not rise at this latitude on this date.',
-    distTitulo: 'Distance to the Sun',
-    distMilhoes: 'million km',
     distPerielio: 'Closer to the Sun — and it is summer in the southern hemisphere.',
     distAfelio: 'Farther from the Sun — and it is winter in the southern hemisphere.',
-    distNota: 'The distance varies only 3.4% across the year. It is not what produces the seasons.',
-    eixoTitulo: 'Axial tilt',
-    eixoNota: 'The axis points at the same spot in the sky, all year long.',
+    ondeTitulo: 'Where you are',
+    norteCurto: 'North',
+    sulCurto: 'South',
+    proximoMarcoAmanha: 'Next milestone: {m}, tomorrow.',
+    linhaHemisferio: '{h}: {est} · {n} h of daylight',
+    eixoLinha: 'Axis tilted {o}°',
+    distLinha: 'Sun {d} million km away',
+    saibaMais: 'Why is there summer?',
+    saibaMenos: 'Hide the explanation',
+    topicoInclinacao: 'It is the tilt, not the distance',
+    inclinacaoLongo: 'The Earth’s axis is tilted {o}° and always points at the same spot in the sky. For half the year it leans towards the Sun, for the other half away from it. Whoever leans towards the Sun gets the light from above, concentrated; the other side gets the same light spread over more ground — and warms up less. None of this has to do with being closer or farther.',
+    topicoPolos: 'Where the Sun never sets',
+    polosLongo: 'Above 66.5° of latitude — the polar circles — there are days when the Sun never sets, and others when it never rises. It is the tilt of the axis carrying one whole pole into the light and the other into the shadow.',
+    topicoDistancia: 'Does the Earth really get closer?',
+    distanciaLongo: 'It does, and the effect is the opposite of what it seems. On 4 January the Earth is {min} million km from the Sun; on 5 July, {max}. That is {dif} million km of difference — {pct}% — and {ene}% more energy arriving in January. Except that January is SUMMER in the southern hemisphere and WINTER in the northern one, at the same time. If distance were in charge, the whole year would be the same on both sides.',
+    distanciaBarras: 'On top, only the stretch between the closest and the farthest distance. Below, the same stretch on a scale that starts at zero — the 5 million vanish inside the 150.',
+    rotuloJaneiro: 'Jan',
+    rotuloJulho: 'Jul',
+    rotuloHoje: 'today',
     proximoMarco: 'Next milestone: {m}, in {d} days.',
     proximoMarcoHoje: 'Next milestone: {m} — it is today.',
     marcoEquinocioMarco: 'March equinox',
@@ -146,7 +169,6 @@ const TEXTOS = {
     marcoSolsticioDezembro: 'December solstice',
     anuncioEstado: 'North: {n}. South: {s}. Daylight: {h} hours.',
     outroCorpo: 'On other planets',
-    escalaLegenda: 'Sizes and distance in true proportion. Earth is the smaller dot.',
     passo1: 'Earth spins tilted. Its axis forms an angle of {obl} degrees.',
     passo2: 'This tilt does not change. Along the entire orbit, the axis keeps pointing at the same spot in the sky.',
     passo3: 'When a hemisphere tilts toward the Sun, light arrives from above and warms more. When it tilts away, light arrives slanted and spreads over more area, warming less. That is what produces summer and winter.',
@@ -159,8 +181,6 @@ const TEXTOS = {
     norte: 'Hemisferio Norte',
     sul: 'Hemisferio Sur',
     primavera: 'Primavera', verao: 'Verano', outono: 'Otoño', inverno: 'Invierno',
-    duracaoDia: 'Luz del día',
-    horas: 'h',
     latitude: 'Latitud',
     diaNoiteTitulo: 'Donde el Sol no se pone',
     faixaDeLuzAlt: 'Horas de luz por latitud. Polo norte {n} h, Ecuador {e} h, Polo sur {s} h.',
@@ -172,19 +192,33 @@ const TEXTOS = {
     relogioDia: '{h} — {estado}',
     estaDeDia: 'de día a {lat}',
     estaDeNoite: 'de noche a {lat}',
-    luzTitulo: 'Ángulo de la luz solar',
+    luzTitulo: 'La luz que llega ahí',
     luzNota: 'La misma luz repartida en {n}× más área calienta {n}× menos cada punto.',
     luzPino: 'Sol en lo alto: máxima energía por área.',
     luzSemSol: 'Hoy el Sol no sale en esta latitud.',
     raioSolarAlt: 'Sol a {z} grados del cenit: la misma luz se reparte por {e} veces más suelo.',
     raioSolarAltNoite: 'El Sol no llega a salir en esta latitud, en esta fecha.',
-    distTitulo: 'Distancia al Sol',
-    distMilhoes: 'millones de km',
     distPerielio: 'Más cerca del Sol — y es verano en el hemisferio sur.',
     distAfelio: 'Más lejos del Sol — y es invierno en el hemisferio sur.',
-    distNota: 'La distancia varía solo 3,4% a lo largo del año. No es ella la que produce las estaciones.',
-    eixoTitulo: 'Inclinación del eje',
-    eixoNota: 'El eje apunta siempre al mismo punto del cielo, todo el año.',
+    ondeTitulo: 'Dónde estás',
+    norteCurto: 'Norte',
+    sulCurto: 'Sur',
+    proximoMarcoAmanha: 'Próximo hito: {m}, mañana.',
+    linhaHemisferio: '{h}: {est} · {n} h de luz',
+    eixoLinha: 'Eje inclinado {o}°',
+    distLinha: 'Sol a {d} millones de km',
+    saibaMais: '¿Por qué existe el verano?',
+    saibaMenos: 'Ocultar la explicación',
+    topicoInclinacao: 'Es la inclinación, no la distancia',
+    inclinacaoLongo: 'El eje de la Tierra está inclinado {o}° y apunta siempre al mismo punto del cielo. Medio año está vuelto hacia el Sol, medio año hacia el lado contrario. Quien se inclina hacia el Sol recibe la luz desde arriba, concentrada; el otro lado recibe la misma luz repartida por más suelo — y se calienta menos. Nada de esto tiene que ver con estar más cerca o más lejos.',
+    topicoPolos: 'Donde el Sol no se pone',
+    polosLongo: 'Por encima de los 66,5° de latitud — los círculos polares — hay días en que el Sol no llega a ponerse, y otros en que no llega a salir. Es la inclinación del eje llevando un polo entero hacia la luz y el otro hacia la sombra.',
+    topicoDistancia: '¿La Tierra llega a estar más cerca?',
+    distanciaLongo: 'Sí, y el efecto es lo contrario de lo que parece. El 4 de enero la Tierra está a {min} millones de km del Sol; el 5 de julio, a {max}. Son {dif} millones de km de diferencia — {pct}% — y {ene}% más de energía llegando en enero. Solo que enero es VERANO en el hemisferio sur e INVIERNO en el norte, al mismo tiempo. Si mandara la distancia, el año entero sería igual en los dos lados.',
+    distanciaBarras: 'Arriba, solo el tramo entre la menor y la mayor distancia. Abajo, el mismo tramo en la escala que empieza en cero — los 5 millones desaparecen dentro de los 150.',
+    rotuloJaneiro: 'ene',
+    rotuloJulho: 'jul',
+    rotuloHoje: 'hoy',
     proximoMarco: 'Próximo hito: {m}, en {d} días.',
     proximoMarcoHoje: 'Próximo hito: {m} — es hoy.',
     marcoEquinocioMarco: 'equinoccio de marzo',
@@ -193,7 +227,6 @@ const TEXTOS = {
     marcoSolsticioDezembro: 'solsticio de diciembre',
     anuncioEstado: 'Norte: {n}. Sur: {s}. Luz del día: {h} horas.',
     outroCorpo: 'En otros planetas',
-    escalaLegenda: 'Tamaños y distancia en proporción real. La Tierra es el punto menor.',
     passo1: 'La Tierra gira inclinada. Su eje forma un ángulo de {obl} grados.',
     passo2: 'Esa inclinación no cambia. A lo largo de toda la órbita, el eje sigue apuntando al mismo punto del cielo.',
     passo3: 'Cuando un hemisferio se inclina hacia el Sol, la luz llega desde arriba y calienta más. Cuando se inclina al lado opuesto, la luz llega inclinada y se reparte en más área, calentando menos. Eso es lo que produce el verano y el invierno.',
@@ -253,7 +286,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     let dias = diasDesdeJ2000(ctx.dataInicial);
     let modoDia = false;                      // se o modo "Ver um dia" está ativo
     let anguloDia = 0;                        // ângulo de rotação diária em radianos
-    let escalaRealAtiva = false;
     let marcoProx = MARCOS[0];                // valor padrão
     let distDoMarco = 0;                      // distância em graus
     const marcosVistos = new Set();
@@ -430,47 +462,77 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     });
 
     // ————— HUD —————
-    // Latitude no topo da coluna esquerda (SPEC §3c: é o controle, não só leitura)
-    const linhaLat = document.createElement('div');
-    linhaLat.className = 'palco-card';
-    linhaLat.innerHTML = `
-      <p class="palco-card-titulo"></p>
-      <input class="palco-lat" type="range" min="0" max="66" step="1" style="width:100%">
-      <p class="palco-card-nota"></p>`;
-    ctx.hudEsq.appendChild(linhaLat);
-    const inputLat = linhaLat.querySelector('.palco-lat');
+    //
+    // Um card por coluna, como nas Marés. Eram seis blocos (latitude, os dois
+    // hemisférios, eixo, faixa de luz, ângulo da luz, distância) e em 393px de
+    // altura o palco fechava quatro deles — inclusive o do ângulo da luz, que
+    // é o diagrama que EXPLICA as estações. Fechado, o CSS esconde o `<svg>`:
+    // era o "gráfico que sumiu" que o Fred relatou.
+    //
+    // Esquerda = onde você está (o controle e a leitura dele). Direita = o que
+    // a luz faz aí. O aprofundamento — a faixa de luz por latitude e o mito da
+    // distância — foi para o painel "Saiba mais", que é largo.
+    const cardOnde = (() => {
+      const el = document.createElement('div');
+      el.className = 'palco-card';
+      el.innerHTML = '<p class="palco-card-titulo"></p>'
+        + '<input class="palco-lat" type="range" min="0" max="66" step="1" style="width:100%">'
+        + '<div class="palco-card-valor"></div><p class="palco-card-nota"></p>';
+      ctx.hudEsq.appendChild(el);
+      return {
+        raiz: el,
+        titulo: el.querySelector('.palco-card-titulo'),
+        valor: el.querySelector('.palco-card-valor'),
+        nota: el.querySelector('.palco-card-nota'),
+      };
+    })();
+    const inputLat = cardOnde.raiz.querySelector('.palco-lat');
     inputLat.value = String(Math.abs(latitude));
     inputLat.setAttribute('aria-label', te('latitude'));
     inputLat.oninput = () => { latitude = -Number(inputLat.value); atualizarHud(); };
 
-    // Dois hemisférios juntos em tela curta (SPEC §3c)
-    const cardDuplo = document.createElement('div');
-    cardDuplo.className = 'palco-card palco-card-duplo';
-    ctx.hudEsq.appendChild(cardDuplo);
-    // Vão ser preenchidos dinamicamente, então criarCard não faz sentido aqui;
-    // montar manualmente para que o pai seja o card-duplo
-    const criarHemisferio = (pai) => {
-      const bloco = document.createElement('div');
-      pai.appendChild(bloco);
-      return {
-        titulo: (() => { const e = document.createElement('p'); e.className = 'palco-card-titulo'; bloco.appendChild(e); return e; })(),
-        valor: (() => { const e = document.createElement('div'); e.className = 'palco-card-valor'; bloco.appendChild(e); return e; })(),
-        nota: (() => { const e = document.createElement('p'); e.className = 'palco-card-nota'; bloco.appendChild(e); return e; })(),
-      };
-    };
-    const cardNorte = criarHemisferio(cardDuplo);
-    const cardSul = criarHemisferio(cardDuplo);
-
-    // HUD direita: faixa de luz, luz, distância, eixo
-    const cardFaixaDeLuz = criarCard(ctx.hudDir);
     const cardLuz = criarCard(ctx.hudDir);
-    const cardDist = criarCard(ctx.hudDir);
-    // O card do eixo vai para a coluna ESQUERDA. Com a faixa de luz nova, a
-    // direita ficou com 4 cards somando 305px contra 161px da esquerda, e em
-    // tela baixa o card do eixo — que carrega o "próximo marco" — era o que
-    // cortava. Equilibrar as duas colunas resolve sem esconder nada: 259 e
-    // 207, contra ~260 disponíveis em 1000×460.
-    const cardEixo = criarCard(ctx.hudEsq);
+
+    // ————— painel "Saiba mais" —————
+    // Mesmo formato do painel das Marés (palco.css `.palco-explicacao`): janela
+    // larga sobre a cena, com o gráfico à esquerda e duas colunas de texto.
+    // É onde mora o que não cabe — nem deve caber — num card de coluna.
+    let mostrarSaibaMais = false;
+    const painel = (() => {
+      const el = document.createElement('div');
+      el.className = 'palco-card palco-explicacao';
+      el.innerHTML = '<button class="palco-explicacao-fechar" type="button">'
+        + '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">'
+        + '<path d="M6 6 18 18M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>'
+        + '</svg></button>'
+        + '<p class="palco-card-titulo"></p>'
+        + '<div class="palco-explicacao-corpo">'
+        + '<div class="palco-card-valor"></div>'
+        + '<div class="palco-card-nota"></div><div class="palco-card-nota"></div></div>';
+      (document.getElementById('palco-estacoes') || document.body).appendChild(el);
+      descartaveis.push({ dispose: () => el.remove() });
+      return {
+        raiz: el,
+        titulo: el.querySelector('.palco-card-titulo'),
+        valor: el.querySelector('.palco-card-valor'),
+        nota: el.querySelectorAll('.palco-card-nota')[0],
+        nota2: el.querySelectorAll('.palco-card-nota')[1],
+      };
+    })();
+    painel.raiz.hidden = true;
+
+    const btnSaibaMais = document.createElement('button');
+    btnSaibaMais.className = 'palco-btn';
+    btnSaibaMais.onclick = () => {
+      mostrarSaibaMais = !mostrarSaibaMais;
+      painel.raiz.hidden = !mostrarSaibaMais;
+      atualizarHud();
+    };
+    painel.raiz.querySelector('.palco-explicacao-fechar').onclick = () => {
+      mostrarSaibaMais = false;
+      painel.raiz.hidden = true;
+      atualizarHud();
+    };
 
     // Botão "Ver um dia": modo que congela o ano e faz a Terra girar
     const btnVerDia = document.createElement('button');
@@ -492,6 +554,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       }
     };
     ctx.rodapeAcoes.appendChild(btnVerDia);
+    ctx.rodapeAcoes.appendChild(btnSaibaMais);
 
     function criarCard(pai) {
       const el = document.createElement('div');
@@ -595,78 +658,25 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       const lambda = lambdaForcada !== undefined ? lambdaForcada : longitudeSolar(n);
       const dec = declinacaoSolar(lambda, obliquidade);
 
-      // Hemisférios, sempre simultâneos e simétricos
-      preencherHemisferio(cardNorte, te('norte'), Math.abs(latitude), lambda, dec);
-      preencherHemisferio(cardSul, te('sul'), -Math.abs(latitude), lambda, dec);
+      // ————— coluna esquerda: onde você está —————
+      const estN = estacaoDoHemisferio(lambda, 'norte');
+      const estS = estacaoDoHemisferio(lambda, 'sul');
+      const horasN = duracaoDoDia(Math.abs(latitude), dec);
+      const horasS = duracaoDoDia(-Math.abs(latitude), dec);
+      // Texto corrido, não o número grande do card: aqui o "valor" são duas
+      // frases, e no corpo de 20px elas quebravam em quatro linhas.
+      const linha = (h, est, horas) => `<div class="palco-linha">`
+        + te('linhaHemisferio')
+          .replace('{h}', `<b>${te(h)}</b>`)
+          .replace('{est}', te(est))
+          .replace('{n}', num(horas, 1))
+        + `</div>`;
 
-      linhaLat.querySelector('.palco-card-titulo').textContent = te('latitude');
-      linhaLat.querySelector('.palco-card-nota').textContent = `${Math.abs(latitude)}° N / ${Math.abs(latitude)}° S`;
-
-      // Card "Onde o Sol não se põe": faixa de luz por latitude
-      cardFaixaDeLuz.titulo.textContent = te('diaNoiteTitulo');
-      cardFaixaDeLuz.valor.innerHTML = svgFaixaDeLuz(dec);
-
-      // A nota muda dependendo do estado
-      if (modoDia) {
-        // No modo dia, mostra a hora e o estado (dia/noite)
-        const hora = ((anguloDia / (Math.PI * 2)) * 24) % 24;
-        const hh = String(Math.floor(hora)).padStart(2, '0');
-        const mm = String(Math.floor((hora % 1) * 60)).padStart(2, '0');
-        const horaFormatada = `${hh}h${mm}`;
-
-        // Calcula se está de dia ou noite usando a mesma fórmula de duracaoDoDia
-        const H = anguloDia - Math.PI;  // ângulo horário a partir do meio-dia
-        const estaDeDia = Math.cos(H) > -Math.tan(latitude * RAD) * Math.tan(dec * RAD);
-        // O relógio precisa dizer QUAL hemisfério, senão ele contradiz o card
-        // ao lado: o slider é de 0 a 66 sem sinal e a latitude interna é do
-        // hemisfério sul (padrão Brasil), então "de noite na sua latitude"
-        // aparecia ao lado de "Hemisfério Norte · Verão · 22,2 h de dia claro".
-        // A física estava certa; faltava dizer de quem se estava falando.
-        const rotuloLat = `${Math.abs(Math.round(latitude))}° ${latitude < 0 ? 'S' : 'N'}`;
-        const estado = (estaDeDia ? te('estaDeDia') : te('estaDeNoite')).replace('{lat}', rotuloLat);
-
-        const textoRelogio = te('relogioDia')
-          .replace('{h}', horaFormatada)
-          .replace('{estado}', estado);
-        cardFaixaDeLuz.nota.className = 'palco-card-nota';
-        cardFaixaDeLuz.nota.textContent = textoRelogio;
-
-        ctx.anunciar(textoRelogio);
-      } else {
-        // Modo normal: nota explicativa
-        cardFaixaDeLuz.nota.className = 'palco-card-nota palco-nota-longa';
-        let nota = te('diaNoiteEquinocio');
-        if (duracaoDoDia(85, dec) >= 23.9) nota = te('solDaMeiaNoiteNorte');
-        else if (duracaoDoDia(-85, dec) >= 23.9) nota = te('solDaMeiaNoiteSul');
-        cardFaixaDeLuz.nota.textContent = nota;
-      }
-
-      // A causa física: quanto a luz se espalha
-      const esp = espalhamentoDaLuz(latitude, dec);
-      cardLuz.titulo.textContent = te('luzTitulo');
-      cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec), esp);
-      cardLuz.nota.className = 'palco-card-nota palco-nota-longa';
-      cardLuz.nota.textContent = !isFinite(esp)
-        ? te('luzSemSol')
-        : esp < 1.05 ? te('luzPino') : te('luzNota').replace(/\{n\}/g, num(esp, 1));
-
-      // Mito da distância — só faz sentido para a Terra. Com outro corpo no
-      // palco, este card mostrava a distância TERRA-Sol e falava do Brasil,
-      // enquanto a tela exibia Urano.
-      const ehTerra = corpoAtual === corpoTerra;
-      cardDist.raiz.hidden = !ehTerra;
-      const ua = distanciaSolarUA(n);
-      const milhoes = (ua * UA_KM) / 1e6;
-      cardDist.titulo.textContent = te('distTitulo');
-      cardDist.valor.textContent = `${num(milhoes, 1)} ${te('distMilhoes')}`;
-      const perto = ua < 0.9845;
-      const longe = ua > 1.0155;
-      cardDist.nota.className = 'palco-card-nota palco-nota-longa';
-      cardDist.nota.textContent = perto ? te('distPerielio') : longe ? te('distAfelio') : te('distNota');
-      cardDist.raiz.classList.toggle('palco-card-alerta', perto || longe);
-
-      cardEixo.titulo.textContent = te('eixoTitulo');
-      cardEixo.valor.textContent = `${num(obliquidade, 2)}°`;
+      cardOnde.titulo.textContent = te('ondeTitulo');
+      cardOnde.valor.innerHTML =
+        `<div class="palco-card-sub">${Math.abs(latitude)}° N / ${Math.abs(latitude)}° S</div>`
+        + linha('norteCurto', estN, horasN)
+        + linha('sulCurto', estS, horasS);
 
       // Mapeia o id do marco para a chave de texto correspondente
       const CHAVE_DO_MARCO = {
@@ -675,50 +685,152 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
         'equinocio-setembro': 'marcoEquinocioSetembro',
         'solsticio-dezembro': 'marcoSolsticioDezembro',
       };
-
-      // Calcula a distância em dias e monta o texto do próximo marco
       const diasDoMarco = Math.round(distDoMarco * (ANO_DIAS / 360));
       const nomeMarco = te(CHAVE_DO_MARCO[marcoProx.id] || 'marcoEquinocioMarco');
       const textoMarco = diasDoMarco === 0
         ? te('proximoMarcoHoje').replace('{m}', nomeMarco)
-        : te('proximoMarco').replace('{m}', nomeMarco).replace('{d}', String(diasDoMarco));
+        : diasDoMarco === 1
+          ? te('proximoMarcoAmanha').replace('{m}', nomeMarco)
+          : te('proximoMarco').replace('{m}', nomeMarco).replace('{d}', String(diasDoMarco));
+      cardOnde.nota.textContent = corpoAtual === corpoTerra
+        ? `${te('eixoLinha').replace('{o}', num(obliquidade, 2))} · ${textoMarco}`
+        : `${corpoAtual.nome} — ${te('eixoLinha').replace('{o}', num(obliquidade, 2))}`;
 
-      const notaEixo = corpoAtual === corpoTerra
-        ? `${te('eixoNota')} · ${textoMarco}`
-        : `${corpoAtual.nome} — ${te('eixoNota')}`;
-      cardEixo.nota.textContent = notaEixo;
+      // ————— coluna direita: a luz que chega aí —————
+      // O diagrama do raio solar é o miolo do modo: enquanto era o terceiro de
+      // três cards numa coluna, nascia fechado no celular e não aparecia.
+      const esp = espalhamentoDaLuz(latitude, dec);
+      cardLuz.titulo.textContent = te('luzTitulo');
+      cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec), esp);
+      const ua = distanciaSolarUA(n);
+      const milhoes = (ua * UA_KM) / 1e6;
+
+      if (modoDia) {
+        // No modo dia, a nota vira relógio: a hora e se é dia ou noite aí.
+        const hora = ((anguloDia / (Math.PI * 2)) * 24) % 24;
+        const hh = String(Math.floor(hora)).padStart(2, '0');
+        const mm = String(Math.floor((hora % 1) * 60)).padStart(2, '0');
+        const H = anguloDia - Math.PI;  // ângulo horário a partir do meio-dia
+        const estaDeDia = Math.cos(H) > -Math.tan(latitude * RAD) * Math.tan(dec * RAD);
+        // O relógio precisa dizer QUAL hemisfério, senão contradiz a linha
+        // acima: o slider é de 0 a 66 sem sinal e a latitude interna é do
+        // hemisfério sul (padrão Brasil).
+        const rotuloLat = `${Math.abs(Math.round(latitude))}° ${latitude < 0 ? 'S' : 'N'}`;
+        const estado = (estaDeDia ? te('estaDeDia') : te('estaDeNoite')).replace('{lat}', rotuloLat);
+        const textoRelogio = te('relogioDia').replace('{h}', `${hh}h${mm}`).replace('{estado}', estado);
+        cardLuz.nota.textContent = textoRelogio;
+        ctx.anunciar(textoRelogio);
+      } else {
+        const luz = !isFinite(esp)
+          ? te('luzSemSol')
+          : esp < 1.05 ? te('luzPino') : te('luzNota').replace(/\{n\}/g, num(esp, 1));
+        // A distância entra como uma linha, não como card: o assunto é o mito,
+        // e o mito se desmonta no painel, com gráfico. Só para a Terra — com
+        // Urano em cena, "é verão no Brasil" não quer dizer nada.
+        // Periélio e afélio continuam sendo marco: a linha muda de texto e o
+        // card acende, como fazia o card de distância antes de ser absorvido.
+        const perto = ua < 0.9845;
+        const longe = ua > 1.0155;
+        const dist = `${te('distLinha').replace('{d}', num(milhoes, 1))}.`;
+        const marcoDist = perto ? ` ${te('distPerielio')}` : longe ? ` ${te('distAfelio')}` : '';
+        cardLuz.nota.textContent = corpoAtual === corpoTerra
+          ? `${luz} ${dist}${marcoDist}`
+          : luz;
+        cardLuz.raiz.classList.toggle('palco-card-alerta',
+          corpoAtual === corpoTerra && (perto || longe));
+      }
+
+      // ————— painel "Saiba mais" —————
+      btnSaibaMais.textContent = mostrarSaibaMais ? te('saibaMenos') : te('saibaMais');
+      // Fora do `if`: `validacao-palco.mjs` cobra que nenhum `.palco-card-titulo`
+      // do palco esteja vazio, e o do painel existe no DOM mesmo fechado.
+      painel.titulo.textContent = te('saibaMais');
+      btnSaibaMais.hidden = corpoAtual !== corpoTerra;
+      if (corpoAtual !== corpoTerra && mostrarSaibaMais) {
+        mostrarSaibaMais = false;
+        painel.raiz.hidden = true;
+      }
+      if (mostrarSaibaMais) {
+        const topico = (chave) => `<p class="palco-topico">${te(chave)}</p>`;
+        painel.valor.innerHTML = svgFaixaDeLuz(dec)
+          + `<div class="palco-card-sub">${te('diaNoiteTitulo')}</div>`
+          + svgDistanciaAnual(ua)
+          + `<div class="palco-card-sub">${te('distanciaBarras')}</div>`;
+
+        let notaPolar = te('diaNoiteEquinocio');
+        if (duracaoDoDia(85, dec) >= 23.9) notaPolar = te('solDaMeiaNoiteNorte');
+        else if (duracaoDoDia(-85, dec) >= 23.9) notaPolar = te('solDaMeiaNoiteSul');
+
+        painel.nota.innerHTML = topico('topicoInclinacao')
+          + `<p>${te('inclinacaoLongo').replace('{o}', num(obliquidade, 2))}</p>`
+          + topico('topicoPolos')
+          + `<p>${te('polosLongo')}</p><p>${notaPolar}</p>`;
+
+        const minUA = 0.98329;
+        const maxUA = 1.01671;
+        const minKm = (minUA * UA_KM) / 1e6;
+        const maxKm = (maxUA * UA_KM) / 1e6;
+        painel.nota2.innerHTML = topico('topicoDistancia')
+          + `<p>${te('distanciaLongo')
+            .replace('{min}', num(minKm, 1))
+            .replace('{max}', num(maxKm, 1))
+            .replace('{dif}', num(maxKm - minKm, 1))
+            .replace('{pct}', num((maxKm / minKm - 1) * 100, 1))
+            .replace('{ene}', num(((maxUA / minUA) ** 2 - 1) * 100, 1))}</p>`;
+      }
 
       // Anúncio de estado: os hemisférios e a duração do dia
-      const estN = estacaoDoHemisferio(lambda, 'norte');
-      const estS = estacaoDoHemisferio(lambda, 'sul');
-      const horasN = duracaoDoDia(Math.abs(latitude), dec);
-      if (ctx.anunciar) {
+      if (ctx.anunciar && !modoDia) {
         ctx.anunciar(te('anuncioEstado')
           .replace('{n}', te(estN))
           .replace('{s}', te(estS))
           .replace('{h}', num(horasN, 1)));
       }
 
-      // Enquanto "ver em escala real" está no ar, a legenda pertence a ele: o
-      // loop roda a cada frame e sobrescrevia a mensagem antes de alguém ler.
-      if (!escalaRealAtiva) {
-        const data = new Date(new Date('2000-01-01T12:00:00Z').getTime() + n * 86400000);
-        ctx.legenda.textContent = data.toLocaleDateString(getIdioma() === 'pt' ? 'pt-BR' : getIdioma());
-      }
+      const data = new Date(new Date('2000-01-01T12:00:00Z').getTime() + n * 86400000);
+      ctx.legenda.textContent = data.toLocaleDateString(getIdioma() === 'pt' ? 'pt-BR' : getIdioma());
       ctx.scrubber.value = String(Math.round((((lambda % 360) + 360) % 360) / 360 * 1000));
-    }
-
-    function preencherHemisferio(card, rotulo, lat, lambda, dec) {
-      const est = estacaoDoHemisferio(lambda, lat >= 0 ? 'norte' : 'sul');
-      const horas = duracaoDoDia(lat, dec);
-      card.titulo.textContent = rotulo;
-      card.valor.textContent = te(est);
-      card.nota.textContent = `${te('duracaoDia')}: ${num(horas, 1)} ${te('horas')}`;
     }
 
     // SVG da faixa de luz por latitude: mostra quantas horas de luz cada latitude
     // recebe na data atual, permitindo ver onde o Sol não se põe e onde a noite
     // não termina.
+    /**
+     * As duas barras da distância Terra-Sol.
+     *
+     * A de cima cobre só o trecho do periélio ao afélio: nela a variação
+     * parece enorme. A de baixo é o MESMO trecho numa régua que começa do
+     * zero, e aí os 5 milhões de km viram um risco fino dentro dos 150.
+     *
+     * É de propósito que o palco não exagera a órbita para mostrar isso: a
+     * "órbita muito oval" é a concepção errada clássica sobre estações — a
+     * mesma que este modo existe para desmontar. Um desenho oval ensinaria o
+     * contrário do texto ao lado dele. A elipse da cena tem a excentricidade
+     * verdadeira (0,0167), que é imperceptível de propósito.
+     */
+    function svgDistanciaAnual(uaHoje) {
+      const MIN = 0.98329;
+      const MAX = 1.01671;
+      const t = Math.max(0, Math.min(1, (uaHoje - MIN) / (MAX - MIN)));
+      const x0 = 6;
+      const larg = 108;
+      const xHoje = x0 + t * larg;
+      // Na régua do zero, o trecho inteiro ocupa a fração (MAX−MIN)/MAX
+      const inicioZero = x0 + (MIN / MAX) * larg;
+      return `<svg viewBox="0 0 120 60" width="100%" height="60" role="img"
+        aria-label="${te('distanciaBarras')}" xmlns="http://www.w3.org/2000/svg">
+        <rect x="${x0}" y="8" width="${larg}" height="7" rx="3.5" fill="#1c2a44"/>
+        <circle cx="${xHoje}" cy="11.5" r="4.5" fill="#ffd479" stroke="#0b101c" stroke-width="1.4"/>
+        <text x="${x0}" y="6" font-size="6.5" fill="#93a0b8">${te('rotuloJaneiro')}</text>
+        <text x="${x0 + larg}" y="6" font-size="6.5" fill="#93a0b8" text-anchor="end">${te('rotuloJulho')}</text>
+        <text x="${xHoje}" y="25" font-size="6.5" fill="#ffd479" text-anchor="middle">${te('rotuloHoje')}</text>
+        <rect x="${x0}" y="40" width="${larg}" height="7" rx="3.5" fill="#101a2e"/>
+        <rect x="${inicioZero}" y="40" width="${x0 + larg - inicioZero}" height="7" rx="3.5" fill="#1c2a44"/>
+        <text x="${x0}" y="57" font-size="6.5" fill="#93a0b8">0</text>
+        <text x="${x0 + larg}" y="57" font-size="6.5" fill="#93a0b8" text-anchor="end">${num((MAX * UA_KM) / 1e6, 0)}</text>
+      </svg>`;
+    }
+
     function svgFaixaDeLuz(dec) {
       // Para cada latitude, calcula a duração do dia
       const alturaSvg = 96;
@@ -798,30 +910,6 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       </svg>`;
     }
 
-    // ————— "ver em escala real" (SPEC §7.2) —————
-    function escalaReal() {
-      if (escalaRealAtiva) return;
-      escalaRealAtiva = true;
-      // O raio efetivo do corpo agora é RAIO_TERRA × fatorCorpo (após a compressão)
-      const escalaTerraReal = ((corpoAtual.raioKm || 6371) / UA_KM) * orbitaDoCorpo() / (RAIO_TERRA * fatorCorpo);
-      const escalaSolReal = (695700 / UA_KM) * orbitaDoCorpo() / RAIO_SOL;
-      terra.scale.setScalar(escalaTerraReal);
-      nuvens.visible = false;
-      eixo.visible = false;
-      terminador.visible = false;
-      sol.scale.setScalar(escalaSolReal);
-      marcos.forEach((m) => { m.mesh.visible = false; });
-      ctx.legenda.textContent = te('escalaLegenda');
-      return () => {
-        terra.scale.setScalar(1);
-        nuvens.visible = (corpoAtual.id === 'terra');
-        eixo.visible = true;
-        terminador.visible = true;
-        marcos.forEach((m) => { m.mesh.visible = true; });
-        escalaRealAtiva = false;
-      };
-    }
-
     function aoScrubber(fracao) {
       // Move para a longitude solar pedida, mantendo o ano corrente.
       const alvo = fracao * 360;
@@ -850,7 +938,10 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     requestAnimationFrame(() => requestAnimationFrame(enquadrar));
 
     return {
-      scene, camera, atualizar, dispose, escalaReal, aoScrubber, irParaLambda,
+      // Sem `escalaReal`: o palco esconde o botão quando a cena não o expõe. O
+      // Fred pediu só a escala didática — o modo real deixava a Terra num
+      // pixel e o argumento das estações não depende disso.
+      scene, camera, atualizar, dispose, aoScrubber, irParaLambda,
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
