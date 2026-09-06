@@ -60,9 +60,12 @@ body.com-palco #mdock { display: none !important; }
   grid-row: 1;
   display: flex;
   align-items: center;
-  /* Tudo encostado à direita, junto do «‹ Voltar»: à esquerda o título ficava
-     em terra de ninguém — nem no canto, nem alinhado com o card de baixo. */
-  justify-content: flex-end;
+  /* Título no canto ESQUERDO, «‹ Voltar» no direito. O que fazia o título
+     parecer solto no meio da tela não era o lado: era um `padding-left: 108px`
+     que o modo dock aplicava (ver a seção "dock mobile"), resquício de quando o
+     app fixava o botão de voltar à esquerda. Sem o recuo, o título encosta na
+     mesma margem do card de baixo. */
+  justify-content: space-between;
   gap: 14px;
 }
 
