@@ -25,19 +25,28 @@ const UA_KM = 149.6e6;
 const ANO_DIAS = 365.2422;
 
 // Geometria do palco (unidades de cena, fora de escala por projeto)
-// A razão órbita:Terra passou de 16,5:1 para 6,25:1; Sol:Terra de 2,6:1 para 1,375:1.
-// Isso torna a Terra visível e seu eixo inclinado legível no didático, sem afetar
-// a proporção Sol—Terra (Sol continua visivelmente maior).
-// Sol agora é 5,5 (3,4× o raio da Terra, deixando folga na órbita).
-const RAIO_ORBITA = 10;
+//
+// As proporções aqui são um compromisso declarado, não um descuido. Na
+// realidade o Sol tem 109 raios da Terra e a órbita tem 23.481 — desenhar
+// qualquer um dos dois de verdade apaga o outro da tela. O que se escolhe é
+// QUANTO de cada erro se aceita.
+//
+// Rodada de 06/09/2026, a pedido do Fred ("mais distante e o Sol maior, para
+// dar noção de proporção"): órbita de 10 para 13 e Sol de 3,4 para 4,3. Isso
+// leva Sol:Terra de 2,1 para 2,7 e órbita:Terra de 6,3 para 8,1, ao custo de a
+// Terra ficar com 77% do tamanho que tinha na tela — o teto é a legibilidade
+// do eixo inclinado e do terminador, que são o assunto do modo. Os números
+// reais aparecem no painel "Saiba mais", no tópico da escala.
+const RAIO_ORBITA = 13;
 // O Sol precisa ser claramente o corpo grande — mas há um teto GEOMÉTRICO que
 // não tem a ver com estética: a câmera é inclinada, então a órbita projeta uma
 // elipse de semi-eixo menor `RAIO_ORBITA · sen(elevação)`. Se o raio do Sol
 // passa disso, a metade distante da órbita inteira fica ATRÁS dele e o planeta
 // — o sujeito do modo — desaparece por meio ano.
 // Com 5,5 e a câmera a 30° isso acontecia: menor = 4,99 contra 5,5 do Sol.
-// 3,4 com a câmera a 48° dá folga até para Júpiter (3,4 + 3,53 = 6,93 < 7,43).
-const RAIO_SOL = 3.4;
+// Com 4,3, órbita 13 e a câmera a 48°, a folga é de 3,3 unidades até para
+// Júpiter, o maior do seletor (semi-menor 11,1 contra 4,3 + 3,53 = 7,83).
+const RAIO_SOL = 4.3;
 const RAIO_TERRA = 1.6;
 
 /**
@@ -77,6 +86,8 @@ const TEXTOS = {
     estaDeDia: 'de dia a {lat}',
     estaDeNoite: 'de noite a {lat}',
     luzTitulo: 'A luz que chega aí',
+    rotuloAngulo: 'ângulo da luz',
+    rotuloFaixa: 'luz por latitude',
     luzNota: 'A mesma luz espalhada por {n}× mais área aquece {n}× menos cada ponto.',
     luzPino: 'Sol a pino: máximo de energia por área.',
     luzSemSol: 'Hoje o Sol não nasce nesta latitude.',
@@ -98,6 +109,8 @@ const TEXTOS = {
     topicoPolos: 'Onde o Sol não se põe',
     polosLongo: 'Acima de 66,5° de latitude — os círculos polares — há dias em que o Sol não chega a se pôr, e outros em que não chega a nascer. É a inclinação do eixo levando um polo inteiro para dentro da luz e o outro para dentro da sombra.',
     topicoDistancia: 'A Terra chega a ficar mais perto?',
+    topicoEscala: 'Esta tela não está em escala',
+    escalaLongo: 'Aqui o Sol tem {s}× o raio da Terra e a órbita tem {o} raios — no céu de verdade são 109× e 23 mil. Não é descuido: desenhar a distância certa deixaria a Terra menor que um ponto, e desenhar o Sol no tamanho certo não deixaria caber mais nada. O que dá para escolher é quanto de cada erro se aceita, e o selo lá em cima avisa que existe um.',
     distanciaLongo: 'Chega, e o efeito é o contrário do que parece. Em 4 de janeiro a Terra está a {min} milhões de km do Sol; em 5 de julho, a {max}. São {dif} milhões de km de diferença — {pct}% — e {ene}% a mais de energia chegando em janeiro. Só que janeiro é VERÃO no hemisfério sul e INVERNO no norte, ao mesmo tempo. Se fosse a distância que manda, o ano inteiro seria igual nos dois lados.',
     distanciaBarras: 'Em cima, só o trecho entre a menor e a maior distância. Embaixo, o mesmo trecho na escala que começa do zero — os 5 milhões somem dentro dos 150.',
     rotuloJaneiro: 'jan',
@@ -135,6 +148,8 @@ const TEXTOS = {
     estaDeDia: 'daytime at {lat}',
     estaDeNoite: 'nighttime at {lat}',
     luzTitulo: 'The light that reaches you',
+    rotuloAngulo: 'angle of light',
+    rotuloFaixa: 'light by latitude',
     luzNota: 'The same light spread over {n}× more area warms each point {n}× less.',
     luzPino: 'Sun overhead: maximum energy per area.',
     luzSemSol: 'Today the Sun does not rise at this latitude.',
@@ -156,6 +171,8 @@ const TEXTOS = {
     topicoPolos: 'Where the Sun never sets',
     polosLongo: 'Above 66.5° of latitude — the polar circles — there are days when the Sun never sets, and others when it never rises. It is the tilt of the axis carrying one whole pole into the light and the other into the shadow.',
     topicoDistancia: 'Does the Earth really get closer?',
+    topicoEscala: 'This screen is not to scale',
+    escalaLongo: 'Here the Sun is {s}× the Earth’s radius and the orbit is {o} radii — in the real sky it is 109× and 23 thousand. This is not carelessness: drawing the true distance would make the Earth smaller than a dot, and drawing the Sun at true size would leave room for nothing else. What you can choose is how much of each error to accept — and the badge above says one exists.',
     distanciaLongo: 'It does, and the effect is the opposite of what it seems. On 4 January the Earth is {min} million km from the Sun; on 5 July, {max}. That is {dif} million km of difference — {pct}% — and {ene}% more energy arriving in January. Except that January is SUMMER in the southern hemisphere and WINTER in the northern one, at the same time. If distance were in charge, the whole year would be the same on both sides.',
     distanciaBarras: 'On top, only the stretch between the closest and the farthest distance. Below, the same stretch on a scale that starts at zero — the 5 million vanish inside the 150.',
     rotuloJaneiro: 'Jan',
@@ -193,6 +210,8 @@ const TEXTOS = {
     estaDeDia: 'de día a {lat}',
     estaDeNoite: 'de noche a {lat}',
     luzTitulo: 'La luz que llega ahí',
+    rotuloAngulo: 'ángulo de la luz',
+    rotuloFaixa: 'luz por latitud',
     luzNota: 'La misma luz repartida en {n}× más área calienta {n}× menos cada punto.',
     luzPino: 'Sol en lo alto: máxima energía por área.',
     luzSemSol: 'Hoy el Sol no sale en esta latitud.',
@@ -214,6 +233,8 @@ const TEXTOS = {
     topicoPolos: 'Donde el Sol no se pone',
     polosLongo: 'Por encima de los 66,5° de latitud — los círculos polares — hay días en que el Sol no llega a ponerse, y otros en que no llega a salir. Es la inclinación del eje llevando un polo entero hacia la luz y el otro hacia la sombra.',
     topicoDistancia: '¿La Tierra llega a estar más cerca?',
+    topicoEscala: 'Esta pantalla no está a escala',
+    escalaLongo: 'Aquí el Sol tiene {s}× el radio de la Tierra y la órbita tiene {o} radios — en el cielo real son 109× y 23 mil. No es descuido: dibujar la distancia verdadera dejaría a la Tierra más pequeña que un punto, y dibujar el Sol a tamaño real no dejaría espacio para nada más. Lo que se puede elegir es cuánto de cada error se acepta, y el sello de arriba avisa que existe uno.',
     distanciaLongo: 'Sí, y el efecto es lo contrario de lo que parece. El 4 de enero la Tierra está a {min} millones de km del Sol; el 5 de julio, a {max}. Son {dif} millones de km de diferencia — {pct}% — y {ene}% más de energía llegando en enero. Solo que enero es VERANO en el hemisferio sur e INVIERNO en el norte, al mismo tiempo. Si mandara la distancia, el año entero sería igual en los dos lados.',
     distanciaBarras: 'Arriba, solo el tramo entre la menor y la mayor distancia. Abajo, el mismo tramo en la escala que empieza en cero — los 5 millones desaparecen dentro de los 150.',
     rotuloJaneiro: 'ene',
@@ -312,7 +333,11 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
     controls.minDistance = 4;
-    controls.maxDistance = 90;
+    // 140, não 90: o enquadramento inicial já pede 67 num celular em paisagem
+    // depois que a órbita cresceu para 13. Com o teto em 90 o OrbitControls
+    // cortaria o afastamento pedido em telas mais estreitas e a cena entraria
+    // com o Sol pela metade.
+    controls.maxDistance = 140;
     // Sem arrastar o alvo: o pan tiraria a Terra do centro e o laço a puxaria
     // de volta no quadro seguinte — a câmera brigando com o dedo. Girar e dar
     // zoom continuam livres. Mesma decisão do modo Marés.
@@ -492,6 +517,10 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
     inputLat.oninput = () => { latitude = -Number(inputLat.value); atualizarHud(); };
 
     const cardLuz = criarCard(ctx.hudDir);
+    // Este card carrega dois gráficos lado a lado; a largura padrão de coluna
+    // (196px em modo dock) deixaria cada um com 83px. A coluna tem folga: no
+    // menor alvo ela vai até 524px e o selo central termina em 458.
+    cardLuz.raiz.classList.add('palco-card-largo');
 
     // ————— painel "Saiba mais" —————
     // Mesmo formato do painel das Marés (palco.css `.palco-explicacao`): janela
@@ -701,7 +730,19 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // três cards numa coluna, nascia fechado no celular e não aparecia.
       const esp = espalhamentoDaLuz(latitude, dec);
       cardLuz.titulo.textContent = te('luzTitulo');
-      cardLuz.valor.innerHTML = svgRaioSolar(Math.abs(latitude - dec), esp);
+      // Os dois gráficos lado a lado, no mesmo card: o ângulo com que a luz
+      // chega na SUA latitude, e como as horas de luz se distribuem por TODAS
+      // elas. São as duas metades da mesma resposta — o que a inclinação faz
+      // com você e o que ela faz com o planeta —, e ver as duas mudando juntas
+      // ao arrastar a data é o que o gráfico sozinho no painel não dava.
+      // Larguras 2fr/1,25fr no CSS: é a razão dos viewBox, então os dois saem
+      // com a mesma altura sem letterbox.
+      cardLuz.valor.innerHTML = '<div class="palco-graficos">'
+        + `<div>${svgRaioSolar(Math.abs(latitude - dec), esp)}`
+        + `<div class="palco-grafico-rotulo">${te('rotuloAngulo')}</div></div>`
+        + `<div>${svgFaixaDeLuz(dec, true)}`
+        + `<div class="palco-grafico-rotulo">${te('rotuloFaixa')}</div></div>`
+        + '</div>';
       const ua = distanciaSolarUA(n);
       const milhoes = (ua * UA_KM) / 1e6;
 
@@ -776,7 +817,11 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
             .replace('{max}', num(maxKm, 1))
             .replace('{dif}', num(maxKm - minKm, 1))
             .replace('{pct}', num((maxKm / minKm - 1) * 100, 1))
-            .replace('{ene}', num(((maxUA / minUA) ** 2 - 1) * 100, 1))}</p>`;
+            .replace('{ene}', num(((maxUA / minUA) ** 2 - 1) * 100, 1))}</p>`
+          + topico('topicoEscala')
+          + `<p>${te('escalaLongo')
+            .replace('{s}', num(RAIO_SOL / RAIO_TERRA, 1))
+            .replace('{o}', num(RAIO_ORBITA / RAIO_TERRA, 0))}</p>`;
       }
 
       // Anúncio de estado: os hemisférios e a duração do dia
@@ -831,7 +876,14 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       </svg>`;
     }
 
-    function svgFaixaDeLuz(dec) {
+    /**
+     * @param {number} dec  declinação solar do dia
+     * @param {boolean} [compacto]  versão para o card da coluna: sem os
+     *   rótulos, que a 83px de largura sairiam com 4px de altura. A leitura
+     *   ali é a FORMA da mancha amarela e a linha laranja da sua latitude; os
+     *   números ficam na versão grande, dentro do painel.
+     */
+    function svgFaixaDeLuz(dec, compacto = false) {
       // Para cada latitude, calcula a duração do dia
       const alturaSvg = 96;
       const larguraSvg = 120;
@@ -860,16 +912,18 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       const yNorte = areaY + (90 - 66.56) / 180 * areaAltura;
       const ySul = areaY + (90 - (-66.56)) / 180 * areaAltura;
       linhas += `<line x1="6" y1="${yNorte}" x2="114" y2="${yNorte}" stroke="#4a6fa8" stroke-dasharray="2,2" stroke-width="0.5"/>`;
-      linhas += `<text x="116" y="${yNorte + 1}" font-size="7" fill="#93a0b8">66°</text>`;
       linhas += `<line x1="6" y1="${ySul}" x2="114" y2="${ySul}" stroke="#4a6fa8" stroke-dasharray="2,2" stroke-width="0.5"/>`;
-      linhas += `<text x="116" y="${ySul + 1}" font-size="7" fill="#93a0b8">-66°</text>`;
+      if (!compacto) {
+        linhas += `<text x="116" y="${yNorte + 1}" font-size="7" fill="#93a0b8">66°</text>`;
+        linhas += `<text x="116" y="${ySul + 1}" font-size="7" fill="#93a0b8">-66°</text>`;
+      }
 
       // Marca na latitude escolhida pelo usuário
       const yUsuario = areaY + (90 - latitude) / 180 * areaAltura;
       const marcador = `<line x1="6" y1="${yUsuario}" x2="114" y2="${yUsuario}" stroke="#ff8a5c" stroke-width="1.2"/>`;
 
       // Eixo: N no topo, S embaixo
-      const eixoTexto = `<text x="2" y="8" font-size="7" fill="#93a0b8">N</text>
+      const eixoTexto = compacto ? '' : `<text x="2" y="8" font-size="7" fill="#93a0b8">N</text>
         <text x="2" y="95" font-size="7" fill="#93a0b8">S</text>`;
 
       const ariaLabel = te('faixaDeLuzAlt')

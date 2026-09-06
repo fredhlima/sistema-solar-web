@@ -239,6 +239,24 @@ body.modo-dock .palco-fechar {
 .palco-card-valor .palco-linha b { font-weight: 600; }
 body.modo-dock .palco-card-valor .palco-linha { font-size: 11px; }
 
+/* Dois gráficos lado a lado dentro de um card. As frações são a razão dos
+   viewBox (120×60 e 120×96), então as duas figuras saem com a MESMA altura e
+   nenhuma fica com faixa vazia em cima e embaixo. */
+.palco-graficos {
+  display: grid;
+  grid-template-columns: 2fr 1.25fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.palco-grafico-rotulo {
+  margin-top: 2px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: #93a0b8;
+  text-align: center;
+}
+
 .palco-card-sub {
   font-size: 11px;
   font-weight: 400;
@@ -634,6 +652,12 @@ body.modo-dock .palco-titulo {
 
 /* Em 390px de altura, três cards por lado não cabem. Compacta o suficiente
    para o conteúdo caber sem rolagem no dock típico. */
+/* Card que carrega dois gráficos lado a lado: precisa de mais largura que a de
+   coluna, senão cada figura fica com 83px. */
+.palco-card-largo { max-width: 300px; }
+body.modo-dock .palco-card.palco-card-largo { max-width: 244px; }
+body.modo-dock .palco-card-largo svg { max-height: 62px; }
+
 body.modo-dock .palco-card {
   padding: 6px 9px;
   /* Era 172px, com a coluna esquerda carregando três blocos empilhados. Com um
