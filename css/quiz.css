@@ -722,6 +722,59 @@
   margin-bottom: 96px;
 }
 
+/* ————— e o mesmo modo DENTRO do dock —————
+
+   Em paisagem de celular, `body.modo-dock .quiz-card` (estilos.css e
+   mobile.css, com `!important`) transforma o card em página de tela cheia —
+   decisão certa para a escolha de pacote e para a pergunta de múltipla
+   escolha, e errada para a de "encontre o astro": o card virava um retângulo
+   do tamanho da tela com `pointer-events: auto`, então NENHUM toque chegava na
+   cena 3D e a pergunta não tinha como ser respondida. Como o dock é a
+   plataforma da loja, isso valia para os oito pacotes, não só os novos.
+
+   Precisa de `!important` e de mais especificidade porque é o que as regras de
+   tela cheia usam. Ancorado embaixo, acima da barra do dock, para não brigar
+   com o «‹ Voltar» que o dock fixa no canto superior esquerdo. */
+body.modo-dock .quiz-overlay.modo-encontrar {
+  align-items: flex-end !important;
+  justify-content: center !important;
+}
+
+body.modo-dock .quiz-overlay.modo-encontrar .quiz-card {
+  width: min(420px, calc(100% - 24px)) !important;
+  max-width: 420px !important;
+  height: auto !important;
+  max-height: calc(100dvh - var(--mdock-bar-h, 64px) - 24px) !important;
+  border-radius: 16px !important;
+  padding: 12px 14px !important;
+  margin: 0 0 calc(var(--mdock-bar-h, 64px) + 12px) !important;
+  overflow-y: auto;
+}
+
+/* Cada pixel a menos aqui é céu a mais para procurar o astro: numa tela de
+   393px o card já ocupa mais da metade da altura útil. */
+body.modo-dock .quiz-overlay.modo-encontrar .quiz-encontrar-card {
+  padding: 10px 12px;
+  margin-bottom: 0;
+}
+
+/* O «‹ Voltar» do dock é `position: fixed`, mas `.quiz-card` tem
+   `backdrop-filter` — e isso faz do card o bloco de contenção dos filhos
+   fixos. Com o card em tela cheia dava no mesmo; compacto, o botão caía DENTRO
+   dele, por cima do contador. Aqui ele volta ao fluxo, no topo do próprio
+   card, que é onde faz sentido num card deste tamanho. */
+body.modo-dock .quiz-overlay.modo-encontrar .botao-fechar-overlay {
+  position: static !important;
+  align-self: flex-start;
+  margin: 0 0 6px !important;
+  top: auto !important;
+  left: auto !important;
+}
+
+body.modo-dock .quiz-overlay.modo-encontrar .quiz-contador { margin-bottom: 4px; }
+body.modo-dock .quiz-overlay.modo-encontrar .quiz-encontrar-texto { font-size: 14px; }
+body.modo-dock .quiz-overlay.modo-encontrar .quiz-encontrar-dica { font-size: 12px; padding: 6px 10px; }
+
 /* Aviso de "tente de novo" na pergunta múltipla */
 .quiz-aviso-erro {
   margin-top: 12px;
