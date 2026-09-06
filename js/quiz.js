@@ -2,7 +2,7 @@
 // Exporta: iniciarQuiz({ motor, dados, premium }) -> { abrir }
 
 import { getIdioma } from './i18n.js';
-import { QUIZ_PACOTES } from './quiz-dados.js?v=4';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=5';
 
 const TEXTOS = {
   pt: {

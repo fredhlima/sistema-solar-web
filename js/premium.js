@@ -9,7 +9,10 @@ export const ITENS_GRATIS = {
   eventos: [],
   quiz: ['planetas'],
   'voce-no-espaco': ['terra', 'lua'],
-  'estacoes-mares': ['estacoes'],
+  // Decisão do Fred (06/09/2026): Estações e Marés são os dois pagos. Antes
+  // Estações entrava como "provinha" grátis; agora a provinha do pacote fica
+  // por conta do quiz de Planetas e da Apollo 11.
+  'estacoes-mares': [],
 };
 
 const CHAVE_STORAGE = 'sistema-solar-premium';

@@ -180,7 +180,7 @@ const NIVEIS = [
 // Ficam no módulo porque as condições de badge abaixo são avaliadas fora do
 // closure de iniciarProgresso. Os valores de reserva existem só para o caso de
 // alguém chamar verificarBadges sem ter iniciado a UI (testes em node).
-let totalPacotesQuiz = 6;
+let totalPacotesQuiz = 8;
 let totalMissoesJogo = 10;
 
 // Quantas missões a badge "Engenheiro Espacial" pede. Constante para a condição

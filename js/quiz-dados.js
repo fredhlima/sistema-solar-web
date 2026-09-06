@@ -1960,6 +1960,427 @@ export const QUIZ_PACOTES = [
         }
       }
     ]
+  },
+  {
+    id: 'mares',
+    icone: '◒',
+    nome: { pt: 'Marés', en: 'Tides', es: 'Mareas' },
+    perguntas: [
+      {
+        id: 'mares-1',
+        tipo: 'multipla',
+        texto: {
+          pt: 'Quem puxa a maré com mais força: a Lua ou o Sol?',
+          en: 'Which pulls the tide harder: the Moon or the Sun?',
+          es: '¿Quién tira más fuerte de la marea: la Luna o el Sol?'
+        },
+        opcoes: {
+          pt: ['O Sol, que é gigante', 'A Lua', 'Os dois igualmente', 'Nenhum dos dois'],
+          en: ['The Sun, which is huge', 'The Moon', 'Both equally', 'Neither of them'],
+          es: ['El Sol, que es gigante', 'La Luna', 'Los dos por igual', 'Ninguno de los dos']
+        },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A Lua, com cerca do dobro da força do Sol. O Sol é muito maior, mas a maré não depende da gravidade e sim da DIFERENÇA de gravidade entre um lado e outro da Terra — e essa diferença cai com o cubo da distância.',
+          en: 'The Moon, with about twice the Sun’s pull. The Sun is far bigger, but tides do not depend on gravity itself: they depend on the DIFFERENCE in gravity across the Earth, and that difference falls with the cube of distance.',
+          es: 'La Luna, con cerca del doble de la fuerza del Sol. El Sol es mucho mayor, pero la marea no depende de la gravedad sino de la DIFERENCIA de gravedad entre un lado y otro de la Tierra — y esa diferencia cae con el cubo de la distancia.'
+        }
+      },
+      {
+        id: 'mares-2',
+        tipo: 'multipla',
+        texto: {
+          pt: 'Quantos bojos de maré alta existem ao mesmo tempo na Terra?',
+          en: 'How many high-tide bulges exist on Earth at the same time?',
+          es: '¿Cuántos abultamientos de marea alta hay a la vez en la Tierra?'
+        },
+        opcoes: { pt: ['Um', 'Dois', 'Quatro', 'Depende do mês'], en: ['One', 'Two', 'Four', 'It depends on the month'], es: ['Uno', 'Dos', 'Cuatro', 'Depende del mes'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Dois, em lados opostos. Por isso a sua praia passa por duas marés altas por dia: a Terra gira e cruza os dois bojos.',
+          en: 'Two, on opposite sides. That is why your beach gets two high tides a day: the Earth spins and passes through both bulges.',
+          es: 'Dos, en lados opuestos. Por eso tu playa pasa por dos mareas altas al día: la Tierra gira y cruza los dos abultamientos.'
+        }
+      },
+      {
+        id: 'mares-3',
+        tipo: 'multipla',
+        texto: {
+          pt: 'Por que existe maré alta também do lado OPOSTO à Lua?',
+          en: 'Why is there also a high tide on the side FACING AWAY from the Moon?',
+          es: '¿Por qué hay marea alta también en el lado OPUESTO a la Luna?'
+        },
+        opcoes: {
+          pt: ['A Lua empurra a água para lá', 'A Terra é puxada para longe da água, que fica para trás', 'O Sol puxa daquele lado', 'A água escorre em volta do planeta'],
+          en: ['The Moon pushes the water there', 'The Earth is pulled away from the water, which lags behind', 'The Sun pulls from that side', 'The water flows around the planet'],
+          es: ['La Luna empuja el agua hacia allá', 'La Tierra es tirada lejos del agua, que se queda atrás', 'El Sol tira de ese lado', 'El agua se desliza alrededor del planeta']
+        },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A Lua puxa o lado próximo mais forte que o centro, e o centro mais forte que o lado distante. No lado distante, a Terra é puxada para longe da água — e a água fica para trás. É a Terra inteira sendo esticada.',
+          en: 'The Moon pulls the near side harder than the centre, and the centre harder than the far side. On the far side, the Earth is pulled away from the water — and the water lags behind. The whole Earth is being stretched.',
+          es: 'La Luna tira del lado cercano más fuerte que del centro, y del centro más que del lado lejano. En el lado lejano, la Tierra es tirada lejos del agua — y el agua se queda atrás. Es la Tierra entera siendo estirada.'
+        }
+      },
+      {
+        id: 'mares-4',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o astro que manda na maré da Terra.', en: 'Find the body that rules the Earth’s tides.', es: 'Encuentra el astro que manda en la marea de la Tierra.' },
+        alvoId: 'lua',
+        dica: { pt: 'Está a 384 mil km daqui e muda de fase a cada semana.', en: 'It is 384 thousand km away and changes phase every week.', es: 'Está a 384 mil km de aquí y cambia de fase cada semana.' },
+        explicacao: {
+          pt: 'A Lua. Ela está muito mais perto que o Sol, e na conta da maré a distância pesa ao cubo — por isso um astro tão menor ganha do Sol.',
+          en: 'The Moon. It is far closer than the Sun, and in the tidal equation distance counts cubed — which is how such a small body beats the Sun.',
+          es: 'La Luna. Está mucho más cerca que el Sol, y en la cuenta de la marea la distancia pesa al cubo — por eso un astro tan pequeño le gana al Sol.'
+        }
+      },
+      {
+        id: 'mares-5',
+        tipo: 'multipla',
+        texto: { pt: 'Quanto tempo passa entre uma maré alta e a seguinte?', en: 'How long is it from one high tide to the next?', es: '¿Cuánto tiempo pasa entre una marea alta y la siguiente?' },
+        opcoes: { pt: ['6 horas', '12 horas exatas', '12h25', '24 horas'], en: ['6 hours', 'Exactly 12 hours', '12h25', '24 hours'], es: ['6 horas', '12 horas exactas', '12h25', '24 horas'] },
+        corretaIndex: 2,
+        explicacao: {
+          pt: '12h25. Não são 12 h exatas porque, enquanto a Terra gira, a Lua avança 13,2° por dia na órbita — a Terra precisa girar mais 54 minutos para reencontrá-la. Metade desse dia lunar (24h50) dá 12h25.',
+          en: '12h25. Not exactly 12 h because, while the Earth spins, the Moon advances 13.2° a day along its orbit — the Earth needs 54 more minutes to catch up. Half of that lunar day (24h50) is 12h25.',
+          es: '12h25. No son 12 h exactas porque, mientras la Tierra gira, la Luna avanza 13,2° por día en su órbita — la Tierra necesita 54 minutos más para reencontrarla. La mitad de ese día lunar (24h50) da 12h25.'
+        }
+      },
+      {
+        id: 'mares-6',
+        tipo: 'multipla',
+        texto: { pt: 'Em que fases da Lua a maré fica mais forte?', en: 'In which Moon phases is the tide strongest?', es: '¿En qué fases de la Luna la marea es más fuerte?' },
+        opcoes: { pt: ['Nos quartos crescente e minguante', 'Na lua nova e na cheia', 'Só na lua cheia', 'A fase não muda nada'], en: ['At first and last quarter', 'At new Moon and full Moon', 'Only at full Moon', 'The phase changes nothing'], es: ['En los cuartos creciente y menguante', 'En la luna nueva y en la llena', 'Solo en la luna llena', 'La fase no cambia nada'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Na lua nova e na cheia, quando Sol, Terra e Lua ficam alinhados e as duas forças se somam. É a maré de sizígia — a mais forte do mês.',
+          en: 'At new and full Moon, when Sun, Earth and Moon line up and both pulls add together. That is the spring tide — the strongest of the month.',
+          es: 'En la luna nueva y en la llena, cuando el Sol, la Tierra y la Luna se alinean y las dos fuerzas se suman. Es la marea viva — la más fuerte del mes.'
+        }
+      },
+      {
+        id: 'mares-7',
+        tipo: 'multipla',
+        texto: { pt: 'Como se chama a maré mais FRACA do mês?', en: 'What is the WEAKEST tide of the month called?', es: '¿Cómo se llama la marea más DÉBIL del mes?' },
+        opcoes: { pt: ['Maré de sizígia', 'Maré de quadratura', 'Maré cheia', 'Maré lunar'], en: ['Spring tide', 'Neap tide', 'Full tide', 'Lunar tide'], es: ['Marea viva', 'Marea muerta', 'Marea llena', 'Marea lunar'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Maré de quadratura, nos quartos crescente e minguante. Aí Lua e Sol puxam a 90° um do outro e as forças se atrapalham em vez de se somar.',
+          en: 'The neap tide, at first and last quarter. There the Moon and the Sun pull at 90° to each other and the forces work against instead of adding up.',
+          es: 'La marea muerta, en los cuartos creciente y menguante. Ahí la Luna y el Sol tiran a 90° uno del otro y las fuerzas se estorban en vez de sumarse.'
+        }
+      },
+      {
+        id: 'mares-8',
+        tipo: 'multipla',
+        texto: { pt: 'A maré causada pela Lua é quantas vezes a causada pelo Sol?', en: 'The Moon’s tide is how many times the Sun’s?', es: '¿La marea de la Luna es cuántas veces la del Sol?' },
+        opcoes: { pt: ['10 vezes', 'Cerca de 2 vezes', 'São iguais', '100 vezes'], en: ['10 times', 'About 2 times', 'They are equal', '100 times'], es: ['10 veces', 'Cerca de 2 veces', 'Son iguales', '100 veces'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Cerca de 2,2 vezes. Por isso o Sol muda a maré — deixa mais forte ou mais fraca conforme a fase — mas quem manda é a Lua.',
+          en: 'About 2.2 times. That is why the Sun changes the tide — making it stronger or weaker depending on the phase — but the Moon is in charge.',
+          es: 'Cerca de 2,2 veces. Por eso el Sol cambia la marea — la hace más fuerte o más débil según la fase — pero quien manda es la Luna.'
+        }
+      },
+      {
+        id: 'mares-9',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o astro que também puxa a maré, com menos força que a Lua.', en: 'Find the body that also pulls the tide, but weaker than the Moon.', es: 'Encuentra el astro que también tira de la marea, con menos fuerza que la Luna.' },
+        alvoId: 'sol',
+        dica: { pt: 'É 27 milhões de vezes mais pesado que a Lua — e mesmo assim perde.', en: 'It is 27 million times heavier than the Moon — and still loses.', es: 'Es 27 millones de veces más pesado que la Luna — y aun así pierde.' },
+        explicacao: {
+          pt: 'O Sol. Ele está 389 vezes mais longe que a Lua, e como a força de maré cai com o cubo da distância, toda a massa dele não compensa.',
+          en: 'The Sun. It is 389 times farther than the Moon, and since tidal force falls with the cube of distance, all that mass does not make up for it.',
+          es: 'El Sol. Está 389 veces más lejos que la Luna, y como la fuerza de marea cae con el cubo de la distancia, toda su masa no lo compensa.'
+        }
+      },
+      {
+        id: 'mares-10',
+        tipo: 'multipla',
+        texto: { pt: 'A força que faz a maré cai com a distância elevada a qual potência?', en: 'Tidal force falls with distance raised to which power?', es: '¿La fuerza que hace la marea cae con la distancia elevada a qué potencia?' },
+        opcoes: { pt: ['Ao quadrado', 'Ao cubo', 'Não depende da distância', 'Direto, sem potência'], en: ['Squared', 'Cubed', 'It does not depend on distance', 'Linearly'], es: ['Al cuadrado', 'Al cubo', 'No depende de la distancia', 'Directa, sin potencia'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Ao cubo. A gravidade comum cai com o quadrado, mas a maré é a DIFERENÇA da gravidade entre dois pontos — e essa diferença cai mais rápido ainda.',
+          en: 'Cubed. Plain gravity falls with the square, but the tide is the DIFFERENCE in gravity between two points — and that difference falls faster still.',
+          es: 'Al cubo. La gravedad común cae con el cuadrado, pero la marea es la DIFERENCIA de gravedad entre dos puntos — y esa diferencia cae aún más rápido.'
+        }
+      },
+      {
+        id: 'mares-11',
+        tipo: 'multipla',
+        texto: { pt: 'O que levanta a água: a gravidade da Lua ou a diferença dela?', en: 'What lifts the water: the Moon’s gravity or the difference in it?', es: '¿Qué levanta el agua: la gravedad de la Luna o la diferencia de ella?' },
+        opcoes: { pt: ['A gravidade da Lua, direto', 'A diferença da gravidade entre um lado e outro da Terra', 'A rotação da Terra sozinha', 'O vento sobre o mar'], en: ['The Moon’s gravity, directly', 'The difference in gravity across the Earth', 'The Earth’s spin alone', 'Wind over the sea'], es: ['La gravedad de la Luna, directa', 'La diferencia de gravedad entre un lado y otro de la Tierra', 'La rotación de la Tierra sola', 'El viento sobre el mar'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A diferença. Se a Lua puxasse a Terra inteira por igual, o planeta todo cairia junto e nada se esticaria — não haveria maré.',
+          en: 'The difference. If the Moon pulled the whole Earth equally, the entire planet would fall together and nothing would stretch — there would be no tide.',
+          es: 'La diferencia. Si la Luna tirara de la Tierra entera por igual, todo el planeta caería junto y nada se estiraría — no habría marea.'
+        }
+      },
+      {
+        id: 'mares-12',
+        tipo: 'multipla',
+        texto: { pt: 'Onde fica a maior maré do mundo, com até 16 metros?', en: 'Where is the world’s largest tide, reaching 16 metres?', es: '¿Dónde está la mayor marea del mundo, de hasta 16 metros?' },
+        opcoes: { pt: ['Baía de Fundy, no Canadá', 'Rio de Janeiro, no Brasil', 'Mar Mediterrâneo', 'Havaí'], en: ['Bay of Fundy, Canada', 'Rio de Janeiro, Brazil', 'The Mediterranean Sea', 'Hawaii'], es: ['Bahía de Fundy, en Canadá', 'Río de Janeiro, en Brasil', 'Mar Mediterráneo', 'Hawái'] },
+        corretaIndex: 0,
+        explicacao: {
+          pt: 'A baía de Fundy, no Canadá: a água entra por um funil que vai estreitando e a maré sobe até 16 metros. No litoral do Sudeste do Brasil ela sobe cerca de 1,5 metro.',
+          en: 'The Bay of Fundy, in Canada: the water funnels into a narrowing channel and the tide rises up to 16 metres. On Brazil’s southeast coast it rises about 1.5 metres.',
+          es: 'La bahía de Fundy, en Canadá: el agua entra por un embudo que se estrecha y la marea sube hasta 16 metros. En el sudeste de Brasil sube cerca de 1,5 metro.'
+        }
+      },
+      {
+        id: 'mares-13',
+        tipo: 'multipla',
+        texto: { pt: 'A altura da maré é a mesma em todas as praias do mundo?', en: 'Is the tide the same height on every beach in the world?', es: '¿La altura de la marea es la misma en todas las playas del mundo?' },
+        opcoes: { pt: ['Sim, a força é a mesma no planeta todo', 'Não — depende do formato da costa e do fundo do mar', 'Só muda no inverno', 'Depende do hemisfério'], en: ['Yes, the force is the same everywhere', 'No — it depends on the shape of the coast and the sea floor', 'It only changes in winter', 'It depends on the hemisphere'], es: ['Sí, la fuerza es la misma en todo el planeta', 'No — depende de la forma de la costa y del fondo del mar', 'Solo cambia en invierno', 'Depende del hemisferio'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A FORÇA é a mesma para o planeta inteiro, mas a ALTURA não: depende do formato da costa e do fundo do mar. Por isso em São Luís a maré passa de 6 metros e no Rio não chega a 2.',
+          en: 'The FORCE is the same for the whole planet, but the HEIGHT is not: it depends on the shape of the coast and the sea floor. That is why in São Luís the tide passes 6 metres and in Rio it barely reaches 2.',
+          es: 'La FUERZA es la misma para todo el planeta, pero la ALTURA no: depende de la forma de la costa y del fondo del mar. Por eso en São Luís la marea pasa de 6 metros y en Río no llega a 2.'
+        }
+      },
+      {
+        id: 'mares-14',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o planeta onde a maré sobe e desce na praia duas vezes por dia.', en: 'Find the planet where the tide rises and falls at the beach twice a day.', es: 'Encuentra el planeta donde la marea sube y baja en la playa dos veces al día.' },
+        alvoId: 'terra',
+        dica: { pt: 'É o único com oceanos de água líquida na superfície.', en: 'It is the only one with liquid water oceans on its surface.', es: 'Es el único con océanos de agua líquida en la superficie.' },
+        explicacao: {
+          pt: 'A Terra. A maré acontece porque a Terra gira por baixo dos dois bojos de água — e cada volta do planeta leva a sua praia por duas marés altas.',
+          en: 'The Earth. Tides happen because the Earth spins underneath the two water bulges — and each turn of the planet takes your beach through two high tides.',
+          es: 'La Tierra. La marea ocurre porque la Tierra gira por debajo de los dos abultamientos de agua — y cada vuelta del planeta lleva tu playa por dos mareas altas.'
+        }
+      },
+      {
+        id: 'mares-15',
+        tipo: 'multipla',
+        texto: { pt: 'A maré também estica a parte sólida da Terra?', en: 'Does the tide also stretch the solid part of the Earth?', es: '¿La marea también estira la parte sólida de la Tierra?' },
+        opcoes: { pt: ['Não, só a água se move', 'Sim, o chão sobe e desce cerca de 30 cm por dia', 'Só nos terremotos', 'Só no fundo do mar'], en: ['No, only water moves', 'Yes — the ground rises and falls about 30 cm a day', 'Only during earthquakes', 'Only on the sea floor'], es: ['No, solo el agua se mueve', 'Sí, el suelo sube y baja cerca de 30 cm por día', 'Solo en los terremotos', 'Solo en el fondo del mar'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Sim. A rocha também se estica: o chão onde você está sobe e desce cerca de 30 cm por dia. Ninguém sente porque tudo em volta sobe junto.',
+          en: 'Yes. Rock stretches too: the ground you stand on rises and falls about 30 cm a day. Nobody feels it because everything around rises with it.',
+          es: 'Sí. La roca también se estira: el suelo donde estás sube y baja cerca de 30 cm por día. Nadie lo siente porque todo alrededor sube junto.'
+        }
+      },
+      {
+        id: 'mares-16',
+        tipo: 'multipla',
+        texto: { pt: 'A Lua se afasta da Terra 3,8 cm por ano. O que isso faz com a maré e com o dia?', en: 'The Moon drifts 3.8 cm away from Earth each year. What does that do to the tide and to the day?', es: 'La Luna se aleja de la Tierra 3,8 cm por año. ¿Qué le hace eso a la marea y al día?' },
+        opcoes: { pt: ['Nada muda', 'A maré enfraquece devagar e o dia fica mais longo', 'A maré fica mais forte', 'O dia fica mais curto'], en: ['Nothing changes', 'The tide slowly weakens and the day gets longer', 'The tide gets stronger', 'The day gets shorter'], es: ['Nada cambia', 'La marea se debilita despacio y el día se alarga', 'La marea se hace más fuerte', 'El día se acorta'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A maré enfraquece bem devagar, e o dia fica mais longo: o atrito das marés freia a rotação da Terra. No tempo dos dinossauros o dia tinha cerca de 23 horas.',
+          en: 'The tide slowly weakens, and the day gets longer: tidal friction brakes the Earth’s spin. In the age of the dinosaurs the day was about 23 hours long.',
+          es: 'La marea se debilita muy despacio, y el día se alarga: el roce de las mareas frena la rotación de la Tierra. En tiempos de los dinosaurios el día tenía cerca de 23 horas.'
+        }
+      }
+    ]
+  },
+  {
+    id: 'estacoes',
+    icone: '◕',
+    nome: { pt: 'Estações do Ano', en: 'Seasons of the Year', es: 'Estaciones del Año' },
+    perguntas: [
+      {
+        id: 'estacoes-1',
+        tipo: 'multipla',
+        texto: { pt: 'O que causa as estações do ano?', en: 'What causes the seasons?', es: '¿Qué causa las estaciones del año?' },
+        opcoes: {
+          pt: ['A Terra ficar mais perto ou mais longe do Sol', 'A inclinação do eixo da Terra', 'A velocidade da Terra na órbita', 'As manchas solares'],
+          en: ['The Earth getting closer to or farther from the Sun', 'The tilt of the Earth’s axis', 'The Earth’s speed along its orbit', 'Sunspots'],
+          es: ['Que la Tierra esté más cerca o más lejos del Sol', 'La inclinación del eje de la Tierra', 'La velocidad de la Tierra en la órbita', 'Las manchas solares']
+        },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'A inclinação do eixo, de 23,4°. Meio ano um hemisfério fica voltado para o Sol e recebe a luz de cima; no outro meio ano a luz chega inclinada e se espalha por mais chão.',
+          en: 'The 23.4° tilt of the axis. For half the year one hemisphere leans towards the Sun and gets the light from above; for the other half the light arrives at an angle and spreads over more ground.',
+          es: 'La inclinación del eje, de 23,4°. Medio año un hemisferio está vuelto hacia el Sol y recibe la luz desde arriba; el otro medio año la luz llega inclinada y se reparte por más suelo.'
+        }
+      },
+      {
+        id: 'estacoes-2',
+        tipo: 'multipla',
+        texto: { pt: 'Quantos graus é a inclinação do eixo da Terra?', en: 'How many degrees is the Earth’s axial tilt?', es: '¿Cuántos grados es la inclinación del eje de la Tierra?' },
+        opcoes: { pt: ['0°, o eixo é reto', '23,4°', '45°', '90°'], en: ['0°, the axis is upright', '23.4°', '45°', '90°'], es: ['0°, el eje es recto', '23,4°', '45°', '90°'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: '23,4° em relação à perpendicular do plano da órbita. Se fosse 0°, não haveria estações: todo dia seria igual ao anterior no mundo inteiro.',
+          en: '23.4° from the perpendicular to the orbital plane. If it were 0°, there would be no seasons: every day would be the same as the last, everywhere.',
+          es: '23,4° respecto a la perpendicular del plano de la órbita. Si fuera 0°, no habría estaciones: cada día sería igual al anterior en todo el mundo.'
+        }
+      },
+      {
+        id: 'estacoes-3',
+        tipo: 'multipla',
+        texto: { pt: 'Quando é verão no hemisfério sul, no hemisfério norte é...', en: 'When it is summer in the southern hemisphere, in the north it is...', es: 'Cuando es verano en el hemisferio sur, en el norte es...' },
+        opcoes: { pt: ['Verão também', 'Inverno', 'Primavera', 'Depende do ano'], en: ['Summer as well', 'Winter', 'Spring', 'It depends on the year'], es: ['Verano también', 'Invierno', 'Primavera', 'Depende del año'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Inverno. Os dois hemisférios têm sempre estações opostas, porque quando um se inclina para o Sol o outro se inclina para o lado contrário.',
+          en: 'Winter. The two hemispheres always have opposite seasons, because when one leans towards the Sun the other leans away.',
+          es: 'Invierno. Los dos hemisferios tienen siempre estaciones opuestas, porque cuando uno se inclina hacia el Sol el otro se inclina al lado contrario.'
+        }
+      },
+      {
+        id: 'estacoes-4',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o planeta cujo eixo inclinado cria as quatro estações que você conhece.', en: 'Find the planet whose tilted axis creates the four seasons you know.', es: 'Encuentra el planeta cuyo eje inclinado crea las cuatro estaciones que conoces.' },
+        alvoId: 'terra',
+        dica: { pt: 'Você está em cima dele agora.', en: 'You are standing on it right now.', es: 'Estás encima de él ahora mismo.' },
+        explicacao: {
+          pt: 'A Terra. O eixo dela aponta sempre para o mesmo ponto do céu — perto da estrela Polar — enquanto ela dá a volta no Sol. É esse apontar fixo que faz o ano ter estações.',
+          en: 'The Earth. Its axis always points at the same spot in the sky — near Polaris — while it goes around the Sun. That fixed pointing is what gives the year its seasons.',
+          es: 'La Tierra. Su eje apunta siempre al mismo punto del cielo — cerca de la estrella Polar — mientras da la vuelta al Sol. Ese apuntar fijo es lo que hace que el año tenga estaciones.'
+        }
+      },
+      {
+        id: 'estacoes-5',
+        tipo: 'multipla',
+        texto: { pt: 'Em janeiro, a Terra está mais perto ou mais longe do Sol?', en: 'In January, is the Earth closer to or farther from the Sun?', es: 'En enero, ¿la Tierra está más cerca o más lejos del Sol?' },
+        opcoes: { pt: ['Mais perto', 'Mais longe', 'Exatamente na média', 'Muda a cada ano'], en: ['Closer', 'Farther', 'Exactly average', 'It changes every year'], es: ['Más cerca', 'Más lejos', 'Exactamente en la media', 'Cambia cada año'] },
+        corretaIndex: 0,
+        explicacao: {
+          pt: 'Mais perto: 147,1 milhões de km em 4 de janeiro, contra 152,1 em 5 de julho. E, mesmo assim, janeiro é inverno no hemisfério norte — prova de que não é a distância que faz as estações.',
+          en: 'Closer: 147.1 million km on 4 January, against 152.1 on 5 July. And even so, January is winter in the northern hemisphere — proof that distance does not make the seasons.',
+          es: 'Más cerca: 147,1 millones de km el 4 de enero, contra 152,1 el 5 de julio. Y aun así, enero es invierno en el hemisferio norte — prueba de que no es la distancia la que hace las estaciones.'
+        }
+      },
+      {
+        id: 'estacoes-6',
+        tipo: 'multipla',
+        texto: { pt: 'Se em janeiro estamos mais perto do Sol, por que faz frio na Europa?', en: 'If we are closer to the Sun in January, why is it cold in Europe?', es: 'Si en enero estamos más cerca del Sol, ¿por qué hace frío en Europa?' },
+        opcoes: { pt: ['Porque o Sol esfria no inverno', 'Porque o hemisfério norte está inclinado para longe do Sol', 'Porque a Europa fica no lado escuro', 'Porque a Terra anda mais devagar'], en: ['Because the Sun cools down in winter', 'Because the northern hemisphere is tilted away from the Sun', 'Because Europe is on the dark side', 'Because the Earth moves more slowly'], es: ['Porque el Sol se enfría en invierno', 'Porque el hemisferio norte está inclinado lejos del Sol', 'Porque Europa está en el lado oscuro', 'Porque la Tierra va más despacio'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Porque em janeiro o hemisfério norte está inclinado para longe do Sol: a luz chega rasante e se espalha por muito mais chão. Os 7% a mais de energia por estarmos mais perto não chegam nem perto de compensar isso.',
+          en: 'Because in January the northern hemisphere leans away from the Sun: the light arrives at a low angle and spreads over far more ground. The 7% extra energy from being closer does not come close to compensating.',
+          es: 'Porque en enero el hemisferio norte está inclinado lejos del Sol: la luz llega rasante y se reparte por mucho más suelo. El 7% más de energía por estar más cerca no compensa ni de lejos.'
+        }
+      },
+      {
+        id: 'estacoes-7',
+        tipo: 'multipla',
+        texto: { pt: 'O que acontece nos equinócios?', en: 'What happens at the equinoxes?', es: '¿Qué pasa en los equinoccios?' },
+        opcoes: { pt: ['O dia e a noite duram quase o mesmo no mundo todo', 'A Terra para de girar por um instante', 'O Sol fica mais perto', 'Começa o verão nos dois hemisférios'], en: ['Day and night last almost the same everywhere', 'The Earth stops spinning for an instant', 'The Sun comes closer', 'Summer starts in both hemispheres'], es: ['El día y la noche duran casi lo mismo en todo el mundo', 'La Tierra deja de girar un instante', 'El Sol se acerca', 'Empieza el verano en los dos hemisferios'] },
+        corretaIndex: 0,
+        explicacao: {
+          pt: 'Dia e noite duram quase o mesmo em toda parte, porque o Sol fica a pino sobre o equador e a luz divide o planeta ao meio pelos polos. Acontece por volta de 20 de março e 22 de setembro.',
+          en: 'Day and night last almost the same everywhere, because the Sun stands overhead at the equator and the light splits the planet through the poles. It happens around 20 March and 22 September.',
+          es: 'El día y la noche duran casi lo mismo en todas partes, porque el Sol queda a plomo sobre el ecuador y la luz divide el planeta por los polos. Ocurre alrededor del 20 de marzo y el 22 de septiembre.'
+        }
+      },
+      {
+        id: 'estacoes-8',
+        tipo: 'multipla',
+        texto: { pt: 'Em que latitude começa a região onde o Sol pode não se pôr?', en: 'At what latitude does the region where the Sun may never set begin?', es: '¿En qué latitud empieza la región donde el Sol puede no ponerse?' },
+        opcoes: { pt: ['23,4°', '45°', '66,5°', '90°'], en: ['23.4°', '45°', '66.5°', '90°'], es: ['23,4°', '45°', '66,5°', '90°'] },
+        corretaIndex: 2,
+        explicacao: {
+          pt: '66,5° — os círculos polares. Ali há dias em que o Sol não chega a se pôr e outros em que não chega a nascer. O número é 90° menos a inclinação do eixo.',
+          en: '66.5° — the polar circles. There are days there when the Sun never sets and others when it never rises. The number is 90° minus the axial tilt.',
+          es: '66,5° — los círculos polares. Allí hay días en que el Sol no llega a ponerse y otros en que no llega a salir. El número es 90° menos la inclinación del eje.'
+        }
+      },
+      {
+        id: 'estacoes-9',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o astro que ilumina sempre metade da Terra de cada vez.', en: 'Find the body that always lights up half the Earth at a time.', es: 'Encuentra el astro que ilumina siempre la mitad de la Tierra a la vez.' },
+        alvoId: 'sol',
+        dica: { pt: 'É a estrela do nosso sistema, no centro de tudo.', en: 'It is our system’s star, at the centre of everything.', es: 'Es la estrella de nuestro sistema, en el centro de todo.' },
+        explicacao: {
+          pt: 'O Sol. Ele ilumina metade do planeta o tempo todo; o que muda com as estações é COMO essa metade fica repartida entre os hemisférios — e com que ângulo a luz chega.',
+          en: 'The Sun. It lights half the planet at all times; what changes with the seasons is HOW that half is split between the hemispheres — and at what angle the light arrives.',
+          es: 'El Sol. Ilumina la mitad del planeta todo el tiempo; lo que cambia con las estaciones es CÓMO se reparte esa mitad entre los hemisferios — y con qué ángulo llega la luz.'
+        }
+      },
+      {
+        id: 'estacoes-10',
+        tipo: 'multipla',
+        texto: { pt: 'Por que a luz inclinada aquece menos que a luz a pino?', en: 'Why does slanted light warm less than overhead light?', es: '¿Por qué la luz inclinada calienta menos que la luz a plomo?' },
+        opcoes: { pt: ['Porque perde força no caminho', 'Porque a mesma luz se espalha por mais área de chão', 'Porque muda de cor', 'Porque vem mais devagar'], en: ['Because it loses strength on the way', 'Because the same light spreads over more ground', 'Because it changes colour', 'Because it travels more slowly'], es: ['Porque pierde fuerza en el camino', 'Porque la misma luz se reparte por más área de suelo', 'Porque cambia de color', 'Porque viene más despacio'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Porque a mesma quantidade de luz se espalha por mais chão. É como espalhar a mesma tinta numa parede maior: a camada fica mais fina. Cada ponto recebe menos energia.',
+          en: 'Because the same amount of light spreads over more ground. It is like spreading the same paint over a bigger wall: the coat gets thinner. Each spot receives less energy.',
+          es: 'Porque la misma cantidad de luz se reparte por más suelo. Es como esparcir la misma pintura en una pared mayor: la capa queda más fina. Cada punto recibe menos energía.'
+        }
+      },
+      {
+        id: 'estacoes-11',
+        tipo: 'multipla',
+        texto: { pt: 'O eixo da Terra muda de direção ao longo do ano?', en: 'Does the Earth’s axis change direction during the year?', es: '¿El eje de la Tierra cambia de dirección a lo largo del año?' },
+        opcoes: { pt: ['Sim, ele acompanha o Sol', 'Não, aponta sempre para o mesmo ponto do céu', 'Sim, gira junto com as estações', 'Muda só nos solstícios'], en: ['Yes, it follows the Sun', 'No, it always points at the same spot in the sky', 'Yes, it turns with the seasons', 'It changes only at the solstices'], es: ['Sí, acompaña al Sol', 'No, apunta siempre al mismo punto del cielo', 'Sí, gira con las estaciones', 'Cambia solo en los solsticios'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Não. O eixo aponta sempre para o mesmo ponto do céu. É justamente por ficar parado enquanto a Terra dá a volta que ora um hemisfério fica voltado para o Sol, ora o outro.',
+          en: 'No. The axis always points at the same spot in the sky. It is precisely because it stays put while the Earth goes around that first one hemisphere faces the Sun, then the other.',
+          es: 'No. El eje apunta siempre al mismo punto del cielo. Es justamente por quedarse quieto mientras la Tierra da la vuelta que ora un hemisferio queda vuelto al Sol, ora el otro.'
+        }
+      },
+      {
+        id: 'estacoes-12',
+        tipo: 'multipla',
+        texto: { pt: 'Quando o dia é mais longo no hemisfério sul?', en: 'When is the day longest in the southern hemisphere?', es: '¿Cuándo el día es más largo en el hemisferio sur?' },
+        opcoes: { pt: ['No solstício de junho', 'No solstício de dezembro', 'No equinócio de março', 'Em fevereiro'], en: ['At the June solstice', 'At the December solstice', 'At the March equinox', 'In February'], es: ['En el solsticio de junio', 'En el solsticio de diciembre', 'En el equinoccio de marzo', 'En febrero'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'No solstício de dezembro, por volta do dia 21 — o começo do verão no sul e do inverno no norte. No mesmo dia, o hemisfério norte tem o dia mais curto do ano.',
+          en: 'At the December solstice, around the 21st — the start of summer in the south and winter in the north. On that same day, the northern hemisphere has its shortest day.',
+          es: 'En el solsticio de diciembre, alrededor del día 21 — el comienzo del verano en el sur y del invierno en el norte. Ese mismo día, el hemisferio norte tiene el día más corto del año.'
+        }
+      },
+      {
+        id: 'estacoes-13',
+        tipo: 'encontrar',
+        texto: { pt: 'Encontre o planeta que gira quase deitado, com estações de 21 anos cada.', en: 'Find the planet that spins almost lying down, with seasons 21 years long.', es: 'Encuentra el planeta que gira casi acostado, con estaciones de 21 años cada una.' },
+        alvoId: 'urano',
+        dica: { pt: 'É o gigante azul-esverdeado, o sétimo a partir do Sol.', en: 'It is the blue-green giant, the seventh from the Sun.', es: 'Es el gigante azul verdoso, el séptimo desde el Sol.' },
+        explicacao: {
+          pt: 'Urano, com o eixo inclinado 98° — praticamente deitado sobre a órbita. Cada polo passa 21 anos na luz e 21 na escuridão. É o exemplo extremo de que a inclinação é que manda nas estações.',
+          en: 'Uranus, with its axis tilted 98° — practically lying on its orbit. Each pole spends 21 years in light and 21 in darkness. It is the extreme proof that tilt is what rules the seasons.',
+          es: 'Urano, con el eje inclinado 98° — prácticamente acostado sobre la órbita. Cada polo pasa 21 años en la luz y 21 en la oscuridad. Es el ejemplo extremo de que la inclinación es la que manda en las estaciones.'
+        }
+      },
+      {
+        id: 'estacoes-14',
+        tipo: 'multipla',
+        texto: { pt: 'Quanto varia a distância entre a Terra e o Sol ao longo do ano?', en: 'How much does the Earth-Sun distance vary over the year?', es: '¿Cuánto varía la distancia entre la Tierra y el Sol a lo largo del año?' },
+        opcoes: { pt: ['Cerca de 3%', 'Cerca de 30%', 'Metade', 'Não varia nada'], en: ['About 3%', 'About 30%', 'By half', 'It does not vary at all'], es: ['Cerca del 3%', 'Cerca del 30%', 'La mitad', 'No varía nada'] },
+        corretaIndex: 0,
+        explicacao: {
+          pt: 'Cerca de 3,4%: 5 milhões de km dentro de 150 milhões. A órbita da Terra é quase uma circunferência perfeita — bem diferente do oval exagerado que aparece em muitos desenhos.',
+          en: 'About 3.4%: 5 million km within 150 million. The Earth’s orbit is almost a perfect circle — very different from the exaggerated oval drawn in many pictures.',
+          es: 'Cerca del 3,4%: 5 millones de km dentro de 150 millones. La órbita de la Tierra es casi una circunferencia perfecta — muy distinta del óvalo exagerado que aparece en muchos dibujos.'
+        }
+      },
+      {
+        id: 'estacoes-15',
+        tipo: 'multipla',
+        texto: { pt: 'Como são as estações perto do equador?', en: 'What are the seasons like near the equator?', es: '¿Cómo son las estaciones cerca del ecuador?' },
+        opcoes: { pt: ['Bem marcadas, como na Europa', 'Pouco marcadas: o dia dura quase 12 h o ano todo', 'Só existe verão', 'Invertidas em relação ao resto do mundo'], en: ['Sharp, like in Europe', 'Faint: the day lasts about 12 h all year', 'There is only summer', 'Reversed compared to the rest of the world'], es: ['Bien marcadas, como en Europa', 'Poco marcadas: el día dura casi 12 h todo el año', 'Solo existe el verano', 'Invertidas respecto al resto del mundo'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Pouco marcadas. No equador o dia dura quase 12 horas o ano inteiro e o Sol fica alto o tempo todo — por isso ali se fala em estação seca e chuvosa, não em verão e inverno.',
+          en: 'Faint. At the equator the day lasts about 12 hours all year and the Sun stays high — which is why people there speak of dry and rainy seasons rather than summer and winter.',
+          es: 'Poco marcadas. En el ecuador el día dura casi 12 horas todo el año y el Sol está alto todo el tiempo — por eso allí se habla de estación seca y lluviosa, no de verano e invierno.'
+        }
+      },
+      {
+        id: 'estacoes-16',
+        tipo: 'multipla',
+        texto: { pt: 'Por que o mês mais quente não é o do solstício de verão?', en: 'Why is the hottest month not the one with the summer solstice?', es: '¿Por qué el mes más caluroso no es el del solsticio de verano?' },
+        opcoes: { pt: ['Porque o Sol demora a chegar', 'Porque a terra e o mar levam semanas para acumular calor', 'Porque o eixo continua mudando', 'Porque a Terra acelera na órbita'], en: ['Because the Sun takes time to arrive', 'Because land and sea take weeks to store up heat', 'Because the axis keeps shifting', 'Because the Earth speeds up in its orbit'], es: ['Porque el Sol tarda en llegar', 'Porque la tierra y el mar tardan semanas en acumular calor', 'Porque el eje sigue cambiando', 'Porque la Tierra acelera en la órbita'] },
+        corretaIndex: 1,
+        explicacao: {
+          pt: 'Porque a terra e o mar levam semanas para acumular calor. O solstício é o dia de mais luz, mas o pico de temperatura chega um a dois meses depois — é o atraso das estações.',
+          en: 'Because land and sea take weeks to store up heat. The solstice is the day with the most light, but the temperature peak arrives one to two months later — the seasonal lag.',
+          es: 'Porque la tierra y el mar tardan semanas en acumular calor. El solsticio es el día de más luz, pero el pico de temperatura llega uno o dos meses después — es el retraso estacional.'
+        }
+      }
+    ]
   }
 ];
-
