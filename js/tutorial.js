@@ -210,6 +210,24 @@ function mostrarPasso() {
   posicionarCard(passo);
 }
 
+// Distâncias do balão: `FOLGA` é o vão entre o balão e o retângulo do foco
+// (a seta ocupa 8 desses pixels), `MARGEM` é o respiro até a borda da tela.
+const FOLGA = 16;
+const MARGEM = 10;
+// Ordem de preferência dos lados. Abaixo primeiro porque é onde o olho vai
+// depois de ver o destaque; os lados horizontais entram quando não há altura,
+// que é o caso do dock no celular deitado.
+const LADOS = ['baixo', 'cima', 'direita', 'esquerda'];
+
+/**
+ * Coloca o balão num lado do alvo em que ele CABE e não cobre o alvo.
+ *
+ * A versão anterior não escolhia lado nenhum: em telas de até 1024px o CSS
+ * fixava o card na base da tela, com `!important`, ocupando a largura inteira.
+ * Em paisagem de celular isso é uma barra de 828×178 sobre o terço de baixo —
+ * exatamente onde mora o dock, que é o alvo de quatro dos seis passos. Três
+ * deles destacavam um botão que ficava atrás do próprio balão.
+ */
 function posicionarCard(passo) {
   const cardElement = document.querySelector('.tutorial-card');
   const focoElement = document.querySelector('.tutorial-foco');
@@ -227,50 +245,90 @@ function posicionarCard(passo) {
     deveEstarCentrado = true;
   }
 
+  cardElement.classList.remove('seta-cima', 'seta-baixo', 'seta-esquerda', 'seta-direita');
+
   if (deveEstarCentrado) {
     focoElement.style.display = 'none';
     cardElement.classList.add('centrado');
+    return;
+  }
+
+  focoElement.style.display = 'block';
+  cardElement.classList.remove('centrado');
+
+  const rect = elemento.getBoundingClientRect();
+  const padding = 8;
+  // O retângulo do destaque é limitado à tela. Os botões do dock encostam na
+  // borda de baixo, então os 8px de folga saíam do viewport e o anel do
+  // destaque aparecia cortado, como um "U" aberto. Limitar também mantém a
+  // conta dos lados honesta: o espaço livre passa a ser o espaço que existe.
+  const alvo = {
+    top: Math.max(2, rect.top - padding),
+    left: Math.max(2, rect.left - padding),
+    right: Math.min(window.innerWidth - 2, rect.right + padding),
+    bottom: Math.min(window.innerHeight - 2, rect.bottom + padding),
+  };
+  focoElement.style.top = alvo.top + 'px';
+  focoElement.style.left = alvo.left + 'px';
+  focoElement.style.width = (alvo.right - alvo.left) + 'px';
+  focoElement.style.height = (alvo.bottom - alvo.top) + 'px';
+
+  // Medir o balão fora do posicionamento anterior, senão a largura vem do
+  // lugar onde ele estava e o lado escolhido muda a cada passo sem motivo.
+  const larg = cardElement.offsetWidth;
+  const alt = cardElement.offsetHeight;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const espaco = {
+    baixo: vh - alvo.bottom - FOLGA - MARGEM,
+    cima: alvo.top - FOLGA - MARGEM,
+    direita: vw - alvo.right - FOLGA - MARGEM,
+    esquerda: alvo.left - FOLGA - MARGEM,
+  };
+  const precisa = (lado) => (lado === 'baixo' || lado === 'cima' ? alt : larg);
+
+  // O primeiro lado que comporta o balão inteiro. Se nenhum comportar (alvo
+  // enorme numa tela pequena), fica o de maior folga relativa — melhor um
+  // balão apertado num canto que um balão em cima do que ele aponta.
+  let lado = LADOS.find((l) => espaco[l] >= precisa(l));
+  if (!lado) {
+    lado = LADOS.slice().sort((a, b) => espaco[b] / precisa(b) - espaco[a] / precisa(a))[0];
+  }
+
+  const centroX = (alvo.left + alvo.right) / 2;
+  const centroY = (alvo.top + alvo.bottom) / 2;
+  const limitar = (v, min, max) => Math.max(min, Math.min(v, max));
+
+  let top;
+  let left;
+  if (lado === 'baixo' || lado === 'cima') {
+    top = lado === 'baixo' ? alvo.bottom + FOLGA : alvo.top - FOLGA - alt;
+    left = limitar(centroX - larg / 2, MARGEM, vw - larg - MARGEM);
   } else {
-    focoElement.style.display = 'block';
-    cardElement.classList.remove('centrado');
+    left = lado === 'direita' ? alvo.right + FOLGA : alvo.left - FOLGA - larg;
+    top = limitar(centroY - alt / 2, MARGEM, vh - alt - MARGEM);
+  }
+  // Só o eixo TRANSVERSAL é limitado. Limitar o eixo do lado escolhido é o que
+  // fazia o card subir por cima do alvo quando ele era alto (painel Explorar
+  // no desktop, 620px): a coordenada era empurrada de volta para dentro da
+  // tela e caía sobre o próprio destaque.
+  if (lado === 'baixo') top = Math.min(top, vh - alt - MARGEM);
+  if (lado === 'cima') top = Math.max(top, MARGEM);
+  if (lado === 'direita') left = Math.min(left, vw - larg - MARGEM);
+  if (lado === 'esquerda') left = Math.max(left, MARGEM);
 
-    const rect = elemento.getBoundingClientRect();
-    const padding = 8;
+  cardElement.style.top = top + 'px';
+  cardElement.style.left = left + 'px';
 
-    // Atualizar foco
-    focoElement.style.top = (rect.top - padding) + 'px';
-    focoElement.style.left = (rect.left - padding) + 'px';
-    focoElement.style.width = (rect.width + padding * 2) + 'px';
-    focoElement.style.height = (rect.height + padding * 2) + 'px';
-
-    // Posicionar card
-    const cardHeight = cardElement.offsetHeight;
-    const cardWidth = cardElement.offsetWidth;
-    const espacoAbaixo = window.innerHeight - (rect.bottom + 16);
-
-    let top;
-    if (espacoAbaixo > 220) {
-      // Colocar abaixo
-      top = rect.bottom + 16;
-    } else {
-      // Colocar acima
-      top = rect.top - cardHeight - 16;
-    }
-    // Alvos altos (ex.: painel Explorar) empurrariam o card pra fora da
-    // tela nos dois ramos — clampa pra dentro do viewport.
-    top = Math.max(12, Math.min(top, window.innerHeight - cardHeight - 12));
-
-    // Posição horizontal (centrar no alvo, com bounds)
-    const left = Math.max(
-      12,
-      Math.min(
-        window.innerWidth - cardWidth - 12,
-        rect.left + rect.width / 2 - cardWidth / 2
-      )
-    );
-
-    cardElement.style.top = top + 'px';
-    cardElement.style.left = left + 'px';
+  // A seta aponta para o centro do alvo, presa à borda do balão voltada para
+  // ele. Sem ela o balão é só uma caixa que apareceu perto de alguma coisa.
+  const oposto = { baixo: 'cima', cima: 'baixo', direita: 'esquerda', esquerda: 'direita' };
+  cardElement.classList.add('seta-' + oposto[lado]);
+  if (lado === 'baixo' || lado === 'cima') {
+    cardElement.style.setProperty('--seta', limitar(centroX - left, 18, larg - 18) + 'px');
+  } else {
+    cardElement.style.setProperty('--seta', limitar(centroY - top, 18, alt - 18) + 'px');
   }
 }
 

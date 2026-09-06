@@ -16,6 +16,10 @@
 
 .tutorial-foco {
   position: fixed;
+  /* Sem isto a borda de 2px entra POR FORA da largura calculada e o anel
+     ultrapassa a tela em 2px de cada lado — visível nos botões do dock, que
+     encostam na borda de baixo. */
+  box-sizing: border-box;
   border-radius: 16px;
   pointer-events: none;
   box-shadow: 0 0 0 9999px rgba(4, 6, 14, 0.72);
@@ -35,6 +39,51 @@
   transition: top 0.3s ease, left 0.3s ease;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
+
+/* Seta do balão: um quadrado girado 45°, com o mesmo fundo e as duas bordas
+   voltadas para fora, para o encaixe com o card ficar invisível. `--seta` é a
+   posição ao longo da borda, calculada em tutorial.js. */
+.tutorial-card::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(11, 16, 28, 0.85);
+  border: 1px solid rgba(120, 160, 255, 0.16);
+  transform: rotate(45deg);
+  display: none;
+}
+
+.tutorial-card.seta-cima::after,
+.tutorial-card.seta-baixo::after,
+.tutorial-card.seta-esquerda::after,
+.tutorial-card.seta-direita::after { display: block; }
+
+.tutorial-card.seta-cima::after {
+  top: -7px;
+  left: calc(var(--seta, 50%) - 6px);
+  border-width: 1px 0 0 1px;
+}
+
+.tutorial-card.seta-baixo::after {
+  bottom: -7px;
+  left: calc(var(--seta, 50%) - 6px);
+  border-width: 0 1px 1px 0;
+}
+
+.tutorial-card.seta-esquerda::after {
+  left: -7px;
+  top: calc(var(--seta, 50%) - 6px);
+  border-width: 0 0 1px 1px;
+}
+
+.tutorial-card.seta-direita::after {
+  right: -7px;
+  top: calc(var(--seta, 50%) - 6px);
+  border-width: 1px 1px 0 0;
+}
+
+.tutorial-card.centrado::after { display: none; }
 
 .tutorial-card.centrado {
   top: 50% !important;
@@ -138,15 +187,24 @@ body.tutorial-ativo .toast-dica {
   display: none;
 }
 
-@media (max-width: 1024px) {
+/* Não existe mais a barra fixa na base para telas de até 1024px. Ela ocupava a
+   largura inteira e o terço de baixo do celular deitado — que é onde vive o
+   dock, alvo de quatro dos seis passos —, então o balão cobria o botão que
+   estava destacando. Agora `posicionarCard` escolhe o lado em que o balão
+   cabe sem tapar o alvo, e o CSS só o mantém compacto. */
+
+/* Em tela baixa (paisagem de celular) o balão precisa caber ao lado do dock,
+   com a altura sobrando para o destaque. */
+@media (max-height: 500px) {
   .tutorial-card {
-    position: fixed !important;
-    left: 12px !important;
-    right: 12px !important;
-    bottom: 12px !important;
-    top: auto !important;
-    width: auto;
+    padding: 12px 14px;
+    width: min(320px, calc(100vw - 24px));
   }
+
+  .tutorial-card-titulo { font-size: 0.95rem; margin-bottom: 8px; }
+  .tutorial-card-texto { font-size: 0.82rem; line-height: 1.4; margin-bottom: 10px; }
+  .tutorial-dots { margin: 10px 0; }
+  .tutorial-botoes { margin-top: 10px; }
 }
 
 /* Alvos de toque ≥44px (Apple HIG) só em telas touch — desktop mantém o visual */
