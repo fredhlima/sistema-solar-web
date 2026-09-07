@@ -27,15 +27,21 @@ function texturaPontoCircular() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 64, 64);
   _texturaPonto = new THREE.CanvasTexture(c);
-  // Sem isto, o mipmap automático do WebGL mistura os pixels transparentes
-  // da borda com os opacos do centro (alpha reto) e "vaza" cor nos níveis
-  // reduzidos — visto pelo Fred como manchas coloridas nas estrelas de fundo
-  // e nos pontos do cinturão quando vistos de longe (é ali que o GPU troca
-  // para um mipmap menor). generateMipmaps=false evita a geração; LinearFilter
-  // ainda suaviza a ampliação de perto.
-  _texturaPonto.generateMipmaps = false;
-  _texturaPonto.minFilter = THREE.LinearFilter;
-  _texturaPonto.magFilter = THREE.LinearFilter;
+  // O <canvas> guarda os pixels PREMULTIPLICADOS internamente, e o navegador
+  // aplica dithering no gradiente — na faixa de alpha quase zero (perto da
+  // borda), cada canal RGB dithera para 0 ou 1 de forma independente. Com
+  // premultiplyAlpha=false (padrão), o navegador desmultiplica (RGB ÷ alpha)
+  // ao subir a textura pra GPU: um texel premultiplicado tipo (1,0,1,1) vira
+  // (255,0,255) — magenta puro — pois a divisão por alpha≈0 amplifica o
+  // lixo de dithering em cor saturada. Isso normalmente é invisível (alpha
+  // ~0), mas o alphaTest do material + a interpolação bilinear com texels
+  // vizinhos opacos deixam passar esse pixel-lixo, visto pelo Fred como
+  // "confete" colorido nas estrelas e nas partículas dos cinturões.
+  // premultiplyAlpha=true faz o navegador NÃO desmultiplicar — sem divisão,
+  // sem amplificação — e com dados premultiplicados o mipmap automático
+  // volta a ser matematicamente correto, então deixamos ele ligado (ajuda
+  // a suavizar os pontos quando vistos de longe).
+  _texturaPonto.premultiplyAlpha = true;
   return _texturaPonto;
 }
 
@@ -337,6 +343,7 @@ export class SistemaSolar3D {
       sizeAttenuation: false,
       map: texturaPontoCircular(),
       transparent: true,
+      premultipliedAlpha: true,
       depthWrite: false,
     });
 
@@ -797,8 +804,25 @@ export class SistemaSolar3D {
       map: texturaPontoCircular(),
       transparent: true,
       alphaTest: 0.05,
+      premultipliedAlpha: true,
       depthWrite: false,
     });
+
+    // O Tour guiado aproxima a câmera do cinturão (ex.: parada de Marte,
+    // ~5,4 unidades da partícula mais próxima). Com sizeAttenuation ligado,
+    // o tamanho em tela cresce como 1/distância — perto do cinturão isso
+    // projeta cada ponto como um círculo enorme e borrado ("balão"), em vez
+    // de uma partícula. Fazemos o clamp de gl_PointSize (em pixels de
+    // dispositivo) direto no vertex shader, depois que o three.js já
+    // calculou o tamanho com atenuação — assim de longe o cinturão continua
+    // com a atenuação normal (fica fino e bonito), e de perto o tamanho
+    // simplesmente satura num teto pequeno, sem inflar.
+    material.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <logdepthbuf_vertex>',
+        'gl_PointSize = min( gl_PointSize, 22.0 );\n\t#include <logdepthbuf_vertex>'
+      );
+    };
 
     const points = new THREE.Points(geometry, material);
     points.userData.corpo = corpo;
@@ -939,17 +963,17 @@ export class SistemaSolar3D {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const texture = new THREE.CanvasTexture(canvas);
-      // Mesma correção da textura de ponto (ver texturaPontoCircular): sem
-      // isto, o mipmap automático "vaza" cor da borda transparente pro
-      // centro quando o Sol fica pequeno na tela (câmera afastada) —
-      // achado pelo Fred como manchas coloridas no glow.
-      texture.generateMipmaps = false;
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
+      // Mesma causa da textura de ponto (ver texturaPontoCircular): canvas
+      // premultiplicado + dithering perto de alpha 0 + desmultiplicação ao
+      // subir pra GPU amplificam o lixo de cada canal em cor saturada —
+      // visto pelo Fred como pontos coloridos (ex. verde) no halo do Sol.
+      // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
+      texture.premultiplyAlpha = true;
       const material = new THREE.SpriteMaterial({
         map: texture,
         blending: THREE.AdditiveBlending,
         transparent: true,
+        premultipliedAlpha: true,
         depthWrite: false,
       });
 
@@ -981,16 +1005,15 @@ export class SistemaSolar3D {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const texture = new THREE.CanvasTexture(canvas);
-    // Mesma correção da textura de ponto/glow do Sol — sem isto, o mipmap
-    // automático "vaza" cor da borda transparente para o centro quando a
-    // coma do cometa fica pequena na tela.
-    texture.generateMipmaps = false;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
+    // Mesma causa da textura de ponto/glow do Sol — canvas premultiplicado +
+    // dithering perto de alpha 0 + desmultiplicação ao subir pra GPU
+    // amplificam o lixo de cada canal em cor saturada na borda da coma.
+    texture.premultiplyAlpha = true;
     const material = new THREE.SpriteMaterial({
       map: texture,
       blending: THREE.AdditiveBlending,
       transparent: true,
+      premultipliedAlpha: true,
       depthWrite: false,
     });
     const sprite = new THREE.Sprite(material);
