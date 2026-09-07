@@ -1258,6 +1258,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     estado.paradaTourAtual = 0;
     document.getElementById('painel-explorar').style.display = 'none';
     document.getElementById('tour-card').style.display = 'block';
+    // 1h/s em vez do 1 dia/s padrão: dentro do Tour guiado os astros passam
+    // rápido demais para acompanhar enquanto a atenção está no card de texto,
+    // não na cena — pedido do Fred (08/09/2026). Volta ao padrão em
+    // sairTour() (concluirTour() já passa por lá).
+    definirRitmo(1 / 24);
     atualizarTour();
   }
 
@@ -1317,6 +1322,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     estado.emTour = false;
     document.getElementById('tour-card').style.display = 'none';
     document.getElementById('painel-explorar').style.display = '';
+    // Volta ao ritmo padrão (1 dia/s) — o 1h/s de iniciarTour() é só para
+    // dentro do tour guiado.
+    definirRitmo(1);
   }
 
   // A dica só faz sentido para quem ainda não sabe girar a cena. Antes ela
@@ -1916,7 +1924,6 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     alternarPausa,
     avancarVelocidade,
     recuarVelocidade,
-    definirRitmo,
     estadoTempo: () => ({
       pausado: estado.velocidadeAtual === 0,
       rotulo: document.getElementById('tempo-velocidade')?.textContent || '',

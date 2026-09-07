@@ -221,6 +221,20 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 }
 .mdock-painel-r { right: calc(12px + var(--safe-right)); width: 290px; }
 
+/* Com uma FICHA aberta (não a lista), a altura acompanha o conteúdo — sem
+   isto, um astro com pouco texto (poucas curiosidades/comparações, ex.:
+   Júpiter no tablet) deixava um vazio enorme até a barra do dock, porque
+   `.mdock-painel-corpo` tem `flex: 1` dentro de uma altura sempre fixa.
+   Achado pelo Fred em 08/09/2026. A LISTA continua preenchendo a vertical
+   toda (proposital — dá espaço para rolar entre muitos astros); só a ficha
+   troca `top` fixo por `max-height`, então ela cresce a partir da barra do
+   dock (mesmo teto de altura de antes) em vez de sempre esticar até lá. */
+#mdock-painel-exp.com-ficha {
+  top: auto;
+  max-height: calc(100dvh - 8px - var(--safe-top) - var(--mdock-bar-h, 56px));
+  height: auto;
+}
+
 /* Experiências abre em TELA CHEIA (pedido do Fred: facilita a visualização
    das 5 opções). O cabeçalho já fecha ao toque — "voltar" fica de graça. */
 body.modo-dock #mdock-painel-xp {

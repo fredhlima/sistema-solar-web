@@ -27,6 +27,15 @@ function texturaPontoCircular() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 64, 64);
   _texturaPonto = new THREE.CanvasTexture(c);
+  // Sem isto, o mipmap automático do WebGL mistura os pixels transparentes
+  // da borda com os opacos do centro (alpha reto) e "vaza" cor nos níveis
+  // reduzidos — visto pelo Fred como manchas coloridas nas estrelas de fundo
+  // e nos pontos do cinturão quando vistos de longe (é ali que o GPU troca
+  // para um mipmap menor). generateMipmaps=false evita a geração; LinearFilter
+  // ainda suaviza a ampliação de perto.
+  _texturaPonto.generateMipmaps = false;
+  _texturaPonto.minFilter = THREE.LinearFilter;
+  _texturaPonto.magFilter = THREE.LinearFilter;
   return _texturaPonto;
 }
 
@@ -930,6 +939,13 @@ export class SistemaSolar3D {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       const texture = new THREE.CanvasTexture(canvas);
+      // Mesma correção da textura de ponto (ver texturaPontoCircular): sem
+      // isto, o mipmap automático "vaza" cor da borda transparente pro
+      // centro quando o Sol fica pequeno na tela (câmera afastada) —
+      // achado pelo Fred como manchas coloridas no glow.
+      texture.generateMipmaps = false;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
       const material = new THREE.SpriteMaterial({
         map: texture,
         blending: THREE.AdditiveBlending,
@@ -965,6 +981,12 @@ export class SistemaSolar3D {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const texture = new THREE.CanvasTexture(canvas);
+    // Mesma correção da textura de ponto/glow do Sol — sem isto, o mipmap
+    // automático "vaza" cor da borda transparente para o centro quando a
+    // coma do cometa fica pequena na tela.
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
     const material = new THREE.SpriteMaterial({
       map: texture,
       blending: THREE.AdditiveBlending,
