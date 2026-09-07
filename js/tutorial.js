@@ -79,9 +79,8 @@ function abrir() {
 
   // 1h/s (1/24 dia/s) em vez do 1 dia/s padrão: pedido do Fred (08/09/2026)
   // — nessa velocidade os astros ainda se movem, mas dá pra acompanhar
-  // enquanto a atenção está no balão do tutorial, não na cena. Fica assim
-  // depois que o tutorial fecha; o usuário ajusta pelos próprios controles
-  // se quiser voltar ao ritmo padrão.
+  // enquanto a atenção está no balão do tutorial, não na cena. Volta para
+  // 1 dia/s ao fechar (ver fechar() logo abaixo).
   definirRitmoRef?.(1 / 24);
 
   // Criar overlay
@@ -373,6 +372,10 @@ function fechar() {
   if (!aberto) return;
 
   aberto = false;
+
+  // Volta ao ritmo padrão (1 dia/s): o 1h/s de abrir() é só para acompanhar
+  // os astros DURANTE o tutorial — pedido do Fred (08/09/2026).
+  definirRitmoRef?.(1);
 
   // Salvar no localStorage
   try {

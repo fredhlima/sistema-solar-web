@@ -17,7 +17,7 @@ import { iniciarEstacoes } from './estacoes.js?v=41';
 import { iniciarMares } from './mares.js?v=28';
 import { iniciarProgresso } from './progresso.js?v=12';
 import { iniciarMusica } from './musica.js?v=10';
-import { iniciarTutorial } from './tutorial.js?v=9';
+import { iniciarTutorial } from './tutorial.js?v=10';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
