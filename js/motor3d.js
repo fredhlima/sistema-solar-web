@@ -947,52 +947,93 @@ export class SistemaSolar3D {
   }
 
   _adicionarGlowSol(grupo, raioSol) {
-    // Volta ao gradiente ORIGINAL (2 sprites, 3 paradas branco→dourado→
-    // laranja) — pedido do Fred em 07/09/2026: o redesenho de 1 sprite com
-    // curva suave ficou "bonito mas menos imponente", e nem subir o pico
-    // nem saturar mais a cor devolveu o brilho de antes. O visual que ele
-    // queria de volta É este; o único problema real dele era o confete
-    // colorido, e ESSE já tem causa comprovada e corrigida (mipmap de
-    // canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
-    // amplificando o lixo em cor saturada — 1300 texels medidos com
-    // getImageData). `premultiplyAlpha`/`premultipliedAlpha` abaixo são
-    // exatamente essa correção, e o Fred já confirmou que ela resolveu o
-    // confete deste gradiente antes de eu redesenhar a curva por conta do
-    // "muito contraste" — não precisa reinventar a curva pra manter o fix.
-    for (let i = 0; i < 2; i++) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
-
-      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-      grad.addColorStop(0.5, 'rgba(255, 200, 0, 0.3)');
-      grad.addColorStop(1, 'rgba(255, 100, 0, 0)');
-
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
-      // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
-      // visto pelo Fred como pontos coloridos (ex. verde) no halo do Sol.
-      // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
-      texture.premultiplyAlpha = true;
-      const material = new THREE.SpriteMaterial({
-        map: texture,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        premultipliedAlpha: true,
-        depthWrite: false,
-      });
-
-      const sprite = new THREE.Sprite(material);
-      const escala = raioSol * (4 + i * 3);
-      sprite.scale.set(escala, escala, 1);
-
-      grupo.add(sprite);
+    // Sprite ÚNICO cuja curva é a SOMA das duas camadas originais (4× e 7× o
+    // raio do Sol, cada uma com as 3 paradas branco/dourado/laranja de
+    // sempre), suavizada só onde a soma tinha uma quebra de inclinação.
+    //
+    // Achado do Fred em 07/09/2026 (print com anotação em vermelho): com as
+    // 2 camadas originais lado a lado, dava pra ver um anel exatamente onde
+    // o sprite interno (4×) termina. O valor da curva ali É contínuo (as
+    // duas coisas somam suavemente até esse ponto) — o que muda de repente é
+    // a INCLINAÇÃO: de um lado dois sprites caindo juntos, do outro só um.
+    // O olho humano realça esse tipo de quebra de inclinação como se fosse
+    // uma borda (banda de Mach) mesmo sem salto real de brilho. E explica
+    // por que a versão com confete "parecia um gradiente só, sem anel": a
+    // própria bagunça de cor do bug borrava essa transição.
+    //
+    // Em vez de aproximar com uma curva nova (tentativa anterior, ficou
+    // "menos imponente"), somamos as DUAS curvas originais ponto a ponto ao
+    // longo do mesmo raio físico — preserva a mesma "massa" de brilho — e
+    // aplicamos uma média móvel só pra arredondar a quebra de inclinação.
+    function alphaCamada(t) {
+      if (t <= 0.5) return 0.8 + (0.3 - 0.8) * (t / 0.5);
+      return 0.3 - 0.3 * ((t - 0.5) / 0.5);
     }
+    function corCamada(t) {
+      if (t <= 0.5) {
+        const f = t / 0.5;
+        return [255, 255 + (200 - 255) * f, 255 + (0 - 255) * f];
+      }
+      const f = (t - 0.5) / 0.5;
+      return [255, 200 + (100 - 200) * f, 0];
+    }
+
+    const ALCANCE = 7; // raios do Sol — igual ao sprite externo de antes
+    const N = 96;
+    const bruto = [];
+    for (let i = 0; i <= N; i++) {
+      const r = (i / N) * ALCANCE;
+      const aInterna = r <= 4 ? alphaCamada(r / 4) : 0;
+      const aExterna = r <= 7 ? alphaCamada(r / 7) : 0;
+      bruto.push(aInterna + aExterna);
+    }
+    // Média móvel só pra arredondar a quebra de inclinação em r=4 — janela
+    // de ~±0.5 raio de cada lado, estreita o bastante pra não achatar o
+    // resto da curva (que já era suave).
+    const JANELA = 7;
+    const suave = bruto.map((_, i) => {
+      let soma = 0, n = 0;
+      for (let k = -JANELA; k <= JANELA; k++) {
+        const j = i + k;
+        if (j >= 0 && j < bruto.length) { soma += bruto[j]; n++; }
+      }
+      return soma / n;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const [r, g, b] = corCamada(t);
+      const alpha = Math.min(1, suave[i]);
+      grad.addColorStop(t, `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha.toFixed(3)})`);
+    }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
+    // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
+    // visto pelo Fred como pontos coloridos (ex. verde) no halo do Sol.
+    // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
+    texture.premultiplyAlpha = true;
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      premultipliedAlpha: true,
+      depthWrite: false,
+    });
+
+    const sprite = new THREE.Sprite(material);
+    const escala = raioSol * ALCANCE;
+    sprite.scale.set(escala, escala, 1);
+
+    grupo.add(sprite);
   }
 
   // Sprite de glow aditivo numa cor arbitrária (usado na coma dos cometas)
