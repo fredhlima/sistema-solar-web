@@ -963,13 +963,18 @@ export class SistemaSolar3D {
     const ctx = canvas.getContext('2d');
 
     const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    const ALPHA_PICO = 0.55;
+    // Pico e cor subidos (pedido do Fred em 07/09/2026: "ficou bonito mas
+    // menos imponente" — a versão anterior tinha pico 0.55 numa cor pálida
+    // 255,225,160; o gradiente ORIGINAL, antes do redesenho, tinha pico 0.8
+    // no centro). A curva suave (que tirou as linhas) é o que muda — não o
+    // brilho — então dá pra subir os dois sem voltar o degrau.
+    const ALPHA_PICO = 0.78;
     const EXPOENTE = 2.4;
     const PASSOS = 32;
     for (let i = 0; i <= PASSOS; i++) {
       const t = i / PASSOS;
       const alpha = ALPHA_PICO * Math.pow(1 - t, EXPOENTE);
-      grad.addColorStop(t, `rgba(255, 225, 160, ${alpha.toFixed(3)})`);
+      grad.addColorStop(t, `rgba(255, 205, 110, ${alpha.toFixed(3)})`);
     }
 
     ctx.fillStyle = grad;

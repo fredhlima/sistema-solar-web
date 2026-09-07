@@ -43,6 +43,15 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: #04060e;
+  /* Sem isto, o Safari/WebKit aplica "font boosting": aumenta sozinho o
+     tamanho de blocos de texto que quebram em várias linhas (mas não os de
+     uma linha só), pensado pra ajudar leitura em coluna estreita. O efeito:
+     na mesma lista, frases curtas (1 linha) ficam no tamanho autoral e
+     frases longas (2+ linhas) saem maiores — visto pelo Fred como "letras
+     de tamanhos diferentes" nas curiosidades do card de um astro. Afeta só
+     Safari/iOS; não reproduz no Chromium. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   /* Pilha de fonte nativa: San Francisco no iOS/macOS, Segoe UI no Windows,
      Roboto no Android — moderna, legível, sem baixar nada. Único lugar que
      precisa dessa lista completa; o resto do app herda daqui. Nunca declarar
