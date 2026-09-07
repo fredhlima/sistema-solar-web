@@ -18,6 +18,7 @@ let passoAtual = 0;
 let aberto = false;
 let ouvinteTeclado = null;
 let ouvinteTamanho = null;
+let observadorAlvo = null;
 let cardElement = null;
 let focoElement = null;
 let overlayElement = null;
@@ -207,7 +208,19 @@ function mostrarPasso() {
   }
 
   // Posicionar
-  posicionarCard(passo);
+  const elementoAlvo = posicionarCard(passo);
+
+  // O alvo pode mudar de TAMANHO depois de o balão já estar posicionado: o
+  // chip do dock nasce "◆ Nível" e vira o nome do nível quando o progresso
+  // sincroniza. Medido em 12 aberturas do tutorial no iPhone 15: numa delas o
+  // passo 6 ficou ~1s com o balão sobre o destaque, até um resize qualquer
+  // reposicionar. Reobservar o alvo fecha essa janela.
+  observadorAlvo?.disconnect();
+  observadorAlvo = null;
+  if (elementoAlvo && window.ResizeObserver) {
+    observadorAlvo = new ResizeObserver(() => posicionarCard(passo));
+    observadorAlvo.observe(elementoAlvo);
+  }
 }
 
 // Distâncias do balão: `FOLGA` é o vão entre o balão e o retângulo do foco
@@ -250,7 +263,7 @@ function posicionarCard(passo) {
   if (deveEstarCentrado) {
     focoElement.style.display = 'none';
     cardElement.classList.add('centrado');
-    return;
+    return null;
   }
 
   focoElement.style.display = 'block';
@@ -330,6 +343,8 @@ function posicionarCard(passo) {
   } else {
     cardElement.style.setProperty('--seta', limitar(centroY - top, 18, alt - 18) + 'px');
   }
+  // Devolvido para mostrarPasso reobservar o alvo — ver o comentário lá.
+  return elemento;
 }
 
 function isElementVisible(element) {
@@ -365,6 +380,8 @@ function fechar() {
   if (ouvinteTamanho) {
     window.removeEventListener('resize', ouvinteTamanho);
   }
+  observadorAlvo?.disconnect();
+  observadorAlvo = null;
 
   overlayElement = null;
   cardElement = null;

@@ -8,6 +8,10 @@
   display: none;
   align-items: center;
   justify-content: center;
+  /* O recorte de tela vira padding do overlay: assim a área útil para o card
+     JÁ É a área segura, e o `max-height: 100%` dele resolve contra ela. */
+  box-sizing: border-box;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
   background: rgba(2, 4, 10, 0.6);
   backdrop-filter: blur(6px);
   pointer-events: auto;
@@ -22,9 +26,15 @@
 
 .progresso-card {
   position: relative;
+  /* `content-box` (o padrão) fazia o `max-height` limitar só o CONTEÚDO: com
+     28px de padding de cada lado mais a borda, o card ficava 412px de altura
+     numa tela de 393px e vazava 9px em cima e 9px embaixo — em QUALQUER
+     celular deitado, com ou sem recorte. Medido em 07/09/2026. */
+  box-sizing: border-box;
   max-width: 520px;
   width: 90%;
-  max-height: 90vh;
+  /* 100% = a caixa segura do overlay (ver o padding lá em cima) */
+  max-height: min(90vh, 100%);
   overflow-y: auto;
   background: rgba(11, 16, 28, 0.86);
   backdrop-filter: blur(14px);

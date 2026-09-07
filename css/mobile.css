@@ -226,6 +226,12 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 body.modo-dock #mdock-painel-xp {
   left: 0; right: 0; top: 0; bottom: 0; width: auto;
   border-radius: 0; z-index: 22;
+  /* O fundo continua indo de borda a borda (a faixa da ilha fica escura, sem
+     costura), mas o CONTEÚDO recua para dentro da área segura. Sem isto, em
+     paisagem no iPhone, o ícone e o começo do nome de cada experiência ficavam
+     atrás da Dynamic Island — os demais painéis do dock já recuavam
+     (`.mdock-painel-l/r`), este não, porque é o único em tela cheia. */
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
 }
 
 /* Card de missão abre "na janela do menu Explorar" (pedido do Fred): mesma

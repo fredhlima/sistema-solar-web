@@ -543,6 +543,11 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
 
   // ---------- sincronização com a seleção da cena 3D (sim:selecao) ----------
   document.addEventListener('sim:selecao', (e) => {
+    // Na pergunta "encontre o astro" o clique na cena é a resposta do quiz.
+    // Sem esta guarda o dock trocava para a página "Explorar" e, pior, chamava
+    // fecharPaginas() → acoes.fecharOverlays(), que clica no «‹ Voltar» de cada
+    // overlay aberto — o do quiz junto. A rodada era encerrada de verdade.
+    if (document.body.classList.contains('quiz-encontrando')) return;
     const id = e.detail?.id ?? null;
     if (id) {
       estado.sel = id;

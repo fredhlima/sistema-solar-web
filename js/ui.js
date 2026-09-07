@@ -149,10 +149,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
   // Register motor selection callback
   motor.aoSelecionar = (id) => {
     estado.corpoSelecionado = id;
+    // Durante a pergunta "encontre o astro" o clique na cena É a resposta do
+    // quiz: abrir a ficha do corpo por cima dela atrapalha a busca. O evento
+    // sim:selecao continua saindo — é dele que o quiz depende.
+    const encontrando = document.body.classList.contains('quiz-encontrando');
     if (id) {
-      abrirPainelInfo(id);
+      if (!encontrando) abrirPainelInfo(id);
       atualizarSelecaoExplorar(id);
-    } else {
+    } else if (!encontrando) {
       fecharPainelInfo();
     }
     // Evento DOM para módulos desacoplados (ex.: modo "encontrar" do quiz)

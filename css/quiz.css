@@ -84,9 +84,12 @@
   letter-spacing: 0.6em;
 }
 
+/* 4x2 fixo: são 8 pacotes, e o auto-fit encaixava 6 na primeira fileira e
+   deixava 2 órfãos na segunda. Abaixo de 640px o @media volta ao auto-fit —
+   4 colunas ali ficariam ilegíveis. */
 .quiz-grid-pacotes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -795,7 +798,7 @@ body.modo-dock .quiz-card {
 body.modo-dock .quiz-titulo-pacotes { font-size: 16px; margin-bottom: 2px; }
 body.modo-dock .quiz-titulo-pacotes::after { margin: 2px 0 8px; font-size: 11px; }
 body.modo-dock .quiz-grid-pacotes {
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 body.modo-dock .quiz-pacote-card { padding: 10px 8px 8px; }

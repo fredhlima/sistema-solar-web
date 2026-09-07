@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=22';
 import { SistemaSolar3D } from './motor3d.js?v=43';
-import { iniciarUI } from './ui.js?v=48';
-import { iniciarMobileDock } from './mobile-dock.js?v=17';
+import { iniciarUI } from './ui.js?v=49';
+import { iniciarMobileDock } from './mobile-dock.js?v=18';
 import { EVENTOS } from './eventos.js?v=10';
 import { MISSOES } from './missoes.js?v=12';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
@@ -11,13 +11,13 @@ import { Trajetorias } from './trajetorias.js?v=20';
 import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=30';
 import { criarPremium } from './premium.js?v=6';
 import { iniciarPaywall } from './paywall.js?v=4';
-import { iniciarQuiz } from './quiz.js?v=12';
+import { iniciarQuiz } from './quiz.js?v=13';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=4';
 import { iniciarEstacoes } from './estacoes.js?v=41';
 import { iniciarMares } from './mares.js?v=28';
 import { iniciarProgresso } from './progresso.js?v=12';
 import { iniciarMusica } from './musica.js?v=10';
-import { iniciarTutorial } from './tutorial.js?v=7';
+import { iniciarTutorial } from './tutorial.js?v=8';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();

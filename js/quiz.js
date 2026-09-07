@@ -151,6 +151,9 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
   // 3D para cliques (pointer-events none no overlay, auto só no card — CSS)
   function setModoEncontrar(ativo) {
     overlay.classList.toggle('modo-encontrar', ativo);
+    // Avisa o resto do app (ui.js, mobile-dock.js) que um clique na cena é
+    // resposta de quiz, não pedido de abrir a ficha do corpo.
+    document.body.classList.toggle('quiz-encontrando', ativo);
   }
 
   // XP do sistema de progressão (js/progresso.js escuta este evento)
