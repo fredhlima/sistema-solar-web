@@ -947,58 +947,52 @@ export class SistemaSolar3D {
   }
 
   _adicionarGlowSol(grupo, raioSol) {
-    // Um sprite só, com gradiente de MUITAS paradas amostrando uma curva
-    // suave — não 3 paradas lineares (branco→dourado→laranja) como antes.
-    // Com só 3 pontos, a interpolação linear cria uma "quebra" visível na
-    // curva de brilho (ainda mais perceptível depois do fix de
-    // premultiplyAlpha, que corrigiu o blending mas expôs essa quebra como
-    // contraste/anel — achado pelo Fred). Uma cor só evita anéis de matiz;
-    // a curva (1-t)^EXPOENTE dá queda contínua, sem degrau: mais intensa
-    // perto do disco do Sol (que fica por baixo da esfera opaca — só a
-    // parte de fora do disco é visível) e sumindo bem antes da borda do
-    // sprite, pra não competir com astros vizinhos quando entram em cena.
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
+    // Volta ao gradiente ORIGINAL (2 sprites, 3 paradas branco→dourado→
+    // laranja) — pedido do Fred em 07/09/2026: o redesenho de 1 sprite com
+    // curva suave ficou "bonito mas menos imponente", e nem subir o pico
+    // nem saturar mais a cor devolveu o brilho de antes. O visual que ele
+    // queria de volta É este; o único problema real dele era o confete
+    // colorido, e ESSE já tem causa comprovada e corrigida (mipmap de
+    // canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
+    // amplificando o lixo em cor saturada — 1300 texels medidos com
+    // getImageData). `premultiplyAlpha`/`premultipliedAlpha` abaixo são
+    // exatamente essa correção, e o Fred já confirmou que ela resolveu o
+    // confete deste gradiente antes de eu redesenhar a curva por conta do
+    // "muito contraste" — não precisa reinventar a curva pra manter o fix.
+    for (let i = 0; i < 2; i++) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
 
-    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    // Pico e cor subidos (pedido do Fred em 07/09/2026: "ficou bonito mas
-    // menos imponente" — a versão anterior tinha pico 0.55 numa cor pálida
-    // 255,225,160; o gradiente ORIGINAL, antes do redesenho, tinha pico 0.8
-    // no centro). A curva suave (que tirou as linhas) é o que muda — não o
-    // brilho — então dá pra subir os dois sem voltar o degrau.
-    const ALPHA_PICO = 0.78;
-    const EXPOENTE = 2.4;
-    const PASSOS = 32;
-    for (let i = 0; i <= PASSOS; i++) {
-      const t = i / PASSOS;
-      const alpha = ALPHA_PICO * Math.pow(1 - t, EXPOENTE);
-      grad.addColorStop(t, `rgba(255, 205, 110, ${alpha.toFixed(3)})`);
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      grad.addColorStop(0.5, 'rgba(255, 200, 0, 0.3)');
+      grad.addColorStop(1, 'rgba(255, 100, 0, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
+      // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
+      // visto pelo Fred como pontos coloridos (ex. verde) no halo do Sol.
+      // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
+      texture.premultiplyAlpha = true;
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        premultipliedAlpha: true,
+        depthWrite: false,
+      });
+
+      const sprite = new THREE.Sprite(material);
+      const escala = raioSol * (4 + i * 3);
+      sprite.scale.set(escala, escala, 1);
+
+      grupo.add(sprite);
     }
-
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
-    // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
-    // visto pelo Fred como pontos coloridos no halo do Sol.
-    // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
-    texture.premultiplyAlpha = true;
-    const material = new THREE.SpriteMaterial({
-      map: texture,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-      premultipliedAlpha: true,
-      depthWrite: false,
-    });
-
-    const sprite = new THREE.Sprite(material);
-    const escala = raioSol * 6;
-    sprite.scale.set(escala, escala, 1);
-
-    grupo.add(sprite);
   }
 
   // Sprite de glow aditivo numa cor arbitrária (usado na coma dos cometas)
