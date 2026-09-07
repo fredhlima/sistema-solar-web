@@ -222,17 +222,29 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
 .mdock-painel-r { right: calc(12px + var(--safe-right)); width: 290px; }
 
 /* Com uma FICHA aberta (não a lista), a altura acompanha o conteúdo — sem
-   isto, um astro com pouco texto (poucas curiosidades/comparações, ex.:
-   Júpiter no tablet) deixava um vazio enorme até a barra do dock, porque
-   `.mdock-painel-corpo` tem `flex: 1` dentro de uma altura sempre fixa.
-   Achado pelo Fred em 08/09/2026. A LISTA continua preenchendo a vertical
-   toda (proposital — dá espaço para rolar entre muitos astros); só a ficha
-   troca `top` fixo por `max-height`, então ela cresce a partir da barra do
-   dock (mesmo teto de altura de antes) em vez de sempre esticar até lá. */
+   isto, um astro com pouco texto deixava um vazio enorme até a barra do
+   dock. Achado pelo Fred em 08/09/2026, refinado em 07/09/2026 (topo fixo,
+   ver comentário abaixo). */
 #mdock-painel-exp.com-ficha {
-  top: auto;
-  max-height: calc(100dvh - 8px - var(--safe-top) - var(--mdock-bar-h, 56px));
+  /* Topo FIXO numa posição agradável (pedido do Fred em 07/09/2026): antes,
+     com `top: auto`/`bottom` fixo, o card crescia pra CIMA a partir da barra
+     do dock — pouco conteúdo deixava o topo baixo na tela, muito conteúdo
+     empurrava o topo quase até o cabeçalho, pulando de posição a cada astro.
+     Agora o topo fica travado (um pouco acima do meio da tela).
+     `bottom: auto` é o que de fato libera a altura pro conteúdo: com `top` E
+     `bottom` os dois fixos, o CSS resolve `height: auto` algebricamente
+     (a caixa sempre estica pra preencher o vão inteiro) em vez de encolher
+     pelo conteúdo — é o comportamento padrão do box model p/ posição
+     absoluta (visto na prática: a caixa batia exatamente no teto do
+     max-height com QUALQUER conteúdo, curto ou longo). Com `bottom: auto`,
+     `height` passa a ser calculado pelo conteúdo de verdade, e o `bottom`
+     final é o que sobrar — capado pelo max-height abaixo, com rolagem
+     interna (.mdock-painel-corpo) se ainda faltar espaço. */
+  --ficha-topo: max(calc(54px + var(--safe-top)), 40vh);
+  top: var(--ficha-topo);
+  bottom: auto;
   height: auto;
+  max-height: calc(100dvh - var(--ficha-topo) - var(--mdock-bar-h, 56px) - 8px);
 }
 
 /* Experiências abre em TELA CHEIA (pedido do Fred: facilita a visualização
