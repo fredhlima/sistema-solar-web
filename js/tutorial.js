@@ -23,7 +23,14 @@ let cardElement = null;
 let focoElement = null;
 let overlayElement = null;
 
-export function iniciarTutorial() {
+// `definirRitmo`: mesma função usada para reduzir a velocidade ao seguir uma
+// missão (ver ui.js) — reaproveitada aqui para deixar a simulação em 1h/s
+// (em vez do 1 dia/s padrão) enquanto o tutorial guia a pessoa pela tela,
+// para os astros se moverem devagar o bastante para dar pra acompanhar.
+let definirRitmoRef = null;
+
+export function iniciarTutorial({ definirRitmo } = {}) {
+  definirRitmoRef = definirRitmo || null;
   // Criar botão "?" de rever tutorial
   const grupoUtilidades = document.querySelector('.grupo-utilidades');
   if (grupoUtilidades) {
@@ -69,6 +76,13 @@ function abrir() {
 
   aberto = true;
   passoAtual = 0;
+
+  // 1h/s (1/24 dia/s) em vez do 1 dia/s padrão: pedido do Fred (08/09/2026)
+  // — nessa velocidade os astros ainda se movem, mas dá pra acompanhar
+  // enquanto a atenção está no balão do tutorial, não na cena. Fica assim
+  // depois que o tutorial fecha; o usuário ajusta pelos próprios controles
+  // se quiser voltar ao ritmo padrão.
+  definirRitmoRef?.(1 / 24);
 
   // Criar overlay
   overlayElement = document.createElement('div');

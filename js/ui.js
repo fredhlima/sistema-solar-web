@@ -1916,6 +1916,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     alternarPausa,
     avancarVelocidade,
     recuarVelocidade,
+    definirRitmo,
     estadoTempo: () => ({
       pausado: estado.velocidadeAtual === 0,
       rotulo: document.getElementById('tempo-velocidade')?.textContent || '',

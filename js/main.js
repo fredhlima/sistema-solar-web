@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=22';
 import { SistemaSolar3D } from './motor3d.js?v=43';
-import { iniciarUI } from './ui.js?v=49';
+import { iniciarUI } from './ui.js?v=50';
 import { iniciarMobileDock } from './mobile-dock.js?v=19';
 import { EVENTOS } from './eventos.js?v=10';
 import { MISSOES } from './missoes.js?v=12';
@@ -17,7 +17,7 @@ import { iniciarEstacoes } from './estacoes.js?v=41';
 import { iniciarMares } from './mares.js?v=28';
 import { iniciarProgresso } from './progresso.js?v=12';
 import { iniciarMusica } from './musica.js?v=10';
-import { iniciarTutorial } from './tutorial.js?v=8';
+import { iniciarTutorial } from './tutorial.js?v=9';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -70,7 +70,7 @@ iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrir
 // Tutorial de onboarding: depois do dock, pra checar body.modo-dock (já
 // setado por iniciarMobileDock) e mirar os alvos certos (desktop ou dock).
 // Só abre sozinho na PRIMEIRA vez (localStorage) — reaberto via botão "?".
-iniciarTutorial();
+iniciarTutorial({ definirRitmo: acoesUI.definirRitmo });
 
 // Smart default (redução de fadiga de decisão): no PRIMEIRO acesso, em vez de
 // deixar o usuário diante do sistema inteiro sem saber onde clicar entre 45
