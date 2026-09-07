@@ -947,42 +947,53 @@ export class SistemaSolar3D {
   }
 
   _adicionarGlowSol(grupo, raioSol) {
-    // Dois sprites aditivos para glow
-    for (let i = 0; i < 2; i++) {
-      const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d');
+    // Um sprite só, com gradiente de MUITAS paradas amostrando uma curva
+    // suave — não 3 paradas lineares (branco→dourado→laranja) como antes.
+    // Com só 3 pontos, a interpolação linear cria uma "quebra" visível na
+    // curva de brilho (ainda mais perceptível depois do fix de
+    // premultiplyAlpha, que corrigiu o blending mas expôs essa quebra como
+    // contraste/anel — achado pelo Fred). Uma cor só evita anéis de matiz;
+    // a curva (1-t)^EXPOENTE dá queda contínua, sem degrau: mais intensa
+    // perto do disco do Sol (que fica por baixo da esfera opaca — só a
+    // parte de fora do disco é visível) e sumindo bem antes da borda do
+    // sprite, pra não competir com astros vizinhos quando entram em cena.
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
 
-      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-      grad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-      grad.addColorStop(0.5, 'rgba(255, 200, 0, 0.3)');
-      grad.addColorStop(1, 'rgba(255, 100, 0, 0)');
-
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      // Mesma causa da textura de ponto (ver texturaPontoCircular): canvas
-      // premultiplicado + dithering perto de alpha 0 + desmultiplicação ao
-      // subir pra GPU amplificam o lixo de cada canal em cor saturada —
-      // visto pelo Fred como pontos coloridos (ex. verde) no halo do Sol.
-      // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
-      texture.premultiplyAlpha = true;
-      const material = new THREE.SpriteMaterial({
-        map: texture,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        premultipliedAlpha: true,
-        depthWrite: false,
-      });
-
-      const sprite = new THREE.Sprite(material);
-      const escala = raioSol * (4 + i * 3);
-      sprite.scale.set(escala, escala, 1);
-
-      grupo.add(sprite);
+    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    const ALPHA_PICO = 0.55;
+    const EXPOENTE = 2.4;
+    const PASSOS = 32;
+    for (let i = 0; i <= PASSOS; i++) {
+      const t = i / PASSOS;
+      const alpha = ALPHA_PICO * Math.pow(1 - t, EXPOENTE);
+      grad.addColorStop(t, `rgba(255, 225, 160, ${alpha.toFixed(3)})`);
     }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
+    // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
+    // visto pelo Fred como pontos coloridos no halo do Sol.
+    // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
+    texture.premultiplyAlpha = true;
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      premultipliedAlpha: true,
+      depthWrite: false,
+    });
+
+    const sprite = new THREE.Sprite(material);
+    const escala = raioSol * 6;
+    sprite.scale.set(escala, escala, 1);
+
+    grupo.add(sprite);
   }
 
   // Sprite de glow aditivo numa cor arbitrária (usado na coma dos cometas)

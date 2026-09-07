@@ -226,11 +226,12 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
    dock. Achado pelo Fred em 08/09/2026, refinado em 07/09/2026 (topo fixo,
    ver comentário abaixo). */
 #mdock-painel-exp.com-ficha {
-  /* Topo FIXO numa posição agradável (pedido do Fred em 07/09/2026): antes,
-     com `top: auto`/`bottom` fixo, o card crescia pra CIMA a partir da barra
-     do dock — pouco conteúdo deixava o topo baixo na tela, muito conteúdo
-     empurrava o topo quase até o cabeçalho, pulando de posição a cada astro.
-     Agora o topo fica travado (um pouco acima do meio da tela).
+  /* Topo FIXO numa posição agradável (pedido do Fred em 07/09/2026, subido
+     em 07/09/2026 depois de ver o resultado — 40vh tinha ficado baixo
+     demais): antes, com `top: auto`/`bottom` fixo, o card crescia pra CIMA
+     a partir da barra do dock — pouco conteúdo deixava o topo baixo na
+     tela, muito conteúdo empurrava o topo quase até o cabeçalho, pulando de
+     posição a cada astro. Agora o topo fica travado perto do topo da tela.
      `bottom: auto` é o que de fato libera a altura pro conteúdo: com `top` E
      `bottom` os dois fixos, o CSS resolve `height: auto` algebricamente
      (a caixa sempre estica pra preencher o vão inteiro) em vez de encolher
@@ -240,11 +241,19 @@ body.ux-ousada.modo-girar .painel-info { display: none !important; }
      `height` passa a ser calculado pelo conteúdo de verdade, e o `bottom`
      final é o que sobrar — capado pelo max-height abaixo, com rolagem
      interna (.mdock-painel-corpo) se ainda faltar espaço. */
-  --ficha-topo: max(calc(54px + var(--safe-top)), 40vh);
+  --ficha-topo: max(calc(54px + var(--safe-top)), 20vh);
   top: var(--ficha-topo);
   bottom: auto;
   height: auto;
   max-height: calc(100dvh - var(--ficha-topo) - var(--mdock-bar-h, 56px) - 8px);
+  /* A regra base (.mdock-painel) arredonda só os cantos de cima e tira a
+     borda de baixo — pensada pra folha grudada na barra do dock, onde o
+     corte reto embaixo fica escondido. A ficha flutua (bottom:auto acima),
+     então esse corte reto sobra visível, sem moldura — "sem acabamento"
+     (achado pelo Fred). Como card flutuante, os 4 cantos arredondam e a
+     borda fecha nos 4 lados. */
+  border-radius: 16px;
+  border-bottom: 1px solid rgba(120, 160, 255, .16);
 }
 
 /* Experiências abre em TELA CHEIA (pedido do Fred: facilita a visualização
