@@ -727,15 +727,15 @@ export const QUIZ_PACOTES = [
           es: '¿Cuál planeta tiene la rotación más rápida?'
         },
         opcoes: {
-          pt: ['Saturno: 10,7 horas', 'Júpiter: 9,93 horas', 'Netuno: 16 horas', 'Urano: 17 horas'],
-          en: ['Saturn: 10.7 hours', 'Jupiter: 9.93 hours', 'Neptune: 16 hours', 'Uranus: 17 hours'],
-          es: ['Saturno: 10,7 horas', 'Júpiter: 9,93 horas', 'Neptuno: 16 horas', 'Urano: 17 horas']
+          pt: ['Saturno', 'Júpiter', 'Netuno', 'Urano'],
+          en: ['Saturn', 'Jupiter', 'Neptune', 'Uranus'],
+          es: ['Saturno', 'Júpiter', 'Neptuno', 'Urano']
         },
         corretaIndex: 1,
         explicacao: {
-          pt: 'Júpiter gira incrivelmente rápido: um dia em Júpiter dura apenas 9,93 horas! Sua rotação rápida causa achatamento nos polos — ele parece um pouco "achatado".',
-          en: 'Jupiter spins incredibly fast: a day on Jupiter is only 9.93 hours! Its rapid rotation causes polar flattening — it looks slightly "squashed".',
-          es: 'Júpiter gira increíblemente rápido: ¡un día en Júpiter dura solo 9,93 horas! Su rotación rápida causa achatamiento polar — se ve un poco "aplastado".'
+          pt: 'Júpiter gira incrivelmente rápido: um dia em Júpiter dura apenas 9,93 horas! Sua rotação rápida causa achatamento nos polos — ele parece um pouco "achatado". Os outros três também giram rápido, mas menos: Saturno (10,7h), Netuno (16h) e Urano (17h).',
+          en: 'Jupiter spins incredibly fast: a day on Jupiter is only 9.93 hours! Its rapid rotation causes polar flattening — it looks slightly "squashed". The other three also spin fast, but less: Saturn (10.7h), Neptune (16h) and Uranus (17h).',
+          es: 'Júpiter gira increíblemente rápido: ¡un día en Júpiter dura solo 9,93 horas! Su rotación rápida causa achatamiento polar — se ve un poco "aplastado". Los otros tres también giran rápido, pero menos: Saturno (10,7h), Neptuno (16h) y Urano (17h).'
         }
       },
       {

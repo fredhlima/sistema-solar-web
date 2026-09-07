@@ -2,7 +2,7 @@
 // Exporta: iniciarQuiz({ motor, dados, premium }) -> { abrir }
 
 import { getIdioma } from './i18n.js';
-import { QUIZ_PACOTES } from './quiz-dados.js?v=5';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=6';
 
 const TEXTOS = {
   pt: {
@@ -128,6 +128,9 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
 
   const conteudo = overlay.querySelector('#quiz-conteudo');
   const btnFechar = overlay.querySelector('.quiz-fechar');
+  // O card é quem rola (overflow-y: auto); guardado para o scroll-to-top ao
+  // mostrar a explicação (ver mostrarExplicacao/mostrarExplicacaoEncontrar).
+  const cardEl = overlay.querySelector('.quiz-card');
 
   // ========== Guardar localStorage com try/catch ==========
   function lerStorage() {
@@ -508,7 +511,15 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
     });
     div.appendChild(btnContinuar);
 
-    conteudo.appendChild(div);
+    // Antes da pergunta (não depois das opções): no celular, com as 4
+    // alternativas na tela, a confirmação nascia lá embaixo e exigia rolar
+    // pra ver — pedido do Fred (08/09/2026). Cai logo abaixo do contador,
+    // e o scroll-to-top garante que ela apareça sem gesto nenhum mesmo se o
+    // card já estiver rolado.
+    const alvo = conteudo.querySelector('.quiz-texto-pergunta');
+    if (alvo) conteudo.insertBefore(div, alvo);
+    else conteudo.appendChild(div);
+    cardEl.scrollTop = 0;
   }
 
   // ========== Mostrar pergunta encontrar ==========
@@ -685,7 +696,17 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
     });
     div.appendChild(btnContinuar);
 
-    conteudo.appendChild(div);
+    // Mesmo ajuste da múltipla escolha: antes do card "ENCONTRE", não depois
+    // — no modo dock o card já ocupa boa parte da altura útil da tela.
+    const alvo = conteudo.querySelector('.quiz-encontrar-card');
+    if (alvo) conteudo.insertBefore(div, alvo);
+    else conteudo.appendChild(div);
+    cardEl.scrollTop = 0;
+
+    // Se a pessoa deixou o Explorar aberto pra pesquisar o astro (ver
+    // mobile-dock.js: togglePainel não fecha mais o quiz durante a busca),
+    // a pergunta resolvida é o gatilho certo pra ele fechar sozinho.
+    document.dispatchEvent(new CustomEvent('sim:quiz-encontrar-resolvido'));
   }
 
   // ========== Mostrar resultado final ==========

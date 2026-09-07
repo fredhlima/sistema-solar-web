@@ -736,11 +736,16 @@
    plataforma da loja, isso valia para os oito pacotes, não só os novos.
 
    Precisa de `!important` e de mais especificidade porque é o que as regras de
-   tela cheia usam. Ancorado embaixo, acima da barra do dock, para não brigar
-   com o «‹ Voltar» que o dock fixa no canto superior esquerdo. */
+   tela cheia usam. Ancorado embaixo À DIREITA (não centralizado): o Fred
+   relatou dificuldade de achar astros distantes/pequenos (Urano, cometa
+   Halley) e pediu para abrir espaço à esquerda — é onde mora o painel
+   Explorar, que agora pode abrir junto sem fechar o quiz (ver
+   mobile-dock.js, togglePainel/'sim:quiz-encontrar-resolvido'). Acima da
+   barra do dock, para não brigar com o «‹ Voltar» que o dock fixa no canto
+   superior esquerdo. */
 body.modo-dock .quiz-overlay.modo-encontrar {
   align-items: flex-end !important;
-  justify-content: center !important;
+  justify-content: flex-end !important;
 }
 
 body.modo-dock .quiz-overlay.modo-encontrar .quiz-card {
@@ -750,8 +755,19 @@ body.modo-dock .quiz-overlay.modo-encontrar .quiz-card {
   max-height: calc(100dvh - var(--mdock-bar-h, 64px) - 24px) !important;
   border-radius: 16px !important;
   padding: 12px 14px !important;
-  margin: 0 0 calc(var(--mdock-bar-h, 64px) + 12px) !important;
+  margin: 0 calc(12px + var(--safe-right)) calc(var(--mdock-bar-h, 64px) + 12px) 0 !important;
   overflow-y: auto;
+}
+
+/* Com o Explorar aberto ao lado (pesquisando o astro em vez de girar a
+   cena), o card encolhe para não brigar de espaço com o painel, que ocupa
+   ~52vw da esquerda — sem isto os dois se sobrepunham em telas mais
+   estreitas. */
+body.modo-dock.mdock-explorar-aberto .quiz-overlay.modo-encontrar .quiz-card {
+  width: min(280px, calc(46vw - 24px)) !important;
+}
+body.modo-dock.mdock-explorar-aberto .quiz-overlay.modo-encontrar .quiz-encontrar-dica {
+  display: none;
 }
 
 /* Cada pixel a menos aqui é céu a mais para procurar o astro: numa tela de

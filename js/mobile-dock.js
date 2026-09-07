@@ -212,7 +212,12 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   function togglePainel(nome) {
     estado.panel = estado.panel === nome ? null : nome;
     estado.calOpen = false;
-    if (estado.panel) fecharPaginas();
+    // Exceção à exclusividade: durante a pergunta "encontre o astro" (quiz),
+    // abrir o Explorar é o próprio jeito de RESPONDER (pesquisar o astro por
+    // nome em vez de girar a cena) — fechar o quiz aqui seria o oposto do que
+    // o Fred pediu (08/09/2026: "navegar pelo Explorar sem que o card feche").
+    const buscandoAstro = nome === 'exp' && document.body.classList.contains('quiz-encontrando');
+    if (estado.panel && !buscandoAstro) fecharPaginas();
     render();
   }
 
@@ -562,6 +567,13 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     render();
   });
 
+  // A pessoa pode ter deixado o Explorar aberto pra achar o astro (ver
+  // togglePainel); resolvida a pergunta, fecha sozinho — sem isso os dois
+  // painéis ficavam abertos até a próxima pergunta, competindo por espaço.
+  document.addEventListener('sim:quiz-encontrar-resolvido', () => {
+    if (estado.panel === 'exp') { estado.panel = null; render(); }
+  });
+
   // ---------- nível / engrenagem ----------
   $('mdock-nivel').onclick = () => abrirProgresso();
   $('mdock-gear').onclick = () => {
@@ -632,6 +644,11 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     if (motor.setDeslocamentoVisao) motor.setDeslocamentoVisao(emModoDock && (estado.panel === 'exp' || cardMissaoVisivel) ? 0.46 : 0);
     // scrim de cena aparece quando um painel ou o calendário está aberto
     $('mdock-scrim-cena').hidden = !(estado.panel || estado.calOpen);
+    // Classe no body (não em #mdock: o card do quiz vive em #ui-root, um
+    // IRMÃO de #mdock, e só herda variável/estado de um ancestral comum) —
+    // deixa o CSS encolher e afastar o card do quiz "encontrar" quando o
+    // Explorar abre ao lado dele (ver css/quiz.css).
+    document.body.classList.toggle('mdock-explorar-aberto', estado.panel === 'exp');
     $('mdock-btn-exp').classList.toggle('ativo', estado.panel === 'exp');
     $('mdock-btn-xp').classList.toggle('ativo', estado.panel === 'xp');
     // Painel esquerdo (Explorar/missão) sobrepunha o cartão do logo — o
