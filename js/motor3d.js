@@ -82,6 +82,9 @@ export class SistemaSolar3D {
     // principal congela (tempoDias não avança) e nada dela é atualizado.
     this._palco = null;
     this._controlsAtivosAntesDoPalco = true;
+    // Camadas de franja do Sol (auréola girante) — preenchido em
+    // _adicionarGlowSol, lido a cada quadro por _atualizarFranjaSol.
+    this._franjasSol = null;
   }
 
   iniciar() {
@@ -959,85 +962,134 @@ export class SistemaSolar3D {
   // referência do Fred mostra a franja cobrindo o contorno visível
   // INTEIRO, de qualquer ângulo, o tempo todo. Isso é exatamente o que um
   // sprite de frente-pra-câmera já faz de graça (é como o glow sempre
-  // funcionou) — então a franja inteira agora é pintada numa ÚNICA textura
-  // 2D, no mesmo sprite da auréola, em vez de geometria 3D por proeminência.
-  // Mais simples E mais fiel à referência ao mesmo tempo.
+  // funcionou) — então a franja é pintada em textura(s) 2D, em sprites
+  // de frente-pra-câmera, em vez de geometria 3D por proeminência.
+  //
+  // 08/09/2026, 2ª rodada: o Fred achou o resultado acima bom mas "sem
+  // imponência", e pediu duas coisas — (a) trazer de volta, como camada de
+  // FUNDO, o halo grande e esmaecido do "teste 1" desta sessão (commit
+  // c30e890), agora mais fraco e mais alaranjado; (b) fazer a franja girar,
+  // em duas velocidades (rotação diferencial, como no Sol real). Pra (b)
+  // funcionar sem juntar tudo numa textura só girando (o que giraria o
+  // anel também, que é radialmente simétrico — girar não mudaria nada nele,
+  // só custaria mais um sprite-material.rotation à toa), o antigo sprite
+  // único virou 4 sprites independentes, todos aditivos com depthWrite
+  // false — soma aditiva é comutativa, então a ORDEM de adição não importa
+  // pro resultado visual (não precisa de renderOrder):
+  //   1. Halo de fundo (_adicionarHaloSolFundo) — grande, fraco, laranja,
+  //      estático.
+  //   2. Auréola/anel estreito (_adicionarAureolaSol) — colado na borda,
+  //      estático (radialmente simétrico).
+  //   3-4. Duas camadas de franja (_criarFranjaSol × 2, via
+  //      _adicionarGlowSol) — cada uma gira em torno do próprio eixo do
+  //      sprite (material.rotation) numa velocidade diferente; ver
+  //      _atualizarFranjaSol.
   _adicionarGlowSol(grupo, raioSol) {
-    const TAMANHO_CANVAS = 256;
-    // Sprite ocupa raioSol × FATOR_ESCALA — bem mais contido que o halo
-    // anterior (que ia a 7× o raio); a referência mostra uma auréola presa
-    // à borda, não um halo grande espalhado pela cena.
-    const FATOR_ESCALA = 2.6;
-    const cx = TAMANHO_CANVAS / 2;
-    const cy = TAMANHO_CANVAS / 2;
-    // Raio, em pixels do canvas, onde fica a borda do disco do Sol (o
-    // próprio mesh esférico cobre tudo daqui pra dentro — só importa o
-    // desenho a partir daqui pra fora). Um Sprite mapeia UV [0,1] pro
-    // range de mundo [-escala/2, +escala/2] — então 1px de canvas equivale
-    // a (escala/TAMANHO_CANVAS) unidades de mundo, e o raio em pixels que
-    // corresponde a raioSol é TAMANHO_CANVAS/FATOR_ESCALA (não
-    // cx/FATOR_ESCALA — essa versão errada, testada e descartada, desenhava
-    // o anel inteiro e a franja DENTRO do raio do disco, escondidos atrás
-    // da esfera opaca; o Sol ficava sem nenhum efeito visível).
-    const raioBase = TAMANHO_CANVAS / FATOR_ESCALA;
+    this._adicionarHaloSolFundo(grupo, raioSol);
+    this._adicionarAureolaSol(grupo, raioSol);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = TAMANHO_CANVAS;
-    canvas.height = TAMANHO_CANVAS;
-    const ctx = canvas.getContext('2d');
-    ctx.globalCompositeOperation = 'lighter';
+    // Duas camadas de franja, mesma rotina, chamadas separadas — os
+    // Math.random() de cada chamada já dão subconjuntos de filamentos
+    // diferentes naturalmente, sem precisar de nenhuma lógica extra pra
+    // evitar repetição. Metade dos filamentos (45) em cada uma soma de
+    // volta a densidade visual da versão anterior (90 numa camada só). A
+    // camada B tem filamentos mais curtos e mais fracos que a A — dá
+    // sensação de profundidade (duas "cortinas" de plasma a distâncias
+    // diferentes) em vez de duas camadas clones se sobrepondo.
+    const franjaA = this._criarFranjaSol(raioSol, {
+      numFilamentos: 45,
+      fatorComprimento: 1,
+      fatorAlpha: 1,
+    });
+    const franjaB = this._criarFranjaSol(raioSol, {
+      numFilamentos: 45,
+      fatorComprimento: 0.65,
+      fatorAlpha: 0.6,
+    });
+    grupo.add(franjaA.sprite);
+    grupo.add(franjaB.sprite);
 
-    // 1) Auréola estreita: um aro QUENTE bem fino colado na borda (0,9 a
-    // 1,08× raioBase), não os 1,25× de uma tentativa anterior — aquela
-    // largura fazia o aro ainda estar perto do pico de brilho bem depois
-    // da borda do disco, e a franja (item 2) nascia DENTRO dessa zona já
-    // clara: aditivo sobre algo já muito claro não gera contraste
-    // nenhum, então os filamentos ficavam invisíveis de perto (achado
-    // testando com zoom). Com o aro mais estreito, ele já caiu quase a
-    // zero bem antes de onde os filamentos se estendem — a maior parte do
-    // comprimento deles fica contra o espaço escuro, com contraste de
-    // verdade.
-    const anel = ctx.createRadialGradient(cx, cy, raioBase * 0.9, cx, cy, raioBase * 1.08);
-    anel.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-    anel.addColorStop(0.56, 'rgba(255, 240, 190, 0.9)'); // ~raioBase (borda do disco)
-    anel.addColorStop(1, 'rgba(255, 150, 60, 0)');
-    ctx.fillStyle = anel;
-    ctx.beginPath();
-    ctx.arc(cx, cy, raioBase * 1.08, 0, Math.PI * 2);
-    ctx.fill();
+    // Rotação diferencial: as duas giram no MESMO sentido, em velocidades
+    // diferentes — o equador do Sol real gira mais rápido que os polos.
+    // Períodos longos (150s/240s) de propósito: mais rápido lê como
+    // catavento mecânico em vez de plasma à deriva. velocidadeRad é
+    // aplicado por _atualizarFranjaSol, chamado do _loop() com o
+    // deltaSegundos de TEMPO REAL (não tempoDias simulado) — ver
+    // comentário lá para o motivo.
+    const PERIODO_A_SEGUNDOS = 150;
+    const PERIODO_B_SEGUNDOS = 240;
+    this._franjasSol = [
+      { material: franjaA.material, velocidadeRad: (Math.PI * 2) / PERIODO_A_SEGUNDOS },
+      { material: franjaB.material, velocidadeRad: (Math.PI * 2) / PERIODO_B_SEGUNDOS },
+    ];
+  }
 
-    // 2) Franja de línguas finas cobrindo TODO o contorno — cada uma é uma
-    // sequência de manchas radiais encolhendo (borda macia por natureza,
-    // sem contorno vetorial reto), partindo de perto da borda do disco e
-    // serpenteando pra fora com leve curvatura aleatória. A maioria curta
-    // (random×random enviesa pro lado baixo), poucas mais longas — igual
-    // numa foto real, onde a franja é predominantemente rasa com alguns
-    // picos maiores se destacando. Alcance máximo (0,97+0,29=1,26×raioBase)
-    // fica dentro do mesmo limite de 1,3× do item 1.
-    const NUM_FILAMENTOS = 90;
-    for (let i = 0; i < NUM_FILAMENTOS; i++) {
-      const theta = (i / NUM_FILAMENTOS) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
-      const comprimento = raioBase * (0.03 + Math.random() * Math.random() * 0.26);
-      const curvatura = (Math.random() - 0.5) * 0.35;
-      const espessura = 1.6 + Math.random() * 2.2;
-      const PASSOS = 6;
-      for (let p = 0; p <= PASSOS; p++) {
-        const t = p / PASSOS; // 0 = junto à borda, 1 = ponta
-        const r = raioBase * 0.97 + comprimento * t;
-        const ang = theta + curvatura * t * t;
-        const x = cx + Math.cos(ang) * r;
-        const y = cy + Math.sin(ang) * r;
-        const raioMancha = (1 - t) * espessura + 0.5;
-        const alpha = (1 - t) * 0.8;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, raioMancha);
-        g.addColorStop(0, `rgba(255, ${Math.round(230 - t * 110)}, ${Math.round(150 - t * 130)}, ${alpha.toFixed(3)})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(x, y, raioMancha, 0, Math.PI * 2);
-        ctx.fill();
+  // Camada 1: halo grande e esmaecido ao fundo, recuperado do "teste 1"
+  // desta sessão (gradiente exponencial puro; commit c30e890, escolhido
+  // pelo Fred entre 3 opções antes de virar a auréola+franja estreitas).
+  // Mudanças a pedido do Fred em 08/09/2026: PICO reduzido de 2,45 pra 1,2
+  // (bem mais fraco — o halo grande antigo "lavava" Mercúrio/Vênus, e essa
+  // é a razão de ele ter sido reduzido da primeira vez) e corCamada
+  // deslocada pro laranja (era branco→dourado→laranja; agora não passa
+  // mais por branco no centro). ALCANCE, N, DECAIMENTO, T0, o envelope
+  // smootherstep e o bruto[N]=0 ficam EXATAMENTE como no teste 1 — details
+  // abaixo, preservados porque resolvem um bug real.
+  _adicionarHaloSolFundo(grupo, raioSol) {
+    // alpha(t) = PICO * exp(-t/DECAIMENTO): decai suave em toda parte por
+    // construção (sem precisar de médias móveis nem envelopes pra tirar
+    // quebras de inclinação), mais concentrado perto do disco do Sol e
+    // dissipando rápido pra fora. Ainda assim, uma exponencial nunca chega
+    // a ZERO de verdade (só se aproxima) — sem cortar essa cauda ela
+    // deixaria o mesmo resíduo nos 4 cantos do canvas que já virou um
+    // quadrado visível numa rodada anterior (createRadialGradient preenche
+    // tudo fora do círculo com a cor da ÚLTIMA parada; se ela não for
+    // alpha 0 exato, sobra opacidade uniforme nos 4 cantos), então o mesmo
+    // envelope smootherstep (derivada zero nos dois extremos, não
+    // introduz degrau novo) força a cauda a alpha 0 exato antes da borda
+    // do sprite.
+    function corCamada(t) {
+      if (t <= 0.35) {
+        const f = t / 0.35;
+        return [255, 190 + (130 - 190) * f, 110 + (45 - 110) * f];
+      }
+      const f = Math.min(1, (t - 0.35) / 0.4);
+      return [255, 130 + (85 - 130) * f, 45 + (20 - 45) * f];
+    }
+
+    const ALCANCE = 7; // raios do Sol
+    const N = 96;
+    const PICO = 1.2;
+    const DECAIMENTO = 0.2;
+    const T0 = 0.75; // a partir daqui começa a forçar a cauda a zero
+    const bruto = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      bruto.push(Math.min(1, PICO * Math.exp(-t / DECAIMENTO)));
+    }
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      if (t > T0) {
+        const u = (t - T0) / (1 - T0);
+        const smootherstep = u * u * u * (u * (u * 6 - 15) + 10);
+        bruto[i] *= (1 - smootherstep);
       }
     }
+    bruto[N] = 0; // exato, sem depender só do envelope (arredondamento de ponto flutuante)
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const [r, g, b] = corCamada(t);
+      const alpha = bruto[i];
+      grad.addColorStop(t, `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha.toFixed(3)})`);
+    }
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const texture = new THREE.CanvasTexture(canvas);
     // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
@@ -1054,10 +1106,162 @@ export class SistemaSolar3D {
     });
 
     const sprite = new THREE.Sprite(material);
+    const escala = raioSol * ALCANCE;
+    sprite.scale.set(escala, escala, 1);
+
+    grupo.add(sprite);
+  }
+
+  // Camada 2: auréola estreita — um aro QUENTE bem fino colado na borda do
+  // disco. Estática de propósito: é radialmente simétrica, então girar o
+  // sprite não mudaria um único pixel renderizado — só custaria um
+  // material.rotation à toa por quadro.
+  _adicionarAureolaSol(grupo, raioSol) {
+    const TAMANHO_CANVAS = 256;
+    // Sprite ocupa raioSol × FATOR_ESCALA — bem mais contido que o halo de
+    // fundo (que vai a 7× o raio); a auréola fica presa à borda do disco.
+    const FATOR_ESCALA = 2.6;
+    const cx = TAMANHO_CANVAS / 2;
+    const cy = TAMANHO_CANVAS / 2;
+    // Raio, em pixels do canvas, onde fica a borda do disco do Sol (o
+    // próprio mesh esférico cobre tudo daqui pra dentro — só importa o
+    // desenho a partir daqui pra fora). Um Sprite mapeia UV [0,1] pro
+    // range de mundo [-escala/2, +escala/2] — então 1px de canvas equivale
+    // a (escala/TAMANHO_CANVAS) unidades de mundo, e o raio em pixels que
+    // corresponde a raioSol é TAMANHO_CANVAS/FATOR_ESCALA (não
+    // cx/FATOR_ESCALA — essa versão errada, testada e descartada, desenhava
+    // o anel inteiro DENTRO do raio do disco, escondido atrás da esfera
+    // opaca; o Sol ficava sem nenhum efeito visível). Esta mesma conta é
+    // reaplicada em _criarFranjaSol — as duas têm que combinar exatamente
+    // no mesmo raioBase, senão a franja nasce alinhada com o raio errado.
+    const raioBase = TAMANHO_CANVAS / FATOR_ESCALA;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = TAMANHO_CANVAS;
+    canvas.height = TAMANHO_CANVAS;
+    const ctx = canvas.getContext('2d');
+    ctx.globalCompositeOperation = 'lighter';
+
+    // Aro fino (0,9 a 1,08× raioBase), não os 1,25× de uma tentativa
+    // anterior — aquela largura fazia o aro ainda estar perto do pico de
+    // brilho bem depois da borda do disco, e a franja nascia DENTRO dessa
+    // zona já clara: aditivo sobre algo já muito claro não gera contraste
+    // nenhum, então os filamentos ficavam invisíveis de perto (achado
+    // testando com zoom). Com o aro mais estreito, ele já caiu quase a
+    // zero bem antes de onde os filamentos se estendem — a maior parte do
+    // comprimento deles fica contra o espaço escuro, com contraste de
+    // verdade.
+    const anel = ctx.createRadialGradient(cx, cy, raioBase * 0.9, cx, cy, raioBase * 1.08);
+    anel.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    anel.addColorStop(0.56, 'rgba(255, 240, 190, 0.9)'); // ~raioBase (borda do disco)
+    anel.addColorStop(1, 'rgba(255, 150, 60, 0)');
+    ctx.fillStyle = anel;
+    ctx.beginPath();
+    ctx.arc(cx, cy, raioBase * 1.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.premultiplyAlpha = true; // ver nota em _adicionarHaloSolFundo
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      premultipliedAlpha: true,
+      depthWrite: false,
+    });
+
+    const sprite = new THREE.Sprite(material);
     const escala = raioSol * FATOR_ESCALA;
     sprite.scale.set(escala, escala, 1);
 
     grupo.add(sprite);
+  }
+
+  // Camadas 3-4: uma textura de franja (línguas finas de plasma cobrindo
+  // TODO o contorno). Chamada duas vezes por _adicionarGlowSol, com
+  // parâmetros diferentes, pra formar as 2 camadas que giram em
+  // velocidades diferentes — ver ali. Retorna { sprite, material } (o
+  // material é guardado à parte porque é nele que a rotação por quadro é
+  // aplicada, em _atualizarFranjaSol).
+  _criarFranjaSol(raioSol, { numFilamentos, fatorComprimento, fatorAlpha }) {
+    const TAMANHO_CANVAS = 256;
+    const FATOR_ESCALA = 2.6; // mesmo valor de _adicionarAureolaSol — ver nota lá sobre raioBase
+    const cx = TAMANHO_CANVAS / 2;
+    const cy = TAMANHO_CANVAS / 2;
+    const raioBase = TAMANHO_CANVAS / FATOR_ESCALA;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = TAMANHO_CANVAS;
+    canvas.height = TAMANHO_CANVAS;
+    const ctx = canvas.getContext('2d');
+    ctx.globalCompositeOperation = 'lighter';
+
+    // Cada filamento é uma sequência de manchas radiais encolhendo (borda
+    // macia por natureza, sem contorno vetorial reto), partindo de perto
+    // da borda do disco e serpenteando pra fora com leve curvatura
+    // aleatória. A maioria curta (random×random enviesa pro lado baixo),
+    // poucas mais longas — igual numa foto real, onde a franja é
+    // predominantemente rasa com alguns picos maiores se destacando.
+    // Alcance máximo (0,97+0,29=1,26×raioBase) fica dentro do mesmo limite
+    // de 1,3× da auréola. TODO desenho aqui é ctx.arc(...) + fill() —
+    // nunca fillRect do canvas inteiro — de propósito: esta textura gira
+    // (material.rotation, em _atualizarFranjaSol), então qualquer pixel
+    // fora do círculo de filamentos precisa estar transparente de
+    // verdade, senão um quadrado giraria visivelmente em volta do Sol.
+    for (let i = 0; i < numFilamentos; i++) {
+      const theta = (i / numFilamentos) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
+      const comprimento = raioBase * (0.03 + Math.random() * Math.random() * 0.26) * fatorComprimento;
+      const curvatura = (Math.random() - 0.5) * 0.35;
+      const espessura = 1.6 + Math.random() * 2.2;
+      const PASSOS = 6;
+      for (let p = 0; p <= PASSOS; p++) {
+        const t = p / PASSOS; // 0 = junto à borda, 1 = ponta
+        const r = raioBase * 0.97 + comprimento * t;
+        const ang = theta + curvatura * t * t;
+        const x = cx + Math.cos(ang) * r;
+        const y = cy + Math.sin(ang) * r;
+        const raioMancha = (1 - t) * espessura + 0.5;
+        const alpha = (1 - t) * 0.8 * fatorAlpha;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, raioMancha);
+        g.addColorStop(0, `rgba(255, ${Math.round(230 - t * 110)}, ${Math.round(150 - t * 130)}, ${alpha.toFixed(3)})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, raioMancha, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.premultiplyAlpha = true; // ver nota em _adicionarHaloSolFundo
+    const material = new THREE.SpriteMaterial({
+      map: texture,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      premultipliedAlpha: true,
+      depthWrite: false,
+    });
+
+    const sprite = new THREE.Sprite(material);
+    const escala = raioSol * FATOR_ESCALA;
+    sprite.scale.set(escala, escala, 1);
+
+    return { sprite, material };
+  }
+
+  // Gira as camadas de franja do Sol (rotação diferencial — ver
+  // _adicionarGlowSol). Chamado do _loop() com o deltaSegundos de TEMPO
+  // REAL do requestAnimationFrame, NÃO com tempoDias simulado: o
+  // simulador vai de pausado até 3650 dias/s, e se a rotação dependesse do
+  // tempo simulado ela congelaria com o tempo pausado e viraria
+  // estroboscópio nas velocidades altas. this._franjasSol é preenchido em
+  // _adicionarGlowSol; fora da cena principal (ex. _palco de
+  // Estações/Marés) ele nunca é criado, daí o guard abaixo.
+  _atualizarFranjaSol(deltaSegundos) {
+    if (!this._franjasSol) return;
+    for (const franja of this._franjasSol) {
+      franja.material.rotation += franja.velocidadeRad * deltaSegundos;
+    }
   }
 
   // Sprite de glow aditivo numa cor arbitrária (usado na coma dos cometas)
@@ -2049,6 +2253,7 @@ export class SistemaSolar3D {
 
       this.controls.update();
       this._atualizarRotulos();
+      this._atualizarFranjaSol(deltaSegundos);
       this.renderer.render(this.scene, this.camera);
     };
 

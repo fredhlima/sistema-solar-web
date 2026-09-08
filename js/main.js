@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=22';
-import { SistemaSolar3D } from './motor3d.js?v=55';
+import { SistemaSolar3D } from './motor3d.js?v=56';
 import { iniciarUI } from './ui.js?v=51';
 import { iniciarMobileDock } from './mobile-dock.js?v=19';
 import { EVENTOS } from './eventos.js?v=10';
