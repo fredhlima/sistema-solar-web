@@ -991,18 +991,22 @@ export class SistemaSolar3D {
     // Duas camadas de franja, mesma rotina, chamadas separadas — os
     // Math.random() de cada chamada já dão subconjuntos de filamentos
     // diferentes naturalmente, sem precisar de nenhuma lógica extra pra
-    // evitar repetição. Metade dos filamentos (45) em cada uma soma de
-    // volta a densidade visual da versão anterior (90 numa camada só). A
-    // camada B tem filamentos mais curtos e mais fracos que a A — dá
-    // sensação de profundidade (duas "cortinas" de plasma a distâncias
-    // diferentes) em vez de duas camadas clones se sobrepondo.
+    // evitar repetição. 90 filamentos em cada uma soma 180 no total (era
+    // 45+45=90; densidade dobrada a pedido do Fred em 08/09/2026). Foram
+    // comparadas 3 variantes com zoom próximo — 90, 140 e 180 — e em 180 as
+    // línguas continuam individualmente distinguíveis, sem virar o aro
+    // contínuo que é o risco documentado no HANDOFF.md (aditivo sobre base
+    // já clara perde contraste). A camada B tem filamentos mais
+    // curtos e mais fracos que a A — dá sensação de profundidade (duas
+    // "cortinas" de plasma a distâncias diferentes) em vez de duas camadas
+    // clones se sobrepondo.
     const franjaA = this._criarFranjaSol(raioSol, {
-      numFilamentos: 45,
+      numFilamentos: 90,
       fatorComprimento: 1,
       fatorAlpha: 1,
     });
     const franjaB = this._criarFranjaSol(raioSol, {
-      numFilamentos: 45,
+      numFilamentos: 90,
       fatorComprimento: 0.65,
       fatorAlpha: 0.6,
     });
@@ -1047,13 +1051,36 @@ export class SistemaSolar3D {
     // envelope smootherstep (derivada zero nos dois extremos, não
     // introduz degrau novo) força a cauda a alpha 0 exato antes da borda
     // do sprite.
+    // A cauda NÃO pode terminar num laranja saturado, por um motivo de 8
+    // bits: a contribuição aditiva de cada canal é `canal * alpha`, e o
+    // canal arredonda pra 0 quando `canal * alpha < 0,5`. Com a cauda em
+    // (255, 85, 20) os limiares de alpha ficam 0,00196 (R), 0,00588 (G) e
+    // 0,025 (B) — o azul morre com alpha 12,75x MAIOR que o vermelho. Os
+    // três canais somem então em raios bem diferentes e cada morte vira um
+    // anel de contorno visível; entre a morte do verde e a do vermelho
+    // sobra só vermelho sobre o fundo azul-marinho, e o halo ganha uma
+    // franja arroxeada. Medido no print do Fred de 08/09/2026 (halo com
+    // Mercúrio em foco, textura esticada ~12x): B sumia em 2,05 raios
+    // solares, G em 2,53 e R em 2,76 — 0,7 raio solar de deriva de matiz.
+    // Convergir a cauda pra um branco-quente (255, 205, 165) põe os
+    // limiares em 0,00196 / 0,00244 / 0,00303 (razão máxima 1,5x): os três
+    // canais morrem praticamente juntos e os anéis viram uma borda só.
+    // A faixa t <= 0,55 é a parte visível e aprovada — fica intocada.
+    const T_NEUTRO_INI = 0.55;
+    const T_NEUTRO_FIM = 0.8;
     function corCamada(t) {
       if (t <= 0.35) {
         const f = t / 0.35;
         return [255, 190 + (130 - 190) * f, 110 + (45 - 110) * f];
       }
       const f = Math.min(1, (t - 0.35) / 0.4);
-      return [255, 130 + (85 - 130) * f, 45 + (20 - 45) * f];
+      const g = 130 + (85 - 130) * f;
+      const b = 45 + (20 - 45) * f;
+      if (t <= T_NEUTRO_INI) return [255, g, b];
+      // (255, 107, 32) é o valor exato da rampa acima em t = 0,55 — a
+      // emenda é contínua por construção, sem degrau de cor.
+      const n = Math.min(1, (t - T_NEUTRO_INI) / (T_NEUTRO_FIM - T_NEUTRO_INI));
+      return [255, 107 + (205 - 107) * n, 32 + (165 - 32) * n];
     }
 
     const ALCANCE = 7; // raios do Sol
