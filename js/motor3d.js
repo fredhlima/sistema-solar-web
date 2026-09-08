@@ -947,86 +947,48 @@ export class SistemaSolar3D {
   }
 
   _adicionarGlowSol(grupo, raioSol) {
-    // Sprite ÚNICO cuja curva é a SOMA das duas camadas originais (4× e 7× o
-    // raio do Sol, cada uma com as 3 paradas branco/dourado/laranja de
-    // sempre), suavizada só onde a soma tinha uma quebra de inclinação.
-    //
-    // Achado do Fred em 07/09/2026 (print com anotação em vermelho): com as
-    // 2 camadas originais lado a lado, dava pra ver um anel exatamente onde
-    // o sprite interno (4×) termina. O valor da curva ali É contínuo (as
-    // duas coisas somam suavemente até esse ponto) — o que muda de repente é
-    // a INCLINAÇÃO: de um lado dois sprites caindo juntos, do outro só um.
-    // O olho humano realça esse tipo de quebra de inclinação como se fosse
-    // uma borda (banda de Mach) mesmo sem salto real de brilho. E explica
-    // por que a versão com confete "parecia um gradiente só, sem anel": a
-    // própria bagunça de cor do bug borrava essa transição.
-    //
-    // Em vez de aproximar com uma curva nova (tentativa anterior, ficou
-    // "menos imponente"), somamos as DUAS curvas originais ponto a ponto ao
-    // longo do mesmo raio físico — preserva a mesma "massa" de brilho — e
-    // aplicamos uma média móvel só pra arredondar a quebra de inclinação.
-    function alphaCamada(t) {
-      if (t <= 0.5) return 0.8 + (0.3 - 0.8) * (t / 0.5);
-      return 0.3 - 0.3 * ((t - 0.5) / 0.5);
-    }
+    // TESTE a pedido do Fred em 07/09/2026: gradiente EXPONENCIAL puro, no
+    // lugar da soma das duas camadas originais + suavização (versão
+    // anterior, seguia comprovadamente boa — este bloco fica fácil de
+    // reverter via git caso o resultado não agrade). alpha(t) = PICO *
+    // exp(-t/DECAIMENTO): decai suave em toda parte por construção (sem
+    // precisar de médias móveis nem envelopes pra tirar quebras de
+    // inclinação), mais concentrado perto do disco do Sol e dissipando
+    // rápido pra fora — "mais transparente na borda, mais acentuado perto
+    // do centro". Ainda assim, uma exponencial nunca chega a ZERO de
+    // verdade (só se aproxima) — sem cortar essa cauda ela deixaria o mesmo
+    // resíduo nos 4 cantos do canvas que já virou um quadrado visível numa
+    // rodada anterior, então o mesmo envelope smootherstep (derivada zero
+    // nos dois extremos, não introduz degrau novo) força a cauda a alpha 0
+    // exato antes da borda do sprite.
     function corCamada(t) {
-      if (t <= 0.5) {
-        const f = t / 0.5;
+      if (t <= 0.35) {
+        const f = t / 0.35;
         return [255, 255 + (200 - 255) * f, 255 + (0 - 255) * f];
       }
-      const f = (t - 0.5) / 0.5;
+      const f = Math.min(1, (t - 0.35) / 0.4);
       return [255, 200 + (100 - 200) * f, 0];
     }
 
-    const ALCANCE = 7; // raios do Sol — igual ao sprite externo de antes
+    const ALCANCE = 7; // raios do Sol — igual ao sprite de antes
     const N = 96;
-    const JANELA = 7;
-    // O array bruto ganha JANELA amostras de folga PRA CADA LADO, além do
-    // intervalo 0..N — sem isso, a média móvel de baixo, perto de i=N (borda
-    // do sprite), só teria pra somar os valores da própria cauda (que ainda
-    // não chegou a zero) e nunca os "zeros futuros" que existem de verdade
-    // fisicamente pra r>7. O resultado, medido na prática: o pico de
-    // gradiente nunca chegava a alpha 0 na borda — sobrava uma faixa (bem
-    // fraca, mas real) de opacidade uniforme até o quadrado do sprite, que
-    // no additive blending contra o céu escuro aparecia como um contorno
-    // quadrado visível ao redor do brilho (achado pelo Fred). Com a folga,
-    // a média em i=N inclui os zeros de verdade e converge pra alpha 0.
+    const PICO = 2.45;
+    const DECAIMENTO = 0.2;
+    const T0 = 0.75; // a partir daqui começa a forçar a cauda a zero
     const bruto = [];
-    for (let i = -JANELA; i <= N + JANELA; i++) {
-      const r = (i / N) * ALCANCE;
-      const aInterna = r > 0 && r <= 4 ? alphaCamada(r / 4) : 0;
-      const aExterna = r > 0 && r <= 7 ? alphaCamada(r / 7) : 0;
-      bruto.push(aInterna + aExterna);
-    }
-    // Média móvel só pra arredondar a quebra de inclinação em r=4 — janela
-    // de ~±0.5 raio de cada lado, estreita o bastante pra não achatar o
-    // resto da curva (que já era suave). Índice de bruto correspondente a
-    // i=0 do intervalo visível é JANELA (por causa da folga acima).
-    const suave = [];
     for (let i = 0; i <= N; i++) {
-      let soma = 0;
-      for (let k = -JANELA; k <= JANELA; k++) soma += bruto[i + JANELA + k];
-      suave.push(soma / (2 * JANELA + 1));
+      const t = i / N;
+      bruto.push(Math.min(1, PICO * Math.exp(-t / DECAIMENTO)));
     }
-    // Dissipa a extremidade externa (pedido do Fred em 07/09/2026): mesmo
-    // com a última parada em alpha 0 (fix anterior), a queda até lá ainda
-    // era relativamente rápida/linear — lia como uma borda definida, não
-    // como fumaça se desfazendo. Um envelope smootherstep (Ken Perlin — tem
-    // 1ª E 2ª derivada zero nos dois extremos) estica essa queda por uma
-    // fatia maior do raio: começa a agir em T0 sem criar um novo degrau ali
-    // (derivada zero na entrada) e chega a zero em t=1 sem parada abrupta
-    // (derivada zero na saída também). Só afeta a parte de fora — o corpo
-    // do brilho (t < T0) fica exatamente como estava.
-    const T0 = 0.6;
     for (let i = 0; i <= N; i++) {
       const t = i / N;
       if (t > T0) {
         const u = (t - T0) / (1 - T0);
         const smootherstep = u * u * u * (u * (u * 6 - 15) + 10);
-        suave[i] *= (1 - smootherstep);
+        bruto[i] *= (1 - smootherstep);
       }
     }
-    suave[N] = 0; // exato, sem depender só do envelope (arredondamento de ponto flutuante)
+    bruto[N] = 0; // exato, sem depender só do envelope (arredondamento de ponto flutuante)
 
     const canvas = document.createElement('canvas');
     canvas.width = 128;
@@ -1036,7 +998,7 @@ export class SistemaSolar3D {
     for (let i = 0; i <= N; i++) {
       const t = i / N;
       const [r, g, b] = corCamada(t);
-      const alpha = Math.min(1, suave[i]);
+      const alpha = bruto[i];
       grad.addColorStop(t, `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha.toFixed(3)})`);
     }
 
