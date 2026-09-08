@@ -947,20 +947,21 @@ export class SistemaSolar3D {
   }
 
   _adicionarGlowSol(grupo, raioSol) {
-    // TESTE a pedido do Fred em 07/09/2026: gradiente EXPONENCIAL puro, no
-    // lugar da soma das duas camadas originais + suavização (versão
-    // anterior, seguia comprovadamente boa — este bloco fica fácil de
-    // reverter via git caso o resultado não agrade). alpha(t) = PICO *
-    // exp(-t/DECAIMENTO): decai suave em toda parte por construção (sem
-    // precisar de médias móveis nem envelopes pra tirar quebras de
-    // inclinação), mais concentrado perto do disco do Sol e dissipando
-    // rápido pra fora — "mais transparente na borda, mais acentuado perto
-    // do centro". Ainda assim, uma exponencial nunca chega a ZERO de
-    // verdade (só se aproxima) — sem cortar essa cauda ela deixaria o mesmo
-    // resíduo nos 4 cantos do canvas que já virou um quadrado visível numa
-    // rodada anterior, então o mesmo envelope smootherstep (derivada zero
-    // nos dois extremos, não introduz degrau novo) força a cauda a alpha 0
-    // exato antes da borda do sprite.
+    // TESTE #2 (pedido do Fred em 07/09/2026): depois de comparar o TESTE #1
+    // (exponencial única) com a versão anterior (soma das duas camadas +
+    // suavização, commit 6375c75) e achar as duas "praticamente idênticas",
+    // ele pediu uma versão que realmente pareça diferente — núcleo mais
+    // concentrado/pontudo perto do disco, caindo mais rápido logo de cara,
+    // antes de esticar numa cauda longa.
+    //
+    // Uma exponencial única não separa essas duas coisas (a mesma taxa de
+    // queda vale perto e longe). Uma BI-exponencial separa: um termo RÁPIDO
+    // que domina perto do disco e já caiu quase todo depois de pouco
+    // espaço (dá o núcleo pontudo), somado a um termo LENTO e mais fraco
+    // que continua presente bem depois do rápido ter sumido (dá a cauda
+    // longa). Soma de duas exponenciais continua suave em toda parte —
+    // sem precisar de média móvel, só do mesmo envelope no final pra
+    // fechar em alpha 0 exato (nenhuma exponencial chega a zero sozinha).
     function corCamada(t) {
       if (t <= 0.35) {
         const f = t / 0.35;
@@ -972,13 +973,17 @@ export class SistemaSolar3D {
 
     const ALCANCE = 7; // raios do Sol — igual ao sprite de antes
     const N = 96;
-    const PICO = 2.45;
-    const DECAIMENTO = 0.2;
-    const T0 = 0.75; // a partir daqui começa a forçar a cauda a zero
+    const L_RAPIDO = 0.1;   // termo do núcleo: cai quase todo em ~0,3-0,4 de t
+    const L_LENTO = 0.3;    // termo da cauda: bem mais devagar
+    const PESO_LENTO = 0.35; // bem mais fraco que o rápido — só sustenta a cauda
+    const PICO = 2.41;      // calibrado pra ~1.1 onde o disco do Sol termina
+    const T0 = 0.75;        // a partir daqui começa a forçar a cauda a zero
     const bruto = [];
     for (let i = 0; i <= N; i++) {
       const t = i / N;
-      bruto.push(Math.min(1, PICO * Math.exp(-t / DECAIMENTO)));
+      const rapido = Math.exp(-t / L_RAPIDO);
+      const lento = PESO_LENTO * Math.exp(-t / L_LENTO);
+      bruto.push(Math.min(1, PICO * (rapido + lento)));
     }
     for (let i = 0; i <= N; i++) {
       const t = i / N;
