@@ -980,25 +980,35 @@ export class SistemaSolar3D {
 
     const ALCANCE = 7; // raios do Sol — igual ao sprite externo de antes
     const N = 96;
+    const JANELA = 7;
+    // O array bruto ganha JANELA amostras de folga PRA CADA LADO, além do
+    // intervalo 0..N — sem isso, a média móvel de baixo, perto de i=N (borda
+    // do sprite), só teria pra somar os valores da própria cauda (que ainda
+    // não chegou a zero) e nunca os "zeros futuros" que existem de verdade
+    // fisicamente pra r>7. O resultado, medido na prática: o pico de
+    // gradiente nunca chegava a alpha 0 na borda — sobrava uma faixa (bem
+    // fraca, mas real) de opacidade uniforme até o quadrado do sprite, que
+    // no additive blending contra o céu escuro aparecia como um contorno
+    // quadrado visível ao redor do brilho (achado pelo Fred). Com a folga,
+    // a média em i=N inclui os zeros de verdade e converge pra alpha 0.
     const bruto = [];
-    for (let i = 0; i <= N; i++) {
+    for (let i = -JANELA; i <= N + JANELA; i++) {
       const r = (i / N) * ALCANCE;
-      const aInterna = r <= 4 ? alphaCamada(r / 4) : 0;
-      const aExterna = r <= 7 ? alphaCamada(r / 7) : 0;
+      const aInterna = r > 0 && r <= 4 ? alphaCamada(r / 4) : 0;
+      const aExterna = r > 0 && r <= 7 ? alphaCamada(r / 7) : 0;
       bruto.push(aInterna + aExterna);
     }
     // Média móvel só pra arredondar a quebra de inclinação em r=4 — janela
     // de ~±0.5 raio de cada lado, estreita o bastante pra não achatar o
-    // resto da curva (que já era suave).
-    const JANELA = 7;
-    const suave = bruto.map((_, i) => {
-      let soma = 0, n = 0;
-      for (let k = -JANELA; k <= JANELA; k++) {
-        const j = i + k;
-        if (j >= 0 && j < bruto.length) { soma += bruto[j]; n++; }
-      }
-      return soma / n;
-    });
+    // resto da curva (que já era suave). Índice de bruto correspondente a
+    // i=0 do intervalo visível é JANELA (por causa da folga acima).
+    const suave = [];
+    for (let i = 0; i <= N; i++) {
+      let soma = 0;
+      for (let k = -JANELA; k <= JANELA; k++) soma += bruto[i + JANELA + k];
+      suave.push(soma / (2 * JANELA + 1));
+    }
+    suave[N] = 0; // garante alpha exatamente 0 na borda do sprite, sem depender de a média convergir sozinha
 
     const canvas = document.createElement('canvas');
     canvas.width = 128;
