@@ -11,18 +11,6 @@ const _EIXO_X = new THREE.Vector3(1, 0, 0);
 const _EIXO_Y = new THREE.Vector3(0, 1, 0);
 const _qSpinTmp = new THREE.Quaternion();
 
-// Temporários de módulo para o billboard axial das proeminências do Sol —
-// recalculado por frame em _atualizarProminencias (evita alocação por frame).
-const _qProemMundo = new THREE.Quaternion();
-const _qProemPaiInv = new THREE.Quaternion();
-const _qProemMundoDesejado = new THREE.Quaternion();
-const _vProemOrigem = new THREE.Vector3();
-const _vProemUp = new THREE.Vector3();
-const _vProemCamera = new THREE.Vector3();
-const _vProemDireita = new THREE.Vector3();
-const _vProemFrente = new THREE.Vector3();
-const _m4Proem = new THREE.Matrix4();
-
 // Sprite circular suave compartilhado por estrelas e partículas dos cinturões
 // (sem ele, THREE.Points desenha quadrados sólidos)
 let _texturaPonto = null;
@@ -420,11 +408,8 @@ export class SistemaSolar3D {
       mesh = new THREE.Mesh(geometry, material);
       mesh.scale.set(escala.raio, escala.raio, escala.raio);
 
-      // Glow do Sol
+      // Glow do Sol (auréola + franja de línguas de plasma na borda)
       this._adicionarGlowSol(grupoOrbita, escala.raio);
-      // Proeminências (línguas de plasma na borda) — pedido do Fred em
-      // 07/09/2026 a partir de uma foto de referência.
-      this._adicionarProminenciasSol(mesh);
     } else {
       const textura = criarTexturaCanvas(corpo);
       const textureObj = new THREE.CanvasTexture(textura);
@@ -961,194 +946,98 @@ export class SistemaSolar3D {
     grupo.userData.rotuloSprite = sprite;
   }
 
-  // Proeminências solares: pequenas "línguas" de plasma na borda do Sol
-  // (pedido do Fred em 07/09/2026, a partir de uma foto de referência).
-  // Anexadas ao MESH do Sol (não ao grupoOrbita) de propósito: o mesh já
-  // recebe o spin diário do Sol por frame (_atualizarFisica, via
-  // periodoRotacaoHoras) e propaga a rotação pros filhos automaticamente —
-  // são parte da superfície, então devem girar junto, não ficar paradas
-  // feito um efeito de câmera. Posição e tamanho ficam em espaço LOCAL do
-  // mesh (esfera unitária, raio 1): o próprio escalonamento do mesh entre
-  // didática/real (setEscala) já multiplica tudo pelo raio real de novo,
-  // sem precisar recalcular nada aqui.
+  // Auréola + franja de proeminências do Sol — pedido do Fred em
+  // 07/09/2026, redesenhado a partir de uma 2ª foto de referência: uma
+  // auréola ESTREITA e intensa grudada na borda (não o halo grande e suave
+  // de antes) e uma franja DENSA de línguas finas ao redor de TODO o
+  // disco, não só umas poucas.
   //
-  // Cada proeminência é 1 plano com BILLBOARD AXIAL: sua base fica presa
-  // num ponto fixo da esfera e seu eixo de crescimento (base→ponta) fica
-  // fixo apontando pra fora dali, mas a ORIENTAÇÃO em torno desse eixo é
-  // recalculada por frame (_atualizarProminencias) pra sempre virar a
-  // maior largura possível pra câmera — como um letreiro que gira só num
-  // eixo, não como um THREE.Sprite (que viraria de frente por inteiro e
-  // perderia a direção "pra fora da esfera"). Primeira tentativa usou 2
-  // planos CRUZADOS fixos (técnica comum em grama/árvores de jogos) — mas
-  // sem acompanhar a câmera, de quase qualquer ângulo de frente pro Sol os
-  // dois planos ficavam vistos de raspão ao mesmo tempo, virando um brilho
-  // em forma de estrela/cruz em vez de língua de fogo (achado pelo Fred).
-  _adicionarProminenciasSol(mesh) {
-    const canvasProm = document.createElement('canvas');
-    canvasProm.width = 64;
-    canvasProm.height = 128;
-    const ctx = canvasProm.getContext('2d');
-    // "Língua de fogo" como sequência de manchas radiais sobrepostas (não
-    // um polígono com contorno reto) — cada mancha já nasce com borda
-    // macia (gradiente radial), então a silhueta inteira fica orgânica em
-    // vez de parecer uma vela/triângulo com aresta viva. Maior e mais
-    // branca/quente na base (y=128, ancorada na esfera), menor e mais
-    // avermelhada/transparente perto da ponta (y=0), com um leve
-    // serpenteio horizontal aleatório pro caminho não ficar reto demais.
-    ctx.globalCompositeOperation = 'lighter';
-    const MANCHAS = 7;
-    let x = 32;
-    for (let i = 0; i < MANCHAS; i++) {
-      const t = i / (MANCHAS - 1); // 0 = base, 1 = ponta
-      const y = 124 - t * 118;
-      x += (Math.random() - 0.5) * 6 * t;
-      const raio = 24 - t * 17;
-      const alpha = 0.85 - t * 0.7;
-      const g = ctx.createRadialGradient(x, y, 0, x, y, raio);
-      g.addColorStop(0, `rgba(255, ${Math.round(235 - t * 110)}, ${Math.round(150 - t * 130)}, ${alpha.toFixed(3)})`);
-      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(x, y, raio, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    const texture = new THREE.CanvasTexture(canvasProm);
-    // Mesma causa das outras texturas de canvas com alpha baixo no Sol (ver
-    // texturaPontoCircular/_adicionarGlowSol): sem isto, o mesmo confete
-    // colorido reapareceria aqui.
-    texture.premultiplyAlpha = true;
-
-    // Geometria e material COMPARTILHADOS entre todas as proeminências —
-    // só a transformação (posição/rotação/escala) muda por instância.
-    const geometria = new THREE.PlaneGeometry(1, 1);
-    geometria.translate(0, 0.5, 0); // base em y=0 (ancorada na esfera), ponta em y=1
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-      premultipliedAlpha: true,
-    });
-
-    this._proeminenciasSolMesh = mesh;
-    this._proeminencias = [];
-
-    const NUM_PROEMINENCIAS = 8;
-    for (let i = 0; i < NUM_PROEMINENCIAS; i++) {
-      const longitude = Math.random() * Math.PI * 2;
-      // Latitude enviesada pro entorno do equador (soma de 2 randoms puxa
-      // a distribuição pro meio em vez de uniforme) — prominências reais
-      // se concentram nas zonas ativas de latitude média, não nos polos.
-      const latitude = ((Math.random() + Math.random()) / 2 - 0.5) * Math.PI * 0.75;
-      const direcao = new THREE.Vector3(
-        Math.cos(latitude) * Math.cos(longitude),
-        Math.sin(latitude),
-        Math.cos(latitude) * Math.sin(longitude)
-      );
-
-      const largura = 0.12 + Math.random() * 0.1;
-      const altura = 0.18 + Math.random() * 0.22;
-
-      const plano = new THREE.Mesh(geometria, material);
-      plano.position.copy(direcao); // esfera unitária: direção = posição na superfície
-      plano.scale.set(largura, altura, 1);
-      // Eixo de crescimento fixo (não muda por frame — só a rotação em
-      // torno dele, calculada em _atualizarProminencias).
-      plano.userData.direcaoLocal = direcao.clone();
-      mesh.add(plano);
-      this._proeminencias.push(plano);
-    }
-  }
-
-  // Gira cada proeminência em torno do próprio eixo de crescimento (fixo,
-  // preso na esfera) pra sempre apresentar a maior largura possível pra
-  // câmera — "billboard axial" (como um letreiro que só gira num eixo),
-  // diferente de um THREE.Sprite (que viraria de frente por inteiro).
-  // Chamado a cada frame em _loop(), junto com _atualizarRotulos().
-  _atualizarProminencias() {
-    const lista = this._proeminencias;
-    if (!lista || !lista.length) return;
-    const mesh = this._proeminenciasSolMesh;
-    mesh.getWorldQuaternion(_qProemMundo);
-    _qProemPaiInv.copy(_qProemMundo).invert();
-
-    for (const plano of lista) {
-      plano.getWorldPosition(_vProemOrigem);
-      _vProemUp.copy(plano.userData.direcaoLocal).applyQuaternion(_qProemMundo).normalize();
-      _vProemCamera.copy(this.camera.position).sub(_vProemOrigem).normalize();
-      _vProemDireita.crossVectors(_vProemUp, _vProemCamera);
-      // Câmera quase alinhada com o próprio eixo da proeminência (olhando
-      // direto pra ponta) — caso raro e só afeta 1 proeminência por vez;
-      // mantém a última orientação válida em vez de girar aleatoriamente.
-      if (_vProemDireita.lengthSq() < 1e-6) continue;
-      _vProemDireita.normalize();
-      _vProemFrente.crossVectors(_vProemDireita, _vProemUp).normalize();
-      _m4Proem.makeBasis(_vProemDireita, _vProemUp, _vProemFrente);
-      _qProemMundoDesejado.setFromRotationMatrix(_m4Proem);
-      plano.quaternion.copy(_qProemPaiInv).multiply(_qProemMundoDesejado);
-    }
-  }
-
+  // As duas rodadas anteriores desta sessão tentaram as línguas como
+  // objetos 3D presos na esfera (planos cruzados, depois billboard axial
+  // por proeminência) — funcionava, mas só mostrava as poucas que
+  // calhavam de estar no lado voltado pra câmera num dado momento; a
+  // referência do Fred mostra a franja cobrindo o contorno visível
+  // INTEIRO, de qualquer ângulo, o tempo todo. Isso é exatamente o que um
+  // sprite de frente-pra-câmera já faz de graça (é como o glow sempre
+  // funcionou) — então a franja inteira agora é pintada numa ÚNICA textura
+  // 2D, no mesmo sprite da auréola, em vez de geometria 3D por proeminência.
+  // Mais simples E mais fiel à referência ao mesmo tempo.
   _adicionarGlowSol(grupo, raioSol) {
-    // TESTE a pedido do Fred em 07/09/2026: gradiente EXPONENCIAL puro, no
-    // lugar da soma das duas camadas originais + suavização (versão
-    // anterior, seguia comprovadamente boa — este bloco fica fácil de
-    // reverter via git caso o resultado não agrade). alpha(t) = PICO *
-    // exp(-t/DECAIMENTO): decai suave em toda parte por construção (sem
-    // precisar de médias móveis nem envelopes pra tirar quebras de
-    // inclinação), mais concentrado perto do disco do Sol e dissipando
-    // rápido pra fora — "mais transparente na borda, mais acentuado perto
-    // do centro". Ainda assim, uma exponencial nunca chega a ZERO de
-    // verdade (só se aproxima) — sem cortar essa cauda ela deixaria o mesmo
-    // resíduo nos 4 cantos do canvas que já virou um quadrado visível numa
-    // rodada anterior, então o mesmo envelope smootherstep (derivada zero
-    // nos dois extremos, não introduz degrau novo) força a cauda a alpha 0
-    // exato antes da borda do sprite.
-    function corCamada(t) {
-      if (t <= 0.35) {
-        const f = t / 0.35;
-        return [255, 255 + (200 - 255) * f, 255 + (0 - 255) * f];
-      }
-      const f = Math.min(1, (t - 0.35) / 0.4);
-      return [255, 200 + (100 - 200) * f, 0];
-    }
-
-    const ALCANCE = 7; // raios do Sol — igual ao sprite de antes
-    const N = 96;
-    const PICO = 2.45;
-    const DECAIMENTO = 0.2;
-    const T0 = 0.75; // a partir daqui começa a forçar a cauda a zero
-    const bruto = [];
-    for (let i = 0; i <= N; i++) {
-      const t = i / N;
-      bruto.push(Math.min(1, PICO * Math.exp(-t / DECAIMENTO)));
-    }
-    for (let i = 0; i <= N; i++) {
-      const t = i / N;
-      if (t > T0) {
-        const u = (t - T0) / (1 - T0);
-        const smootherstep = u * u * u * (u * (u * 6 - 15) + 10);
-        bruto[i] *= (1 - smootherstep);
-      }
-    }
-    bruto[N] = 0; // exato, sem depender só do envelope (arredondamento de ponto flutuante)
+    const TAMANHO_CANVAS = 256;
+    // Sprite ocupa raioSol × FATOR_ESCALA — bem mais contido que o halo
+    // anterior (que ia a 7× o raio); a referência mostra uma auréola presa
+    // à borda, não um halo grande espalhado pela cena.
+    const FATOR_ESCALA = 2.6;
+    const cx = TAMANHO_CANVAS / 2;
+    const cy = TAMANHO_CANVAS / 2;
+    // Raio, em pixels do canvas, onde fica a borda do disco do Sol (o
+    // próprio mesh esférico cobre tudo daqui pra dentro — só importa o
+    // desenho a partir daqui pra fora). Um Sprite mapeia UV [0,1] pro
+    // range de mundo [-escala/2, +escala/2] — então 1px de canvas equivale
+    // a (escala/TAMANHO_CANVAS) unidades de mundo, e o raio em pixels que
+    // corresponde a raioSol é TAMANHO_CANVAS/FATOR_ESCALA (não
+    // cx/FATOR_ESCALA — essa versão errada, testada e descartada, desenhava
+    // o anel inteiro e a franja DENTRO do raio do disco, escondidos atrás
+    // da esfera opaca; o Sol ficava sem nenhum efeito visível).
+    const raioBase = TAMANHO_CANVAS / FATOR_ESCALA;
 
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = TAMANHO_CANVAS;
+    canvas.height = TAMANHO_CANVAS;
     const ctx = canvas.getContext('2d');
-    const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    for (let i = 0; i <= N; i++) {
-      const t = i / N;
-      const [r, g, b] = corCamada(t);
-      const alpha = bruto[i];
-      grad.addColorStop(t, `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha.toFixed(3)})`);
-    }
+    ctx.globalCompositeOperation = 'lighter';
 
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 1) Auréola estreita: um aro QUENTE bem fino colado na borda (0,9 a
+    // 1,08× raioBase), não os 1,25× de uma tentativa anterior — aquela
+    // largura fazia o aro ainda estar perto do pico de brilho bem depois
+    // da borda do disco, e a franja (item 2) nascia DENTRO dessa zona já
+    // clara: aditivo sobre algo já muito claro não gera contraste
+    // nenhum, então os filamentos ficavam invisíveis de perto (achado
+    // testando com zoom). Com o aro mais estreito, ele já caiu quase a
+    // zero bem antes de onde os filamentos se estendem — a maior parte do
+    // comprimento deles fica contra o espaço escuro, com contraste de
+    // verdade.
+    const anel = ctx.createRadialGradient(cx, cy, raioBase * 0.9, cx, cy, raioBase * 1.08);
+    anel.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    anel.addColorStop(0.56, 'rgba(255, 240, 190, 0.9)'); // ~raioBase (borda do disco)
+    anel.addColorStop(1, 'rgba(255, 150, 60, 0)');
+    ctx.fillStyle = anel;
+    ctx.beginPath();
+    ctx.arc(cx, cy, raioBase * 1.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2) Franja de línguas finas cobrindo TODO o contorno — cada uma é uma
+    // sequência de manchas radiais encolhendo (borda macia por natureza,
+    // sem contorno vetorial reto), partindo de perto da borda do disco e
+    // serpenteando pra fora com leve curvatura aleatória. A maioria curta
+    // (random×random enviesa pro lado baixo), poucas mais longas — igual
+    // numa foto real, onde a franja é predominantemente rasa com alguns
+    // picos maiores se destacando. Alcance máximo (0,97+0,29=1,26×raioBase)
+    // fica dentro do mesmo limite de 1,3× do item 1.
+    const NUM_FILAMENTOS = 90;
+    for (let i = 0; i < NUM_FILAMENTOS; i++) {
+      const theta = (i / NUM_FILAMENTOS) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
+      const comprimento = raioBase * (0.03 + Math.random() * Math.random() * 0.26);
+      const curvatura = (Math.random() - 0.5) * 0.35;
+      const espessura = 1.6 + Math.random() * 2.2;
+      const PASSOS = 6;
+      for (let p = 0; p <= PASSOS; p++) {
+        const t = p / PASSOS; // 0 = junto à borda, 1 = ponta
+        const r = raioBase * 0.97 + comprimento * t;
+        const ang = theta + curvatura * t * t;
+        const x = cx + Math.cos(ang) * r;
+        const y = cy + Math.sin(ang) * r;
+        const raioMancha = (1 - t) * espessura + 0.5;
+        const alpha = (1 - t) * 0.8;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, raioMancha);
+        g.addColorStop(0, `rgba(255, ${Math.round(230 - t * 110)}, ${Math.round(150 - t * 130)}, ${alpha.toFixed(3)})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x, y, raioMancha, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
 
     const texture = new THREE.CanvasTexture(canvas);
     // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
@@ -1165,7 +1054,7 @@ export class SistemaSolar3D {
     });
 
     const sprite = new THREE.Sprite(material);
-    const escala = raioSol * ALCANCE;
+    const escala = raioSol * FATOR_ESCALA;
     sprite.scale.set(escala, escala, 1);
 
     grupo.add(sprite);
@@ -2160,7 +2049,6 @@ export class SistemaSolar3D {
 
       this.controls.update();
       this._atualizarRotulos();
-      this._atualizarProminencias();
       this.renderer.render(this.scene, this.camera);
     };
 
