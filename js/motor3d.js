@@ -11,6 +11,18 @@ const _EIXO_X = new THREE.Vector3(1, 0, 0);
 const _EIXO_Y = new THREE.Vector3(0, 1, 0);
 const _qSpinTmp = new THREE.Quaternion();
 
+// Temporários de módulo para o billboard axial das proeminências do Sol —
+// recalculado por frame em _atualizarProminencias (evita alocação por frame).
+const _qProemMundo = new THREE.Quaternion();
+const _qProemPaiInv = new THREE.Quaternion();
+const _qProemMundoDesejado = new THREE.Quaternion();
+const _vProemOrigem = new THREE.Vector3();
+const _vProemUp = new THREE.Vector3();
+const _vProemCamera = new THREE.Vector3();
+const _vProemDireita = new THREE.Vector3();
+const _vProemFrente = new THREE.Vector3();
+const _m4Proem = new THREE.Matrix4();
+
 // Sprite circular suave compartilhado por estrelas e partículas dos cinturões
 // (sem ele, THREE.Points desenha quadrados sólidos)
 let _texturaPonto = null;
@@ -410,6 +422,9 @@ export class SistemaSolar3D {
 
       // Glow do Sol
       this._adicionarGlowSol(grupoOrbita, escala.raio);
+      // Proeminências (línguas de plasma na borda) — pedido do Fred em
+      // 07/09/2026 a partir de uma foto de referência.
+      this._adicionarProminenciasSol(mesh);
     } else {
       const textura = criarTexturaCanvas(corpo);
       const textureObj = new THREE.CanvasTexture(textura);
@@ -944,6 +959,136 @@ export class SistemaSolar3D {
 
     grupo.add(sprite);
     grupo.userData.rotuloSprite = sprite;
+  }
+
+  // Proeminências solares: pequenas "línguas" de plasma na borda do Sol
+  // (pedido do Fred em 07/09/2026, a partir de uma foto de referência).
+  // Anexadas ao MESH do Sol (não ao grupoOrbita) de propósito: o mesh já
+  // recebe o spin diário do Sol por frame (_atualizarFisica, via
+  // periodoRotacaoHoras) e propaga a rotação pros filhos automaticamente —
+  // são parte da superfície, então devem girar junto, não ficar paradas
+  // feito um efeito de câmera. Posição e tamanho ficam em espaço LOCAL do
+  // mesh (esfera unitária, raio 1): o próprio escalonamento do mesh entre
+  // didática/real (setEscala) já multiplica tudo pelo raio real de novo,
+  // sem precisar recalcular nada aqui.
+  //
+  // Cada proeminência é 1 plano com BILLBOARD AXIAL: sua base fica presa
+  // num ponto fixo da esfera e seu eixo de crescimento (base→ponta) fica
+  // fixo apontando pra fora dali, mas a ORIENTAÇÃO em torno desse eixo é
+  // recalculada por frame (_atualizarProminencias) pra sempre virar a
+  // maior largura possível pra câmera — como um letreiro que gira só num
+  // eixo, não como um THREE.Sprite (que viraria de frente por inteiro e
+  // perderia a direção "pra fora da esfera"). Primeira tentativa usou 2
+  // planos CRUZADOS fixos (técnica comum em grama/árvores de jogos) — mas
+  // sem acompanhar a câmera, de quase qualquer ângulo de frente pro Sol os
+  // dois planos ficavam vistos de raspão ao mesmo tempo, virando um brilho
+  // em forma de estrela/cruz em vez de língua de fogo (achado pelo Fred).
+  _adicionarProminenciasSol(mesh) {
+    const canvasProm = document.createElement('canvas');
+    canvasProm.width = 64;
+    canvasProm.height = 128;
+    const ctx = canvasProm.getContext('2d');
+    // "Língua de fogo" como sequência de manchas radiais sobrepostas (não
+    // um polígono com contorno reto) — cada mancha já nasce com borda
+    // macia (gradiente radial), então a silhueta inteira fica orgânica em
+    // vez de parecer uma vela/triângulo com aresta viva. Maior e mais
+    // branca/quente na base (y=128, ancorada na esfera), menor e mais
+    // avermelhada/transparente perto da ponta (y=0), com um leve
+    // serpenteio horizontal aleatório pro caminho não ficar reto demais.
+    ctx.globalCompositeOperation = 'lighter';
+    const MANCHAS = 7;
+    let x = 32;
+    for (let i = 0; i < MANCHAS; i++) {
+      const t = i / (MANCHAS - 1); // 0 = base, 1 = ponta
+      const y = 124 - t * 118;
+      x += (Math.random() - 0.5) * 6 * t;
+      const raio = 24 - t * 17;
+      const alpha = 0.85 - t * 0.7;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, raio);
+      g.addColorStop(0, `rgba(255, ${Math.round(235 - t * 110)}, ${Math.round(150 - t * 130)}, ${alpha.toFixed(3)})`);
+      g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, raio, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const texture = new THREE.CanvasTexture(canvasProm);
+    // Mesma causa das outras texturas de canvas com alpha baixo no Sol (ver
+    // texturaPontoCircular/_adicionarGlowSol): sem isto, o mesmo confete
+    // colorido reapareceria aqui.
+    texture.premultiplyAlpha = true;
+
+    // Geometria e material COMPARTILHADOS entre todas as proeminências —
+    // só a transformação (posição/rotação/escala) muda por instância.
+    const geometria = new THREE.PlaneGeometry(1, 1);
+    geometria.translate(0, 0.5, 0); // base em y=0 (ancorada na esfera), ponta em y=1
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      premultipliedAlpha: true,
+    });
+
+    this._proeminenciasSolMesh = mesh;
+    this._proeminencias = [];
+
+    const NUM_PROEMINENCIAS = 8;
+    for (let i = 0; i < NUM_PROEMINENCIAS; i++) {
+      const longitude = Math.random() * Math.PI * 2;
+      // Latitude enviesada pro entorno do equador (soma de 2 randoms puxa
+      // a distribuição pro meio em vez de uniforme) — prominências reais
+      // se concentram nas zonas ativas de latitude média, não nos polos.
+      const latitude = ((Math.random() + Math.random()) / 2 - 0.5) * Math.PI * 0.75;
+      const direcao = new THREE.Vector3(
+        Math.cos(latitude) * Math.cos(longitude),
+        Math.sin(latitude),
+        Math.cos(latitude) * Math.sin(longitude)
+      );
+
+      const largura = 0.12 + Math.random() * 0.1;
+      const altura = 0.18 + Math.random() * 0.22;
+
+      const plano = new THREE.Mesh(geometria, material);
+      plano.position.copy(direcao); // esfera unitária: direção = posição na superfície
+      plano.scale.set(largura, altura, 1);
+      // Eixo de crescimento fixo (não muda por frame — só a rotação em
+      // torno dele, calculada em _atualizarProminencias).
+      plano.userData.direcaoLocal = direcao.clone();
+      mesh.add(plano);
+      this._proeminencias.push(plano);
+    }
+  }
+
+  // Gira cada proeminência em torno do próprio eixo de crescimento (fixo,
+  // preso na esfera) pra sempre apresentar a maior largura possível pra
+  // câmera — "billboard axial" (como um letreiro que só gira num eixo),
+  // diferente de um THREE.Sprite (que viraria de frente por inteiro).
+  // Chamado a cada frame em _loop(), junto com _atualizarRotulos().
+  _atualizarProminencias() {
+    const lista = this._proeminencias;
+    if (!lista || !lista.length) return;
+    const mesh = this._proeminenciasSolMesh;
+    mesh.getWorldQuaternion(_qProemMundo);
+    _qProemPaiInv.copy(_qProemMundo).invert();
+
+    for (const plano of lista) {
+      plano.getWorldPosition(_vProemOrigem);
+      _vProemUp.copy(plano.userData.direcaoLocal).applyQuaternion(_qProemMundo).normalize();
+      _vProemCamera.copy(this.camera.position).sub(_vProemOrigem).normalize();
+      _vProemDireita.crossVectors(_vProemUp, _vProemCamera);
+      // Câmera quase alinhada com o próprio eixo da proeminência (olhando
+      // direto pra ponta) — caso raro e só afeta 1 proeminência por vez;
+      // mantém a última orientação válida em vez de girar aleatoriamente.
+      if (_vProemDireita.lengthSq() < 1e-6) continue;
+      _vProemDireita.normalize();
+      _vProemFrente.crossVectors(_vProemDireita, _vProemUp).normalize();
+      _m4Proem.makeBasis(_vProemDireita, _vProemUp, _vProemFrente);
+      _qProemMundoDesejado.setFromRotationMatrix(_m4Proem);
+      plano.quaternion.copy(_qProemPaiInv).multiply(_qProemMundoDesejado);
+    }
   }
 
   _adicionarGlowSol(grupo, raioSol) {
@@ -2015,6 +2160,7 @@ export class SistemaSolar3D {
 
       this.controls.update();
       this._atualizarRotulos();
+      this._atualizarProminencias();
       this.renderer.render(this.scene, this.camera);
     };
 
