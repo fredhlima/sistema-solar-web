@@ -1008,7 +1008,25 @@ export class SistemaSolar3D {
       for (let k = -JANELA; k <= JANELA; k++) soma += bruto[i + JANELA + k];
       suave.push(soma / (2 * JANELA + 1));
     }
-    suave[N] = 0; // garante alpha exatamente 0 na borda do sprite, sem depender de a média convergir sozinha
+    // Dissipa a extremidade externa (pedido do Fred em 07/09/2026): mesmo
+    // com a última parada em alpha 0 (fix anterior), a queda até lá ainda
+    // era relativamente rápida/linear — lia como uma borda definida, não
+    // como fumaça se desfazendo. Um envelope smootherstep (Ken Perlin — tem
+    // 1ª E 2ª derivada zero nos dois extremos) estica essa queda por uma
+    // fatia maior do raio: começa a agir em T0 sem criar um novo degrau ali
+    // (derivada zero na entrada) e chega a zero em t=1 sem parada abrupta
+    // (derivada zero na saída também). Só afeta a parte de fora — o corpo
+    // do brilho (t < T0) fica exatamente como estava.
+    const T0 = 0.6;
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      if (t > T0) {
+        const u = (t - T0) / (1 - T0);
+        const smootherstep = u * u * u * (u * (u * 6 - 15) + 10);
+        suave[i] *= (1 - smootherstep);
+      }
+    }
+    suave[N] = 0; // exato, sem depender só do envelope (arredondamento de ponto flutuante)
 
     const canvas = document.createElement('canvas');
     canvas.width = 128;
