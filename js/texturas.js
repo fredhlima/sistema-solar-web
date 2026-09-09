@@ -30,6 +30,22 @@ function misturarCores(a, b, t) {
 }
 
 /**
+ * Hash inteiro 2D sem colisão óbvia, pra gerar o ângulo do gradiente de
+ * cada canto da célula do Perlin (09/09/2026 — ver nota em perlinNoise
+ * logo abaixo sobre o bug que isso substitui). `ix*73 + iy*97` colidia
+ * (ex.: (10,5) e (107,-68) davam a mesma chave 1215) e produzia o mesmo
+ * gradiente em cantos bem diferentes da grade. Aqui multiplicamos cada
+ * eixo (e a seed) por primos grandes distintos (constantes usuais de hash
+ * tipo "squirrel noise"), embaralhamos os bits com XOR-shift e só então
+ * reduzimos pra [0,1) — não é criptográfico, só precisa espalhar bem.
+ */
+function hash2(ix, iy, seed) {
+  let h = Math.imul(ix | 0, 374761393) + Math.imul(iy | 0, 668265263) + Math.imul(seed | 0, 1274126177);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+
+/**
  * Ruído Perlin simplificado (interpolação + gradiente).
  */
 function perlinNoise(x, y, seed) {
@@ -42,15 +58,28 @@ function perlinNoise(x, y, seed) {
   const u = fade(xf);
   const v = fade(yf);
 
-  const grad = (ix, iy) => {
-    const angle = seededRandom(seed, ix * 73 + iy * 97) * Math.PI * 2;
-    return Math.cos(angle) * (xf - (ix & 1)) + Math.sin(angle) * (yf - (iy & 1));
+  // BUG (encontrado e corrigido em 09/09/2026): a versão anterior usava
+  // `ix & 1` — a paridade da coordenada ABSOLUTA da célula — como se fosse
+  // o deslocamento do canto (0 ou 1) dentro da célula atual. As duas coisas
+  // só coincidem quando xi é par; em células de índice ímpar o deslocamento
+  // saía trocado e o vetor gradiente invertia de sinal, criando uma
+  // descontinuidade EXATA na fronteira da célula — visível como aresta reta
+  // alinhada aos eixos (os "retângulos" na textura do núcleo dos cometas).
+  // A prova numérica: Perlin de verdade vale 0 em todo ponto inteiro da
+  // grade (dx e dy = 0, gradiente irrelevante); a versão com bug só zerava
+  // quando as DUAS coordenadas eram pares. Correção: passar explicitamente
+  // o deslocamento do canto (0 para o canto "esquerdo/inferior", 1 para o
+  // "direito/superior" da célula, não a paridade do índice absoluto) e
+  // trocar o hash colidente por `hash2` (ver acima).
+  const grad = (ix, iy, dx, dy) => {
+    const angle = hash2(ix, iy, seed) * Math.PI * 2;
+    return Math.cos(angle) * (xf - dx) + Math.sin(angle) * (yf - dy);
   };
 
-  const g00 = grad(xi, yi);
-  const g10 = grad(xi + 1, yi);
-  const g01 = grad(xi, yi + 1);
-  const g11 = grad(xi + 1, yi + 1);
+  const g00 = grad(xi, yi, 0, 0);
+  const g10 = grad(xi + 1, yi, 1, 0);
+  const g01 = grad(xi, yi + 1, 0, 1);
+  const g11 = grad(xi + 1, yi + 1, 1, 1);
 
   const nx0 = g00 * (1 - u) + g10 * u;
   const nx1 = g01 * (1 - u) + g11 * u;
@@ -504,33 +533,86 @@ function criarTexturaNevoa(canvas, ctx, corpo, seed) {
 function criarTexturaCometa(canvas, ctx, corpo, seed) {
   const w = canvas.width;
   const h = canvas.height;
-  const cores = corpo.aparencia.cores || ['#8b7355', '#a0907d', '#e8d8d0'];
+  // Fallback também escuro (08/09/2026, SPEC-cometas.md) — cores reais de
+  // cada cometa vêm de dados.js; ver nota lá sobre albedo ~0,04 do Halley.
+  const cores = corpo.aparencia.cores || ['#171310', '#0b0908', '#7d6f5a'];
+  const corBase = hexParaRgb(cores[0]);
+  const corRocha = hexParaRgb(cores[1] || cores[0]);
+  const corGelo = hexParaRgb(cores[2] || cores[0]);
 
-  ctx.fillStyle = cores[0];
-  ctx.fillRect(0, 0, w, h);
+  // Manchas de gelo/rocha por ruído, pixel a pixel via ImageData (era em
+  // blocos de 4px com limiar duro — 08/09/2026, SPEC-cometas.md round 2:
+  // com o núcleo ocupando boa parte da tela os blocos ficavam retângulos
+  // contáveis). Duas oitavas (larga = manchas, fina = quebra a borda das
+  // manchas) e transição por INTERPOLAÇÃO de cor conforme o ruído (não
+  // limiar/escolha entre 3 cores fixas), então não sobra aresta reta em
+  // lugar nenhum — nem de bloco, nem de limiar.
+  const imgData = ctx.createImageData(w, h);
+  const data = imgData.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const nLarga = perlinNoise(x / 70, y / 70, seed);
+      const nFina = perlinNoise(x / 17, y / 17, seed + 811);
+      const n = nLarga * 0.75 + nFina * 0.25;
 
-  const bloco = 4;
-  for (let y = 0; y < h; y += bloco) {
-    for (let x = 0; x < w; x += bloco) {
-      const n = perlinNoise(x / 70, y / 70, seed);
-      if (n > 0.25) {
-        ctx.fillStyle = cores[2] || cores[0]; // geada/gelo exposto
-      } else if (n < -0.2) {
-        ctx.fillStyle = cores[1] || cores[0]; // rocha mais escura
+      // t² (não t linear) mantém a mistura concentrada perto das bordas
+      // das manchas e a base quase pura no meio de cada mancha/vale —
+      // suave, mas sem lavar o contraste que o albedo baixo do Halley
+      // precisa (ver dados.js).
+      //
+      // GELO (09/09/2026): o ruído (soma de duas oitavas) é aproximadamente
+      // simétrico em torno de zero, então "n >= 0" sozinho já cobre ~metade
+      // da superfície — misturando gelo em ~metade dos pixels o núcleo
+      // inteiro ficava bege/acinzentado, não o carvão quase preto que o
+      // albedo ~0,04 do Halley pede (dados.js). LIMIAR_GELO empurra o
+      // início da mistura pra bem acima de zero, então só as CRISTAS mais
+      // altas do ruído (não metade da área) puxam pro gelo; abaixo do
+      // limiar fica base pura. LIMIAR_GELO e TOPO_GELO foram calibrados
+      // por amostragem pixel a pixel da textura completa do Halley
+      // (1024×512) pra deixar ~15% da área "mais perto do gelo que da
+      // base" (dentro da faixa-alvo de 10–20%, medida via distância de
+      // cor) — não são arbitrários, mexer neles muda a cobertura medida.
+      let cor;
+      if (n >= 0) {
+        const LIMIAR_GELO = 0.02;
+        const TOPO_GELO = 0.22;
+        if (n > LIMIAR_GELO) {
+          const t = Math.min(1, (n - LIMIAR_GELO) / (TOPO_GELO - LIMIAR_GELO));
+          cor = misturarCores(corBase, corGelo, t * t);
+        } else {
+          cor = corBase;
+        }
       } else {
-        continue;
+        const t = Math.min(1, -n / 0.3);
+        cor = misturarCores(corBase, corRocha, t * t);
       }
-      ctx.fillRect(x, y, bloco, bloco);
+
+      const idx = (y * w + x) * 4;
+      data[idx] = cor.r;
+      data[idx + 1] = cor.g;
+      data[idx + 2] = cor.b;
+      data[idx + 3] = 255;
     }
   }
+  ctx.putImageData(imgData, 0, 0);
 
+  // Crateras: sobre uma base quase preta, uma mancha só escura (versão
+  // antiga) some — some contraste como sombra + um filete de rebordo um
+  // pouco mais claro (relevo raspado por luz lateral), pra continuar
+  // visível mesmo no núcleo quase carvão.
   const numCrateras = 25;
   for (let i = 0; i < numCrateras; i++) {
     const cx = seededRandom(seed, i * 2) * w;
     const cy = seededRandom(seed, i * 2 + 1) * h;
     const raio = seededRandom(seed, i * 3) * 14 + 3;
 
-    ctx.fillStyle = 'rgba(15, 12, 10, 0.5)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, raio * 1.15, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(150, 135, 115, 0.16)';
+    ctx.lineWidth = Math.max(1, raio * 0.18);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
     ctx.beginPath();
     ctx.arc(cx, cy, raio, 0, Math.PI * 2);
     ctx.fill();

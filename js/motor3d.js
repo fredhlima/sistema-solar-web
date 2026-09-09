@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { criarTexturaCanvas, criarTexturaAneis } from './texturas.js?v=4';
+import { criarTexturaCanvas, criarTexturaAneis } from './texturas.js?v=7';
 
 const J2000_EPOCH = new Date('2000-01-01T12:00:00Z').getTime();
 const UA_KM = 149.6e6;
@@ -10,6 +10,24 @@ const UA_KM = 149.6e6;
 const _EIXO_X = new THREE.Vector3(1, 0, 0);
 const _EIXO_Y = new THREE.Vector3(0, 1, 0);
 const _qSpinTmp = new THREE.Quaternion();
+
+// Temporários de módulo para o billboard axial da cauda dos cometas (evita
+// alocação por cometa por quadro — ver _atualizarFisica, "Atualizar cauda
+// do cometa").
+const _vCaudaPos = new THREE.Vector3();
+const _vCaudaEixoA = new THREE.Vector3();
+const _vCaudaV = new THREE.Vector3();
+const _vCaudaLado = new THREE.Vector3();
+const _vCaudaNormal = new THREE.Vector3();
+const _mCaudaBasis = new THREE.Matrix4();
+
+// Hash pseudo-aleatório determinístico (mesma fórmula de seededRandom em
+// texturas.js) — usado para as protuberâncias do núcleo do cometa, um fluxo
+// separado do usado na textura, mas com a mesma semente por corpo.
+function _hashSeed(seed, index) {
+  const s = (seed + index) * 73856093 ^ (seed + index + 1) * 19349663;
+  return ((s ^ (s >> 15)) & 0xffffff) / 0xffffff;
+}
 
 // Sprite circular suave compartilhado por estrelas e partículas dos cinturões
 // (sem ele, THREE.Points desenha quadrados sólidos)
@@ -516,7 +534,12 @@ export class SistemaSolar3D {
     grupoOrbita.position.copy(posicao);
     grupoOrbita.userData.corpo = corpo;
 
-    const geometry = new THREE.SphereGeometry(1, 32, 16);
+    // Núcleo: esfera-base deformada em "batata" irregular + alongada num
+    // eixo (ver _criarGeometriaNucleoCometa) — núcleos reais de cometa não
+    // são esféricos. NÃO mexe na hitbox (mais abaixo): continua a esfera
+    // simples, o cometa tem que continuar clicável nas pontas também.
+    const seed = corpo.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const geometry = this._criarGeometriaNucleoCometa(corpo, seed);
     const material = new THREE.MeshStandardMaterial({
       map: textureObj,
       roughness: 1,
@@ -525,24 +548,59 @@ export class SistemaSolar3D {
     mesh.scale.set(escala.raio, escala.raio, escala.raio);
     grupoOrbita.add(mesh);
 
+    // Maior raio local do núcleo deformado (clamp 0,82–1,18× alongamento,
+    // ver _criarGeometriaNucleoCometa) — usado só como PISO VISUAL da
+    // cauda/coma no quadro (ver _atualizarFisica): perto do piso de 0,15
+    // (SPEC-cometas.md §3), a cauda/coma ficam menores que o próprio
+    // núcleo e o teste de oclusão de profundidade as esconde inteiras
+    // atrás dele (achado ao testar com o Halley "hoje" a ~35 UA, olhando
+    // quase de ponta pro eixo anti-solar — a cauda "some" mesmo com escala
+    // > 0). O piso garante que nunca ficam menores que o núcleo, sem mudar
+    // o fator relatado por fatorCaudaCometa().
+    // Clamp de irregularidade em _criarGeometriaNucleoCometa é [0,62 · 1,05]
+    // (era 0,82–1,18) — o alongamento (X) e sua compensação de volume em Y/Z
+    // (c = 1/√alongamento, ver função) mudam qual eixo domina o raio máximo;
+    // pra alongamento ≥ 1 (todos os cometas cadastrados) o eixo X sempre
+    // vence (alongamento ≥ 1/√alongamento), mas o max() cobre o caso inverso
+    // sem precisar assumir isso.
+    const CLAMP_MAX_NUCLEO = 1.05;
+    const alongamentoNucleo = corpo.aparencia?.alongamento ?? 1.0;
+    const raioNucleoLocalMax =
+      CLAMP_MAX_NUCLEO * Math.max(alongamentoNucleo, 1 / Math.sqrt(alongamentoNucleo));
+
     // Coma: halo brilhante ao redor do núcleo (mesmo recurso do glow do Sol)
-    const corCauda = corpo.aparencia.cores?.[2] || '#e8d8d0';
+    const corComa = corpo.aparencia.cores?.[2] || '#7d6f5a';
     const tamanhoComa = escala.raio * 6;
-    const coma = this._criarSpriteGlowColorido(corCauda, tamanhoComa);
+    const coma = this._criarSpriteGlowColorido(corComa, tamanhoComa);
     grupoOrbita.add(coma);
 
-    // Cauda: sempre aponta para longe do Sol (atualizada por quadro).
-    // Duas camadas (núcleo denso + halo largo e fraco) para dar profundidade.
-    // IMPORTANTE: a geometria do cone é transladada para que a BASE (lado
-    // largo) fique no núcleo (origem local) e o ÁPICE se estenda inteiro
-    // para fora; sem isso, o cone fica centralizado na origem e metade dele
-    // "vaza" para o lado voltado ao Sol — o defeito visual reportado.
+    // Cauda: dois PLANOS com billboard axial (giram em torno do eixo
+    // anti-solar pra ficar de frente pra câmera — ver "Atualizar cauda do
+    // cometa" em _atualizarFisica), não cones. Cauda de íons (azulada,
+    // reta e estreita, a mais longa) + cauda de poeira (branco-amarelada,
+    // mais larga/em leque, ~60% do comprimento). Ambas aditivas — ver
+    // _criarCaudaPlano sobre a convenção obrigatória (premultiplyAlpha).
     const grupoCauda = new THREE.Group();
     const comprimentoCauda = escala.raio * 26;
-    grupoCauda.add(
-      this._criarConeCauda(escala.raio * 4.2, comprimentoCauda, corCauda, 0.14),
-      this._criarConeCauda(escala.raio * 1.8, comprimentoCauda * 0.65, corCauda, 0.26)
-    );
+    const caudaIons = this._criarCaudaPlano({
+      comprimento: comprimentoCauda,
+      largura: escala.raio * 2.6,
+      corRGB: [150, 195, 255],
+      picoAlonga: 0.06,
+      subidaRapida: 0.3,
+      descidaLenta: 1.7,
+      intensidade: 0.95,
+    });
+    const caudaPoeira = this._criarCaudaPlano({
+      comprimento: comprimentoCauda * 0.6,
+      largura: escala.raio * 7.5,
+      corRGB: [255, 240, 205],
+      picoAlonga: 0.48,
+      subidaRapida: 0.6,
+      descidaLenta: 1.05,
+      intensidade: 0.5,
+    });
+    grupoCauda.add(caudaIons, caudaPoeira);
     grupoCauda.userData.ehCauda = true;
     grupoOrbita.add(grupoCauda);
     const cauda = grupoCauda;
@@ -564,10 +622,98 @@ export class SistemaSolar3D {
       cauda,
       coma,
       tamanhoComa, // escala do sprite é ABSOLUTA — guardar a base p/ setEscala
+      comprimentoCaudaBase: comprimentoCauda, // comprimento (mundo) da cauda de íons ANTES do fator de escala/distância — piso visual (ver _atualizarFisica)
+      raioNucleoLocalMax, // maior raio LOCAL do núcleo deformado — idem
+      fatorCaudaBase: 1, // fator da troca de escala didática/real (ver setEscala) — composto com o fator de distância ao Sol por quadro
       corpo,
       escala,
       periodoRotacao: corpo.periodoRotacaoHoras || 24,
     });
+  }
+
+  // Deforma uma SphereGeometry(1) em "batata" irregular: soma de
+  // protuberâncias suaves (cosseno, não ruído de alta frequência — dá
+  // silhueta de batata em vez de superfície spiky) em direções
+  // pseudo-aleatórias determinísticas pela seed, mais alongamento num eixo
+  // (corpo.aparencia.alongamento, padrão 1,0 = esfera se o corpo não tiver
+  // o campo).
+  //
+  // Correção 08/09/2026 (SPEC-cometas.md, "acabamento dos cometas" round 2):
+  // a versão anterior fazia só `v.x *= alongamento`, esticando X sem
+  // compensar Y/Z — o núcleo (não só a silhueta) inchava em volume junto
+  // com o alongamento (2× de volume pro Halley, alongamento 2,0). Agora o
+  // alongamento PRESERVA VOLUME: X estica por `alongamento`, Y e Z encolhem
+  // por `1/√alongamento` (produto dos três fatores = 1, então a proporção
+  // 2:1 aparece sem o corpo ficar maior que a esfera original).
+  //
+  // Clamp de irregularidade era 0,82–1,18× — largo e fraco demais, as 9
+  // protuberâncias se somavam num elipsoide liso (a silhueta em
+  // HALLEY-nucleo.png era perfeitamente lisa, sem relevo de batata). Agora:
+  // mais protuberâncias (16), mais estreitas e mais fortes, clamp
+  // 0,62–1,05×. Ainda smoothstep (não ruído de alta frequência), então a
+  // silhueta continua contínua/orgânica, sem picos pontudos nem vértices
+  // cruzando — só mais irregular. O clamp mais largo é o motivo de
+  // raioNucleoLocalMax (ver _criarCometa) também ter mudado.
+  //
+  // Números calibrados medindo (não só olhando): configs mais "abertas" (ex.
+  // 18 bumps/amp ±0,30/clamp 0,70–1,30, os números "de partida" do spec)
+  // batem folgado o critério de irregularidade, mas pra ESTA seed (hash de
+  // "halley") acabam com alguma protuberância caindo perto o bastante do
+  // eixo X alongado pra empurrar a ponta pra fora, mesmo com a compensação
+  // de volume acima — a maior extensão do núcleo saía maior que no commit
+  // anterior, o oposto do que o Defeito 1 pede. Com 16 bumps/amp ±0,30/
+  // clamp 0,62–1,05 a extensão fica ~0,5-0,8% MENOR que a anterior (duas
+  // métricas: maior eixo e maior distância par-a-par na superfície) e a
+  // irregularidade continua folgada acima da meta de 6%/12% (medido com
+  // elipse ajustada por momentos sobre uma fatia equatorial analítica, não
+  // a malha renderizada, que teria ruído de quantização — ver relatório da
+  // tarefa pros números completos).
+  _criarGeometriaNucleoCometa(corpo, seed) {
+    // 48×24 (era 32×16): a esfera-base precisa de mais segmentos pra ter
+    // resolução suficiente pro relevo mais estreito/forte não aparecer
+    // faceado. São só 3 cometas — custo irrelevante.
+    const geometry = new THREE.SphereGeometry(1, 48, 24);
+    const alongamento = corpo.aparencia?.alongamento ?? 1.0;
+    const compensacao = 1 / Math.sqrt(alongamento); // preserva volume (ver acima)
+    const pos = geometry.attributes.position;
+    const v = new THREE.Vector3();
+    const dir = new THREE.Vector3();
+
+    const NUM_PROTUBERANCIAS = 16;
+    const bumps = [];
+    for (let i = 0; i < NUM_PROTUBERANCIAS; i++) {
+      const theta = _hashSeed(seed, i * 4) * Math.PI * 2;
+      const phi = Math.acos(2 * _hashSeed(seed, i * 4 + 1) - 1);
+      bumps.push({
+        dir: new THREE.Vector3(
+          Math.sin(phi) * Math.cos(theta),
+          Math.sin(phi) * Math.sin(theta),
+          Math.cos(phi)
+        ),
+        amp: (_hashSeed(seed, i * 4 + 2) - 0.5) * 0.6, // ±0,30
+        largura: 0.22 + _hashSeed(seed, i * 4 + 3) * 0.28, // 0,22–0,50
+      });
+    }
+
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      dir.copy(v).normalize();
+      let desloc = 0;
+      for (const b of bumps) {
+        const d = dir.dot(b.dir);
+        const influencia = Math.max(0, (d - (1 - b.largura)) / b.largura);
+        desloc += b.amp * influencia * influencia * (3 - 2 * influencia); // smoothstep
+      }
+      const fatorRaio = Math.max(0.62, Math.min(1.05, 1 + desloc));
+      v.multiplyScalar(fatorRaio);
+      v.x *= alongamento;
+      v.y *= compensacao;
+      v.z *= compensacao;
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+    return geometry;
   }
 
   // Telescópios espaciais (V7): modelos 3D detalhados construídos com
@@ -1327,20 +1473,104 @@ export class SistemaSolar3D {
     return sprite;
   }
 
-  // Cone da cauda do cometa, já transladado para que a base fique na
-  // origem local (o núcleo) e o ápice se estenda inteiro em +Y — ver
-  // comentário em _criarCometa sobre o defeito que isto corrige.
-  _criarConeCauda(raioBase, comprimento, cor, opacidade) {
-    const geometry = new THREE.ConeGeometry(raioBase, comprimento, 10, 1, true);
+  // Plano da cauda do cometa (íons ou poeira), com billboard axial aplicado
+  // por quadro em _atualizarFisica (gira em torno do eixo anti-solar pra
+  // ficar de frente pra câmera — técnica documentada no SPEC-cometas.md,
+  // mesma família de ideia das proeminências solares, ver nota grande em
+  // _adicionarGlowSol). Geometria transladada para que a BASE (largura
+  // zero, ver _criarTexturaCauda) fique na origem local (o núcleo) e a
+  // PONTA se estenda inteira em +Y — mesma técnica do cone antigo, ver
+  // HANDOFF.md sobre o defeito que isto corrige (metade vazando pro lado
+  // do Sol se a geometria ficasse centralizada na origem).
+  //
+  // AdditiveBlending + depthWrite:false + premultipliedAlpha (material E
+  // textura) é convenção obrigatória deste projeto desde o bug do "confete
+  // colorido" — ver _texturaPonto/_adicionarHaloSolFundo. side:DoubleSide
+  // aqui NÃO causa o escurecimento duplo do cone antigo (que vinha de alpha
+  // blending normal): é um plano sem espessura, então DoubleSide só evita
+  // que ele suma quando visto de um ângulo em que a normal calculada foge
+  // um pouco da câmera (ex. câmera quase alinhada com o eixo anti-solar).
+  _criarCaudaPlano({ comprimento, largura, corRGB, picoAlonga, subidaRapida, descidaLenta, intensidade }) {
+    const textura = this._criarTexturaCauda(corRGB, { picoAlonga, subidaRapida, descidaLenta, intensidade });
+    const geometry = new THREE.PlaneGeometry(largura, comprimento, 1, 1);
     geometry.translate(0, comprimento / 2, 0);
     const material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(cor),
+      map: textura,
       transparent: true,
-      opacity: opacidade,
-      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      premultipliedAlpha: true,
       depthWrite: false,
+      side: THREE.DoubleSide,
     });
     return new THREE.Mesh(geometry, material);
+  }
+
+  // Textura de uma cauda: perfil construído PIXEL A PIXEL (ImageData, não
+  // createRadialGradient) porque a forma não é radialmente simétrica —
+  // estreita/reta (íons) ou larga em leque (poeira). O alpha chega a ZERO
+  // EXATO nas bordas laterais e na ponta por CONSTRUÇÃO (a função de
+  // largura já é zero ali, então nenhum pixel fora dela recebe alpha > 0),
+  // não por aproximação de gradiente — mesmo cuidado do halo do Sol (ver
+  // _adicionarHaloSolFundo): um resíduo de alpha não-zero na borda vira
+  // aresta reta visível quando a textura é ampliada.
+  //
+  // Eixos do canvas: y cresce pra baixo (convenção Canvas 2D); com
+  // texture.flipY no padrão (true), a linha de BAIXO do canvas (y=h-1) sobe
+  // pra V=0 — que é onde a geometria foi transladada pra y=0, ou seja, o
+  // núcleo. A linha de CIMA (y=0) sobe pra V=1 — a ponta da cauda, em
+  // y=comprimento. Por isso s (posição ao longo da cauda, 0=núcleo,
+  // 1=ponta) é `1 - y/(h-1)`, não `y/(h-1)`.
+  _criarTexturaCauda(corRGB, { picoAlonga, subidaRapida, descidaLenta, intensidade }) {
+    const w = 128;
+    const h = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    const data = img.data;
+    const [r, g, b] = corRGB;
+
+    for (let y = 0; y < h; y++) {
+      const s = 1 - y / (h - 1);
+      // Envelope de largura: sobe rápido perto do núcleo (0→picoAlonga) e
+      // desce devagar até a ponta (picoAlonga→1) — ZERO EXATO nas duas
+      // pontas (s<=0 ou s>=1), não só um valor pequeno.
+      let envelope = 0;
+      if (s > 0 && s < 1) {
+        const subida = Math.pow(Math.min(1, s / picoAlonga), subidaRapida);
+        const descida = Math.pow(Math.min(1, (1 - s) / (1 - picoAlonga)), descidaLenta);
+        envelope = Math.min(subida, descida);
+      }
+      const meiaLargura = envelope * 0.5; // fração do canvas, 0..0.5
+      const alphaComprimento = Math.pow(Math.max(0, 1 - s), 0.5) * intensidade; // mais forte perto do núcleo
+
+      for (let x = 0; x < w; x++) {
+        const u = x / (w - 1);
+        const distLateral = Math.abs(u - 0.5);
+        let alpha = 0;
+        if (meiaLargura > 0 && distLateral < meiaLargura) {
+          const t = 1 - distLateral / meiaLargura; // 1 no centro -> 0 na borda lateral
+          const fadeLateral = t * t * (3 - 2 * t); // smoothstep: zero EXATO em t=0 (a borda)
+          alpha = fadeLateral * alphaComprimento;
+        }
+        alpha = Math.max(0, Math.min(1, alpha));
+        const idx = (y * w + x) * 4;
+        data[idx] = r;
+        data[idx + 1] = g;
+        data[idx + 2] = b;
+        data[idx + 3] = Math.round(alpha * 255);
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    // Canvas premultiplicado + dithering perto de alpha 0 + desmultiplicação
+    // ao subir pra GPU amplificam o lixo de cada canal em cor saturada —
+    // mesma causa do "confete" no halo do Sol/coma dos cometas.
+    // premultiplyAlpha=true evita a desmultiplicação (e a amplificação).
+    texture.premultiplyAlpha = true;
+    return texture;
   }
 
   _adicionarAneis(grupo, corpo, raioBase) {
@@ -1753,14 +1983,19 @@ export class SistemaSolar3D {
       // cauda ficava com ~13u (maior que o Júpiter real da cena; parecia
       // defeito). Fisicamente caudas são mesmo enormes, mas 25% (~0,05 UA)
       // mantém o cometa identificável sem engolir os planetas.
+      //
+      // Isto COMPÕE com o fator de distância ao Sol (fatorCaudaCometa, ver
+      // _fatorDistanciaCauda) aplicado por quadro em _atualizarFisica — um
+      // não pode sobrescrever o outro (armadilha documentada no spec):
+      // aqui só atualizamos a BASE (fatorCaudaBase); a escala final
+      // (base × distância) é recomposta logo abaixo, com o fator de
+      // distância já vigente, pra não haver 1 quadro de escala errada.
       if (fisico.cauda) {
-        const fatorCauda = this._escala === 'real' ? 0.25 : 1;
-        fisico.cauda.scale.setScalar(fatorCauda); // grupo: fator relativo à geometria
-        if (fisico.coma && fisico.tamanhoComa) {
-          // sprite: escala ABSOLUTA — recompõe a partir do tamanho-base
-          const t = fisico.tamanhoComa * fatorCauda;
-          fisico.coma.scale.set(t, t, 1);
-        }
+        fisico.fatorCaudaBase = this._escala === 'real' ? 0.25 : 1;
+        const distanciaCometaCena = fisico.grupoOrbita.position.length(); // Sol na origem
+        const fatorDist = this._fatorDistanciaCauda(distanciaCometaCena, this._distanciaTerraCena());
+        fisico._fatorDistanciaCauda = fatorDist;
+        this._aplicarEscalaCaudaComa(fisico, fisico.fatorCaudaBase * fatorDist);
       }
 
       fisico.escala = novaEscala;
@@ -1929,6 +2164,94 @@ export class SistemaSolar3D {
     return { raio, distancia };
   }
 
+  // Distância heliocêntrica ATUAL da Terra, em unidades de cena — régua de
+  // 1 UA sem constante mágica (SPEC-cometas.md §3): a órbita da Terra tem
+  // excentricidade 0,0167, então serve com <2% de erro, e funciona igual
+  // nos dois modos de escala (didática/real) porque _calcularPosicao já
+  // devolve a posição na escala atual. Cache do corpo (não da distância —
+  // essa muda por quadro) porque dados.js não muda em runtime.
+  _distanciaTerraCena() {
+    if (this._corpoTerraCache === undefined) {
+      this._corpoTerraCache = this.dados.corpos.find((c) => c.id === 'terra') || null;
+    }
+    if (!this._corpoTerraCache) return 1;
+    return this._calcularPosicao(this._corpoTerraCache, false).length();
+  }
+
+  // Fator de encolhimento da cauda/coma do cometa pela distância ao Sol
+  // (SPEC-cometas.md §3, decisão do Fred 08/09/2026): cheio (1,0) dentro de
+  // 2 UA, caindo em smoothstep (não linear) até um piso de 0,15 além de
+  // 6 UA — nunca some de todo, o cometa continua identificável longe do
+  // periélio (ex. Halley "hoje", a ~35 UA).
+  //
+  // Achado ao testar (não estava no spec): _calcularDistancia comprime a
+  // distância de cena com RAIZ QUADRADA no modo didático — `70*sqrt(ua)`,
+  // contra `70*ua` (linear) no modo real (ver _calcularDistancia, ramo
+  // "não é lua" — cometas e planetas usam o mesmo ramo). A razão simples
+  // `distanciaCometaCena/distanciaTerraCena` só é igual à razão em UA
+  // quando a compressão é linear (modo real); no modo didático ela dá
+  // sqrt(UA), não UA — testado com o Halley "hoje": razão bruta ≈ 8,3, que
+  // sem a correção seria lida como ~8,3 UA quando a distância real é
+  // ~35 UA (8,3² ≈ 35 aí sim bate). Por isso eleva ao quadrado no modo
+  // didático antes de comparar aos limiares em UA — não é uma constante
+  // nova inventada, é o mesmo expoente que _calcularDistancia já usa pra
+  // essa mesma compressão.
+  _fatorDistanciaCauda(distanciaCometaCena, distanciaTerraCena) {
+    if (!(distanciaTerraCena > 0)) return 1;
+    const razao = distanciaCometaCena / distanciaTerraCena;
+    const dAU = this._escala === 'didatica' ? razao * razao : razao;
+    const T_PERTO_UA = 2;
+    const T_LONGE_UA = 6;
+    const PISO = 0.15;
+    const t = Math.min(1, Math.max(0, (dAU - T_PERTO_UA) / (T_LONGE_UA - T_PERTO_UA)));
+    const s = t * t * (3 - 2 * t); // smoothstep
+    return 1 - s * (1 - PISO);
+  }
+
+  // Fator de distância aplicado no quadro mais recente à cauda/coma do
+  // cometa `id` (0,15..1) — exposto pra QA/debug (ver SPEC-cometas.md §4.4).
+  // null se o corpo não existe ou ainda não renderizou nenhum quadro.
+  fatorCaudaCometa(id) {
+    const fisico = this.corposFisicos.get(id);
+    return fisico ? fisico._fatorDistanciaCauda ?? null : null;
+  }
+
+  // Aplica a escala final à cauda (grupo) e à coma (sprite) de um cometa a
+  // partir do fator "puro" (fatorCaudaBase × fatorDistância) — chamado de
+  // setEscala() e de _atualizarFisica() (billboard). Inclui um PISO VISUAL
+  // (achado ao testar, fora do texto do spec): perto do piso de distância
+  // (0,15), o tamanho "puro" da cauda/coma fica menor que o próprio núcleo
+  // (mais ainda com o alongamento — §2.2), e o teste de profundidade as
+  // esconde INTEIRAS atrás dele — visto com o Halley "hoje" (~35 UA) no
+  // ângulo de câmera que um focar() a partir da visão geral já dá de cara
+  // (quase de ponta pro eixo anti-solar). Isso contradiz "nunca some de
+  // todo" (§3) na prática, então a escala RENDERIZADA (não o fator exposto
+  // por fatorCaudaCometa, que fica puro) nunca cai abaixo de uma margem do
+  // raio atual do núcleo.
+  _aplicarEscalaCaudaComa(fisico, fatorFinal) {
+    const raioNucleoMundo = (fisico.raioNucleoLocalMax ?? 1) * fisico.mesh.scale.x;
+    // Baixados 08/09/2026 (SPEC-cometas.md, round 2): 2,6/1,5 — somados ao
+    // núcleo que inchava em volume (ver _criarGeometriaNucleoCometa) —
+    // produziam uma bola de poeira gigante em vez do "pedra escura com leve
+    // brilho" decidido pelo Fred (§3 do spec) longe do Sol. O piso continua
+    // existindo pelo mesmo motivo de antes (sem ele, cauda/coma somem atrás
+    // do núcleo em certos ângulos com o Halley "hoje", ~35 UA) — só ficou
+    // mais discreto.
+    const MARGEM_COMA = 1.35; // diâmetro da coma >= 1,35x o raio do núcleo
+    const MARGEM_CAUDA = 0.8; // comprimento da cauda de íons >= 0,8x o DIÂMETRO do núcleo
+    const comaMinimo = raioNucleoMundo * MARGEM_COMA;
+    const caudaMinimoComprimento = raioNucleoMundo * 2 * MARGEM_CAUDA;
+    const fatorCaudaMinimo = fisico.comprimentoCaudaBase > 0
+      ? caudaMinimoComprimento / fisico.comprimentoCaudaBase
+      : 0;
+
+    fisico.cauda.scale.setScalar(Math.max(fatorFinal, fatorCaudaMinimo));
+    if (fisico.coma && fisico.tamanhoComa) {
+      const t = Math.max(fisico.tamanhoComa * fatorFinal, comaMinimo);
+      fisico.coma.scale.set(t, t, 1);
+    }
+  }
+
   _calcularPosicao(corpo, relativo = false, tempoDias = this.tempoDias) {
     if (corpo.tipo === 'estrela') {
       return new THREE.Vector3(0, 0, 0);
@@ -2046,14 +2369,41 @@ export class SistemaSolar3D {
           }
         }
 
-        // Atualizar cauda do cometa
+        // Atualizar cauda do cometa: billboard axial (gira em torno do eixo
+        // anti-solar pra ficar de frente pra câmera) + encolhimento com a
+        // distância ao Sol (composto com o fator de escala didática/real
+        // aplicado em setEscala — ver fisico.fatorCaudaBase e SPEC-cometas.md §3).
         if (fisico.cauda) {
-          const posCorpo = new THREE.Vector3();
-          fisico.grupoOrbita.getWorldPosition(posCorpo);
-          const posSol = new THREE.Vector3(0, 0, 0);
-          const direcaoCauda = posCorpo.clone().sub(posSol).normalize();
+          fisico.grupoOrbita.getWorldPosition(_vCaudaPos);
 
-          fisico.cauda.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direcaoCauda);
+          // Escala: fatorDistância (0,15..1) × fatorCaudaBase (escala
+          // didática/real, ver setEscala) — os dois se COMPÕEM, nunca um
+          // sobrescreve o outro (armadilha documentada no spec). O valor
+          // EXPOSTO (fatorCaudaCometa/_fatorDistanciaCauda) é sempre o
+          // puro, sem o piso visual abaixo — os critérios de verificação
+          // do spec (§4.4) leem esse valor.
+          const fatorDist = this._fatorDistanciaCauda(_vCaudaPos.length(), this._distanciaTerraCena());
+          fisico._fatorDistanciaCauda = fatorDist; // exposto p/ debug/QA — ver fatorCaudaCometa()
+          this._aplicarEscalaCaudaComa(fisico, (fisico.fatorCaudaBase ?? 1) * fatorDist);
+
+          // Billboard axial: eixo A = direção anti-solar (Sol na origem);
+          // V = vetor câmera→cometa. "Lado" do plano = A×V normalizado;
+          // normal do plano = lado×A. Ver SPEC-cometas.md §2.1 — um
+          // THREE.Sprite comum NÃO serve aqui (fica de frente nos dois
+          // eixos, perderia a orientação da cauda).
+          _vCaudaEixoA.copy(_vCaudaPos).normalize();
+          _vCaudaV.copy(_vCaudaPos).sub(this.camera.position).normalize();
+          _vCaudaLado.crossVectors(_vCaudaEixoA, _vCaudaV);
+          if (_vCaudaLado.lengthSq() < 1e-8) {
+            // V quase paralelo a A (câmera ~alinhada com a cauda) — cai num
+            // eixo lateral estável em vez de NaN.
+            _vCaudaLado.crossVectors(_vCaudaEixoA, _EIXO_Y);
+            if (_vCaudaLado.lengthSq() < 1e-8) _vCaudaLado.crossVectors(_vCaudaEixoA, _EIXO_X);
+          }
+          _vCaudaLado.normalize();
+          _vCaudaNormal.crossVectors(_vCaudaLado, _vCaudaEixoA).normalize();
+          _mCaudaBasis.makeBasis(_vCaudaLado, _vCaudaEixoA, _vCaudaNormal);
+          fisico.cauda.quaternion.setFromRotationMatrix(_mCaudaBasis);
         }
       } else if (fisico.isCinturao) {
         // Rotacionar cinturão

@@ -2114,7 +2114,16 @@ export const DADOS = { corpos: [
     anguloInicialGraus: 66.278,
     aparencia: {
       tipo: 'cometa',
-      cores: ['#8b7355', '#a0907d', '#e8d8d0']
+      // Paleta escurecida (08/09/2026, SPEC-cometas.md): albedo real do
+      // Halley é ~0,04 — mais escuro que carvão, um dos objetos mais
+      // escuros do Sistema Solar. cores[0]=base quase preta, cores[1]=rocha
+      // ainda mais escura, cores[2]=gelo exposto (mancha clara de contraste
+      // sobre a base, não branco puro).
+      cores: ['#171310', '#0b0908', '#7d6f5a'],
+      // Núcleo real ~16×8×8 km (proporção ~2:1) — alongamento no eixo X da
+      // geometria do núcleo (ver _criarGeometriaNucleoCometa em motor3d.js).
+      // Ausente = 1,0 (esfera), então cometas sem o campo não quebram.
+      alongamento: 2.0
     },
     aneis: null,
     info: {
@@ -2165,7 +2174,9 @@ export const DADOS = { corpos: [
     anguloInicialGraus: 0.391,
     aparencia: {
       tipo: 'cometa',
-      cores: ['#a0907d', '#8b8680', '#e8d8d0']
+      // Paleta escurecida (ver nota no Halley acima, mesma convenção)
+      cores: ['#1a1714', '#0d0b09', '#8c8171'],
+      alongamento: 1.3
     },
     aneis: null,
     info: {
@@ -2216,7 +2227,14 @@ export const DADOS = { corpos: [
     anguloInicialGraus: 207.354,
     aparencia: {
       tipo: 'cometa',
-      cores: ['#696159', '#4a4238', '#2f2724']
+      // Paleta escurecida (ver nota no Halley acima, mesma convenção) —
+      // cores[2] agora é a mais CLARA das três (era a mais escura antes:
+      // a textura usa cores[2] como mancha de gelo/depósito brilhante, ver
+      // criarTexturaCometa em texturas.js).
+      cores: ['#141311', '#080706', '#665e50'],
+      // Formato "pato de borracha" bilobado (~4,3×4,1×3,3 km) — alongamento
+      // mais modesto que o Halley, a irregularidade vem mais dos bumps.
+      alongamento: 1.5
     },
     aneis: null,
     info: {
