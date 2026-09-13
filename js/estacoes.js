@@ -12,7 +12,7 @@
 // por escrito seria ensinar o erro e corrigi-lo com legenda.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=30';
+import { getIdioma } from './i18n.js?v=32';
 import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=20';
 import { criarTexturaCanvas } from './texturas.js?v=7';
 import {

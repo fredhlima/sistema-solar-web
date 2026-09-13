@@ -17,35 +17,98 @@ export const ITENS_GRATIS = {
 
 const CHAVE_STORAGE = 'sistema-solar-premium';
 
+// ID da entitlement configurada no RevenueCat (dashboard) — todo pacote que
+// libera o Pro precisa conceder esta entitlement. Já existia no dashboard
+// (criada em sessão anterior, 10/09/2026) como "Solar System Pro"; NÃO é
+// 'pro' — confirmado lendo Product catalog > Entitlements no RevenueCat.
+const ENTITLEMENT_PRO = 'solar_system_pro';
+
+// Key de API PÚBLICA de produção do app "Solar System (Play Store)" no
+// RevenueCat (Project settings > Apps > Solar System (Play Store) > Public
+// API Key). O app já está ligado ao Play Console via service account
+// (revenuecat-service-account@sistema-solar-revenuecat.iam.gserviceaccount.com,
+// 13/09/2026) — ver HANDOFF para os detalhes da conexão.
+const REVENUECAT_API_KEY = 'goog_XvBJbvyapdFIyKzJZXrqnHYVgai';
+
+// Acessa o plugin nativo do RevenueCat direto do bridge do Capacitor.
+// Não importamos o pacote NPM @revenuecat/purchases-capacitor: seu build
+// ESM (dist/esm/index.js) usa `export * from './definitions'` e
+// `import('./web')` sem extensão `.js`, sintaxe válida só sob bundler — falha
+// tanto em Node puro quanto em resolução ESM nativa de navegador (confirmado
+// com `node -e "import('@revenuecat/purchases-capacitor')"` →
+// "Cannot find module '.../dist/esm/definitions'"). O bridge nativo do
+// Capacitor já registra o plugin em window.Capacitor.Plugins.Purchases
+// independente de qualquer import JS, então acessamos direto — sem bundler,
+// sem vendoring do pacote (nem da dependência transitiva
+// @revenuecat/purchases-typescript-internal-esm).
+function obterPurchasesPlugin() {
+  return (typeof window !== 'undefined' && window.Capacitor?.Plugins?.Purchases) || null;
+}
+
+function estaNoAppNativo() {
+  return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.());
+}
+
 class PlayBillingProvider {
-  // Stub: documentação para integração futura com RevenueCat
-  // Produto: 'explorador_pro'
-  // Plugin: @revenuecat/purchases-capacitor
-  // Para trocar para produção: criar classe real neste arquivo
-  async comprar() {
-    throw new Error('PlayBillingProvider não implementado; use mock para desenvolvimento');
+  // Integração real com Play Billing via RevenueCat.
+  // Produto: 'explorador_pro' — Entitlement: 'pro'
+  constructor() {
+    this._configurando = null;
   }
+
+  async _garantirConfigurado() {
+    const plugin = obterPurchasesPlugin();
+    if (!plugin) {
+      throw new Error('Plugin de compras não disponível (fora do app Android nativo)');
+    }
+    if (!this._configurando) {
+      this._configurando = plugin.configure({ apiKey: REVENUECAT_API_KEY });
+    }
+    await this._configurando;
+    return plugin;
+  }
+
+  _proAtivo(customerInfo) {
+    return Boolean(customerInfo?.entitlements?.active?.[ENTITLEMENT_PRO]);
+  }
+
+  async statusAtivo() {
+    const plugin = await this._garantirConfigurado();
+    const { customerInfo } = await plugin.getCustomerInfo();
+    return this._proAtivo(customerInfo);
+  }
+
+  async comprar() {
+    const plugin = await this._garantirConfigurado();
+    const { current } = await plugin.getOfferings();
+    const pacote = current?.availablePackages?.[0];
+    if (!pacote) {
+      throw new Error('Nenhum pacote disponível nas ofertas do RevenueCat');
+    }
+    const { customerInfo } = await plugin.purchasePackage({ aPackage: pacote });
+    return this._proAtivo(customerInfo);
+  }
+
   async restaurar() {
-    throw new Error('PlayBillingProvider não implementado; use mock para desenvolvimento');
+    const plugin = await this._garantirConfigurado();
+    const { customerInfo } = await plugin.restorePurchases();
+    return this._proAtivo(customerInfo);
   }
 }
 
-const PROVIDER = 'mock';
+const NATIVO = estaNoAppNativo();
+const PROVIDER = NATIVO ? 'revenuecat' : 'mock';
 
-// v1.0 (teste fechado da Play Store, 08/08/2026): NÃO existe compra dentro do
-// app. Enquanto o Play Billing real não está integrado, seria desonesto — e
-// risco de reprovação — anunciar um Pro que não cobra nada (o PROVIDER acima
-// ainda é 'mock', que gera transação falsa).
+// v1.0 (teste fechado da Play Store, 08/08/2026): fora do app Android nativo
+// (showcase web, testes em node), NÃO existe compra real possível — manter
+// tudo liberado ali evita anunciar um Pro que não pode ser cobrado.
 //
-// Com este interruptor ligado, todo o conteúdo fica liberado e o paywall se
-// torna inalcançável: `exigir()` e `exigirItem()` são os ÚNICOS pontos que o
-// abrem (paywall.js:183 registra a função por `definirPaywall`), e ambos
-// passam a retornar true. Os selos "PRO" também somem sozinhos, porque quiz,
-// você-no-espaço, eventos e badges derivam a marcação do mesmo estado.
-//
-// Para reativar o freemium: ponha `false` aqui E integre o billing real
-// (trocar PROVIDER, ver android/RELEASE.md e o HANDOFF de 08/08).
-const TUDO_LIBERADO = true;
+// Dentro do app Android nativo, o billing real (RevenueCat/Play Billing,
+// classe PlayBillingProvider acima) está integrado — o freemium volta a
+// valer: `exigir()` e `exigirItem()` (paywall.js:183 registra a função por
+// `definirPaywall`) passam a poder retornar false e abrir o paywall de
+// verdade.
+const TUDO_LIBERADO = !NATIVO;
 
 export function criarPremium() {
   let estado = { ativo: false, transacaoId: null, data: null };
@@ -86,6 +149,30 @@ export function criarPremium() {
 
   // Carrega estado inicial
   lerStorage();
+
+  // Fora do app nativo (showcase web, node) não existe billing real — o
+  // provider fica null e comprar()/restaurar() usam o mock abaixo, como
+  // sempre fizeram (TUDO_LIBERADO já libera tudo nesse caso, então esses
+  // métodos só são chamados a partir de testes/depuração).
+  const billing = PROVIDER === 'revenuecat' ? new PlayBillingProvider() : null;
+
+  if (billing) {
+    // Reconcilia com o status real da conta Play Store em segundo plano —
+    // RevenueCat associa a compra ao usuário do Play Store automaticamente,
+    // então quem já é Pro (reinstalou o app, limpou dados) não deveria
+    // precisar clicar em "Restaurar compra" pra recuperar o acesso.
+    billing.statusAtivo().then((proAtivo) => {
+      if (proAtivo && estado.ativo !== true) {
+        estado.ativo = true;
+        estado.transacaoId = estado.transacaoId || `revenuecat-${Date.now()}`;
+        estado.data = estado.data || new Date().toISOString();
+        salvarStorage();
+        notificarListeners();
+      }
+    }).catch((e) => {
+      console.error('Falha ao verificar status do Play Billing:', e);
+    });
+  }
 
   return {
     get ativo() {
@@ -131,6 +218,17 @@ export function criarPremium() {
     },
 
     async comprar() {
+      if (billing) {
+        // Play Billing real via RevenueCat: purchasePackage() já resolve
+        // (ou rejeita, se o usuário cancelar/falhar) — sem timeout artificial.
+        const proAtivo = await billing.comprar();
+        estado.ativo = proAtivo;
+        estado.transacaoId = proAtivo ? `revenuecat-${Date.now()}` : null;
+        estado.data = proAtivo ? new Date().toISOString() : null;
+        salvarStorage();
+        notificarListeners();
+        return { ok: proAtivo, transacaoId: estado.transacaoId };
+      }
       // Mock: aguarda ~900ms, gera transacaoId
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -145,6 +243,15 @@ export function criarPremium() {
     },
 
     async restaurar() {
+      if (billing) {
+        const proAtivo = await billing.restaurar();
+        estado.ativo = proAtivo;
+        estado.transacaoId = proAtivo ? (estado.transacaoId || `revenuecat-${Date.now()}`) : null;
+        estado.data = proAtivo ? (estado.data || new Date().toISOString()) : null;
+        salvarStorage();
+        if (proAtivo) notificarListeners();
+        return { ok: true, restaurado: proAtivo };
+      }
       // Lê storage; se ativo, notifica e retorna {ok, restaurado: true}.
       // Comparação estrita (=== true), igual a `ativo`/`recurso()` acima —
       // um storage corrompido/parcial (ex.: {ativo:"true"} como string) não

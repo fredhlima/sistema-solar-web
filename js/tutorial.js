@@ -1,4 +1,4 @@
-import { t, tToque } from './i18n.js?v=30';
+import { t, tToque } from './i18n.js?v=32';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 
@@ -6,6 +6,7 @@ const CHAVE = 'sistema-solar-tutorial-visto';
 // o chrome desktop fica display:none (spotlight não acharia nada), então cada
 // passo mira o equivalente do dock quando body.modo-dock está ativo.
 const PASSOS = [
+  { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTituloDisclaimer', texto: 'tutorialTextoDisclaimer' },
   { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
   { alvo: '#painel-explorar',      alvoMobile: '#mdock-btn-exp',  titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
   { alvo: '.grupo-experiencias',   alvoMobile: '#mdock-btn-xp',   titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },

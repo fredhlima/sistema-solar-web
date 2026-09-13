@@ -8,8 +8,8 @@ import { MISSOES } from './missoes.js?v=12';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=6';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=30';
-import { criarPremium } from './premium.js?v=6';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=32';
+import { criarPremium } from './premium.js?v=8';
 import { iniciarPaywall } from './paywall.js?v=4';
 import { iniciarQuiz } from './quiz.js?v=14';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=4';
@@ -17,7 +17,7 @@ import { iniciarEstacoes } from './estacoes.js?v=43';
 import { iniciarMares } from './mares.js?v=30';
 import { iniciarProgresso } from './progresso.js?v=12';
 import { iniciarMusica } from './musica.js?v=10';
-import { iniciarTutorial } from './tutorial.js?v=12';
+import { iniciarTutorial } from './tutorial.js?v=13';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
