@@ -3,6 +3,7 @@ import {criarCena} from './hangar-scene.js?v=2';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 let state={selected:null,exploded:false,isolated:false},scene=null,rotating=false;
+const mobile=matchMedia('(max-width: 680px)'),sheet=$('#selection-sheet');
 function element(tag,text,className){const el=document.createElement(tag);if(text)el.textContent=text;if(className)el.className=className;return el;}
 for(const [i,p]of PARTES.entries()){
  const b=element('button');b.type='button';b.setAttribute('aria-pressed','false');b.append(element('span',String(i+1).padStart(2,'0')),document.createTextNode(p.curto));
@@ -17,6 +18,15 @@ function renderDetail(p){
  document.body.classList.add('has-selection');
  const aside=$('aside');if(getComputedStyle(aside).overflowY==='auto')aside.scrollTop=0;
 }
+function showDetail(value){
+ const open=value&&mobile.matches;document.body.classList.toggle('detail-open',open);sheet.setAttribute('aria-hidden',String(mobile.matches&&!open));sheet.inert=mobile.matches&&!open;if(!open)sheet.style.transform='';
+}
+function syncDetailMode(){showDetail(document.body.classList.contains?.('detail-open'));if(!mobile.matches){sheet.inert=false;sheet.setAttribute('aria-hidden','false');}}
+mobile.addEventListener('change',syncDetailMode);$('#close-detail').onclick=$('#sheet-backdrop').onclick=()=>showDetail(false);
+let sheetDrag=null;const sheetHead=$('#sheet-head');
+sheetHead.addEventListener('pointerdown',e=>{if(!mobile.matches)return;sheetDrag={start:e.clientY,dy:0};sheetHead.setPointerCapture?.(e.pointerId);});
+sheetHead.addEventListener('pointermove',e=>{if(!sheetDrag)return;sheetDrag.dy=Math.max(0,e.clientY-sheetDrag.start);sheet.style.transform=`translateY(${sheetDrag.dy}px)`;});
+sheetHead.addEventListener('pointerup',()=>{if(!sheetDrag)return;const close=sheetDrag.dy>80;sheetDrag=null;sheet.style.transform='';showDetail(!close);});
 function sync(){
  const p=PARTES.find(p=>p.id===state.selected);
  $('#explode').textContent=state.exploded?'Montar foguete':'Separar as peças';$('#explode').setAttribute('aria-pressed',String(state.exploded));
@@ -29,7 +39,7 @@ function sync(){
 }
 function select(id){const p=PARTES.find(p=>p.id===id);if(!p)return;state.selected=id;
  if(['lm','cm'].includes(id)&&!state.exploded)state.exploded=true;
- renderDetail(p);sync();
+ renderDetail(p);sync();showDetail(true);
 }
 $('#explode').onclick=()=>{state.exploded=!state.exploded;state.isolated=false;sync();};
 $('#isolate').onclick=()=>{state.isolated=!state.isolated;if(state.isolated)state.exploded=true;sync();};
@@ -48,6 +58,7 @@ function failure(){const box=$('#error');box.hidden=false;box.textContent='A vis
 function pivotChanged({label,x,y,show}){$('#pivot-label').textContent=label;if(!show)return;const el=$('#pivot-indicator');el.style.left=`${x}px`;el.style.top=`${y}px`;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');}
 try{scene=criarCena({canvas:$('#rocket'),viewport:$('#viewport'),labels:$('#piece-labels'),onSelect:select,onPivotChange:pivotChanged});sync();syncMotion();}
 catch(error){console.warn('Hangar: WebGL indisponível.',error.message);failure();}
+syncDetailMode();
 $('#rocket').addEventListener('webglcontextlost',e=>{e.preventDefault();scene?.dispose();scene=null;failure();});
 // Opt-in diagnostics only when explicitly requested by local tests.
 if(new URLSearchParams(location.search).has('test'))window.__hangar={inspect:()=>scene?.inspect(),project:id=>scene?.project(id)};
