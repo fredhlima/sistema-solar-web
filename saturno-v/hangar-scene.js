@@ -1,15 +1,15 @@
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {PARTES,posicaoParte} from './saturno-v-data.js?v=2';
-import {criarSaturnoV} from './saturno-v-model.js?v=1';
+import {PARTES,posicaoParte} from './saturno-v-data.js?v=3';
+import {criarSaturnoV} from './saturno-v-model.js?v=2';
 
-export function criarCena({canvas,viewport,labels,onSelect}){
+export function criarCena({canvas,viewport,labels,onSelect,onPivotChange}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=T.SRGBColorSpace;
  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
  const scene=new T.Scene(),camera=new T.PerspectiveCamera(36,1,.1,2400);
  const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;controls.minDistance=2;controls.maxDistance=1200;
- controls.enablePan=false;controls.autoRotateSpeed=.65;
+ controls.enablePan=true;controls.autoRotateSpeed=.65;
  scene.add(new T.HemisphereLight(0xe1f1ff,0x596576,2.6));
  for(const [color,power,x,y,z]of [[0xffffff,3.5,60,140,100],[0xb6dbff,2.5,-65,100,-50],[0xffdcaa,1.4,50,20,-70]]){const l=new T.DirectionalLight(color,power);l.position.set(x,y,z);scene.add(l);}
  const {root,groups,panels,legs}=criarSaturnoV();scene.add(root);
@@ -38,6 +38,15 @@ export function criarCena({canvas,viewport,labels,onSelect}){
   }
   controls.target.copy(target);camera.position.copy(target).addScaledVector(direction,Math.max(7,distance));controls.update();
  }
+ function screenPoint(point){const rect=viewport.getBoundingClientRect(),v=point.clone().project(camera);return {x:(v.x*.5+.5)*rect.width,y:(-v.y*.5+.5)*rect.height};}
+ function partName(id){return PARTES.find(p=>p.id===id)?.curto||'Foguete inteiro';}
+ function announcePivot(label,point,show=true){onPivotChange?.({label,show,...screenPoint(point)});}
+ function setPivotPoint(point,label,show=true){
+  // Preserve the view direction and distance, so choosing a pivot never causes
+  // the disorienting jump common in CAD viewers.
+  const offset=camera.position.clone().sub(controls.target);controls.target.copy(point);camera.position.copy(point).add(offset);controls.update();autoFit=false;announcePivot(label,point,show);
+ }
+ function setPivot(id,point=null){const group=groups.get(id);if(!group)return;root.updateMatrixWorld(true);setPivotPoint(point||new T.Box3().setFromObject(group).getCenter(new T.Vector3()),partName(id));}
  function updateGeometry(alpha){let moving=false;
   for(const [i,p]of PARTES.entries()){
    const g=groups.get(p.id),v=posicaoParte(p,i,state.exploded);const target=new T.Vector3(v.x,v.y,v.z);
@@ -51,18 +60,20 @@ export function criarCena({canvas,viewport,labels,onSelect}){
  function setState(next){
   const prev=state;state={...next};
   for(const [id,g]of groups)g.traverse(o=>{if(o.isMesh)o.material.emissive.setHex(state.selected===id?0x153348:0);});
-  if(state.isolated||prev.isolated){updateGeometry(1);autoFit=true;pendingFit=true;}
-  if(prev.exploded!==state.exploded){autoFit=true;pendingFit=true;if(media.matches)updateGeometry(1);}
+  if(state.isolated||prev.isolated){updateGeometry(1);autoFit=true;pendingFit=true;onPivotChange?.({label:state.isolated?partName(state.selected):'Foguete inteiro',show:false});}
+  if(prev.exploded!==state.exploded){autoFit=true;pendingFit=true;onPivotChange?.({label:'Foguete inteiro',show:false});if(media.matches)updateGeometry(1);}
  }
  controls.addEventListener('start',()=>{autoFit=false;});
- const ray=new T.Raycaster(),mouse=new T.Vector2();let down=null,pointers=new Set(),multi=false;
+ const ray=new T.Raycaster(),mouse=new T.Vector2();let down=null,pointers=new Set(),multi=false,lastTap=null;
+ function hitAt(e){const rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);return ray.intersectObjects(visible(),true)[0];}
  canvas.addEventListener('pointerdown',e=>{pointers.add(e.pointerId);multi=pointers.size>1;down={x:e.clientX,y:e.clientY,id:e.pointerId};});
  canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);down=null;});
  canvas.addEventListener('pointerup',e=>{
   pointers.delete(e.pointerId);if(multi||!down||e.pointerId!==down.id||Math.hypot(e.clientX-down.x,e.clientY-down.y)>6){if(!pointers.size)multi=false;return;}
-  down=null;const rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);ray.setFromCamera(mouse,camera);
-  const hit=ray.intersectObjects(visible(),true)[0];if(hit)onSelect(hit.object.userData.part);
+  down=null;const hit=hitAt(e);if(!hit)return;const id=hit.object.userData.part,now=performance.now();onSelect(id);
+  if(e.pointerType&&e.pointerType!=='mouse'&&lastTap&&lastTap.id===id&&now-lastTap.time<360&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<24){setPivot(id,hit.point);lastTap=null;}else lastTap={id,time:now,x:e.clientX,y:e.clientY};
  });
+ canvas.addEventListener('dblclick',e=>{const hit=hitAt(e);if(hit){onSelect(hit.object.userData.part);setPivot(hit.object.userData.part,hit.point);}});
  function resize(){const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();pendingFit=true;}
  const observer=new ResizeObserver(resize);observer.observe(viewport);camera.position.set(36,65,210);controls.target.set(0,52,0);updateGeometry(1);resize();
  function placeLabels(){let lastY=-100;const rect=viewport.getBoundingClientRect();
@@ -83,8 +94,9 @@ export function criarCena({canvas,viewport,labels,onSelect}){
  raf=requestAnimationFrame(tick);
  return {
   setState,
-  overview(){autoFit=true;pendingFit=true;},
-  focus(){if(state.selected){autoFit=false;updateGeometry(1);fit(state.selected);}},
+  overview(){autoFit=true;pendingFit=true;onPivotChange?.({label:'Foguete inteiro',show:false});},
+  focus(){if(state.selected){autoFit=false;updateGeometry(1);fit(state.selected);announcePivot(partName(state.selected),controls.target);}},
+  setPivot,
   zoom(factor){autoFit=false;camera.position.sub(controls.target).multiplyScalar(factor).add(controls.target);controls.update();},
   rotate(value){rotate=value;},
   dispose(){cancelAnimationFrame(raf);observer.disconnect();controls.dispose();root.traverse(o=>{o.geometry?.dispose();if(o.material){o.material.map?.dispose();o.material.dispose();}});renderer.dispose();},
