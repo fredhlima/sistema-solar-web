@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {PARTES} from './saturno-v-data.js?v=2';
+import {PARTES} from './saturno-v-data.js?v=3';
 
 export function criarSaturnoV(){
 const white=new T.MeshStandardMaterial({color:0xe9e9df,roughness:.55,metalness:.12});
@@ -18,6 +18,11 @@ function engine(g,x,z,y,size){
  for(let j=0;j<8;j++){const t=j/8;const r=(.9-.58*t)*size;const hoop=add(g,new T.TorusGeometry(r,.02*size,6,36),silver,x,y+(-1.2+1.65*t)*size,z);hoop.rotation.x=Math.PI/2;}
 }
 function label(g,text,r,y){const c=document.createElement('canvas');c.width=256;c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#eeeede';ctx.fillRect(0,0,256,128);ctx.fillStyle='#121a21';ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.fillText(text,128,80);const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;const mat=new T.MeshStandardMaterial({map:tex,roughness:.7});add(g,new T.PlaneGeometry(r*1.25,r*.62),mat,0,y,r+.025);}
+function texture(draw,w=512,h=256){const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');draw(ctx,w,h);const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;return tex;}
+function flagTexture(){return texture((ctx,w,h)=>{const stripe=h/13;for(let i=0;i<13;i++){ctx.fillStyle=i%2?'#fff':'#b22234';ctx.fillRect(0,i*stripe,w,stripe+1);}const cw=w*.4,ch=stripe*7;ctx.fillStyle='#3c3b6e';ctx.fillRect(0,0,cw,ch);ctx.fillStyle='#fff';for(let row=0;row<9;row++){const six=row%2===0,n=six?6:5;for(let col=0;col<n;col++){const x=(col+.7+(six?0:.5))*cw/6.4,y=(row+.7)*ch/9.4;ctx.fillRect(x-2,y-2,4,4);}}});}
+function wordTexture(text,color='#c52b32',vertical=false){return texture((ctx,w,h)=>{ctx.fillStyle='rgba(0,0,0,0)';ctx.fillRect(0,0,w,h);ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`700 ${vertical?Math.floor(h/(text.length+1)):Math.floor(h*.55)}px Arial, sans-serif`;if(vertical){[...text].forEach((letter,i)=>ctx.fillText(letter,w/2,(i+.7)*h/text.length));}else ctx.fillText(text,w/2,h/2);},vertical?160:512,vertical?720:180);}
+function decal(g,map,w,h,x,y,z,rotationY=0){const mat=new T.MeshStandardMaterial({map,transparent:true,alphaTest:.02,roughness:.7,metalness:.05,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2});const m=add(g,new T.PlaneGeometry(w,h),mat,x,y,z);m.rotation.y=rotationY;return m;}
+const flag=flagTexture(),usa=wordTexture('USA','#c52b32',true),united=wordTexture('UNITED STATES','#24282c');
 for(const [index,p]of PARTES.entries()){
  const g=new T.Group();g.userData.part=p.id;g.position.y=p.base;root.add(g);groups.set(p.id,g);
  if(['sic','sii','sivb'].includes(p.id)){
@@ -26,7 +31,8 @@ for(const [index,p]of PARTES.entries()){
   for(let k=0;k<40;k++){const a=k*Math.PI*2/40;rod(g,[(r+.035)*Math.cos(a),3.3,(r+.035)*Math.sin(a)],[(r+.035)*Math.cos(a),8,(r+.035)*Math.sin(a)],.055,white);}
   if(p.id==='sivb')engine(g,0,0,2,1.35);else{engine(g,0,0,1.5,p.id==='sic'?1.25:.9);for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;engine(g,Math.cos(a)*2.9,Math.sin(a)*2.9,1.5,p.id==='sic'?1.25:.9);}}
   for(let k=0;k<4;k++){const stripe=add(g,new T.BoxGeometry(.1,9,1.65),black,r, h-7,0);stripe.position.set(Math.cos(k*Math.PI/2)*(r+.02),h-7,Math.sin(k*Math.PI/2)*(r+.02));stripe.rotation.y=-k*Math.PI/2;}
-  label(g,p.id==='sic'?'USA':p.id==='sii'?'S-II':'S-IVB',r,h*.55);
+  if(p.id==='sic'){decal(g,flag,2.5,1.3,0,h*.72,r+.045);decal(g,usa,1.15,5.1,0,h*.47,r+.05);}
+  else label(g,p.id==='sii'?'S-II':'S-IVB',r,h*.55);
   if(p.id==='sic')for(let k=0;k<4;k++){const shape=new T.Shape();shape.moveTo(0,0);shape.lineTo(2.5,0);shape.lineTo(0,5);shape.closePath();const fin=add(g,new T.ExtrudeGeometry(shape,{depth:.14,bevelEnabled:false}),silver);fin.position.set(4.8*Math.cos(k*Math.PI/2),.5,4.8*Math.sin(k*Math.PI/2));fin.rotation.y=-k*Math.PI/2;}
  }else if(p.id.startsWith('inter')){const ring=add(g,new T.CylinderGeometry(p.id==='inter2'?3.3:5,5,p.altura,48,1,true),white,0,p.altura/2);ring.material.side=T.DoubleSide;for(let y=.4;y<p.altura;y+=.5){const radius=p.id==='inter2'?5-1.7*y/p.altura:5;const hoop=add(g,new T.TorusGeometry(radius,.045,6,64),silver,0,y);hoop.rotation.x=Math.PI/2;}
  }else if(p.id==='iu'){cyl(g,3.3,3.3,1,.5,black);for(let i=0;i<8;i++){const a=i*Math.PI/4;add(g,new T.BoxGeometry(.45,.45,.25),silver,3.3*Math.sin(a),.5,3.3*Math.cos(a));}
@@ -44,6 +50,7 @@ for(const [index,p]of PARTES.entries()){
   for(const x of [-.65,.65])add(g,new T.BoxGeometry(.65,.65,.06),windowMat,x,4.05,1.23);
   cyl(g,.32,.32,.5,5.9,silver);rod(g,[0,4.7,0],[1.4,6.5,0],.04);add(g,new T.SphereGeometry(.22,12,8),silver,1.4,6.5);
   for(let k=0;k<4;k++){const leg=new T.Group();g.add(leg);rod(leg,[1.5,1.8,0],[3.2,-.2,0],.1,gold);rod(leg,[1.5,.6,0],[3.2,-.2,0],.06,silver);cyl(leg,.45,.45,.12,-.25,gold,3.2);leg.rotation.y=k*Math.PI/2;legs.push(leg);}
+  decal(g,flag,1.0,.52,0,3.55,1.54);
  }else if(p.id==='sm'){
   cyl(g,2,2,5.4,4.3,silver);
   for(let k=0;k<6;k++){const a=k*Math.PI/3;const panel=add(g,new T.BoxGeometry(1.0,2.7,.055),white,2.025*Math.sin(a),3.7,2.025*Math.cos(a));panel.rotation.y=a;}
@@ -52,6 +59,7 @@ for(const [index,p]of PARTES.entries()){
   for(let i=0;i<8;i++){const a=i*Math.PI/4;rod(g,[2.01*Math.cos(a),2,2.01*Math.sin(a)],[2.01*Math.cos(a),6.7,2.01*Math.sin(a)],.04,white);}
  }else if(p.id==='cm'){
   cyl(g,.45,2,3.3,1.85,silver);cyl(g,2,1.85,.2,.1,black);add(g,new T.BoxGeometry(.55,.55,.08),windowMat,0,1.4,1.45);cyl(g,.4,.4,.3,3.45,silver);
+  decal(g,flag,.72,.38,-.43,1.95,1.42);decal(g,united,1.18,.42,.32,1.95,1.43);
  }else if(p.id==='les'){
   // Boost protective cover belongs to escape assembly, so separating reveals Columbia.
   const cover=add(g,new T.CylinderGeometry(.46,2.06,3.5,48,1,true),white,0,-1.75);cover.material.side=T.DoubleSide;
