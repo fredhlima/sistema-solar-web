@@ -47,8 +47,8 @@ export function criarCena({canvas,viewport,labels,onSelect,onPivotChange,partes=
   const offset=camera.position.clone().sub(controls.target);controls.target.copy(point);camera.position.copy(point).add(offset);controls.update();autoFit=false;pendingFit=false;announcePivot(label,point,show);
  }
  function setPivot(id,point=null){const group=groups.get(id);if(!group)return;root.updateMatrixWorld(true);setPivotPoint(point||new T.Box3().setFromObject(group).getCenter(new T.Vector3()),partName(id));}
- function updateGeometry(alpha){let moving=false;
-  if(animate){grid.visible=floor.visible=!state.isolated;return animate(state,alpha);}
+ function updateGeometry(alpha,dt){let moving=false;
+  if(animate){grid.visible=floor.visible=!state.isolated;return animate(state,alpha,dt);}
   for(const [i,p]of partes.entries()){
    const g=groups.get(p.id),v=positionForPart(p,i,state.exploded);const target=new T.Vector3(v.x,v.y,v.z);
    if(g.position.distanceTo(target)>.015){moving=true;g.position.lerp(target,alpha);}else g.position.copy(target);
@@ -88,7 +88,7 @@ export function criarCena({canvas,viewport,labels,onSelect,onPivotChange,partes=
   }
  }
  function tick(now){raf=requestAnimationFrame(tick);if(document.hidden){last=now;return;}const dt=Math.min((now-last)/1000,.05);last=now;
-  const moving=updateGeometry(media.matches?1:1-Math.exp(-dt*7));
+  const moving=updateGeometry(media.matches?1:1-Math.exp(-dt*7),media.matches?undefined:dt);
   if(pendingFit||(moving&&autoFit)){fit(state.isolated?state.selected:null);pendingFit=false;}
   controls.autoRotate=rotate&&!media.matches;controls.update();placeLabels();renderer.render(scene,camera);
  }

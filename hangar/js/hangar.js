@@ -1,5 +1,5 @@
-import {obterVeiculo} from './hangar-vehicles.js?v=3';
-import {criarCena} from './hangar-scene.js?v=4';
+import {obterVeiculo} from './hangar-vehicles.js?v=4';
+import {criarCena} from './hangar-scene.js?v=5';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 const vehicle=obterVeiculo(new URLSearchParams(location.search).get('modelo')),PARTES=vehicle.partes,FONTES=vehicle.fontes;
@@ -7,6 +7,7 @@ document.title=`${vehicle.nome} · Hangar`;
 $('#vehicle-name').textContent=vehicle.nome;$('#mission-name').textContent=vehicle.missao;$('#vehicle-subtitle').textContent=vehicle.subtitulo;
 $('#viewport').setAttribute('aria-label',`Modelo tridimensional · ${vehicle.titulo}`);
 $('#part-count').textContent=`${PARTES.length} conjuntos`;
+$('#parts').setAttribute('aria-label',`Componentes de ${vehicle.nome}`);
 $('.intro .eyebrow').textContent=vehicle.destino;$('.intro h2').textContent=vehicle.intro;$('.intro>p:not(.eyebrow)').textContent=vehicle.descricao;
 const stats=$('.stats');stats.replaceChildren();for(const [value,label]of vehicle.stats){const item=document.createElement('span'),b=document.createElement('b');b.textContent=value;item.append(b,document.createTextNode(label));stats.append(item);}
 $('#vehicle-footer').replaceChildren(document.createTextNode('Modelo didático, com proporções e detalhes aproximados. Esta animação não representa a sequência de voo. '));
@@ -56,7 +57,7 @@ function sync(){
  for(const [id,b]of buttons)b.setAttribute('aria-pressed',String(id===state.selected));scene?.setState(state);
 }
 function select(id){const p=PARTES.find(p=>p.id===id);if(!p)return;state.selected=id;
- if(vehicle.revelar.includes(id)&&!state.exploded)state.exploded=true;
+ if((vehicle.revelar.includes(id)||(vehicle.id==='shuttle'&&id==='arm'))&&!state.exploded)state.exploded=true;
  renderDetail(p);sync();showDetail(true);
 }
 $('#explode').onclick=()=>{state.exploded=!state.exploded;state.isolated=false;sync();};
