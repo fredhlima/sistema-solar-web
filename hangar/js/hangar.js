@@ -1,4 +1,4 @@
-import {obterVeiculo} from './hangar-vehicles.js?v=4';
+import {obterVeiculo} from './hangar-vehicles.js?v=6';
 import {criarCena} from './hangar-scene.js?v=5';
 
 const $=s=>document.querySelector(s),buttons=new Map();
@@ -8,6 +8,10 @@ $('#vehicle-name').textContent=vehicle.nome;$('#mission-name').textContent=vehic
 $('#viewport').setAttribute('aria-label',`Modelo tridimensional · ${vehicle.titulo}`);
 $('#part-count').textContent=`${PARTES.length} conjuntos`;
 $('#parts').setAttribute('aria-label',`Componentes de ${vehicle.nome}`);
+if(vehicle.id==='shuttle'){
+ $('#visual-credit').textContent='Fuselagem, janelas, portas e motores: Space Shuttle (D), NASA 3D Resources, adaptado para este hangar. Hubble, braço e conjunto de lançamento são modelos didáticos próprios. Os mapas originais da NASA incluem pinturas de outras épocas: a aparência não é uma réplica exata da STS-31 de 1990. Marcas NASA são protegidas e não indicam endosso do aplicativo.';
+ const source=document.createElement('a');source.href='https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Shuttle%20(D)';source.target='_blank';source.rel='noopener';source.textContent='Modelo original da NASA ↗';$('.credits').append(source);
+}
 $('.intro .eyebrow').textContent=vehicle.destino;$('.intro h2').textContent=vehicle.intro;$('.intro>p:not(.eyebrow)').textContent=vehicle.descricao;
 const stats=$('.stats');stats.replaceChildren();for(const [value,label]of vehicle.stats){const item=document.createElement('span'),b=document.createElement('b');b.textContent=value;item.append(b,document.createTextNode(label));stats.append(item);}
 $('#vehicle-footer').replaceChildren(document.createTextNode('Modelo didático, com proporções e detalhes aproximados. Esta animação não representa a sequência de voo. '));
