@@ -1,6 +1,6 @@
 import {PARTES as SATURNO,FONTES as FONTES_SATURNO,posicaoParte as posSaturno} from './saturno-v-data.js?v=3';
 import {PARTES as SHUTTLE,FONTES as FONTES_SHUTTLE,posicaoParte as posShuttle} from './shuttle-data.js?v=4';
-import {criarSaturnoV} from './saturno-v-model.js?v=2';
+import {criarSaturnoV} from './saturno-v-model.js?v=3';
 import {criarShuttle} from './shuttle-model.js?v=6';
 export const VEICULOS={
  saturno:{id:'saturno',nome:'Saturno V',missao:'MISSÃO APOLLO 11',subtitulo:'Hangar interativo · 1969',titulo:'Saturno V / Apollo 11',destino:'DESTINO: LUA',intro:'Um foguete. Muitas descobertas.',descricao:'Apollo 11 é a missão. Saturno V é o foguete que a lançou. Só o módulo lunar pousou na Lua.',nota:'O foguete que iniciou a primeira viagem de pouso na Lua.',separacao:'Esta separação é didática. No voo, cada peça saía em um momento.',stats:[['110,6 m','altura real'],['3','astronautas'],['1969','primeiro pouso']],partes:SATURNO,fontes:FONTES_SATURNO,positionForPart:posSaturno,buildModel:criarSaturnoV,revelar:['lm','cm'],url:FONTES_SATURNO.missao.url},

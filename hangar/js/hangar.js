@@ -1,5 +1,5 @@
-import {obterVeiculo} from './hangar-vehicles.js?v=6';
-import {criarCena} from './hangar-scene.js?v=5';
+import {obterVeiculo} from './hangar-vehicles.js?v=7';
+import {criarCena} from './hangar-scene.js?v=6';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 const vehicle=obterVeiculo(new URLSearchParams(location.search).get('modelo')),PARTES=vehicle.partes,FONTES=vehicle.fontes;
@@ -11,6 +11,9 @@ $('#parts').setAttribute('aria-label',`Componentes de ${vehicle.nome}`);
 if(vehicle.id==='shuttle'){
  $('#visual-credit').textContent='Fuselagem, janelas, portas e motores: Space Shuttle (D), NASA 3D Resources, adaptado para este hangar. Hubble, braço e conjunto de lançamento são modelos didáticos próprios. Os mapas originais da NASA incluem pinturas de outras épocas: a aparência não é uma réplica exata da STS-31 de 1990. Marcas NASA são protegidas e não indicam endosso do aplicativo.';
  const source=document.createElement('a');source.href='https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Space%20Shuttle%20(D)';source.target='_blank';source.rel='noopener';source.textContent='Modelo original da NASA ↗';$('.credits').append(source);
+}else{
+ $('#visual-credit').textContent='Casco do Saturn V e módulo lunar Eagle: NASA 3D Resources, adaptados para a vista explodida. Os mapas genéricos do foguete original foram substituídos por materiais e marcações inspirados no SA-506 da Apollo 11. Painéis do SLA e motores J-2 internos são complementos didáticos. Não há patrocínio ou aprovação da NASA.';
+ const source=document.createElement('a');source.href='https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Saturn%20V';source.target='_blank';source.rel='noopener';source.textContent='Modelos originais da NASA ↗';$('.credits').append(source);
 }
 $('.intro .eyebrow').textContent=vehicle.destino;$('.intro h2').textContent=vehicle.intro;$('.intro>p:not(.eyebrow)').textContent=vehicle.descricao;
 const stats=$('.stats');stats.replaceChildren();for(const [value,label]of vehicle.stats){const item=document.createElement('span'),b=document.createElement('b');b.textContent=value;item.append(b,document.createTextNode(label));stats.append(item);}
