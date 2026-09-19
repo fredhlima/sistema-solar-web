@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#04060e"><title>Saturno V · Hangar Apollo 11</title><link rel="stylesheet" href="css/hangar.css?v=5"></head>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#04060e"><title>Saturno V · Hangar Apollo 11</title><link rel="stylesheet" href="css/hangar.css?v=6"></head>
 <body>
 <header class="app-header">
- <a href="index.html" class="back">‹ <span>Hangar</span></a>
+ <a href="hangar.html" class="back">‹ <span>Hangar</span></a>
  <div class="identity"><img src="../assets/logo.svg" alt=""><div><small id="mission-name">MISSÃO APOLLO 11</small><h1 id="vehicle-name">Saturno V</h1><p id="vehicle-subtitle">Hangar interativo · 1969</p></div></div>
  <span class="tag"><i></i> EXPLORAÇÃO 3D</span>
 </header>
@@ -20,6 +20,7 @@
 </section>
 <aside class="painel">
  <div class="aside-scroll">
+  <div class="mobile-sheet-head"><i aria-hidden="true"></i><span id="mobile-sheet-title">PEÇAS DO VEÍCULO</span><button id="close-panel" type="button" aria-label="Fechar painel">×</button></div>
   <div class="intro"><p class="eyebrow">DESTINO: LUA</p><h2>Um foguete.<br>Muitas descobertas.</h2><p>Apollo 11 é a missão. Saturno V é o foguete que a lançou. Só o módulo lunar pousou na Lua.</p><div class="stats"><span><b>110,6 m</b>altura real</span><span><b>3</b>astronautas</span><span><b>1969</b>primeiro pouso</span></div></div>
   <div id="selection-sheet" class="selection-sheet" tabindex="-1">
    <div id="sheet-head" class="sheet-head"><i aria-hidden="true"></i><span>DETALHES DA PEÇA</span><button id="close-detail" type="button" aria-label="Fechar detalhes">×</button></div>
@@ -31,7 +32,13 @@
   <footer id="vehicle-footer">Modelo didático com proporções e detalhes aproximados. Os espaços entre peças facilitam a exploração; esta animação não é a sequência de voo.<br><a href="https://www.nasa.gov/missions/apollo/apollo-11/apollo-11-mission-overview/" target="_blank" rel="noopener">Conheça a Apollo 11 na NASA ↗</a></footer>
  </div>
 </aside>
-<button id="sheet-backdrop" type="button" aria-label="Fechar detalhes da peça" tabindex="-1"></button>
+<button id="sheet-backdrop" type="button" aria-label="Fechar painel" tabindex="-1"></button>
+<nav id="mobile-dock" class="mobile-dock painel" aria-label="Controles principais">
+ <button id="mobile-parts" type="button"><span aria-hidden="true">☷</span>Peças</button>
+ <button id="mobile-explode" type="button" class="primary"><span aria-hidden="true">↔</span><b>Separar</b></button>
+ <button id="mobile-selection" type="button" disabled><span aria-hidden="true">◎</span>Detalhes</button>
+ <button id="mobile-more" type="button" aria-expanded="false"><span aria-hidden="true">•••</span>Mais</button>
+</nav>
 </main>
-<script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script><script type="module" src="js/hangar.js?v=8"></script>
+<script type="importmap">{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}</script><script type="module" src="js/hangar.js?v=9"></script>
 </body></html>

@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {PARTES,posicaoParte} from './saturno-v-data.js?v=3';
-import {criarSaturnoV} from './saturno-v-model.js?v=3';
+import {PARTES,posicaoParte} from './saturno-v-data.js?v=4';
+import {criarSaturnoV} from './saturno-v-model.js?v=4';
 
 export function criarCena({canvas,viewport,labels,onSelect,onPivotChange,partes=PARTES,positionForPart=posicaoParte,buildModel=criarSaturnoV}){
  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});

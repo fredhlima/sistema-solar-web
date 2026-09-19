@@ -1,5 +1,5 @@
-import {obterVeiculo} from './hangar-vehicles.js?v=7';
-import {criarCena} from './hangar-scene.js?v=6';
+import {obterVeiculo} from './hangar-vehicles.js?v=8';
+import {criarCena} from './hangar-scene.js?v=7';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 const vehicle=obterVeiculo(new URLSearchParams(location.search).get('modelo')),PARTES=vehicle.partes,FONTES=vehicle.fontes;
@@ -32,30 +32,44 @@ function renderDetail(p){
  const detail=$('#detail');detail.replaceChildren(element('p',p.nome,'eyebrow'),element('h2',p.apelido),element('p',p.crianca),element('p',p.analogia,'analogy'),element('h3','O que aconteceu com esta peça?'),element('p',p.destino),element('p',p.pergunta,'question'));
  const advanced=element('details');advanced.id='advanced';advanced.append(element('summary','Quero saber mais · dados técnicos'),element('p',p.detalhes));
  const dl=element('dl');for(const [name,value]of p.numeros){const row=element('div');row.append(element('dt',name),element('dd',value));dl.append(row);}advanced.append(dl);
+ if(p.engenharia)advanced.append(element('h3','Como a engenharia resolvia'),element('p',p.engenharia));
+ for(const [title,items]of [['Curiosidades',p.curiosidades],['Missões e momentos importantes',p.missoes]])if(items?.length){const section=element('section',null,'advanced-section');section.append(element('h3',title));const list=element('ul');for(const item of items)list.append(element('li',item));section.append(list);advanced.append(section);}
  const sources=element('div',null,'sources');sources.append(element('h3','Fontes para investigar'));
  for(const key of p.fontes){const f=FONTES[key],a=element('a',f.nome+' ↗');a.href=f.url;a.target='_blank';a.rel='noopener';sources.append(a);}advanced.append(sources);detail.append(advanced);
  document.body.classList.add('has-selection');
  sheet.scrollTop=0;if(!mobile.matches)$('.aside-scroll').scrollTop=0;
 }
-function showDetail(value){
- const open=Boolean(value&&mobile.matches),wasOpen=document.body.classList.contains('detail-open');
+function showPanel(mode){
+ const next=mobile.matches?mode:null,wasOpen=document.body.classList.contains('detail-open')||document.body.classList.contains('parts-open');
+ const open=Boolean(next),details=next==='detail';
  if(open&&!wasOpen)returnFocus=document.activeElement;
- document.body.classList.toggle('detail-open',open);sheet.setAttribute('aria-hidden',String(mobile.matches&&!open));sheet.inert=mobile.matches&&!open;
- sheet.setAttribute('role',open?'dialog':'region');sheet.setAttribute('aria-modal',String(open));sheet.setAttribute('aria-label','Detalhes da peça selecionada');
- if(open&&!wasOpen)sheet.focus?.({preventScroll:true});
- if(!open){sheet.style.transform='';if(wasOpen)returnFocus?.focus?.({preventScroll:true});}
+ document.body.classList.toggle('detail-open',details);document.body.classList.toggle('parts-open',next==='parts');document.body.classList.remove('mobile-tools-open');$('#mobile-more').setAttribute('aria-expanded','false');
+ sheet.setAttribute('aria-hidden',String(mobile.matches&&!details));sheet.inert=mobile.matches&&!details;
+ sheet.setAttribute('role',details?'dialog':'region');sheet.setAttribute('aria-modal',String(details));sheet.setAttribute('aria-label','Detalhes da peça selecionada');
+ $('#mobile-sheet-title').textContent=details?'DETALHES DA PEÇA':'PEÇAS DO VEÍCULO';
+ panel.inert=mobile.matches&&!open;panel.setAttribute('aria-hidden',String(mobile.matches&&!open));
+ if(details&&(!wasOpen||!document.body.classList.contains('detail-open')))sheet.focus?.({preventScroll:true});
+ if(!details)sheet.style.transform='';
+ if(!open&&wasOpen)returnFocus?.focus?.({preventScroll:true});
 }
-function syncDetailMode(){showDetail(document.body.classList.contains?.('detail-open'));if(!mobile.matches){sheet.inert=false;sheet.setAttribute('aria-hidden','false');}}
-mobile.addEventListener('change',syncDetailMode);$('#close-detail').onclick=$('#sheet-backdrop').onclick=()=>showDetail(false);
+function showDetail(value){showPanel(value?'detail':null);}
+function syncDetailMode(){if(!mobile.matches){document.body.classList.remove('detail-open');document.body.classList.remove('parts-open');document.body.classList.remove('mobile-tools-open');sheet.inert=false;sheet.setAttribute('aria-hidden','false');panel.inert=false;panel.setAttribute('aria-hidden','false');}else{sheet.inert=true;sheet.setAttribute('aria-hidden','true');panel.inert=true;panel.setAttribute('aria-hidden','true');}}
+mobile.addEventListener('change',syncDetailMode);$('#close-detail').onclick=$('#close-panel').onclick=$('#sheet-backdrop').onclick=()=>showPanel(null);
 let sheetDrag=null;const sheetHead=$('#sheet-head');
 sheetHead.addEventListener('pointerdown',e=>{if(!mobile.matches)return;sheetDrag={start:e.clientY,dy:0};sheetHead.setPointerCapture?.(e.pointerId);});
 sheetHead.addEventListener('pointermove',e=>{if(!sheetDrag)return;sheetDrag.dy=Math.max(0,e.clientY-sheetDrag.start);sheet.style.transform=`translateY(${sheetDrag.dy}px)`;});
 sheetHead.addEventListener('pointerup',()=>{if(!sheetDrag)return;const close=sheetDrag.dy>80;sheetDrag=null;sheet.style.transform='';showDetail(!close);});
 sheetHead.addEventListener('pointercancel',()=>{sheetDrag=null;sheet.style.transform='';});
+const panel=$('aside'),mobileSheetHead=$('.mobile-sheet-head');let panelDrag=null;
+mobileSheetHead.addEventListener('pointerdown',e=>{if(!mobile.matches)return;panelDrag={start:e.clientY,dy:0};mobileSheetHead.setPointerCapture?.(e.pointerId);});
+mobileSheetHead.addEventListener('pointermove',e=>{if(!panelDrag)return;panelDrag.dy=Math.max(0,e.clientY-panelDrag.start);panel.style.transform=`translateY(${panelDrag.dy}px)`;});
+mobileSheetHead.addEventListener('pointerup',()=>{if(!panelDrag)return;const close=panelDrag.dy>80;panelDrag=null;panel.style.transform='';if(close)showPanel(null);});
+mobileSheetHead.addEventListener('pointercancel',()=>{panelDrag=null;panel.style.transform='';});
 sheet.addEventListener('keydown',e=>{if(!mobile.matches||!document.body.classList.contains('detail-open'))return;if(e.key==='Escape'){e.preventDefault();showDetail(false);}if(e.key==='Tab'){const items=[...sheet.querySelectorAll('button:not(:disabled),a,summary')].filter(el=>el.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===sheet)){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
 function sync(){
  const p=PARTES.find(p=>p.id===state.selected);
  $('#explode').textContent=state.exploded?'Montar conjunto':'Separar as peças';$('#explode').setAttribute('aria-pressed',String(state.exploded));
+ $('#mobile-explode b').textContent=state.exploded?'Montar':'Separar';$('#mobile-explode').setAttribute('aria-pressed',String(state.exploded));$('#mobile-selection').disabled=!p;
  $('#isolate').textContent=state.isolated?'Voltar ao conjunto':'Ver só esta peça';$('#isolate').setAttribute('aria-pressed',String(state.isolated));
  $('#focus').disabled=$('#isolate').disabled=$('#pivot').disabled=!p||!scene;
  $('#view-label').textContent=state.isolated?'EXPLORANDO UMA PEÇA':state.exploded?'VISTA EXPLODIDA · PARA ESTUDAR':'CONJUNTO MONTADO';
@@ -68,6 +82,10 @@ function select(id){const p=PARTES.find(p=>p.id===id);if(!p)return;state.selecte
  renderDetail(p);sync();showDetail(true);
 }
 $('#explode').onclick=()=>{state.exploded=!state.exploded;state.isolated=false;sync();};
+$('#mobile-explode').onclick=()=>$('#explode').onclick();
+$('#mobile-parts').onclick=()=>showPanel('parts');
+$('#mobile-selection').onclick=()=>state.selected&&showPanel('detail');
+$('#mobile-more').onclick=()=>{const open=!document.body.classList.contains('mobile-tools-open');showPanel(null);document.body.classList.toggle('mobile-tools-open',open);$('#mobile-more').setAttribute('aria-expanded',String(open));};
 $('#isolate').onclick=()=>{state.isolated=!state.isolated;if(state.isolated)state.exploded=true;sync();};
 $('#overview').onclick=()=>{state.isolated=false;sync();scene?.overview();};
 $('#focus').onclick=()=>scene?.focus();$('#zoom-in').onclick=()=>scene?.zoom(.8);$('#zoom-out').onclick=()=>scene?.zoom(1.25);

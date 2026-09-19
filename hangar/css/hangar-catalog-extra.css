@@ -1,0 +1,13 @@
+.future {
+  background: linear-gradient(160deg, #121b2aa0, #080c15e8);
+  border-style: dashed;
+}
+.future .illustration {
+  height: 230px;
+  background: radial-gradient(ellipse at center, #233d5c55, transparent 68%);
+}
+.building { color: #f2bd59; }
+.footnote { max-width: 780px; }
+@media (max-width: 650px) {
+  .future .illustration { height: 215px; }
+}

@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {PARTES} from './saturno-v-data.js?v=3';
+import {PARTES} from './saturno-v-data.js?v=4';
 import {criarPecaSaturnoNASA,criarModuloLunarNASA} from './apollo-nasa.js?v=2';
 
 export function criarSaturnoV(){
