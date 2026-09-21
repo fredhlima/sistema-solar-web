@@ -1,7 +1,8 @@
 import * as T from 'three';
 
-// Snapshots of the simplified models already used by motor3d.js. They are
-// intentionally not redesigned here: these pages only expose existing work.
+// Lightweight procedural fallbacks from motor3d.js. The Hangar loads the
+// official NASA models first; these keep the page usable if WebGL asset loading
+// is interrupted or unsupported.
 export function criarHubbleAtual(){
  const g=new T.Group(),prata=new T.MeshStandardMaterial({color:0xc8ccd4,metalness:.92,roughness:.26}),escuro=new T.MeshStandardMaterial({color:0x9aa0aa,metalness:.7,roughness:.4}),boomMat=new T.MeshStandardMaterial({color:0x888e98,metalness:.7,roughness:.5});
  const tubo=new T.Mesh(new T.CylinderGeometry(.34,.34,1.35,32),prata);tubo.rotation.z=Math.PI/2;g.add(tubo);
@@ -27,6 +28,6 @@ export function criarWebbAtual(){
 }
 
 export const MODELOS_FUTUROS={
- hubble:{id:'hubble',nome:'Hubble',missao:'OBSERVATÓRIO · 1990',estado:'Modelo simplificado atual',descricao:'Este é o modelo que já aparece no Sistema Solar. A futura versão do Hangar poderá detalhar instrumentos, manutenção e estrutura.',fonte:'https://science.nasa.gov/mission/hubble/observatory/design/',criar:criarHubbleAtual},
- jwst:{id:'jwst',nome:'James Webb',missao:'OBSERVATÓRIO · 2021',estado:'Modelo simplificado atual',descricao:'Este é o modelo que já aparece no Sistema Solar. A futura versão poderá explorar espelhos, escudo solar e instrumentos.',fonte:'https://science.nasa.gov/mission/webb/spacecraft-overview/',criar:criarWebbAtual}
+ hubble:{id:'hubble',nome:'Hubble',missao:'OBSERVATÓRIO · 1990',estado:'Modelo oficial NASA · prévia',descricao:'Modelo oficial da NASA com revestimento térmico, painéis solares, antenas e detalhes externos. A exploração didática por peças ainda está em construção.',fonte:'https://science.nasa.gov/mission/hubble/observatory/design/',arquivo:'assets/models/nasa/hubble.glb',criarFallback:criarHubbleAtual},
+ jwst:{id:'jwst',nome:'James Webb',missao:'OBSERVATÓRIO · 2021',estado:'Modelo oficial NASA · prévia',descricao:'Modelo oficial da NASA com espelho segmentado, escudo solar multicamada e estrutura de suporte. A exploração didática por peças ainda está em construção.',fonte:'https://science.nasa.gov/mission/webb/spacecraft-overview/',arquivo:'assets/models/nasa/webb.glb',criarFallback:criarWebbAtual}
 };
