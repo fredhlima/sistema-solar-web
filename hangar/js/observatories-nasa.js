@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js?v=1';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js?v=2';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js?v=1';
 
 const NASA_REVISION='11ebb4ee043715aefbba6aeec8a61746fad67fa7';
