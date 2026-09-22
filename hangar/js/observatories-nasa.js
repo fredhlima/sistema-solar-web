@@ -2,16 +2,18 @@ import * as T from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js?v=1';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js?v=1';
 
+const NASA_REVISION='11ebb4ee043715aefbba6aeec8a61746fad67fa7';
+const NASA_RAW=`https://raw.githubusercontent.com/nasa/NASA-3D-Resources/${NASA_REVISION}/3D%20Models`;
 const FILES={
- hubble:new URL('../assets/models/nasa/hubble.glb',import.meta.url).href,
- jwst:new URL('../assets/models/nasa/webb.glb',import.meta.url).href
+ hubble:`${NASA_RAW}/Hubble%20Space%20Telescope%20(A)/Hubble%20Space%20Telescope%20(A).glb`,
+ jwst:`${NASA_RAW}/James%20Webb%20Space%20Telescope%20(A)/James%20Webb%20Space%20Telescope%20(A).glb`
 };
 
 export async function carregarObservatorioNASA(id,onProgress=()=>{}){
  const arquivo=FILES[id];
  if(!arquivo)throw new Error(`Observatório NASA desconhecido: ${id}`);
  const draco=new DRACOLoader();
- draco.setDecoderPath(new URL('../lib/addons/libs/draco/gltf/',import.meta.url).href);
+ draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
  const loader=new GLTFLoader();loader.setDRACOLoader(draco);
  try{
   const gltf=await loader.loadAsync(arquivo,event=>onProgress(event.total?event.loaded/event.total:0));
