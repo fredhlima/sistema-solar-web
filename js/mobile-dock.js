@@ -5,12 +5,14 @@
 // FASE 1: dock + título + nível/engrenagem + HUD + transporte + calendário +
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
-import { t, trocarIdioma, getIdioma } from './i18n.js?v=32';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=39';
 
-const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-const MESF = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const pad2 = (n) => String(n).padStart(2, '0');
-const fmtData = (d) => `${d.getDate()} ${MES[d.getMonth()]} ${d.getFullYear()} ▾`;
+// Usa o mesmo formatador do resto do app (respeita o idioma escolhido em
+// Settings) em vez de um array de meses fixo em pt-BR — achado do Fred
+// (16/09/2026): com Language=EN, essa pílula continuava mostrando "abr",
+// "fev" etc. porque tinha seu próprio array hardcoded, alheio ao i18n.
+const fmtData = (d) => `${formatarDataCompacta(d)} ▾`;
 
 const SVG_LOGO = `<svg viewBox="0 0 1024 1024">
   <defs>
@@ -57,7 +59,7 @@ const GRUPOS_EXTRA = [
 ];
 const normalizar = (s) => (s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 
-export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso }) {
+export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso, premium }) {
   // ---------- gating ----------
   // Decisão do Fred (03/08/2026): TABLET TAMBÉM É BLOQUEADO em retrato. O gate
   // tinha `max-width: 900px`, que pegava iPad de 820/834px mas deixava passar o
@@ -168,7 +170,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
         <span class="mdock-cal-nav" id="mdock-cal-next">›</span>
       </div>
       <div class="mdock-cal-semana">
-        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+        ${t('diasSemanaAbrev').map((d) => `<div>${d}</div>`).join('')}
       </div>
       <div class="mdock-cal-dias" id="mdock-cal-dias"></div>
       <button class="mdock-cal-hoje" id="mdock-cal-hoje">${t('hoje')}</button>
@@ -203,6 +205,22 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     estado.settingsOpen = false;
     render();
   }
+
+  // Esc fecha o painel/calendário/settings do dock que estiver aberto — mesma
+  // disciplina de cada overlay de tela cheia (paywall.js, quiz.js, etc., que já
+  // escutam Esc para si mesmos). Sem isto, no Android o botão Voltar do sistema
+  // (que main.js liga nesse mesmo Esc via __voltarAndroid) saía do app inteiro
+  // com o painel Explorar/Experiências aberto, em vez de só fechá-lo (achado do
+  // Fred em teste manual, 17/09/2026).
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (estado.panel || estado.calOpen || estado.settingsOpen) fecharTudo();
+  });
+
+  // Exposto para o back button nativo (ver __voltarAndroid em main.js): diz se
+  // há algo deste dock para fechar, sem depender de nenhuma outra suposição de
+  // DOM externa.
+  window.__mdockAberto = () => Boolean(estado.panel || estado.calOpen || estado.settingsOpen);
 
   // Exclusividade de janelas: qualquer superfície nova fecha as páginas de
   // ui-root abertas (eventos/comparador/quiz/você/paywall/missão) — sem isto
@@ -530,8 +548,10 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       { label: t('btnTamanhos'), icone: SVG_COMPARAR, acao: acoes.abrirComparador },
       { label: t('btnQuiz'), icone: SVG_QUIZ, acao: acoes.abrirQuiz },
       { label: t('btnVoce'), icone: SVG_VOCE, acao: acoes.abrirVoce },
-      acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes },
-      acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares },
+      // estacoes-mares é 100% Pro (sem provinha) — mesmo selo usado no resto
+      // do app (.premium-cadeado), já que o dock não tinha nenhum até agora.
+      acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes, pro: !!premium && !premium.recurso('estacoes-mares') },
+      acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares, pro: !!premium && !premium.recurso('estacoes-mares') },
     ].filter(Boolean).forEach((it) => {
       const b = document.createElement('button');
       b.className = 'mdock-xp-btn' + (it.tour ? ' mdock-xp-btn-tour' : '');
@@ -539,6 +559,12 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       const span = document.createElement('span');
       span.textContent = it.label;
       b.appendChild(span);
+      if (it.pro) {
+        const selo = document.createElement('span');
+        selo.className = 'premium-cadeado';
+        selo.textContent = t('proBadge');
+        b.appendChild(selo);
+      }
       b.onclick = () => { estado.panel = null; render(); fecharPaginas(); it.acao(); };
       wrap.appendChild(b);
     });
@@ -671,7 +697,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
 
     // calendário
     if (estado.calOpen) {
-      $('mdock-cal-mes').textContent = `${MESF[estado.calM]} ${estado.calY}`;
+      $('mdock-cal-mes').textContent = `${t('meses')[estado.calM]} ${estado.calY}`;
       const dias = $('mdock-cal-dias');
       dias.innerHTML = '';
       const primeiro = new Date(estado.calY, estado.calM, 1).getDay();

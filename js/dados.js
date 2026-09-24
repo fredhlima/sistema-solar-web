@@ -547,7 +547,7 @@ export const DADOS = { corpos: [
         { rotulo: 'Duração do ano', valor: '11,86 anos' },
         { rotulo: 'Duração do dia', valor: '9,93 horas' },
         { rotulo: 'Temperatura do núcleo', valor: '~24.000 K' },
-        { rotulo: 'Luas', valor: '95+ (4 galileanas)' }
+        { rotulo: 'Luas', valor: 'Mais de 90, e contando (4 galileanas)' }
       ],
       curiosidades: [
         'Caberiam 1.300 Terras dentro de Júpiter, ou 5 bilhões de humanos — é verdadeiramente gigantesco.',
@@ -566,7 +566,7 @@ export const DADOS = { corpos: [
         composicao: 'Hidrogênio molecular (H₂), hélio (He), traços de metano (CH₄), amônia (NH₃), água (H₂O), núcleo rochoso/gelado ~20-30 M⊕.',
         temperatura: 'Topo das nuvens: -110 °C; núcleo: ~24.000 K.',
         missoes: ['Pioneer 10-11 (1973–1974)', 'Voyager 1-2 (1979)', 'Galileo (1995–2003)', 'JUNO (2016–presente)', 'Europa Clipper (2024–presente)'],
-        texto: 'Júpiter é o primeiro planeta gasoso, ~318 M⊕. Formou-se in situ ~4,5 Ga com núcleo de silicatos/gelos e envelope H₂/He primordial. Migração Grande ninguém (Grand Tack) moldou formação do sistema. Período rotação rápida (9,93h) causa achatamento equatorial. Banda/zona de nuvens alt/alt-nuvem em 80 níveis. Campo magnético Dipolar 4 G, maior magnetosfera do sistema solar. 95 luas descobertas, incluindo 4 galileanas; possível anel fraco.'
+        texto: 'Júpiter é o maior planeta, um gigante gasoso com ~318 massas terrestres (M⊕). Formou-se há ~4,5 bilhões de anos, com um núcleo de rocha e gelo envolto por hidrogênio e hélio. Pela hipótese do Grand Tack, sua migração no início do sistema solar moldou a formação dos planetas rochosos. A rotação rápida (9,93 h) achata o planeta nos polos. As nuvens se organizam em faixas claras (zonas) e escuras (cinturões). O campo magnético (~4 gauss no equador) cria a maior magnetosfera do sistema solar. Tem mais de 90 luas conhecidas (o número cresce a cada nova busca), incluindo as 4 galileanas, e um sistema de anéis tênue, descoberto pela Voyager 1 em 1979.'
       }
     }
   },
@@ -798,7 +798,7 @@ export const DADOS = { corpos: [
         { rotulo: 'Duração do ano', valor: '29,46 anos' },
         { rotulo: 'Duração do dia', valor: '10,7 horas' },
         { rotulo: 'Densidade', valor: '0,687 g/cm³ (flutuaria na água)' },
-        { rotulo: 'Luas', valor: '274 confirmadas em 2025 (2 principais: Titã, Encélado)' }
+        { rotulo: 'Luas', valor: 'Mais de 270, e contando (2 principais: Titã, Encélado)' }
       ],
       curiosidades: [
         'Saturno é menos denso que a água — se colocado em uma banheira cósmica, ele flutuaria!',

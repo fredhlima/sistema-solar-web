@@ -21,6 +21,7 @@ export function iniciarPaywall({ premium, t }) {
       <div class="paywall-badge">${t('proBadge')}</div>
       <h2 class="paywall-titulo">${t('paywallTitulo')}</h2>
       <p class="paywall-subtitulo">${t('paywallSubtitulo')}</p>
+      <p class="paywall-contexto" hidden></p>
 
       <p class="paywall-reciprocidade">${t('paywallReciprocidade')}</p>
 
@@ -29,6 +30,7 @@ export function iniciarPaywall({ premium, t }) {
         <li>${t('paywallBeneficio2')}</li>
         <li>${t('paywallBeneficio3')}</li>
         <li>${t('paywallBeneficio4')}</li>
+        <li>${t('paywallBeneficio5')}</li>
       </ul>
 
       <div class="paywall-preco">${t('paywallPreco')}</div>
@@ -39,7 +41,7 @@ export function iniciarPaywall({ premium, t }) {
       <button id="paywall-comprar" class="paywall-comprar">${t('paywallComprar')}</button>
       <button id="paywall-restaurar" class="paywall-restaurar">${t('paywallRestaurar')}</button>
 
-      <div class="paywall-rodape">${t('paywallLegal')}</div>
+      ${premium?.provider === 'revenuecat' ? '' : `<div class="paywall-rodape">${t('paywallLegal')}</div>`}
     </div>
   `;
   root.appendChild(overlay);
@@ -170,12 +172,88 @@ export function iniciarPaywall({ premium, t }) {
     }
   }, { capture: true });
 
+  const liBeneficios = Array.from(overlay.querySelectorAll('.paywall-beneficios li'));
+
+  // Mapeamento recurso → índice do benefício correspondente (0-based)
+  const RECURSO_BENEFICIO = {
+    'quiz': 0,
+    'missoes': 1,
+    'eventos': 2,
+    'voce-no-espaco': 3,
+    'estacoes-mares': 4
+  };
+
   // Função abrir
-  function abrir(idRecurso) {
+  async function abrir(idRecurso) {
     clearTimeout(timerFechar);
     timerFechar = null;
     overlay.style.display = 'flex';
     estado = 'repouso';
+
+    // Atualiza contexto: se existe chave paywallContexto_<idRecurso>, mostra;
+    // senão esconde. Converte hífens em underscores para acessar chave de tradução.
+    const pContexto = overlay.querySelector('.paywall-contexto');
+    if (idRecurso) {
+      const chaveContexto = 'paywallContexto_' + idRecurso.replace(/-/g, '_');
+      const textoContexto = t(chaveContexto);
+      // Trata como ausente se voltar a própria chave ou vazio
+      if (textoContexto && textoContexto !== chaveContexto) {
+        pContexto.textContent = textoContexto;
+        pContexto.hidden = false;
+      } else {
+        pContexto.hidden = true;
+      }
+    } else {
+      pContexto.hidden = true;
+    }
+
+    // Reordena benefícios: o correspondente ao idRecurso vai pro topo com
+    // destaque, os demais sem destaque em ordem original
+    // Parte sempre da ordem ORIGINAL (liBeneficios, guardada na criação):
+    // indexar pela ordem atual do DOM erraria o item a partir da 2ª abertura,
+    // porque a abertura anterior já moveu um <li> para o topo.
+    const ulBeneficios = overlay.querySelector('.paywall-beneficios');
+    if (ulBeneficios) {
+      liBeneficios.forEach(li => ulBeneficios.appendChild(li));
+      // Sempre remove classe de destaque de todos
+      Array.from(ulBeneficios.querySelectorAll('li')).forEach(li => {
+        li.classList.remove('paywall-beneficio-destaque');
+      });
+
+      // Se há idRecurso válido, move o benefício correspondente pro topo
+      if (idRecurso && RECURSO_BENEFICIO.hasOwnProperty(idRecurso)) {
+        const indiceDestaque = RECURSO_BENEFICIO[idRecurso];
+        const lis = liBeneficios;
+
+        if (indiceDestaque < lis.length) {
+          const liDestaque = lis[indiceDestaque];
+          liDestaque.classList.add('paywall-beneficio-destaque');
+          // Move pro início usando firstChild
+          ulBeneficios.insertBefore(liDestaque, ulBeneficios.firstChild);
+        }
+      }
+    }
+
+    // Atualiza preço
+    const divPreco = overlay.querySelector('.paywall-preco');
+    if (premium.provider === 'revenuecat') {
+      // Mostra placeholder enquanto carrega
+      divPreco.textContent = t('paywallPrecoSemValor');
+      try {
+        const preco = await premium.precoLocal();
+        if (preco) {
+          const textoPreco = t('paywallPrecoLoja').replace('{preco}', preco);
+          divPreco.textContent = textoPreco;
+        }
+      } catch (e) {
+        console.error('Erro ao carregar preço local:', e);
+        // Mantém o placeholder se falhar
+      }
+    } else {
+      // Mock/navegador: mantém o texto padrão
+      divPreco.textContent = t('paywallPreco');
+    }
+
     atualizarUI();
   }
 

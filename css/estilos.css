@@ -1128,6 +1128,24 @@ button, input, select, textarea {
   gap: 12px;
 }
 
+.eventos-btn-toggle-passados {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #93a0b8;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  align-self: flex-start;
+}
+
+.eventos-btn-toggle-passados:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #e6ecf5;
+}
+
 .evento-item {
   background: rgba(92, 200, 255, 0.08);
   border: 1px solid rgba(92, 200, 255, 0.16);

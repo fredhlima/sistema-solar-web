@@ -4,7 +4,7 @@
 // e os brilhos são aleatórios). Liga/desliga pelo botão ♫ na barra de ações;
 // preferência persistida. O AudioContext só nasce/resume em gesto do usuário
 // (política de autoplay); com a aba oculta o contexto é suspenso (bateria).
-import { getIdioma } from './i18n.js?v=32';
+import { getIdioma } from './i18n.js?v=39';
 
 const CHAVE_STORAGE = 'sistema-solar-musica';
 
@@ -210,21 +210,42 @@ export function iniciarMusica() {
   };
   if (barra) barra.appendChild(btn);
 
-  // Autoplay: se a preferência é "ligada", começa no primeiro gesto
+  // Autoplay: se a preferência é "ligada", começa no primeiro gesto.
+  // Captura (não bubble): um botão que chama stopPropagation() no clique
+  // (vários painéis fazem isso) nunca deixaria o evento borbulhar até o
+  // document — em fase de captura o listener já disparou antes disso,
+  // então o primeiro toque em QUALQUER lugar da página conta.
   if (ligada) {
     const aoPrimeiroGesto = () => {
       if (ligada && !tocando) ligar();
     };
-    document.addEventListener('pointerdown', aoPrimeiroGesto, { once: true });
-    document.addEventListener('click', aoPrimeiroGesto, { once: true });
-    document.addEventListener('keydown', aoPrimeiroGesto, { once: true });
+    const opcoes = { once: true, capture: true };
+    document.addEventListener('pointerdown', aoPrimeiroGesto, opcoes);
+    document.addEventListener('click', aoPrimeiroGesto, opcoes);
+    document.addEventListener('keydown', aoPrimeiroGesto, opcoes);
   }
 
-  // Aba oculta: suspende o áudio (bateria); visível de novo: retoma
+  // Aba oculta: suspende o áudio (bateria); visível de novo: retoma.
+  // No Android nativo, qualquer overlay do sistema que rouba o foco por um
+  // instante (diálogo de permissão, o aviso único de "tela cheia" do modo
+  // imersivo, puxar a bandeja de notificações) pode deixar a AudioTrack
+  // nativa "congelada" mesmo depois do ctx.resume() — o AudioContext do JS
+  // volta a dizer "running", mas o WebView não retoma de fato a track no
+  // nível do SO (visto no `dumpsys media.audio_flinger`: frozen-while-active).
+  // Por isso, ao voltar a ficar visível, em vez de só resume() reconstruímos
+  // o grafo do zero — é a única forma confiável de garantir que volta a
+  // tocar de verdade, não só "no papel".
   document.addEventListener('visibilitychange', () => {
-    if (!ctx || !tocando) return;
-    if (document.hidden) ctx.suspend();
-    else ctx.resume();
+    if (!tocando) return;
+    if (document.hidden) {
+      if (ctx) ctx.suspend();
+    } else {
+      if (ctx) { try { ctx.close(); } catch (e) { /* já fechado */ } }
+      ctx = null;
+      nosAtivos.clear();
+      if (timerAgenda) { clearInterval(timerAgenda); timerAgenda = null; }
+      ligar();
+    }
   });
 
   return {

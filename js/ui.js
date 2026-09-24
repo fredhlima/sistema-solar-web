@@ -1,4 +1,4 @@
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=32';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=39';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -60,6 +60,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     modoIncluirSolComparador: false,
     incluirSolComparador: false,
     missaoSelecionada: null,
+    mostrarEventosPassados: false,
   };
 
   // Efeito IKEA: favoritar astros cria um senso de posse ("minha coleção do
@@ -366,29 +367,34 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       itensExp.appendChild(btnVoce);
     }
 
-    // Estações do Ano (Experiências)
+    // Estações do Ano (Experiências) — 100% Pro (ITENS_GRATIS['estacoes-mares']
+    // é vazio), mesmo padrão de selo+gate usado nos botões de Eventos.
     if (abrirEstacoes) {
       const btnEstacoes = document.createElement('button');
       btnEstacoes.className = 'botao';
       btnEstacoes.id = 'btn-estacoes';
       btnEstacoes.innerHTML = t('btnEstacoes');
       btnEstacoes.onclick = () => {
+        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-estacoes');
         abrirEstacoes();
       };
+      if (!premiumTem('estacoes-mares')) btnEstacoes.appendChild(criarSeloPro());
       itensExp.appendChild(btnEstacoes);
     }
 
-    // Marés (Experiências)
+    // Marés (Experiências) — mesmo recurso Pro que Estações.
     if (abrirMares) {
       const btnMares = document.createElement('button');
       btnMares.className = 'botao';
       btnMares.id = 'btn-mares';
       btnMares.innerHTML = t('btnMares');
       btnMares.onclick = () => {
+        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-mares');
         abrirMares();
       };
+      if (!premiumTem('estacoes-mares')) btnMares.appendChild(criarSeloPro());
       itensExp.appendChild(btnMares);
     }
 
@@ -1167,17 +1173,21 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const btnEstacoesInfo = conteudo.querySelector('#info-estacoes-btn');
     if (btnEstacoesInfo && abrirEstacoes) {
       btnEstacoesInfo.onclick = () => {
+        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-estacoes');
         abrirEstacoes();
       };
+      if (!premiumTem('estacoes-mares')) btnEstacoesInfo.appendChild(criarSeloPro());
     }
 
     const btnMaresInfo = conteudo.querySelector('#info-mares-btn');
     if (btnMaresInfo && abrirMares) {
       btnMaresInfo.onclick = () => {
+        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-mares');
         abrirMares();
       };
+      if (!premiumTem('estacoes-mares')) btnMaresInfo.appendChild(criarSeloPro());
     }
 
     // Favoritar: alterna estado, persiste e atualiza o marcador na lista
@@ -1308,6 +1318,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     }
     textoElem.textContent = texto;
 
+    btnAnterior.textContent = t('anterior');
     btnAnterior.style.visibility = estado.paradaTourAtual === 0 ? 'hidden' : 'visible';
     btnProximo.textContent = estado.paradaTourAtual === PARADAS_TOUR.length - 1 ? t('concluir') : t('proximo');
   }
@@ -1415,13 +1426,16 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     }
 
     const painel = document.getElementById('painel-eventos');
-    const conteudo = document.getElementById('eventos-conteudo-inner');
 
     painel.classList.add('aberto');
     estado.painelEventosAberto = true;
     document.body.classList.add('com-painel-dir');
 
-    // Atualizar lista de eventos
+    renderizarListaEventos();
+  }
+
+  function renderizarListaEventos() {
+    const conteudo = document.getElementById('eventos-conteudo-inner');
     conteudo.innerHTML = '';
 
     if (!eventos || eventos.length === 0) {
@@ -1429,19 +1443,46 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       return;
     }
 
-    const msSim = motor.getDataSimulada().getTime();
+    // "Já passou" é relativo ao relógio REAL (Date.now()), não ao simulado.
+    // O simulado anda sozinho a 1 dia/s desde a carga da página (motor3d.js,
+    // _velocidade padrão) só pra dar vida às órbitas — em poucos segundos de
+    // uso ele já dispara dias/semanas à frente do real, o que fazia eventos
+    // genuinamente futuros aparecerem como passados (achado 23/09/2026).
+    // Uma lista de efemérides responde "isso já aconteceu de verdade?", não
+    // "isso ficou pra trás do carrossel animado".
+    const msAgora = Date.now();
 
     // Next future event (calculated once, outside loop)
     const ordenados = [...eventos].sort((a, b) => Date.parse(a.dataISO) - Date.parse(b.dataISO));
-    const proximoFuturo = ordenados.find(e => Date.parse(e.dataISO + 'T00:00:00Z') >= msSim) || null;
+    const proximoFuturo = ordenados.find(e => Date.parse(e.dataISO + 'T00:00:00Z') >= msAgora) || null;
 
-    ordenados.forEach(evento => {
+    // Eventos passados ficam ocultos por padrão.
+    const qtdPassados = ordenados.filter(e => Date.parse(e.dataISO + 'T00:00:00Z') < msAgora).length;
+
+    if (qtdPassados > 0) {
+      const btnToggle = document.createElement('button');
+      btnToggle.className = 'eventos-btn-toggle-passados';
+      btnToggle.textContent = estado.mostrarEventosPassados
+        ? t('ocultarEventosPassados')
+        : `${t('verEventosPassados')} (${qtdPassados})`;
+      btnToggle.onclick = () => {
+        estado.mostrarEventosPassados = !estado.mostrarEventosPassados;
+        renderizarListaEventos();
+      };
+      conteudo.appendChild(btnToggle);
+    }
+
+    const listaExibir = estado.mostrarEventosPassados
+      ? ordenados
+      : ordenados.filter(e => Date.parse(e.dataISO + 'T00:00:00Z') >= msAgora);
+
+    listaExibir.forEach(evento => {
       const msEvento = Date.parse(evento.dataISO + 'T00:00:00Z');
 
       const div = document.createElement('div');
       div.className = 'evento-item';
 
-      const jaPassou = msEvento < msSim;
+      const jaPassou = msEvento < msAgora;
       if (jaPassou) {
         div.classList.add('evento-passado');
       }
@@ -1902,10 +1943,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     // Vão embrulhadas no mesmo evento de progresso que os botões do desktop
     // disparam, para o XP contar igual nos dois shells.
     abrirEstacoes: abrirEstacoes
-      ? () => { progressoEvento('abriu-estacoes'); abrirEstacoes(); }
+      ? () => { if (!premiumExigir('estacoes-mares')) return; progressoEvento('abriu-estacoes'); abrirEstacoes(); }
       : undefined,
     abrirMares: abrirMares
-      ? () => { progressoEvento('abriu-mares'); abrirMares(); }
+      ? () => { if (!premiumExigir('estacoes-mares')) return; progressoEvento('abriu-mares'); abrirMares(); }
       : undefined,
     // Exclusividade de janelas (dock): fecha qualquer página/overlay aberto —
     // eventos, card de missão, comparador, quiz, você-no-espaço, paywall —

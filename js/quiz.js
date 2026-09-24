@@ -1,8 +1,8 @@
 // Quiz espacial com pacotes de perguntas, medalhas e persistência
 // Exporta: iniciarQuiz({ motor, dados, premium }) -> { abrir }
 
-import { getIdioma } from './i18n.js';
-import { QUIZ_PACOTES } from './quiz-dados.js?v=6';
+import { getIdioma } from './i18n.js?v=39';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=7';
 
 const TEXTOS = {
   pt: {

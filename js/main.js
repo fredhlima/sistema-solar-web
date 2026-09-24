@@ -1,23 +1,24 @@
 import * as THREE from 'three';
-import { DADOS } from './dados.js?v=23';
+import { DADOS } from './dados.js?v=25';
 import { SistemaSolar3D } from './motor3d.js?v=61';
-import { iniciarUI } from './ui.js?v=51';
-import { iniciarMobileDock } from './mobile-dock.js?v=19';
-import { EVENTOS } from './eventos.js?v=10';
-import { MISSOES } from './missoes.js?v=12';
+import { iniciarUI } from './ui.js?v=60';
+import { iniciarMobileDock } from './mobile-dock.js?v=28';
+import { EVENTOS } from './eventos.js?v=11';
+import { MISSOES } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
-import { QUIZ_PACOTES } from './quiz-dados.js?v=6';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=7';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=32';
-import { criarPremium } from './premium.js?v=8';
-import { iniciarPaywall } from './paywall.js?v=4';
-import { iniciarQuiz } from './quiz.js?v=14';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=4';
-import { iniciarEstacoes } from './estacoes.js?v=43';
-import { iniciarMares } from './mares.js?v=30';
-import { iniciarProgresso } from './progresso.js?v=12';
-import { iniciarMusica } from './musica.js?v=10';
-import { iniciarTutorial } from './tutorial.js?v=13';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=39';
+import { criarPremium } from './premium.js?v=12';
+import { iniciarPaywall } from './paywall.js?v=9';
+import { iniciarQuiz } from './quiz.js?v=17';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=6';
+import { iniciarEstacoes } from './estacoes.js?v=50';
+import { iniciarMares } from './mares.js?v=37';
+import { iniciarProgresso } from './progresso.js?v=15';
+import { criarAvaliacao } from './avaliacao.js?v=1';
+import { iniciarMusica } from './musica.js?v=18';
+import { iniciarTutorial } from './tutorial.js?v=20';
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -54,7 +55,8 @@ const aoProgresso = (tipo, extra) =>
   document.dispatchEvent(new CustomEvent('sim:progresso', { detail: { tipo, ...(extra || {}) } }));
 const estacoes = iniciarEstacoes({ motor, dados: DADOS, premium, aoProgresso });
 const mares = iniciarMares({ motor, dados: DADOS, premium, aoProgresso });
-const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: QUIZ_PACOTES, premium });
+const avaliacao = criarAvaliacao();
+const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: QUIZ_PACOTES, premium, aoConquistar: avaliacao.pedirSeOportuno });
 const acoesUI = iniciarUI({
   motor, dados: DADOS, eventos: EVENTOS, missoes: MISSOES, trajetorias, premium,
   abrirQuiz: quiz.abrir, abrirVoce: voce.abrir, abrirEstacoes: estacoes.abrir, abrirMares: mares.abrir,
@@ -65,7 +67,7 @@ audioCompartilhado.obterCtx = musica.obterCtx;
 
 // Dock mobile (UI paralela em toque+paisagem; desktop/web fica intacto).
 // Reusa o motor real e as ações do ui.js — ver mobile-dock.js.
-iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir });
+iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir, premium });
 
 // Tutorial de onboarding: depois do dock, pra checar body.modo-dock (já
 // setado por iniciarMobileDock) e mirar os alvos certos (desktop ou dock).
@@ -100,6 +102,32 @@ window.__mares = mares;
 // Exposto só para os testes de geometria da cena (tests/validacao-palco.mjs)
 window.__THREE_V3 = THREE.Vector3;
 window.__musica = musica;
+
+// Chamado pelo MainActivity.java a cada toque no botão Voltar do sistema
+// Android (ver onBackPressed nativo). Sem isto o WebView não tem histórico de
+// navegação (é uma SPA sem pushState), então o comportamento padrão do
+// BridgeActivity é sair do app direto no primeiro toque — mesmo com um painel
+// (Explorar/Experiências/paywall/quiz/...) aberto por cima (achado do Fred em
+// teste manual, 17/09/2026). Reaproveita o mesmo Esc que cada overlay já
+// escuta para si (paywall.js, quiz.js, progresso.js, voce-no-espaco.js,
+// palco.js, tutorial.js) em vez de duplicar a lógica de fechamento de cada um.
+// Retorna true se havia algo pra fechar (o Java então NÃO sai do app) ou false
+// se a cena estava "vazia" (o Java segue com o comportamento padrão de saída).
+window.__voltarAndroid = function () {
+  const overlayAberto = [
+    '.paywall-overlay', '.quiz-overlay', '.voce-no-espaco-overlay',
+    '.progresso-overlay', '.palco-overlay', '.tutorial-overlay',
+  ].some((sel) => {
+    const el = document.querySelector(sel);
+    return el && getComputedStyle(el).display !== 'none';
+  });
+  const dockAberto = Boolean(window.__mdockAberto && window.__mdockAberto());
+  const algoAberto = overlayAberto || dockAberto;
+  if (algoAberto) {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  }
+  return algoAberto;
+};
 
 // Ponte de depuração via DOM (funciona mesmo em contextos JS isolados):
 // dispare `document.dispatchEvent(new Event('sim:dump'))` e leia

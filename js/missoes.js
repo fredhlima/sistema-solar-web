@@ -177,7 +177,7 @@ export const MISSOES = [
     nome: 'Perseverance',
     cor: '#c1440e',
     descricao: 'Rover do tamanho de um carro procurando sinais de vida microbiana antiga em Marte. Coleta e guarda amostras de rocha marciana para uma futura missão de retorno à Terra. Carregou o pequeno helicóptero Ingenuity, primeiro voo motorizado em outro planeta (2021).',
-    estado: 'Ativa — explorando a cratera Jezero em Marte',
+    estado: 'Ativa — explorando a borda da cratera Jezero em Marte',
     interestelar: false,
     paradas: [
       { corpo: 'terra', data: '2020-07-30', rotulo: 'Lançamento de Cabo Canaveral' },

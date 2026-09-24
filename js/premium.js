@@ -94,6 +94,20 @@ class PlayBillingProvider {
     const { customerInfo } = await plugin.restorePurchases();
     return this._proAtivo(customerInfo);
   }
+
+  // Mesmo pacote que comprar() usa (availablePackages[0]): a oferta atual do
+  // RevenueCat tem um único pacote, o Explorador Pro.
+  async precoLocal() {
+    try {
+      const plugin = await this._garantirConfigurado();
+      const { current } = await plugin.getOfferings();
+      const priceString = current?.availablePackages?.[0]?.product?.priceString;
+      return priceString || null;
+    } catch (e) {
+      console.error('Erro ao obter preço local:', e);
+      return null;
+    }
+  }
 }
 
 const NATIVO = estaNoAppNativo();
@@ -112,6 +126,7 @@ const TUDO_LIBERADO = !NATIVO;
 
 export function criarPremium() {
   let estado = { ativo: false, transacaoId: null, data: null };
+  let precoLocalCache = null;
   const listeners = new Set();
 
   // Tenta ler do localStorage; fallback memória se indisponível (node, modo seguro)
@@ -286,6 +301,26 @@ export function criarPremium() {
         // sem-op se localStorage indisponível
       }
       notificarListeners();
+    },
+
+    async precoLocal() {
+      // Devolve o preço local da loja (string como "R$ 12,90") ou null.
+      // Cache: guarda a primeira string obtida com sucesso.
+      if (precoLocalCache !== null) {
+        return precoLocalCache;
+      }
+      if (PROVIDER === 'revenuecat' && billing) {
+        try {
+          const preco = await billing.precoLocal();
+          if (preco) {
+            precoLocalCache = preco;
+            return preco;
+          }
+        } catch (e) {
+          console.error('Erro ao obter preço local do billing:', e);
+        }
+      }
+      return null;
     },
 
     provider: PROVIDER

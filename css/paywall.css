@@ -70,6 +70,14 @@
   line-height: 1.5;
 }
 
+.paywall-contexto {
+  font-size: 13px;
+  color: #5cc8ff;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
 .paywall-beneficios {
   list-style: none;
   padding: 0;
@@ -95,6 +103,18 @@
   height: 6px;
   background: #5cc8ff;
   border-radius: 50%;
+}
+
+.paywall-beneficio-destaque {
+  color: #5cc8ff !important;
+  font-weight: 600;
+}
+
+.paywall-beneficio-destaque::before {
+  background: #5cc8ff !important;
+  width: 8px !important;
+  height: 8px !important;
+  top: 1px !important;
 }
 
 /* Reciprocidade: reconhece o valor já entregue de graça, antes de pedir.
@@ -208,6 +228,7 @@ body.modo-dock .paywall-card {
     'badge badge'
     'title title'
     'subtitle subtitle'
+    'contexto contexto'
     'recip benefits'
     'price benefits'
     'anchor benefits'
@@ -218,11 +239,26 @@ body.modo-dock .paywall-card {
   row-gap: 3px;
   align-content: center;
   overflow: hidden !important;
+  /* O conteúdo do paywall (curto, virou grid compacto acima) já se
+     centraliza verticalmente com align-content — diferente de
+     quiz/comparador/você, que são páginas longas e roláveis e por isso
+     precisam da folga cheia de 60px+safe-top pro botão "‹ Voltar" fixo
+     não cobrir o topo do conteúdo. Herdar aquele mesmo padding aqui (a
+     regra compartilhada em estilos.css/mobile.css, ambos carregados
+     ANTES deste arquivo) soma-se à centralização e empurra tudo pra
+     baixo, sobrando um vão vazio grande no topo da tela. Precisa
+     continuar MAIOR que o padding lateral comum: mesmo centralizado, o
+     botão fixo (top ~12px + safe-top, ~44px de altura) não pode ficar
+     por cima da faixa "PRO" se o conteúdo for alto o suficiente.
+     !important necessário para vencer a regra compartilhada de mesma
+     especificidade (ordem de carga: este arquivo vem depois). */
+  padding-top: calc(16px + var(--safe-top)) !important;
 }
 
 body.modo-dock .paywall-badge { grid-area: badge; margin-bottom: 1px; padding: 3px 9px; font-size: 10px; }
 body.modo-dock .paywall-titulo { grid-area: title; font-size: 18px; margin: 0; }
 body.modo-dock .paywall-subtitulo { grid-area: subtitle; font-size: 11px; line-height: 1.25; margin: 0 0 2px; }
+body.modo-dock .paywall-contexto { grid-area: contexto; font-size: 12px; line-height: 1.25; margin: 0 0 4px; text-align: center; }
 body.modo-dock .paywall-reciprocidade { grid-area: recip; font-size: 10px; line-height: 1.25; padding: 6px 8px; margin: 0; }
 body.modo-dock .paywall-beneficios { grid-area: benefits; align-self: center; margin: 0; }
 body.modo-dock .paywall-beneficios li { font-size: 10px; line-height: 1.22; margin-bottom: 5px; padding-left: 14px; }

@@ -1,10 +1,10 @@
 // Progressão: níveis + badges com XP
 // Exporta iniciarProgresso({ dados })
 
-import { getIdioma } from './i18n.js';
+import { getIdioma } from './i18n.js?v=39';
 // só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
 // em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
-import { ITENS_GRATIS } from './premium.js';
+import { ITENS_GRATIS } from './premium.js?v=12';
 
 // Textos localizados (pt/en/es)
 const TEXTOS = {
@@ -425,7 +425,9 @@ function adicionarXp(estado, quantidade, dados) {
 // mostrar "/5 pacotes" (são 6) e "/7 missões" (são 10), fazendo quem visse as 10
 // missões ler "10/7". Ambos são opcionais: sem eles o contador se esconde, o que
 // é melhor do que mentir.
-export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium }) {
+// aoConquistar (opcional): chamado depois dos toasts de nível/conquista —
+// usado por main.js para o pedido de avaliação (js/avaliacao.js).
+export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConquistar }) {
   if (typeof document === 'undefined') {
     return {
       abrir: () => { throw new Error('Progresso: document não disponível em ambiente node'); }
@@ -566,6 +568,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium }) {
       for (const badge of res.badges) {
         mostrarToast(`${tt('niveisNovaConquista', { badge: tt(badge.nome) })}`);
       }
+      if (res.subiu || res.badges.length) aoConquistar?.();
     }
   }
 
@@ -655,6 +658,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium }) {
           mostrarToast(`${tt('niveisNovaConquista', { badge: tt(badge.nome) })}`);
         }
       }
+      if (res.subiu || res.badges.some(b => !badgesAntigos.has(b.id))) aoConquistar?.();
     }
   }
 
