@@ -324,7 +324,7 @@ export const TRADUCAO = {
           { rotulo: 'Year length', valor: '11.86 years' },
           { rotulo: 'Day length', valor: '9.93 hours' },
           { rotulo: 'Core temperature', valor: '~24,000 K' },
-          { rotulo: 'Moons', valor: '95+ (4 Galilean)' }
+          { rotulo: 'Moons', valor: 'More than 90, and counting (4 Galilean)' }
         ],
         curiosidades: [
           '1,300 Earths would fit inside Jupiter, or 5 billion humans — it is truly gigantic.',
@@ -343,7 +343,7 @@ export const TRADUCAO = {
           composicao: 'Molecular hydrogen (H₂), helium (He), traces of methane (CH₄), ammonia (NH₃), water (H₂O), rocky/icy core ~20-30 M⊕.',
           temperatura: 'Top of clouds: -110 °C; core: ~24,000 K.',
           missoes: ['Pioneer 10-11 (1973–1974)', 'Voyager 1-2 (1979)', 'Galileo (1995–2003)', 'JUNO (2016–present)', 'Europa Clipper (2024–present)'],
-          texto: 'Jupiter is the first gas giant, ~318 M⊕. Formed in situ ~4.5 Ga with silicate/ice core and primordial H₂/He envelope. Grand Tack migration shaped solar system formation. Rapid rotation (9.93h) causes equatorial flattening. Band/zone cloud structure at 80+ levels. Dipolar magnetic field 4 G, largest magnetosphere in solar system. 95 discovered moons, including 4 Galilean; possible weak ring.'
+          texto: 'Jupiter is the largest planet, a gas giant of ~318 Earth masses (M⊕). It formed ~4.5 billion years ago, with a core of rock and ice wrapped in hydrogen and helium. According to the Grand Tack hypothesis, its early migration shaped the formation of the rocky planets. Its fast rotation (9.93 h) flattens it at the poles. Its clouds are organized into light bands (zones) and dark bands (belts). Its magnetic field (~4 gauss at the equator) creates the largest magnetosphere in the solar system. It has more than 90 known moons (the count grows with every new search), including the 4 Galilean moons, and a faint ring system discovered by Voyager 1 in 1979.'
         }
       }
     },
@@ -465,7 +465,7 @@ export const TRADUCAO = {
           { rotulo: 'Year length', valor: '29.46 years' },
           { rotulo: 'Day length', valor: '10.7 hours' },
           { rotulo: 'Density', valor: '0.687 g/cm³ (floats in water!)' },
-          { rotulo: 'Moons', valor: '274 confirmed as of 2025 (2 major: Titan, Enceladus)' }
+          { rotulo: 'Moons', valor: 'More than 270, and counting (2 major: Titan, Enceladus)' }
         ],
         curiosidades: [
           'Saturn is less dense than water — if placed in a cosmic bathtub, it would float!',
@@ -1349,7 +1349,7 @@ export const TRADUCAO = {
   eventos: {
     'eclipse-solar-2026': { nome: 'Total Solar Eclipse', descricao: 'Total solar eclipse visible from Spain, Iceland, and Greenland. Maximum duration of 2 minutes and 18 seconds. A rare celestial spectacle.' },
     'oposicao-marte-2027': { nome: 'Mars Opposition', descricao: 'Mars in opposition — the planet at its brightest and closest to Earth. Ideal for observation with telescopes. Closest approach distance.' },
-    'conjuncao-venus-jupiter-2027': { nome: 'Venus-Jupiter Conjunction', descricao: 'Venus and Jupiter pass very close in the sky — the two brightest planets appear side by side. Spectacular naked-eye observation.' },
+    'conjuncao-venus-jupiter-2027': { nome: 'Venus-Jupiter Conjunction', descricao: 'Venus and Jupiter, the two brightest planets, pass very close in the sky. This time the meeting happens too close to the Sun to see with the naked eye — but here in the simulator you can follow it all.' },
     'perseidas-2028': { nome: 'Perseid Meteor Shower', descricao: 'Peak activity of the Perseid meteor shower — up to 100 meteors per hour. Best observed in dark skies away from light pollution.' },
     'oposicao-jupiter-2029': { nome: 'Jupiter Opposition', descricao: 'Jupiter in opposition. The largest planet at its closest and brightest. Ideal for observing its Galilean satellites.' },
     'aproximacao-apofis-2029': { nome: 'Apophis Close Approach', descricao: 'Asteroid Apophis passes just 31,600 km from Earth — within the orbit of geostationary satellites! It will be visible to the naked eye, one of the closest approaches ever predicted without collision. Watch it in 3D: around this date, Apophis dives in and skims past Earth, well inside the Moon\'s orbit.' },
@@ -1362,12 +1362,12 @@ export const TRADUCAO = {
     'eclipse-lunar-total-2028': { nome: 'New Year\'s Eve Total Lunar Eclipse', descricao: 'On the last night of 2028, the Moon fully enters Earth\'s shadow and turns red — a total lunar eclipse at the turn of the year. Visible from Europe, Africa and Asia. A New Year with a blood Moon in the sky.' },
     'superlua-2029': { nome: 'Supermoon (Full Moon at Perigee)', descricao: 'The full Moon coincides with its closest point to Earth — a supermoon. It looks up to 14% larger in the sky. A phenomenon that makes tides noticeably stronger.' },
     'eclipse-lunar-total-2029': { nome: 'Total Lunar Eclipse', descricao: 'The Moon plunges entirely into Earth\'s shadow and takes on a copper-red tone — the famous blood Moon. Visible from the Americas, including Brazil. The color comes from sunlight filtered through Earth\'s atmosphere.' },
-    'eclipse-solar-anular-2030': { nome: 'Annular Solar Eclipse', descricao: 'Annular solar eclipse forming a ring of fire in the sky. Observable from Tunisia, Algeria, Nigeria and the Gulf of Guinea. One of the most striking visual spectacles.' },
-    'eclipse-solar-anular-2031': { nome: 'Annular Solar Eclipse', descricao: 'Annular solar eclipse visible from Angola, Botswana, Zambia and Zimbabwe. The ring of fire lasts up to 7 minutes in some places. An impressive celestial alignment.' },
+    'eclipse-solar-anular-2030': { nome: 'Annular Solar Eclipse', descricao: 'Annular solar eclipse forming a ring of fire in the sky. Observable from Algeria, Tunisia, Libya, Greece and Turkey. One of the most striking visual spectacles.' },
+    'eclipse-solar-anular-2031': { nome: 'Annular Solar Eclipse', descricao: 'Annular solar eclipse visible from Angola, Namibia, Zambia and Tanzania. The ring of fire lasts up to 5 and a half minutes in some places. An impressive celestial alignment.' },
     'eclipse-lunar-total-2032': { nome: 'Total Lunar Eclipse', descricao: 'Total lunar eclipse — the whole Moon crosses Earth\'s shadow and stays reddened for more than an hour. Visible from Asia, Australia and the Indian Ocean.' },
     'transito-mercurio-2032': { nome: 'Transit of Mercury', descricao: 'Mercury passes in front of the solar disk — a tiny black dot crossing the Sun. Observable with a safe telescope. A rare event that lets scientists measure properties of the planet.' },
     'eclipse-solar-total-2033': { nome: 'Total Solar Eclipse in the Arctic', descricao: 'Total solar eclipse with the path of darkness crossing Alaska and far-eastern Russia. During totality you can see the solar corona — the Sun\'s silvery atmosphere — with the naked eye.' },
-    'eclipse-lunar-total-2033': { nome: 'Total Lunar Eclipse', descricao: 'Total lunar eclipse with the Moon diving completely into Earth\'s shadow. Visible from the Americas, Europe and Africa. The second total lunar eclipse of the year — 2033 is a lucky year for blood-Moon fans.' },
+    'eclipse-lunar-total-2033': { nome: 'Total Lunar Eclipse', descricao: 'Total lunar eclipse with the Moon diving completely into Earth\'s shadow. Visible from the Americas, Asia and Oceania. The second total lunar eclipse of the year — 2033 is a lucky year for blood-Moon fans.' },
     'maxima-elongacao-mercurio-2034': { nome: 'Mercury at Greatest Elongation', descricao: 'Mercury reaches its greatest angular distance from the Sun in the sky — up to 28°. The best chance to spot the elusive planet at dusk. A planet few people ever manage to see.' },
     'eclipse-solar-total-2035': { nome: 'Total Solar Eclipse over Asia', descricao: 'Total solar eclipse crossing China and Japan — the path of darkness passes near Beijing and Tokyo, two of the world\'s most populous cities. Millions will watch night fall in the middle of the morning.' },
     'eclipse-lunar-total-2036': { nome: 'Total Lunar Eclipse', descricao: 'The Moon crosses the center of Earth\'s shadow in a deep, dark total eclipse. Visible from the Americas, Europe and Africa. The dustier Earth\'s atmosphere is, the redder the Moon turns.' },
@@ -1396,6 +1396,6 @@ export const TRADUCAO = {
     'artemis-2': { nome: 'Artemis 2', descricao: 'The first crewed mission beyond low Earth orbit since Apollo 17 (1972). Four astronauts flew around the Moon aboard the Orion spacecraft, paving the way for the Artemis 3 landing.', estado: 'Completed — crewed lunar flyby (2026)', paradas: ['Launch (SLS/Orion)', 'Crewed flyby of the Moon', 'Return and splashdown'] },
     juno: { nome: 'Juno', descricao: 'Solar-powered probe studying the composition, magnetic field, and internal structure of Jupiter. Record holder for solar panels farthest from the Sun in operation. Eccentric polar orbit that avoids the most intense radiation belts.', estado: 'In orbit around Jupiter — mission in final phase', paradas: ['Launch from Cape Canaveral', 'Gravitational assist at Earth', 'Orbital insertion at Jupiter'] },
     parker: { nome: 'Parker Solar Probe', descricao: 'The probe "touches" the Sun\'s atmosphere (solar corona) with a carbon-based heat shield withstanding ~1,377°C. Used 7 Venus flybys as gravitational slingshots to shrink its orbit — in 3D, each loop of the spiral dives closer to the Sun, down to the record 2024 perihelion. Record speed of ~690,000 km/h — the fastest human-made object ever.', estado: 'Active — the closest probe to the Sun ever built', paradas: ['Launch from Cape Canaveral', '1st Venus slingshot', '2nd Venus slingshot', '3rd Venus slingshot', '4th Venus slingshot', '5th Venus slingshot', '6th Venus slingshot', '7th and final Venus slingshot', 'Record perihelion — closest to the Sun in history'] },
-    perseverance: { nome: 'Perseverance', descricao: 'Car-sized rover searching for signs of ancient microbial life on Mars. Collects and preserves Martian rock samples for a future return mission to Earth. Carried the small Ingenuity helicopter, the first powered flight on another planet (2021).', estado: 'Active — exploring Jezero Crater on Mars', paradas: ['Launch from Cape Canaveral', 'Landing in Jezero Crater'] }
+    perseverance: { nome: 'Perseverance', descricao: 'Car-sized rover searching for signs of ancient microbial life on Mars. Collects and preserves Martian rock samples for a future return mission to Earth. Carried the small Ingenuity helicopter, the first powered flight on another planet (2021).', estado: 'Active — exploring the rim of Jezero Crater on Mars', paradas: ['Launch from Cape Canaveral', 'Landing in Jezero Crater'] }
   }
 };

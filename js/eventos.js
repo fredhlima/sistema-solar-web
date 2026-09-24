@@ -91,8 +91,8 @@ export const EVENTOS = [
     id: 'conjuncao-venus-jupiter-2027',
     nome: 'Conjunção Vênus-Júpiter',
     tipo: 'conjuncao',
-    dataISO: '2027-08-12',
-    descricao: 'Vênus e Júpiter passam muito próximos no céu — os dois planetas mais brilhantes aparecem lado a lado. Espetáculo de observação a olho nu.',
+    dataISO: '2027-08-25',
+    descricao: 'Vênus e Júpiter, os dois planetas mais brilhantes, passam muito próximos no céu. Desta vez o encontro acontece perto demais do Sol e não dá para ver a olho nu — mas aqui no simulador você acompanha tudo.',
     corpoFoco: null
   },
   {
@@ -147,7 +147,7 @@ export const EVENTOS = [
     id: 'superlua-2029',
     nome: 'Superlua (Lua Cheia no Perigeu)',
     tipo: 'marco',
-    dataISO: '2029-01-25',
+    dataISO: '2029-03-30',
     descricao: 'A Lua cheia coincide com seu ponto mais próximo à Terra — uma superlua. Aparenta até 14% maior no céu. Fenômeno raro que afeta as marés de forma mais intensa.',
     corpoFoco: 'lua'
   },
@@ -163,7 +163,7 @@ export const EVENTOS = [
     id: 'oposicao-jupiter-2029',
     nome: 'Oposição de Júpiter',
     tipo: 'oposicao',
-    dataISO: '2029-10-31',
+    dataISO: '2029-04-12',
     descricao: 'Júpiter em oposição. O maior planeta está no seu mais próximo e brilhante. Ideal para observar seus satélites galileanos.',
     corpoFoco: 'jupiter'
   },
@@ -180,7 +180,7 @@ export const EVENTOS = [
     nome: 'Eclipse Solar Anular',
     tipo: 'eclipse',
     dataISO: '2030-06-01',
-    descricao: 'Eclipse solar anular formando um anel de fogo no céu. Observável na Tunísia, Argélia, Nigéria e Golfo da Guiné. Um dos espetáculos visuais mais impressionantes.',
+    descricao: 'Eclipse solar anular formando um anel de fogo no céu. Observável na Argélia, Tunísia, Líbia, Grécia e Turquia. Um dos espetáculos visuais mais impressionantes.',
     corpoFoco: 'terra'
   },
   {
@@ -196,7 +196,7 @@ export const EVENTOS = [
     nome: 'Eclipse Solar Anular',
     tipo: 'eclipse',
     dataISO: '2031-05-21',
-    descricao: 'Eclipse solar anular visível em Angola, Botswana, Zâmbia e Zimbábue. O anel de fogo dura até 7 minutos em alguns locais. Um alinhamento celestial impressionante.',
+    descricao: 'Eclipse solar anular visível em Angola, Namíbia, Zâmbia e Tanzânia. O anel de fogo dura até 5 minutos e meio em alguns locais. Um alinhamento celestial impressionante.',
     corpoFoco: 'terra'
   },
   {
@@ -219,7 +219,7 @@ export const EVENTOS = [
     id: 'oposicao-saturno-2032',
     nome: 'Oposição de Saturno',
     tipo: 'oposicao',
-    dataISO: '2032-09-06',
+    dataISO: '2032-12-24',
     descricao: 'Saturno em oposição — melhor época para observar o planeta com anéis. Anéis em máxima abertura, oferecem visão espetacular.',
     corpoFoco: 'saturno'
   },
@@ -236,7 +236,7 @@ export const EVENTOS = [
     nome: 'Eclipse Lunar Total',
     tipo: 'eclipse',
     dataISO: '2033-10-08',
-    descricao: 'Eclipse lunar total com a Lua mergulhando completamente na sombra da Terra. Visível das Américas, Europa e África. Segundo eclipse lunar total do ano — 2033 é um ano de sorte para quem gosta de Lua vermelha.',
+    descricao: 'Eclipse lunar total com a Lua mergulhando completamente na sombra da Terra. Visível das Américas, da Ásia e da Oceania. Segundo eclipse lunar total do ano — 2033 é um ano de sorte para quem gosta de Lua vermelha.',
     corpoFoco: 'lua'
   },
   {
@@ -264,10 +264,13 @@ export const EVENTOS = [
     corpoFoco: 'terra'
   },
   {
+    // id mantido por compatibilidade (progresso salvo); não há oposição de Urano
+    // em 2035 — a de 30/12/2034 é a mais próxima (checagem de 24/09/2026).
+    // Netuno 2040: data calculada pelo período sinódico (±2 dias).
     id: 'oposicao-urano-2035',
     nome: 'Oposição de Urano',
     tipo: 'oposicao',
-    dataISO: '2035-11-20',
+    dataISO: '2034-12-30',
     descricao: 'Urano em oposição — o planeta gelado está no seu mais brilhante. Requer telescópio para observação, mas alcança magnitude 5,7.',
     corpoFoco: 'urano'
   },
@@ -291,7 +294,7 @@ export const EVENTOS = [
     id: 'oposicao-netuno-2040',
     nome: 'Oposição de Netuno',
     tipo: 'oposicao',
-    dataISO: '2040-09-26',
+    dataISO: '2040-10-26',
     descricao: 'Netuno em oposição — o planeta mais distante do sistema solar está no seu mais brilhante. Alcança magnitude 7,8 (observável com binóculos).',
     corpoFoco: 'netuno'
   },

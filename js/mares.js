@@ -10,8 +10,8 @@
 // Aqui se mostra a FORÇA relativa e o RITMO, que é o que a geometria permite.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=32';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=20';
+import { getIdioma } from './i18n.js?v=39';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=27';
 import { criarTexturaCanvas } from './texturas.js?v=7';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,

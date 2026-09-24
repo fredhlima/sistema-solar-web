@@ -1,12 +1,15 @@
-import { t, tToque } from './i18n.js?v=32';
+import { t, tToque } from './i18n.js?v=39';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 
 // alvoMobile: seletores do dock mobile (js/mobile-dock.js). No celular deitado
 // o chrome desktop fica display:none (spotlight não acharia nada), então cada
 // passo mira o equivalente do dock quando body.modo-dock está ativo.
+// O aviso educativo (pedido do Fred, 13/09) era o 1º cartão; a revisão
+// independente (Q3, 24/09) mostrou que ele era a primeira frase lida pela
+// criança, antes do "Bem-vindo". Agora é uma nota discreta no ÚLTIMO passo
+// (ver .tutorial-card-nota em mostrarPasso).
 const PASSOS = [
-  { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTituloDisclaimer', texto: 'tutorialTextoDisclaimer' },
   { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
   { alvo: '#painel-explorar',      alvoMobile: '#mdock-btn-exp',  titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
   { alvo: '.grupo-experiencias',   alvoMobile: '#mdock-btn-xp',   titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },
@@ -87,6 +90,7 @@ function abrir() {
   cardElement.innerHTML = `
     <h3 class="tutorial-card-titulo"></h3>
     <p class="tutorial-card-texto"></p>
+    <p class="tutorial-card-nota" hidden>${t('tutorialTextoDisclaimer')}</p>
     <div class="tutorial-dots"></div>
     <div class="tutorial-botoes">
       <button class="tutorial-btn-pular">${t('tutorialPular')}</button>
@@ -176,6 +180,8 @@ function mostrarPasso() {
   } else {
     btnAnterior.style.visibility = 'visible';
   }
+
+  cardElement.querySelector('.tutorial-card-nota').hidden = passoAtual !== PASSOS.length - 1;
 
   // Último passo: trocar próximo por tour e livre
   if (passoAtual === PASSOS.length - 1) {

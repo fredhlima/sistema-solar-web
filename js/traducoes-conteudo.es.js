@@ -512,7 +512,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Lunas",
-            "valor": "95+ (4 galileanas)"
+            "valor": "Más de 90, y contando (4 galileanas)"
           }
         ],
         "curiosidades": [
@@ -538,7 +538,7 @@ export const TRADUCAO = {
             "JUNO (2016–presente)",
             "Europa Clipper (2024–presente)"
           ],
-          "texto": "Júpiter es el primer planeta gaseoso, ~318 M⊕. Se formó in situ ~4.5 mil millones de años atrás con núcleo de silicatos/hielos y envoltura primordial H₂/He. La migración del Grand Tack moldeó la formación del sistema. La rotación rápida (9.93h) causa achatamiento ecuatorial. Bandas/zonas de nubes alt/alt-cloud en 80 niveles. Campo magnético dipolar 4 G, la magnetosfera más grande del sistema solar. 95 lunas descubiertas, incluyendo 4 galileanas; posible anillo débil."
+          "Júpiter es el planeta más grande, un gigante gaseoso de ~318 masas terrestres (M⊕). Se formó hace ~4.500 millones de años, con un núcleo de roca y hielo envuelto en hidrógeno y helio. Según la hipótesis del Grand Tack, su migración temprana moldeó la formación de los planetas rocosos. Su rotación rápida (9,93 h) lo achata en los polos. Sus nubes se organizan en bandas claras (zonas) y oscuras (cinturones). Su campo magnético (~4 gauss en el ecuador) crea la magnetosfera más grande del sistema solar. Tiene más de 90 lunas conocidas (el número crece con cada nueva búsqueda), incluidas las 4 galileanas, y un sistema de anillos tenue, descubierto por la Voyager 1 en 1979.": "Júpiter es el primer planeta gaseoso, ~318 M⊕. Se formó in situ ~4.5 mil millones de años atrás con núcleo de silicatos/hielos y envoltura primordial H₂/He. La migración del Grand Tack moldeó la formación del sistema. La rotación rápida (9.93h) causa achatamiento ecuatorial. Bandas/zonas de nubes alt/alt-cloud en 80 niveles. Campo magnético dipolar 4 G, la magnetosfera más grande del sistema solar. más de 90 lunas descubiertas (el número crece con cada nueva búsqueda), incluyendo 4 galileanas; posible anillo débil."
         }
       }
     },
@@ -968,7 +968,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Lunas",
-            "valor": "274 confirmadas (2 principales: Titán, Encélado)"
+            "valor": "Más de 270, y contando (2 principales: Titán, Encélado)"
           }
         ],
         "curiosidades": [
@@ -2296,7 +2296,7 @@ export const TRADUCAO = {
     },
     "conjuncao-venus-jupiter-2027": {
       "nome": "Conjunción Venus-Júpiter",
-      "descricao": "Venus y Júpiter pasan muy cerca en el cielo — los dos planetas más brillantes aparecen lado a lado. Espectáculo de observación a simple vista."
+      "descricao": "Venus y Júpiter, los dos planetas más brillantes, pasan muy cerca en el cielo. Esta vez el encuentro ocurre demasiado cerca del Sol y no se ve a simple vista — pero aquí en el simulador puedes seguirlo todo."
     },
     "perseidas-2028": {
       "nome": "Lluvia de Meteoros Perseidas",
@@ -2348,11 +2348,11 @@ export const TRADUCAO = {
     },
     "eclipse-solar-anular-2030": {
       "nome": "Eclipse Solar Anular",
-      "descricao": "Eclipse solar anular que forma un anillo de fuego en el cielo. Observable en Túnez, Argelia, Nigeria y el Golfo de Guinea. Uno de los espectáculos visuales más impresionantes."
+      "descricao": "Eclipse solar anular que forma un anillo de fuego en el cielo. Observable en Argelia, Túnez, Libia, Grecia y Turquía. Uno de los espectáculos visuales más impresionantes."
     },
     "eclipse-solar-anular-2031": {
       "nome": "Eclipse Solar Anular",
-      "descricao": "Eclipse solar anular visible en Angola, Botsuana, Zambia y Zimbabue. El anillo de fuego dura hasta 7 minutos en algunos lugares. Una alineación celestial impresionante."
+      "descricao": "Eclipse solar anular visible en Angola, Namibia, Zambia y Tanzania. El anillo de fuego dura hasta 5 minutos y medio en algunos lugares. Una alineación celestial impresionante."
     },
     "eclipse-lunar-total-2032": {
       "nome": "Eclipse Lunar Total",
@@ -2368,7 +2368,7 @@ export const TRADUCAO = {
     },
     "eclipse-lunar-total-2033": {
       "nome": "Eclipse Lunar Total",
-      "descricao": "Eclipse lunar total con la Luna sumergiéndose por completo en la sombra de la Tierra. Visible desde las Américas, Europa y África. Segundo eclipse lunar total del año — 2033 es un año de suerte para los amantes de la Luna roja."
+      "descricao": "Eclipse lunar total con la Luna sumergiéndose por completo en la sombra de la Tierra. Visible desde las Américas, Asia y Oceanía. Segundo eclipse lunar total del año — 2033 es un año de suerte para los amantes de la Luna roja."
     },
     "maxima-elongacao-mercurio-2034": {
       "nome": "Máxima Elongación de Mercurio",
@@ -2543,7 +2543,7 @@ export const TRADUCAO = {
     "perseverance": {
       "nome": "Perseverance",
       "descricao": "Rover del tamaño de un automóvil buscando signos de vida microbiana antigua en Marte. Recolecta y preserva muestras de rocas marcianas para una futura misión de retorno a la Tierra. Llevaba el pequeño helicóptero Ingenuity, el primer vuelo motorizado en otro planeta (2021).",
-      "estado": "Activa — explorando el cráter Jezero en Marte",
+      "estado": "Activa — explorando el borde del cráter Jezero en Marte",
       "paradas": [
         "Lanzamiento de Cabo Cañaveral",
         "Aterrizaje en el cráter Jezero"

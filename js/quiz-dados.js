@@ -53,15 +53,15 @@ export const QUIZ_PACOTES = [
           es: '¿Cuántas lunas tiene Saturno? (aproximadamente)'
         },
         opcoes: {
-          pt: ['8', '30', '95', '146'],
-          en: ['8', '30', '95', '146'],
-          es: ['8', '30', '95', '146']
+          pt: ['8', '30', '95', 'Mais de 270'],
+          en: ['8', '30', '95', 'More than 270'],
+          es: ['8', '30', '95', 'Más de 270']
         },
         corretaIndex: 3,
         explicacao: {
-          pt: 'Saturno tem 146 luas conhecidas! Destas, as mais famosas são Titã (a única com atmosfera densa) e Encélado (que dispara água gelada).',
-          en: 'Saturn has 146 known moons! Among these, the most famous are Titan (the only one with a dense atmosphere) and Enceladus (which shoots out frozen water).',
-          es: 'Saturno tiene 146 lunas conocidas. Entre ellas, las más famosas son Titán (la única con atmósfera densa) y Encélado (que dispara agua congelada).'
+          pt: 'Saturno tem mais de 270 luas conhecidas — e os astrônomos continuam achando novas! Destas, as mais famosas são Titã (a única com atmosfera densa) e Encélado (que dispara água gelada).',
+          en: 'Saturn has more than 270 known moons — and astronomers keep finding new ones! Among these, the most famous are Titan (the only one with a dense atmosphere) and Enceladus (which shoots out frozen water).',
+          es: 'Saturno tiene más de 270 lunas conocidas, ¡y los astrónomos siguen encontrando nuevas! Entre ellas, las más famosas son Titán (la única con atmósfera densa) y Encélado (que dispara agua congelada).'
         }
       },
       {
@@ -520,15 +520,15 @@ export const QUIZ_PACOTES = [
           es: '¿Cuántas lunas conocidas tiene el planeta Urano?'
         },
         opcoes: {
-          pt: ['5 lunas', '15 lunas', '27+ lunas', '95+ lunas'],
+          pt: ['5 luas', '15 luas', '27+ luas', '95+ luas'],
           en: ['5 moons', '15 moons', '27+ moons', '95+ moons'],
           es: ['5 lunas', '15 lunas', '27+ lunas', '95+ lunas']
         },
         corretaIndex: 2,
         explicacao: {
-          pt: 'Urano tem 27 lunas conhecidas! As 5 maiores (Titânia, Oberão, Umbriel, Ariel e Miranda) têm nomes de personagens de Shakespeare. Muitas das luas menores foram descobertas mais recentemente por telescópios espaciais.',
-          en: 'Uranus has 27 known moons! The 5 largest (Titania, Oberon, Umbriel, Ariel, and Miranda) are named after Shakespeare characters. Many of the smaller moons were discovered more recently by space telescopes.',
-          es: 'Urano tiene 27 lunas conocidas. Los 5 más grandes (Titania, Oberón, Umbriel, Ariel y Miranda) llevan nombres de personajes de Shakespeare. Muchas de las lunas más pequeñas fueron descubiertas recientemente por telescopios espaciales.'
+          pt: 'Urano tem mais de 27 luas conhecidas — e contando! As 5 maiores (Titânia, Oberão, Umbriel, Ariel e Miranda) têm nomes de personagens de Shakespeare. Muitas das luas menores foram descobertas mais recentemente por telescópios espaciais.',
+          en: 'Uranus has more than 27 known moons — and counting! The 5 largest (Titania, Oberon, Umbriel, Ariel, and Miranda) are named after Shakespeare characters. Many of the smaller moons were discovered more recently by space telescopes.',
+          es: 'Urano tiene más de 27 lunas conocidas, ¡y siguen apareciendo más! Los 5 más grandes (Titania, Oberón, Umbriel, Ariel y Miranda) llevan nombres de personajes de Shakespeare. Muchas de las lunas más pequeñas fueron descubiertas recientemente por telescopios espaciales.'
         }
       },
       {
@@ -913,9 +913,9 @@ export const QUIZ_PACOTES = [
         },
         corretaIndex: 1,
         explicacao: {
-          pt: 'Saturno tem 146 luas conhecidas — o recorde do sistema solar! A maioria são pequenas, descobertas nos últimos anos por telescópios espaciais. As 5 principais (Titã, Encélado, Rheia, Dione, Tétis) são mundos complexos por si só.',
-          en: 'Saturn has 146 known moons — the solar system record! Most are small, discovered in recent years by space telescopes. The 5 largest (Titan, Enceladus, Rhea, Dione, Tethys) are complex worlds in their own right.',
-          es: 'Saturno tiene 146 lunas conocidas — ¡el récord del sistema solar! La mayoría son pequeñas, descubiertas en años recientes por telescopios espaciales. Las 5 principales (Titán, Encélado, Rea, Dione, Tetis) son mundos complejos por derecho propio.'
+          pt: 'Saturno tem mais de 270 luas conhecidas — o recorde do sistema solar! A maioria são pequenas, descobertas nos últimos anos por telescópios espaciais. As 5 principais (Titã, Encélado, Rheia, Dione, Tétis) são mundos complexos por si só.',
+          en: 'Saturn has more than 270 known moons — the solar system record! Most are small, discovered in recent years by space telescopes. The 5 largest (Titan, Enceladus, Rhea, Dione, Tethys) are complex worlds in their own right.',
+          es: 'Saturno tiene más de 270 lunas conocidas — ¡el récord del sistema solar! La mayoría son pequeñas, descubiertas en años recientes por telescopios espaciales. Las 5 principales (Titán, Encélado, Rea, Dione, Tetis) son mundos complejos por derecho propio.'
         }
       },
       {
