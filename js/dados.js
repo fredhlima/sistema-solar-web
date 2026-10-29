@@ -100,7 +100,7 @@ export const DADOS = { corpos: [
         composicao: 'Silicatos rochosos, ferro, níquel; núcleo rico em ferro (75% da massa).',
         temperatura: 'Mínima -173 °C (regiões polares na sombra), máxima 427 °C (face iluminada).',
         missoes: ['Mariner 10 (1974–1975)', 'MESSENGER (2011–2015)', 'BepiColombo (2021–2025)'],
-        texto: 'Mercúrio é o planeta terrestre mais denso e próximo do Sol, descoberto por astrônomos antigos. Sua órbita excentricada (0,2056) foi crucial para verificar a relatividade geral de Einstein. Possui um grande núcleo de ferro que gera um fraco campo magnético. A superfície exibe crateras de impacto, dorsal escarpada (Discover Rupes) e outras feições vulcânicas antigas. Praticamente sem atmosfera, toda radiação solar é absorvida diretamente.'
+        texto: 'Mercúrio é um dos planetas terrestres mais densos e o mais próximo do Sol, descoberto por astrônomos antigos. Sua órbita excentricada (0,2056) foi crucial para verificar a relatividade geral de Einstein. Possui um grande núcleo de ferro que gera um fraco campo magnético. A superfície exibe crateras de impacto, dorsal escarpada (Discover Rupes) e outras feições vulcânicas antigas. Praticamente sem atmosfera, toda radiação solar é absorvida diretamente.'
       }
     }
   },
@@ -115,7 +115,7 @@ export const DADOS = { corpos: [
     periodoOrbitalDias: 224.7,
     // Sentido retrógrado vem só da geometria (inclinacaoEixoGraus=177,36° > 90,
     // polo já invertido) — período positivo evita dupla negação (mesmo padrão do Tritão).
-    periodoRotacaoHoras: 2807,
+    periodoRotacaoHoras: 5832.6,
     excentricidade: 0.0068,
     inclinacaoOrbitaGraus: 3.395,
     inclinacaoEixoGraus: 177.36,
@@ -465,7 +465,7 @@ export const DADOS = { corpos: [
       avancado: {
         composicao: 'Condrita carbonácea tipo C, similar a asteroides do cinturão principal, matriz de silicatos com água.',
         temperatura: 'Superfície: estimada -4 a -112 °C.',
-        missoes: ['Mariner 7 (1969)', 'Viking 1-2 (1976)', 'Rosetta OSIRIS (2015, voo próximo)', 'Tianwen-1 (2020–presente)', 'Sample Return (JAXA Perseverance, ~2030)'],
+        missoes: ['Mariner 7 (1969)', 'Viking 1-2 (1976)', 'Rosetta OSIRIS (2015, voo próximo)', 'Tianwen-1 (2020–presente)', 'MMX (JAXA, missão de retorno de amostras de Fobos)'],
         texto: 'Fobos é uma lua retrógrada irregular, ~23 × 21 × 19 km, órbita excêntrica. Provavelmente um asteroide capturado ~4,5 Ga. Maré de Marte o estica; tidal locking sincronizado. Cratera de impacto Stickney (~10 km) e sistema de grooves radiantes. Campo preto em regime de captura levará colisão em ~50 Ma. Densidade ~1,88 g/cm³ sugere porosidade alta (~30%).'
       }
     }
@@ -1567,7 +1567,7 @@ export const DADOS = { corpos: [
         composicao: 'Basalto vulcânico primário (olivina/piroxênio), cortex diferenciado, núcleo metálico pequeno.',
         temperatura: 'Superfície: média estimada -100 a -150 °C (depende posição solar).',
         missoes: ['Dawn (2011–2012)', 'Apophis (ESA/JAXA, voo próximo 2029)'],
-        texto: 'Vesta é o 2º asteroide maior (R = 263 km), classe V (vulcânico, basalto-howardita). Diferenciação térmica primitiva produziu núcleo metálico, manto basalto, cortex anortosita. Cratera Rheasilvia polo sul 500 km diâmetro (~1 Ga) ejetou hemisfério massa — origem família Vesta asteroides ~5-10% cinturão. Albedo alto (0,42). Rotação rápida 3,63 horas (precessão por YORP). Possível origem lunar/marciana contrária — provável acreção próxima a Sun/Júpiter Grande Tack.'
+        texto: 'Vesta é o 2º asteroide maior (R = 263 km), classe V (vulcânico, basalto-howardita). Diferenciação térmica primitiva produziu núcleo metálico, manto basalto, cortex anortosita. Cratera Rheasilvia polo sul 500 km diâmetro (~1 Ga) ejetou hemisfério massa — origem família Vesta asteroides ~5-10% cinturão. Albedo alto (0,42). Rotação rápida de cerca de 5,34 horas. Possível origem lunar/marciana contrária — provável acreção próxima a Sun/Júpiter Grande Tack.'
       }
     }
   },

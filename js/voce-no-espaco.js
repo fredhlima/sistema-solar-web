@@ -1,4 +1,4 @@
-import { getIdioma } from './i18n.js?v=39';
+import { getIdioma } from './i18n.js?v=301';
 
 // Texts (pt/en/es)
 const TEXTOS = {
@@ -141,13 +141,31 @@ function formatarNumero(n) {
   return String(n);
 }
 
+function limitarValor(valor, padrao, minimo, maximo) {
+  if (typeof valor !== 'number' && typeof valor !== 'string') return padrao;
+  if (typeof valor === 'string' && valor.trim() === '') return padrao;
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) return padrao;
+  return Math.min(maximo, Math.max(minimo, numero));
+}
+
+function lerValorValido(valor, minimo, maximo) {
+  if (typeof valor !== 'number' && typeof valor !== 'string') return null;
+  if (typeof valor === 'string' && valor.trim() === '') return null;
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero >= minimo && numero <= maximo ? numero : null;
+}
+
 // Load persisted data from localStorage
 function carregarDados() {
   try {
     const salvo = localStorage.getItem('sistema-solar-voce');
     if (salvo) {
       const dados = JSON.parse(salvo);
-      return { peso: dados.peso ?? 30, idade: dados.idade ?? 8 };
+      return {
+        peso: limitarValor(dados.peso, 30, 10, 150),
+        idade: limitarValor(dados.idade, 8, 1, 100)
+      };
     }
   } catch (e) {
     // localStorage unavailable or invalid JSON
@@ -337,40 +355,73 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
     }
   }
 
-  // Sincronizar inputs
-  function sincronizarInputs(peso, idade) {
+  // Sincronizar somente o campo alterado; o outro pode conter um rascunho ativo.
+  function sincronizarPeso(peso) {
     inputPeso.value = peso;
     rangePeso.value = peso;
+  }
+
+  function sincronizarIdade(idade) {
     inputIdade.value = idade;
     rangeIdade.value = idade;
   }
 
-  // Recalcular (chamado ao mudar inputs)
-  function recalcular() {
-    // Checagem explícita de NaN (não `|| padrao`) — peso/idade digitados
-    // como 0 são valores válidos e não devem virar o padrão silenciosamente
-    const peso = parseFloat(inputPeso.value);
-    const idade = parseFloat(inputIdade.value);
-    pesoAtual = Number.isNaN(peso) ? 30 : peso;
-    idadeAtual = Number.isNaN(idade) ? 8 : idade;
-    sincronizarInputs(pesoAtual, idadeAtual);
+  // Atualiza cálculos apenas quando o rascunho está dentro do intervalo. Isso
+  // deixa digitar, por exemplo, "25" sem transformar a primeira tecla "2" em 10.
+  function recalcular(campo) {
+    if (campo === 'peso') {
+      const peso = lerValorValido(inputPeso.value, 10, 150);
+      if (peso === null) return;
+      pesoAtual = peso;
+      rangePeso.value = peso;
+    } else if (campo === 'idade') {
+      const idade = lerValorValido(inputIdade.value, 1, 100);
+      if (idade === null) return;
+      idadeAtual = idade;
+      rangeIdade.value = idade;
+    } else {
+      return;
+    }
     salvarDados(pesoAtual, idadeAtual);
     reconstruirGrid();
   }
 
+  // Ao confirmar/sair do campo, limita o rascunho e atualiza só esse controle.
+  function normalizarCampo(campo) {
+    if (campo === 'peso') {
+      const anterior = pesoAtual;
+      pesoAtual = limitarValor(inputPeso.value, pesoAtual, 10, 150);
+      sincronizarPeso(pesoAtual);
+      if (pesoAtual !== anterior) {
+        salvarDados(pesoAtual, idadeAtual);
+        reconstruirGrid();
+      }
+    } else if (campo === 'idade') {
+      const anterior = idadeAtual;
+      idadeAtual = limitarValor(inputIdade.value, idadeAtual, 1, 100);
+      sincronizarIdade(idadeAtual);
+      if (idadeAtual !== anterior) {
+        salvarDados(pesoAtual, idadeAtual);
+        reconstruirGrid();
+      }
+    }
+  }
+
   // Listeners de input
-  inputPeso.addEventListener('input', recalcular);
+  inputPeso.addEventListener('input', () => recalcular('peso'));
+  inputPeso.addEventListener('change', () => normalizarCampo('peso'));
   rangePeso.addEventListener('input', () => {
-    pesoAtual = parseFloat(rangePeso.value) || 30;
-    sincronizarInputs(pesoAtual, idadeAtual);
+    pesoAtual = limitarValor(rangePeso.value, pesoAtual, 10, 150);
+    sincronizarPeso(pesoAtual);
     salvarDados(pesoAtual, idadeAtual);
     reconstruirGrid();
   });
 
-  inputIdade.addEventListener('input', recalcular);
+  inputIdade.addEventListener('input', () => recalcular('idade'));
+  inputIdade.addEventListener('change', () => normalizarCampo('idade'));
   rangeIdade.addEventListener('input', () => {
-    idadeAtual = parseFloat(rangeIdade.value) || 8;
-    sincronizarInputs(pesoAtual, idadeAtual);
+    idadeAtual = limitarValor(rangeIdade.value, idadeAtual, 1, 100);
+    sincronizarIdade(idadeAtual);
     salvarDados(pesoAtual, idadeAtual);
     reconstruirGrid();
   });
@@ -416,3 +467,4 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
 
   return { abrir, fechar };
 }
+

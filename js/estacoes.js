@@ -12,13 +12,13 @@
 // por escrito seria ensinar o erro e corrigi-lo com legenda.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=39';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=27';
-import { criarTexturaCanvas } from './texturas.js?v=7';
+import { getIdioma } from './i18n.js?v=301';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=301';
+import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
-  diasDesdeJ2000, longitudeSolar, distanciaSolarUA, declinacaoSolar,
+  diasDesdeJ2000, longitudeSolar, proximoMarcoSolar, distanciaSolarUA, declinacaoSolar,
   duracaoDoDia, espalhamentoDaLuz, estacaoDoHemisferio, MARCOS, OBLIQUIDADE_TERRA,
-} from './estacoes-calc.js?v=2';
+} from './estacoes-calc.js?v=301';
 
 const RAD = Math.PI / 180;
 const UA_KM = 149.6e6;
@@ -105,18 +105,18 @@ const TEXTOS = {
     saibaMais: 'Por que existe verão?',
     saibaMenos: 'Ocultar a explicação',
     topicoInclinacao: 'É a inclinação, não a distância',
-    inclinacaoLongo: 'O eixo da Terra é inclinado {o}° e aponta sempre para o mesmo ponto do céu. Meio ano ele está voltado para o Sol, meio ano para o lado contrário. Quem está inclinado na direção do Sol recebe a luz de cima, concentrada; quem está do outro lado recebe a mesma luz espalhada por mais chão — e esquenta menos. Nada disso tem a ver com estar mais perto ou mais longe.',
+    inclinacaoLongo: 'O eixo da Terra é inclinado {o}° e mantém aproximadamente a mesma direção ao longo do ano. Ao orbitar o Sol, cada hemisfério fica alternadamente inclinado em sua direção ou para longe dele. Isso muda o ângulo da luz e a duração do dia: é a causa principal das estações. A distância também altera um pouco a energia recebida.',
     topicoPolos: 'Onde o Sol não se põe',
     polosLongo: 'Acima de 66,5° de latitude — os círculos polares — há dias em que o Sol não chega a se pôr, e outros em que não chega a nascer. É a inclinação do eixo levando um polo inteiro para dentro da luz e o outro para dentro da sombra.',
     topicoDistancia: 'A Terra chega a ficar mais perto?',
     topicoEscala: 'Esta tela não está em escala',
     escalaLongo: 'Aqui o Sol tem {s}× o raio da Terra e a órbita tem {o} raios — no céu de verdade são 109× e 23 mil. Não é descuido: desenhar a distância certa deixaria a Terra menor que um ponto, e desenhar o Sol no tamanho certo não deixaria caber mais nada. O que dá para escolher é quanto de cada erro se aceita, e o selo lá em cima avisa que existe um.',
-    distanciaLongo: 'Chega, e o efeito é o contrário do que parece. Em 4 de janeiro a Terra está a {min} milhões de km do Sol; em 5 de julho, a {max}. São {dif} milhões de km de diferença — {pct}% — e {ene}% a mais de energia chegando em janeiro. Só que janeiro é VERÃO no hemisfério sul e INVERNO no norte, ao mesmo tempo. Se fosse a distância que manda, o ano inteiro seria igual nos dois lados.',
+    distanciaLongo: 'Chega, e o efeito é o contrário do que parece. No início de janeiro a Terra está a {min} milhões de km do Sol; no início de julho, a {max}. São {dif} milhões de km de diferença — {pct}% — e {ene}% a mais de energia chegando em janeiro. Só que janeiro é VERÃO no hemisfério sul e INVERNO no norte, ao mesmo tempo. Se fosse a distância que manda, o ano inteiro seria igual nos dois lados.',
     distanciaBarras: 'Em cima, só o trecho entre a menor e a maior distância. Embaixo, o mesmo trecho na escala que começa do zero — os 5 milhões somem dentro dos 150.',
     rotuloJaneiro: 'jan',
     rotuloJulho: 'jul',
     rotuloHoje: 'hoje',
-    proximoMarco: 'Próximo marco: {m}, em {d} dias.',
+    proximoMarco: 'Próximo marco: {m}, em cerca de {d} dias.',
     proximoMarcoHoje: 'Próximo marco: {m} — é hoje.',
     marcoEquinocioMarco: 'equinócio de março',
     marcoSolsticioJunho: 'solstício de junho',
@@ -167,18 +167,18 @@ const TEXTOS = {
     saibaMais: 'Why is there summer?',
     saibaMenos: 'Hide the explanation',
     topicoInclinacao: 'It is the tilt, not the distance',
-    inclinacaoLongo: 'The Earth’s axis is tilted {o}° and always points at the same spot in the sky. For half the year it leans towards the Sun, for the other half away from it. Whoever leans towards the Sun gets the light from above, concentrated; the other side gets the same light spread over more ground — and warms up less. None of this has to do with being closer or farther.',
+    inclinacaoLongo: 'Earth’s axis is tilted {o}° and keeps approximately the same direction throughout the year. As Earth orbits the Sun, each hemisphere alternately tilts toward or away from it. This changes sunlight’s angle and day length: the main cause of seasons. Distance also slightly changes the energy received.',
     topicoPolos: 'Where the Sun never sets',
     polosLongo: 'Above 66.5° of latitude — the polar circles — there are days when the Sun never sets, and others when it never rises. It is the tilt of the axis carrying one whole pole into the light and the other into the shadow.',
     topicoDistancia: 'Does the Earth really get closer?',
     topicoEscala: 'This screen is not to scale',
     escalaLongo: 'Here the Sun is {s}× the Earth’s radius and the orbit is {o} radii — in the real sky it is 109× and 23 thousand. This is not carelessness: drawing the true distance would make the Earth smaller than a dot, and drawing the Sun at true size would leave room for nothing else. What you can choose is how much of each error to accept — and the badge above says one exists.',
-    distanciaLongo: 'It does, and the effect is the opposite of what it seems. On 4 January the Earth is {min} million km from the Sun; on 5 July, {max}. That is {dif} million km of difference — {pct}% — and {ene}% more energy arriving in January. Except that January is SUMMER in the southern hemisphere and WINTER in the northern one, at the same time. If distance were in charge, the whole year would be the same on both sides.',
+    distanciaLongo: 'It does, and the effect is the opposite of what it seems. In early January the Earth is {min} million km from the Sun; in early July, {max}. That is {dif} million km of difference — {pct}% — and {ene}% more energy arriving in January. Except that January is SUMMER in the southern hemisphere and WINTER in the northern one, at the same time. If distance were in charge, the whole year would be the same on both sides.',
     distanciaBarras: 'On top, only the stretch between the closest and the farthest distance. Below, the same stretch on a scale that starts at zero — the 5 million vanish inside the 150.',
     rotuloJaneiro: 'Jan',
     rotuloJulho: 'Jul',
     rotuloHoje: 'today',
-    proximoMarco: 'Next milestone: {m}, in {d} days.',
+    proximoMarco: 'Next milestone: {m}, in about {d} days.',
     proximoMarcoHoje: 'Next milestone: {m} — it is today.',
     marcoEquinocioMarco: 'March equinox',
     marcoSolsticioJunho: 'June solstice',
@@ -229,18 +229,18 @@ const TEXTOS = {
     saibaMais: '¿Por qué existe el verano?',
     saibaMenos: 'Ocultar la explicación',
     topicoInclinacao: 'Es la inclinación, no la distancia',
-    inclinacaoLongo: 'El eje de la Tierra está inclinado {o}° y apunta siempre al mismo punto del cielo. Medio año está vuelto hacia el Sol, medio año hacia el lado contrario. Quien se inclina hacia el Sol recibe la luz desde arriba, concentrada; el otro lado recibe la misma luz repartida por más suelo — y se calienta menos. Nada de esto tiene que ver con estar más cerca o más lejos.',
+    inclinacaoLongo: 'El eje terrestre está inclinado {o}° y mantiene aproximadamente la misma dirección durante el año. Al orbitar el Sol, cada hemisferio se inclina alternativamente hacia él o en sentido contrario. Cambian el ángulo de la luz y la duración del día: la causa principal de las estaciones. La distancia también altera un poco la energía recibida.',
     topicoPolos: 'Donde el Sol no se pone',
     polosLongo: 'Por encima de los 66,5° de latitud — los círculos polares — hay días en que el Sol no llega a ponerse, y otros en que no llega a salir. Es la inclinación del eje llevando un polo entero hacia la luz y el otro hacia la sombra.',
     topicoDistancia: '¿La Tierra llega a estar más cerca?',
     topicoEscala: 'Esta pantalla no está a escala',
     escalaLongo: 'Aquí el Sol tiene {s}× el radio de la Tierra y la órbita tiene {o} radios — en el cielo real son 109× y 23 mil. No es descuido: dibujar la distancia verdadera dejaría a la Tierra más pequeña que un punto, y dibujar el Sol a tamaño real no dejaría espacio para nada más. Lo que se puede elegir es cuánto de cada error se acepta, y el sello de arriba avisa que existe uno.',
-    distanciaLongo: 'Sí, y el efecto es lo contrario de lo que parece. El 4 de enero la Tierra está a {min} millones de km del Sol; el 5 de julio, a {max}. Son {dif} millones de km de diferencia — {pct}% — y {ene}% más de energía llegando en enero. Solo que enero es VERANO en el hemisferio sur e INVIERNO en el norte, al mismo tiempo. Si mandara la distancia, el año entero sería igual en los dos lados.',
+    distanciaLongo: 'Sí, y el efecto es lo contrario de lo que parece. A principios de enero la Tierra está a {min} millones de km del Sol; a principios de julio, a {max}. Son {dif} millones de km de diferencia — {pct}% — y {ene}% más de energía llegando en enero. Solo que enero es VERANO en el hemisferio sur e INVIERNO en el norte, al mismo tiempo. Si mandara la distancia, el año entero sería igual en los dos lados.',
     distanciaBarras: 'Arriba, solo el tramo entre la menor y la mayor distancia. Abajo, el mismo tramo en la escala que empieza en cero — los 5 millones desaparecen dentro de los 150.',
     rotuloJaneiro: 'ene',
     rotuloJulho: 'jul',
     rotuloHoje: 'hoy',
-    proximoMarco: 'Próximo hito: {m}, en {d} días.',
+    proximoMarco: 'Próximo hito: {m}, en unos {d} días.',
     proximoMarcoHoje: 'Próximo hito: {m} — es hoy.',
     marcoEquinocioMarco: 'equinoccio de marzo',
     marcoSolsticioJunho: 'solsticio de junio',
@@ -656,27 +656,23 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       camera.position.add(controls.target.clone().sub(alvoAnterior));
       controls.update();
 
-      // `db < da`, não `>`. A comparação estava invertida desde a Fase 1 e o
-      // reduce devolvia o marco MAIS DISTANTE: em λ=100° (dez dias depois do
-      // solstício de junho) ele escolhia o solstício de dezembro, a 170°.
-      // Três consequências, todas invisíveis até este modo passar a NOMEAR o
-      // marco na tela: a bolinha destacada na órbita era a do lado oposto, o
-      // texto anunciava o marco errado, e `distDoMarco` — sempre ≥ 90° — nunca
-      // caía abaixo de 2, de modo que o progresso `estacoes-marco` jamais
-      // disparava de dentro do modo.
-      marcoProx = marcos.reduce((a, b) => {
-        const da = Math.abs(((lambda - a.lambda + 540) % 360) - 180);
-        const db = Math.abs(((lambda - b.lambda + 540) % 360) - 180);
-        return db < da ? b : a;
-      });
+      // A legenda anuncia o próximo marco no tempo, não o mais próximo por
+      // distância angular absoluta (que pode já ter passado).
+      marcoProx = proximoMarcoSolar(lambda, marcos);
       marcos.forEach((m) => { m.mat.opacity = m === marcoProx ? 1 : 0.45; });
 
       // Chegar perto de um marco dentro do modo também conta para a badge —
       // não só clicar no evento correspondente no painel de Eventos.
-      distDoMarco = Math.abs(((lambda - marcoProx.lambda + 540) % 360) - 180);
-      if (distDoMarco < 2 && !marcosVistos.has(marcoProx.id)) {
-        marcosVistos.add(marcoProx.id);
-        if (aoProgresso) aoProgresso('estacoes-marco', { id: marcoProx.id });
+      distDoMarco = ((marcoProx.lambda - lambda + 360) % 360);
+      const marcoMaisProximo = marcos.reduce((a, b) => {
+        const da = Math.abs(((lambda - a.lambda + 540) % 360) - 180);
+        const db = Math.abs(((lambda - b.lambda + 540) % 360) - 180);
+        return db < da ? b : a;
+      });
+      const distanciaMaisProxima = Math.abs(((lambda - marcoMaisProximo.lambda + 540) % 360) - 180);
+      if (distanciaMaisProxima < 2 && !marcosVistos.has(marcoMaisProximo.id)) {
+        marcosVistos.add(marcoMaisProximo.id);
+        if (aoProgresso) aoProgresso('estacoes-marco', { id: marcoMaisProximo.id });
       }
 
       atualizarHud(lambda, dias);

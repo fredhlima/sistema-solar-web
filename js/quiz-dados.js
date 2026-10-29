@@ -113,15 +113,15 @@ export const QUIZ_PACOTES = [
           es: '¿Cuánto tiempo tarda la Tierra en orbitar el Sol?'
         },
         opcoes: {
-          pt: ['365,25 dias', '270 dias', '450 dias', '730 dias'],
-          en: ['365.25 days', '270 days', '450 days', '730 days'],
-          es: ['365,25 días', '270 días', '450 días', '730 días']
+          pt: ['Aproximadamente 365,25 dias', '270 dias', '450 dias', '730 dias'],
+          en: ['About 365.25 days', '270 days', '450 days', '730 days'],
+          es: ['Aproximadamente 365,25 días', '270 días', '450 días', '730 días']
         },
         corretaIndex: 0,
         explicacao: {
-          pt: 'A Terra leva exatamente 365,25 dias para dar uma volta completa ao redor do Sol. Esse quarto de dia extra é por isso que temos anos bissextos a cada 4 anos.',
-          en: 'Earth takes exactly 365.25 days to complete one orbit around the Sun. That extra quarter day is why we have leap years every 4 years.',
-          es: 'La Tierra tarda exactamente 365,25 días en completar una órbita alrededor del Sol. Ese cuarto de día extra es por eso que tenemos años bisiestos cada 4 años.'
+          pt: '365,25 dias é uma aproximação comum do ano tropical médio, que acompanha as estações (cerca de 365,242 dias). Em relação às estrelas, o ano sideral dura cerca de 365,256 dias.',
+          en: '365.25 days is a common approximation of the mean tropical year, which tracks the seasons (about 365.242 days). Relative to the stars, the sidereal year lasts about 365.256 days.',
+          es: '365,25 días es una aproximación común del año tropical medio, que sigue las estaciones (unos 365,242 días). En relación con las estrellas, el año sidéreo dura unos 365,256 días.'
         }
       },
       {
@@ -154,14 +154,14 @@ export const QUIZ_PACOTES = [
         },
         alvoId: 'marte',
         dica: {
-          pt: 'É o quarto planeta, e tem o vulcão Olympus Mons com 21 km de altura.',
-          en: 'It is the 4th planet, and has Olympus Mons volcano rising 21 km high.',
-          es: 'Es el 4º planeta, y tiene el volcán Olympus Mons que se eleva 21 km de altura.'
+          pt: 'É o quarto planeta, onde fica o vulcão Olympus Mons, cujo cume está a pouco mais de 20 km acima do datum marciano de 0 km.',
+          en: 'It is the 4th planet, home to Olympus Mons, whose summit is just over 20 km above Mars’s 0 km datum.',
+          es: 'Es el cuarto planeta, donde está el volcán Olympus Mons, cuya cima está a poco más de 20 km sobre el datum marciano de 0 km.'
         },
         explicacao: {
-          pt: 'Marte tem Olympus Mons, um vulcão escudo com 21 km de altura e 600 km de largura — 4 vezes maior que o Monte Everest! É o maior vulcão conhecido do sistema solar.',
-          en: 'Mars has Olympus Mons, a shield volcano 21 km high and 600 km wide — 4 times taller than Mount Everest! It is the largest known volcano in the solar system.',
-          es: 'Marte tiene el Olympus Mons, un volcán escudo de 21 km de altura y 600 km de ancho — ¡4 veces más alto que el Monte Everest! Es el volcán más grande conocido del sistema solar.'
+          pt: 'Olympus Mons é o maior vulcão conhecido do sistema solar. A região do cume fica a pouco mais de 20 km acima do datum marciano de 0 km; a altura em relação à planície vizinha é outra medida. Comparações com o Everest dependem da referência e não devem misturar altitude com relevo local.',
+          en: 'Olympus Mons is the largest known volcano in the solar system. The summit region is just over 20 km above Mars’s 0 km datum; its height above the nearby plain is a different measurement. Comparisons with Everest depend on the reference and should not mix elevation with local relief.',
+          es: 'Olympus Mons es el volcán más grande conocido del sistema solar. La región de la cima está a poco más de 20 km sobre el datum marciano de 0 km; la altura respecto a la llanura cercana es otra medida. Las comparaciones con el Everest dependen de la referencia y no deben mezclar altitud con relieve local.'
         }
       },
       {
@@ -197,11 +197,11 @@ export const QUIZ_PACOTES = [
           en: ['Venus', 'Mars', 'Mercury', 'Earth'],
           es: ['Venus', 'Marte', 'Mercurio', 'Tierra']
         },
-        corretaIndex: 1,
+        corretaIndex: 2,
         explicacao: {
-          pt: 'Marte tem excentricidade 0,0934 — sua órbita é bem mais oval que a da Terra (0,0167). Isto significa que Marte está às vezes bem mais perto do Sol e outras vezes bem mais longe.',
-          en: 'Mars has an eccentricity of 0.0934 — its orbit is much more oval than Earth\'s (0.0167). This means Mars is sometimes much closer to the Sun and other times much farther away.',
-          es: 'Marte tiene una excentricidad de 0,0934 — su órbita es mucho más ovalada que la de la Tierra (0,0167). Esto significa que Marte está a veces mucho más cerca del Sol y otras veces mucho más lejos.'
+          pt: 'Entre essas opções, Mercúrio tem a maior excentricidade orbital (0,2056); Marte tem 0,0935 e a Terra, 0,0167. Quanto maior a excentricidade, mais alongada é a órbita.',
+          en: 'Among these options, Mercury has the greatest orbital eccentricity (0.2056); Mars is 0.0935 and Earth is 0.0167. Greater eccentricity means a more elongated orbit.',
+          es: 'Entre estas opciones, Mercurio tiene la mayor excentricidad orbital (0,2056); Marte tiene 0,0935 y la Tierra, 0,0167. Cuanto mayor es la excentricidad, más alargada es la órbita.'
         }
       },
       {
@@ -308,9 +308,9 @@ export const QUIZ_PACOTES = [
         id: 'planetas-16',
         tipo: 'encontrar',
         texto: {
-          pt: 'Encontre o planeta que orbita o Sol mais rapidamente.',
-          en: 'Find the planet that orbits the Sun the fastest.',
-          es: 'Encuentra el planeta que orbita el Sol más rápidamente.'
+          pt: 'Encontre o planeta com a maior velocidade orbital média.',
+          en: 'Find the planet with the highest average orbital speed.',
+          es: 'Encuentra el planeta con la mayor velocidad orbital media.'
         },
         alvoId: 'mercurio',
         dica: {
@@ -319,9 +319,9 @@ export const QUIZ_PACOTES = [
           es: 'Es el 1er planeta, el más cercano al Sol, y completa una órbita en solo 88 días.'
         },
         explicacao: {
-          pt: 'Mercúrio orbita o Sol a uma velocidade média de 47,87 km/s — impressionante! Quanto mais perto do Sol, mais rápido precisa se mover para manter a órbita. Mercúrio é o campeão de velocidade orbital.',
-          en: 'Mercury orbits the Sun at an average speed of 47.87 km/s — impressive! The closer to the Sun, the faster an object must move to maintain orbit. Mercury is the champion of orbital speed.',
-          es: 'Mercurio orbita el Sol a una velocidad promedio de 47,87 km/s — ¡impresionante! Cuanto más cerca del Sol, más rápido debe moverse un objeto para mantener la órbita. Mercurio es el campeón de velocidad orbital.'
+          pt: 'A ficha de dados planetários NASA/NSSDC registra 47,36 km/s como velocidade orbital média de Mercúrio. Por causa da órbita alongada, sua velocidade varia de cerca de 38,86 km/s no afélio a 58,97 km/s no periélio.',
+          en: 'NASA/NSSDC’s planetary fact sheet lists Mercury’s mean orbital speed as 47.36 km/s. Because its orbit is elongated, its speed ranges from about 38.86 km/s at aphelion to 58.97 km/s at perihelion.',
+          es: 'La ficha de datos planetarios NASA/NSSDC registra 47,36 km/s como velocidad orbital media de Mercurio. Debido a su órbita alargada, la velocidad varía entre unos 38,86 km/s en el afelio y 58,97 km/s en el perihelio.'
         }
       }
     ]

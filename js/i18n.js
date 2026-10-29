@@ -1,6 +1,6 @@
 // Núcleo de internacionalização (pt = fonte; en/es = overlays com fallback).
 // Contratos descritos na SPEC.md, seção EXPANSÃO V3.
-import { UI_TEXTOS } from './traducoes-ui.js?v=31';
+import { UI_TEXTOS } from './traducoes-ui.js?v=301';
 
 const IDIOMAS = ['pt', 'en', 'es'];
 const CHAVE_STORAGE = 'sistema-solar-idioma';
@@ -49,7 +49,7 @@ export function t(chave, params) {
 // no modo-dock; senão cai no texto padrão, e a maioria das chaves (que não fala
 // de gesto nenhum) não precisa de variante.
 export function tToque(chave, params) {
-  if (document.body.classList.contains('modo-dock')) {
+  if (document.body.classList.contains('modo-dock') || window.matchMedia?.('(pointer: coarse)')?.matches) {
     const dic = UI_TEXTOS[idiomaAtual] || {};
     const base = UI_TEXTOS.pt || {};
     // checa a existência direto no dicionário: t() devolve a própria chave

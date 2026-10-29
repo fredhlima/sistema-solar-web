@@ -1,10 +1,11 @@
+import { recursoDisponivel } from './release-scope.js?v=301';
 // Progressão: níveis + badges com XP
 // Exporta iniciarProgresso({ dados })
 
-import { getIdioma } from './i18n.js?v=39';
+import { getIdioma } from './i18n.js?v=301';
 // só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
 // em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
-import { ITENS_GRATIS } from './premium.js?v=12';
+import { ITENS_GRATIS } from './premium.js?v=301';
 
 // Textos localizados (pt/en/es)
 const TEXTOS = {
@@ -334,15 +335,51 @@ function carregarEstado() {
 // e usar essas chaves como semente evita dar a ele mais um pagamento integral
 // por pacotes que ele já tinha concluído.
 function migrar(estado) {
-  if (!estado || typeof estado !== 'object') return criarEstadoVazio();
-  if (!Array.isArray(estado.pacotesConcluidos)) {
-    estado.pacotesConcluidos = Object.keys(estado.medalhasPorPacote || {});
+  if (!estado || typeof estado !== 'object' || Array.isArray(estado)) return criarEstadoVazio();
+
+  const vazio = criarEstadoVazio();
+  const normalizado = { ...vazio, ...estado };
+  normalizado.xp = Number.isFinite(estado.xp) && estado.xp >= 0 ? estado.xp : vazio.xp;
+
+  // Estados antigos, parciais ou parcialmente corrompidos não podem deixar
+  // arrays/objetos ausentes para os handlers de progresso usarem depois.
+  const listas = [
+    'corposVisitados', 'missoesVistas', 'eventosViajados',
+    'marcosEstacoes', 'marcosMares', 'badges'
+  ];
+  for (const chave of listas) {
+    const valor = estado[chave];
+    normalizado[chave] = Array.isArray(valor)
+      ? [...new Set(valor.filter(item => typeof item === 'string' && item.trim()))]
+      : [];
   }
-  // `marcosEstacoes` nasceu com o modo Estações: quem já jogava não tem o array
-  // no estado salvo, e sem esta linha o primeiro marco visto quebraria o push
-  if (!Array.isArray(estado.marcosEstacoes)) estado.marcosEstacoes = [];
-  if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
-  return estado;
+
+  const medalhas = estado.medalhasPorPacote;
+  normalizado.medalhasPorPacote = {};
+  if (medalhas && typeof medalhas === 'object' && !Array.isArray(medalhas)) {
+    for (const [id, medalha] of Object.entries(medalhas)) {
+      if (id.trim() && ['bronze', 'prata', 'ouro'].includes(medalha)) {
+        normalizado.medalhasPorPacote[id] = medalha;
+      }
+    }
+  }
+
+  // `pacotesConcluidos` surgiu depois das medalhas. No formato legado, as
+  // medalhas válidas continuam sendo a fonte para não voltar a pagar XP cheio.
+  const pacotesConcluidos = estado.pacotesConcluidos;
+  normalizado.pacotesConcluidos = Array.isArray(pacotesConcluidos)
+    ? [...new Set(pacotesConcluidos.filter(id => typeof id === 'string' && id.trim()))]
+    : Object.keys(normalizado.medalhasPorPacote);
+
+  const unicos = estado.unicos;
+  normalizado.unicos = {};
+  if (unicos && typeof unicos === 'object' && !Array.isArray(unicos)) {
+    for (const [id, visto] of Object.entries(unicos)) {
+      if (id.trim() && typeof visto === 'boolean') normalizado.unicos[id] = visto;
+    }
+  }
+
+  return normalizado;
 }
 
 function criarEstadoVazio() {
@@ -398,6 +435,17 @@ function calcularProgresso(xp) {
   return { nivel, xpAtual, xpProximo, percentualBarra: percentual };
 }
 
+// Somente metas alcançáveis no catálogo 1.0 geram novas conquistas.
+function badgeDisponivel(id) {
+  if (['anel-de-ouro','sabe-tudo'].includes(id)) return recursoDisponivel('quiz');
+  if (id === 'viajante-do-tempo') return recursoDisponivel('eventos');
+  return id !== 'engenheiro-espacial'; // requer sete trajetórias; a 1.0 contém Apollo 11.
+}
+function contarMissoesDisponiveis(vistas, missoes) {
+  const ids = new Set((missoes || []).map(m => m.id));
+  return [...new Set(vistas)].filter(id => ids.has(id)).length;
+}
+
 // Adiciona XP e retorna badges ganhos nesta chamada
 function adicionarXp(estado, quantidade, dados) {
   const nivelAntes = calcularNivel(estado.xp);
@@ -408,7 +456,7 @@ function adicionarXp(estado, quantidade, dados) {
 
   // Checa todos os badges
   for (const badge of BADGES) {
-    if (!estado.badges.includes(badge.id)) {
+    if (badgeDisponivel(badge.id) && !estado.badges.includes(badge.id)) {
       if (badge.condicao(estado, dados)) {
         estado.badges.push(badge.id);
         badges.push(badge);
@@ -486,6 +534,8 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
   overlay.style.display = 'none';
   root.appendChild(overlay);
 
+  if (!recursoDisponivel('quiz')) overlay.querySelector('.progresso-ouro-atual')?.closest('.progresso-contador')?.setAttribute('hidden', '');
+
   // Chip de nível (fixo)
   const chip = document.createElement('div');
   chip.className = 'progresso-chip';
@@ -524,6 +574,8 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
     badgesGrid.innerHTML = '';
     for (const badge of BADGES) {
       const conquistada = estado.badges.includes(badge.id);
+      // Preserve troféus antigos, sem promover metas fora do catálogo atual.
+      if (!conquistada && !badgeDisponivel(badge.id)) continue;
       // Badge que o jogador free NÃO consegue alcançar por mais que se esforce
       // (exige conteúdo Pro) ganha selo. Antes ela aparecia igual às outras, com
       // a dica de como obter e sem dizer que dependia de compra — criança free
@@ -547,7 +599,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
     overlay.querySelector('.progresso-visitados-atual').textContent = estado.corposVisitados.length;
     overlay.querySelector('.progresso-visitados-total').textContent = dados.corpos.length;
     overlay.querySelector('.progresso-ouro-atual').textContent = ouroCount;
-    overlay.querySelector('.progresso-missoes-atual').textContent = estado.missoesVistas.length;
+    overlay.querySelector('.progresso-missoes-atual').textContent = contarMissoesDisponiveis(estado.missoesVistas, missoes);
     // Totais derivados dos dados — nunca escritos à mão (ver comentário em
     // iniciarProgresso). `totalPacotes`/`totalMissoes` vêm do closure.
     overlay.querySelector('.progresso-ouro-total').textContent = totalPacotes || '—';
@@ -635,10 +687,16 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
     } else if (tipo === 'estacoes-marco') {
       const id = evt.detail.id;
       if (!Array.isArray(estado.marcosEstacoes)) estado.marcosEstacoes = [];
-  if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
       if (id && !estado.marcosEstacoes.includes(id)) {
         xpGanho = 5;
         estado.marcosEstacoes.push(id);
+      }
+    } else if (tipo === 'mares-marco') {
+      const id = evt.detail.id;
+      if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
+      if (id && !estado.marcosMares.includes(id)) {
+        xpGanho = 5;
+        estado.marcosMares.push(id);
       }
     }
 
@@ -758,3 +816,4 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
 
   return { abrir, fechar };
 }
+

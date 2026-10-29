@@ -61,7 +61,7 @@ export const TRADUCAO = {
           composicao: 'Rocky silicates, iron, nickel; iron-rich core (75% of mass).',
           temperatura: 'Minimum -173 °C (polar regions in shadow), maximum 427 °C (illuminated face).',
           missoes: ['Mariner 10 (1974–1975)', 'MESSENGER (2011–2015)', 'BepiColombo (2021–2025)'],
-          texto: 'Mercury is the densest terrestrial planet and closest to the Sun, known to ancient astronomers. Its eccentric orbit (0.2056) was crucial for verifying Einstein\'s general relativity. It has a large iron core that generates a weak magnetic field. The surface shows impact craters, a large escarpment (Discover Rupes), and other ancient volcanic features. With virtually no atmosphere, all solar radiation is absorbed directly.'
+          texto: 'Mercury is one of the densest terrestrial planets and the closest to the Sun, known to ancient astronomers. Its eccentric orbit (0.2056) was crucial for verifying Einstein\'s general relativity. It has a large iron core that generates a weak magnetic field. The surface shows impact craters, a large escarpment (Discover Rupes), and other ancient volcanic features. With virtually no atmosphere, all solar radiation is absorbed directly.'
         }
       }
     },
@@ -283,7 +283,7 @@ export const TRADUCAO = {
         avancado: {
           composicao: 'Carbonaceous chondrite type C, similar to asteroids in the main belt, silicate matrix with water.',
           temperatura: 'Surface: estimated -4 to -112 °C.',
-          missoes: ['Mariner 7 (1969)', 'Viking 1-2 (1976)', 'Rosetta OSIRIS (2015, close flyby)', 'Tianwen-1 (2020–present)', 'Sample Return (JAXA Perseverance, ~2030)'],
+          missoes: ['Mariner 7 (1969)', 'Viking 1-2 (1976)', 'Rosetta OSIRIS (2015, close flyby)', 'Tianwen-1 (2020–present)', 'MMX (JAXA, Phobos sample-return mission)'],
           texto: 'Phobos is an irregular retrograde moon, ~23 × 21 × 19 km, with an eccentric orbit. Likely a captured asteroid ~4.5 Ga. Martian tides stretch it; tidal locking synchronized. Stickney impact crater (~10 km) and system of radial grooves. Field regime of capture will lead to collision in ~50 Ma. Density ~1.88 g/cm³ suggests high porosity (~30%).'
         }
       }

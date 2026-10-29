@@ -1,4 +1,17 @@
 import * as T from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+let moduloLunarAtual = null;
+export async function prepararModuloLunarAtual() {
+ const draco=new DRACOLoader();draco.setDecoderPath(new URL('../../lib/draco/',import.meta.url).href);
+ const loader=new GLTFLoader();loader.setDRACOLoader(draco);
+ try {
+  const gltf=await loader.loadAsync(new URL('../../modelos/modulo-lunar.glb?v=2',import.meta.url).href);
+  const modelo=gltf.scene;const box=new T.Box3().setFromObject(modelo),size=box.getSize(new T.Vector3()),center=box.getCenter(new T.Vector3());
+  const scale=7/size.y;modelo.scale.multiplyScalar(scale);modelo.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);
+  moduloLunarAtual=new T.Group();moduloLunarAtual.add(modelo);
+ } finally {draco.dispose();}
+}
 import {NASA_APOLLO} from './apollo-nasa-data.js?v=2';
 
 function bytes(base64){return Uint8Array.from(atob(base64),c=>c.charCodeAt(0));}
@@ -44,5 +57,6 @@ export function criarPecaSaturnoNASA(id){
  return root;
 }
 export function criarModuloLunarNASA(loadTexture){
+ if(moduloLunarAtual)return moduloLunarAtual.clone(true);
  return build(NASA_APOLLO.lunar.meshes,materials(NASA_APOLLO.lunar.materials,NASA_APOLLO.lunar.images,loadTexture), 'NASA Apollo Lunar Module');
 }

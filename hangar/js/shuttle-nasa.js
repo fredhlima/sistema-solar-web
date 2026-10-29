@@ -7,7 +7,12 @@ export function criarModeloNASA(id,loadTexture=uri=>new T.TextureLoader().load(u
  const source=NASA_SHUTTLE[id];
  if(!source)throw new Error(`Modelo NASA desconhecido: ${id}`);
  const root=new T.Group();root.name=`NASA / ${id}`;root.userData.source='NASA-3D-Resources / Space Shuttle (D)';
- const textures=source.images.map(uri=>{const t=loadTexture(uri);t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;return t;});
+ const mirroredSideTexture=source.materials.find(material=>material.name==='side stb')?.image;
+ const textures=source.images.map((uri,index)=>{const t=loadTexture(uri);t.colorSpace=T.SRGBColorSpace;t.flipY=false;t.anisotropy=8;
+  // The NASA side-stb map stores its lettering mirrored; correct that map
+  // alone so both exterior inscriptions read from outside the orbiter.
+  if(id==='orbiter'&&index===mirroredSideTexture){t.wrapS=T.RepeatWrapping;t.repeat.x=-1;t.offset.x=1;}
+  return t;});
  const materials=source.materials.map(def=>{
   const isGlass=def.name==='shut-glass',isRadiator=def.name==='doors inside';
   const color=new T.Color().setRGB(...def.color);

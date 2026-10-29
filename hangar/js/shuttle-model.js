@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {criarModeloNASA} from './shuttle-nasa.js?v=3';
+import {criarModeloNASA} from './shuttle-nasa.js?v=4';
 import {PARTES,posicaoParte} from './shuttle-data.js?v=4';
 
 // NASA orbiter, doors and main engines; original animated payload/launch stack.
@@ -67,6 +67,17 @@ export function criarShuttle(){
   const deployed=smooth(.7,.85,progress);solar.forEach(p=>p.scale.x=.025+.975*deployed);antennaRoots.forEach(p=>p.scale.x=.12+.88*deployed);cover.rotation.z=-Math.PI*.75*deployed;
   root.updateMatrixWorld(true);return progress!==target;
  }
+ // Explicit pose controls for the separate STS-61 servicing scene. The
+ // Discovery/STS-31 animator above never calls this method.
+ function setServicePose({doorsOpen=0,armGrab=0,armLift=0,arraysOpen=1,apertureOpen=0}={}){
+  const clamp=n=>Math.max(0,Math.min(1,Number(n)||0));
+  hinges.forEach(({hinge,side})=>hinge.rotation.y=side*2.15*clamp(doorsOpen));
+  poseArm(clamp(armGrab),clamp(armLift));
+  solar.forEach(panel=>panel.scale.x=.025+.975*clamp(arraysOpen));
+  antennaRoots.forEach(antenna=>antenna.scale.x=.12+.88*clamp(arraysOpen));
+  cover.rotation.z=-Math.PI*.75*clamp(apertureOpen);
+  root.updateMatrixWorld(true);
+ }
  animate({exploded:false,isolated:false},1);
- return {root,groups,panels:[],legs:[],animate};
+ return {root,groups,panels:[],legs:[],animate,setServicePose};
 }

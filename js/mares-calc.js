@@ -6,7 +6,7 @@
 // de preamar de um porto. A altura real depende dos constituintes harmônicos
 // daquele lugar — com a mesma Lua, a Baía de Fundy tem ~16 m e o Mediterrâneo
 // ~20 cm. O que se calcula é a FORÇA relativa (adimensional) e o RITMO.
-import { diasDesdeJ2000, longitudeSolar } from './estacoes-calc.js?v=2';
+import { diasDesdeJ2000, longitudeSolar } from './estacoes-calc.js?v=301';
 
 const RAD = Math.PI / 180;
 const DEG = 180 / Math.PI;

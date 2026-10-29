@@ -103,7 +103,7 @@ export const TRADUCAO = {
             "MESSENGER (2011–2015)",
             "BepiColombo (2021–2025)"
           ],
-          "texto": "Mercurio es el planeta terrestre más denso y cercano al Sol, descubierto por astrónomos antiguos. Su órbita excéntrica (0.2056) fue crucial para verificar la relatividad general de Einstein. Posee un gran núcleo de hierro que genera un débil campo magnético. La superficie exhibe cráteres de impacto, escarpe escarpada (Discovery Rupes) y otras características vulcánicas antiguas. Prácticamente sin atmósfera, toda la radiación solar es absorbida directamente."
+          "texto": "Mercurio es uno de los planetas terrestres más densos y el más cercano al Sol, descubierto por astrónomos antiguos. Su órbita excéntrica (0.2056) fue crucial para verificar la relatividad general de Einstein. Posee un gran núcleo de hierro que genera un débil campo magnético. La superficie exhibe cráteres de impacto, escarpe escarpada (Discovery Rupes) y otras características vulcánicas antiguas. Prácticamente sin atmósfera, toda la radiación solar es absorbida directamente."
         }
       }
     },
@@ -429,7 +429,7 @@ export const TRADUCAO = {
             "Viking 1-2 (1976)",
             "Rosetta OSIRIS (2015, vuelo cercano)",
             "Tianwen-1 (2020–presente)",
-            "Sample Return (JAXA Perseverance, ~2030)"
+            "MMX (JAXA, misión de retorno de muestras de Fobos)"
           ],
           "texto": "Fobos es una luna retrógrada irregular, ~23 × 21 × 19 km, órbita excéntrica. Probablemente un asteroide capturado ~4.5 mil millones de años atrás. Las mareas de Marte lo estiran; bloqueo de mareas sincronizado. Cráter de impacto Stickney (~10 km) y sistema de surcos radiantes. El campo negro en régimen de captura llevará a la colisión en ~50 millones de años. La densidad ~1.88 g/cm³ sugiere alta porosidad (~30%)."
         }
@@ -1711,7 +1711,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Temperatura de la superficie",
-            "valor": "-380 °C (más fría)"
+            "valor": "-240 a -226 °C"
           },
           {
             "rotulo": "Composición",
@@ -1737,7 +1737,7 @@ export const TRADUCAO = {
         ],
         "avancado": {
           "composicao": "Nitrógeno congelado, metano, hielo de agua, posible océano subsuperficial, núcleo rocoso.",
-          "temperatura": "Superficie -380 °C a -220 °C; posible océano ~200-300 °C (especulativo).",
+          "temperatura": "Superficie: -240 a -226 °C; posible océano subsuperficial (especulativo).",
           "missoes": [
             "New Horizons (2015 sobrevuelo, datos aún siendo analizados)",
             "Posible orbitador propuesto"

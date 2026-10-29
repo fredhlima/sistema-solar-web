@@ -1,8 +1,8 @@
 // Quiz espacial com pacotes de perguntas, medalhas e persistência
 // Exporta: iniciarQuiz({ motor, dados, premium }) -> { abrir }
 
-import { getIdioma } from './i18n.js?v=39';
-import { QUIZ_PACOTES } from './quiz-dados.js?v=7';
+import { getIdioma } from './i18n.js?v=301';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 
 const TEXTOS = {
   pt: {
@@ -286,30 +286,33 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
       // Verifica permissão
       const permitido = !premium || premium.permitido('quiz', id);
 
-      const card = document.createElement('div');
+      const card = document.createElement('button');
+      card.type = 'button';
       card.className = 'quiz-pacote-card';
       if (!permitido) card.classList.add('bloqueado');
 
-      const icone = document.createElement('div');
+      const icone = document.createElement('span');
       icone.className = 'quiz-pacote-icone';
       icone.textContent = pacote.icone || '◐';
+      icone.setAttribute('aria-hidden', 'true');
       card.appendChild(icone);
 
-      const nomeEl = document.createElement('div');
+      const nomeEl = document.createElement('span');
       nomeEl.className = 'quiz-pacote-nome';
       nomeEl.textContent = nomePacote;
       card.appendChild(nomeEl);
 
-      const metadata = document.createElement('div');
+      const metadata = document.createElement('span');
       metadata.className = 'quiz-pacote-metadata';
 
       const melhorPct = storage[id]?.melhorPct ?? null;
       const medalha = storage[id]?.medalha ?? null;
 
       if (melhorPct !== null) {
-        const medalhaEl = document.createElement('div');
+        const medalhaEl = document.createElement('span');
         medalhaEl.className = `quiz-medalha quiz-medalha-${medalha}`;
         medalhaEl.textContent = '●'; // círculo cheio
+        medalhaEl.setAttribute('aria-hidden', 'true');
         metadata.appendChild(medalhaEl);
 
         const pctEl = document.createElement('div');
@@ -317,14 +320,15 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
         pctEl.textContent = tt('melhor', { pct: melhorPct });
         metadata.appendChild(pctEl);
       } else {
-        const vazio = document.createElement('div');
+        const vazio = document.createElement('span');
         vazio.className = 'quiz-medalha quiz-medalha-vazio';
         vazio.textContent = '○'; // círculo vazio
+        vazio.setAttribute('aria-hidden', 'true');
         metadata.appendChild(vazio);
       }
 
       if (!permitido) {
-        const selo = document.createElement('div');
+        const selo = document.createElement('span');
         selo.className = 'quiz-selo-pro';
         selo.textContent = 'PRO';
         metadata.appendChild(selo);
@@ -819,3 +823,4 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
 
   return { abrir };
 }
+

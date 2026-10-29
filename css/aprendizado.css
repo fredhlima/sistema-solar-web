@@ -1,0 +1,275 @@
+.aprendizado-sol {
+  position: fixed;
+  z-index: 35;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  width: min(360px, 42vw);
+  max-height: calc(100vh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  color: #eaf1ff;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  pointer-events: none;
+}
+
+.aprendizado-sol[hidden] { display: none; }
+
+.aprendizado-painel {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  overflow: hidden;
+  pointer-events: auto;
+  background: rgba(8, 15, 29, .94);
+  border: 1px solid rgba(132, 177, 255, .32);
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .4);
+  backdrop-filter: blur(12px);
+}
+
+.aprendizado-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(132, 177, 255, .14);
+}
+
+.aprendizado-kicker {
+  color: #83c9ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.aprendizado-cabecalho h2 { margin: 3px 0 0; font-size: 18px; line-height: 1.25; }
+
+.aprendizado-sol button {
+  min-width: 44px;
+  min-height: 44px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.aprendizado-fechar {
+  flex: 0 0 44px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .08);
+  font-size: 24px !important;
+}
+
+.aprendizado-conteudo {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px;
+}
+
+.aprendizado-conteudo p { margin: 0 0 12px; }
+
+.aprendizado-modo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;color:#b8c7df;font-size:12px;}
+.aprendizado-modo-botao{border:1px solid #83c9ff66;border-radius:10px;background:#153044;padding:5px 12px;font-size:12px!important;}
+.aprendizado-modo-botao[aria-pressed=true]{background:#225878;border-color:#83c9ff;color:#fff;}
+.aprendizado-familia{padding:10px 12px;margin:0 0 12px;border-left:3px solid #83c9ff;border-radius:0 10px 10px 0;background:#173148;color:#eaf1ff;}
+.aprendizado-familia strong{display:block;margin-bottom:5px;color:#9bd5ff;font-size:12px;}
+.aprendizado-familia p{margin:0 0 6px;line-height:1.45;}
+.aprendizado-familia span{display:block;color:#d3e7f7;font-size:12px;line-height:1.4;}
+
+.aprendizado-acao,
+.aprendizado-respostas button,
+.aprendizado-avancar,
+.aprendizado-voltar,
+.aprendizado-retorno {
+  border: 1px solid rgba(131, 201, 255, .35);
+  border-radius: 10px;
+  background: rgba(46, 113, 185, .24);
+  padding: 8px 12px;
+}
+
+.aprendizado-respostas { display: grid; gap: 8px; }
+.aprendizado-respostas button { text-align: left; }
+.aprendizado-feedback { margin-top: 10px !important; color: #a8d8ff; }
+.aprendizado-feedback[data-correto="false"] { color: #ffd28a; }
+.aprendizado-pista:not(:empty) { margin: 10px 0 0; padding: 10px 12px; border-left: 2px solid #67c8ff; background: rgba(70, 150, 210, .12); border-radius: 0 8px 8px 0; }
+.aprendizado-observar [aria-pressed="true"] { border-color: #67c8ff; background: rgba(70, 150, 210, .35); }
+.aprendizado-fonte { font-size: 12px; }
+.aprendizado-fonte a { color: #91d1ff; }
+
+.aprendizado-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(132, 177, 255, .14);
+  color: #b8c7df;
+  font-size: 12px;
+}
+
+.aprendizado-rodape > div { display: flex; gap: 8px; }
+.aprendizado-rodape button { font-size: 13px; }
+.aprendizado-avancar { background: #176bb1; font-weight: 700; }
+
+/* O guia ocupa a lateral, acima do transporte, sem cobrir a faixa de destinos. */
+body.com-navegacao .aprendizado-sol {
+ top:calc(var(--nav-h) + 8px);bottom:auto;
+ left:calc(12px + var(--safe-left,0px));width:min(360px,42vw);
+ max-height:calc(100dvh - var(--nav-h) - var(--safe-bottom,0px) - 20px);
+ z-index:90;
+}
+.aprendizado-repetir {border:1px solid #83c9ff55;border-radius:10px;background:#153044;padding:8px 12px;}
+.aprendizado-rodape {flex-wrap:wrap;}
+.aprendizado-cabecalho,.aprendizado-rodape {flex-shrink:0;}
+@media (max-height:420px) {.aprendizado-cabecalho{padding:10px 12px 8px;}.aprendizado-conteudo{padding:10px 12px;}.aprendizado-rodape{padding:8px 12px;}}
+
+.aprendizado-relacionado {width:100%;text-align:left;border:1px solid #ffc57555;border-radius:10px;background:#3c2d1b;padding:8px 12px;color:#ffe0b0!important;}
+
+.aprendizado-revisar {width:100%;text-align:left;border:1px solid #83c9ff55;border-radius:10px;background:#153044;padding:8px 12px;margin-bottom:10px;}
+.aprendizado-respostas button[aria-pressed="true"] {border-color:#83c9ff;background:#204e74;}
+
+.aprendizado-observar {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+
+/* Convites opcionais no encerramento, com separação entre os alvos de toque. */
+.aprendizado-aprofundamentos {display:grid;gap:8px;}
+
+.aprendizado-continuar {width:100%;text-align:left;margin-bottom:8px;border-color:#83c9ff;background:#204e74;}
+.aprendizado-retorno {width:100%;text-align:left;margin-bottom:12px;-webkit-appearance:none;appearance:none;}
+
+.aprendizado-continuar, .aprendizado-retorno {border-radius:10px;padding:8px 12px;}
+
+/* Durante a leitura, o transporte continua acessível abaixo da cena. */
+body.com-navegacao.nav-guia .aprendizado-sol {max-height:calc(100dvh - var(--nav-h) - var(--mdock-bar-h,64px) - 20px);}
+.aprendizado-modelo {position:fixed;top:calc(var(--nav-h,48px) + 8px);bottom:calc(var(--mdock-bar-h,64px) + 8px);right:calc(12px + var(--safe-right,0px));left:calc(min(360px,42vw) + 24px + var(--safe-left,0px));pointer-events:auto;border-radius:14px;background:radial-gradient(ellipse at center,#152b3c,#060d19);overflow:hidden;}
+.aprendizado-modelo canvas {width:100%;height:100%;display:block;touch-action:none;}
+.aprendizado-modelo-pecas {position:absolute;top:8px;left:8px;right:8px;display:flex;gap:4px;overflow-x:auto;overscroll-behavior-x:contain;}
+.aprendizado-modelo-pecas button {flex:none;white-space:nowrap;font-size:11px;padding:4px 8px;border:1px solid #83c9ff55;border-radius:10px;background:#0b2036;}
+.aprendizado-modelo-pecas button[aria-pressed=true] {background:#225878;border-color:#83c9ff;}
+.aprendizado-modelo-nota {position:absolute;bottom:8px;left:10px;right:10px;font-size:11px;color:#b8c7df;text-align:center;margin:0;pointer-events:none;background:#060d19bd;border-radius:6px;padding:4px 6px;text-shadow:0 1px 2px #000;}
+
+.aprendizado-trilha-posicao{margin:0 0 5px;font-size:11px;line-height:1.3;color:#a7bed2}
+.aprendizado-trilha-fim{color:#a7bed2;font-size:13px}
+.aprendizado-opcionais{margin-top:10px;padding-top:8px;border-top:1px solid #83c9ff33}
+.aprendizado-opcionais p{margin:0 0 6px;font-size:12px;color:#a7bed2}
+.aprendizado-opcionais .aprendizado-aprofundar{min-height:44px;text-align:left;border-color:#83c9ff55;background:#153044}
+
+/* Foco visível no percurso, inclusive na região rolável e no modelo 3D. */
+.aprendizado-sol :is(button,a,[tabindex]):focus-visible {outline:3px solid #83c9ff;outline-offset:2px;}
+.aprendizado-modelo canvas:focus-visible {outline-offset:-4px;}
+.aprendizado-peca-leitura{margin-top:12px;padding:10px 12px;border-left:2px solid #83c9ff;background:#83c9ff0a;border-radius:0 8px 8px 0;font-size:13px;line-height:1.5;}
+.aprendizado-peca-leitura strong{color:#83c9ff;}.aprendizado-peca-leitura p{margin:5px 0 0;}
+.aprendizado-modelo-ferramentas{position:absolute;right:8px;bottom:8px;display:flex;gap:4px;}
+.aprendizado-modelo-ferramentas button{min-width:44px;min-height:44px;border:1px solid #83c9ff55;background:#0b2036;border-radius:9px;}
+.aprendizado-modelo[data-missao=sts61] .aprendizado-modelo-nota{right:156px;font-size:10px;line-height:1.3;}
+.aprendizado-conteudo {scroll-padding-block:8px;}
+
+.aprendizado-experimento{display:flex;flex-direction:column;gap:8px;padding:10px;overflow:auto;overscroll-behavior:contain;}
+.aprendizado-experimento canvas{width:100%;height:clamp(120px,28vh,240px);flex:1;min-height:120px;}
+.experimento-controles{display:grid;gap:5px;flex:none;}.experimento-estado{font-size:12px;color:#d6eafa;margin:0;}.experimento-presets{display:flex;gap:5px;overflow:auto;padding:2px;}.experimento-presets button{flex:none;font-size:11px;border:1px solid #83c9ff55;border-radius:9px;background:#153044;padding:6px 9px;}.experimento-presets button[aria-pressed=true]{background:#225878;border-color:#83c9ff}.experimento-controles label{display:flex;align-items:center;gap:8px;font-size:11px;color:#b8c7df}.experimento-controles input[type=range]{min-width:80px;width:100%;height:44px;accent-color:#83c9ff;}.experimento-nota{font-size:10px;line-height:1.4;margin:0;color:#b8c7df;flex:none;}
+
+.experimento-ano .experimento-controles{grid-template-columns:1fr 1fr}.experimento-ano :is(.experimento-estado,.experimento-presets){grid-column:1/-1}.experimento-ano canvas{min-height:100px}.experimento-ano .experimento-controles label{min-width:0}.experimento-ano .experimento-controles input{min-width:40px}
+
+.experimento-legenda{display:flex;gap:8px;flex-wrap:wrap;font-size:10px;margin:0}.experimento-legenda span[hidden]{display:none}
+
+.experimento-habitabilidade h3{font-size:13px;font-weight:600;margin:0;color:#d6eafa}.experimento-habitabilidade .experimento-presets{flex:none}.habitabilidade-evidencias{overflow:auto;min-height:80px;flex:1;display:grid;gap:8px;scroll-padding:8px}.habitabilidade-evidencias h4{font-size:14px;margin:0;color:#d6eafa}.habitabilidade-evidencias article{border-left:2px solid #83c9ff55;padding-left:9px}.habitabilidade-evidencias h5{font-size:11px;letter-spacing:.02em;margin:0 0 3px;color:#83c9ff}.habitabilidade-evidencias p{font-size:12px;line-height:1.5;margin:0;color:#d6eafa}.habitabilidade-evidencias a{font-size:11px;color:#83c9ff;min-height:44px;display:flex;align-items:center}.aprendizado-experimento :is(button,input,a):focus-visible{outline:3px solid #83c9ff;outline-offset:2px}
+.habitabilidade-evidencias:focus-visible{outline:3px solid #83c9ff;outline-offset:-3px}
+
+.habitabilidade-evidencias p{font-size:13px}.habitabilidade-evidencias h5{font-size:12px}
+
+@media(max-height:420px){.experimento-assistencias canvas{min-height:90px}}
+
+.experimento-luz .experimento-presets{flex:none}.experimento-luz button{min-height:44px;min-width:64px}.luz-imagem{position:relative;overflow:hidden;width:100%;aspect-ratio:2;flex:none;border-radius:8px;background:#080e18}.luz-imagem img{display:block;width:100%;height:auto}.experimento-luz[data-vista=hubble] .luz-imagem,.experimento-luz[data-vista=webb] .luz-imagem{aspect-ratio:1}.experimento-luz[data-vista=hubble] img,.experimento-luz[data-vista=webb] img{width:200%}.experimento-luz[data-vista=webb] img{margin-left:-100%}.luz-faixas{white-space:pre-line;color:#83c9ff;font-size:11px;line-height:1.4;margin:0;flex:none}.experimento-luz details{font-size:10px;color:#b8c7df;flex:none}.experimento-luz summary{min-height:44px;display:flex;align-items:center;cursor:pointer}.experimento-luz details p{line-height:1.5}.experimento-luz details a{color:#83c9ff;display:flex;align-items:center;min-height:44px}.experimento-luz summary:focus-visible{outline:3px solid #83c9ff;outline-offset:2px}
+
+.experimento-cometas .experimento-presets button,.experimento-escalas .experimento-presets button{min-height:44px;min-width:64px}.experimento-cometas canvas{min-height:110px}.experimento-cometas .experimento-legenda{flex-wrap:wrap}
+
+.escalas-controle{display:flex;align-items:center;gap:8px;color:#d6eafa;font-size:11px;flex:none}.escalas-controle input{width:100%;min-width:70px;height:44px;accent-color:#83c9ff}.escalas-controle output{white-space:nowrap;min-width:40px}.escalas-lista{overflow:auto;overscroll-behavior:contain;min-height:100px;flex:1;display:grid;gap:12px;scroll-padding:8px}.escalas-lista article{padding:0 2px}.escalas-lista h4{font-size:12px;margin:0 0 4px;color:#d6eafa}.escalas-lista p{font-size:11px;line-height:1.4;margin:4px 0 0;color:#b8c7df}.escalas-trilho{height:8px;background:#1e3044;border-radius:4px;overflow:hidden}.escalas-trilho span{display:block;height:100%;background:#83c9ff;border-radius:4px}.escalas-lista:focus-visible{outline:3px solid #83c9ff;outline-offset:2px}
+
+.escalas-lista article[data-destaque=true]{border-left:2px solid #83c9ff;padding-left:7px}.escalas-lista article[data-destaque=true] h4{color:#83c9ff}
+
+.aprendizado-mundos-fonte{font-size:10px;line-height:1.35;color:#9fb2c9;padding:6px 12px;margin:0;flex:none;border-top:1px solid #83c9ff16}.aprendizado-mundos-fonte a{color:#83c9ff}.aprendizado-mundos-fonte a:focus-visible{outline:3px solid #83c9ff}
+
+.experimento-missao .missao-visual{position:relative;min-height:125px;flex:1;background:radial-gradient(ellipse,#193044,#081321);border-radius:10px;overflow:hidden}.missao-visual svg,.experimento-missao .missao-visual canvas{width:100%;height:100%;min-height:125px;position:absolute;inset:0}.missao-visual text{fill:#c9dced;font:12px -apple-system,sans-serif}.experimento-missao [hidden]{display:none!important}.experimento-missao .experimento-presets{flex:none}.experimento-missao .experimento-estado{flex:none}.experimento-missao .missao-ferramentas button{min-height:44px}
+.experimento-missao .experimento-nota a{color:#83c9ff}
+
+/* R1: mesma leitura visual no essencial e na investigação, com alvos de toque. */
+.estacoes-laboratorio{top:max(12px,var(--safe-top,0px));gap:8px;padding:12px;scroll-padding:8px;}
+.estacoes-laboratorio h3{font-size:14px;line-height:1.3;margin:0;color:#d6eafa;}
+.estacoes-ajustes{display:grid;gap:8px;flex:none;}
+.estacoes-luz{display:grid;gap:8px;flex:none;}
+.estacoes-dia p,.estacoes-conclusao{margin:0 0 4px;font-size:12px;color:#eaf1ff;}
+.estacoes-dia-barra{height:16px;border-radius:8px;overflow:hidden;background:#243b62;}
+.estacoes-dia-barra span{display:block;height:100%;background:linear-gradient(90deg,#e39c36,#ffe39a);}
+.estacoes-laboratorio .experimento-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:visible;gap:4px;padding:0;}
+.estacoes-laboratorio[data-modo=essencial] .experimento-presets{grid-template-columns:repeat(2,minmax(0,1fr));}
+.estacoes-laboratorio button,.estacoes-nota summary{min-height:44px;min-width:44px;color:#eaf1ff;cursor:pointer;}
+.estacoes-laboratorio button{border:1px solid #83c9ff55;border-radius:9px;background:#153044;padding:5px 8px;font-size:12px;}
+.estacoes-latitude{display:flex;align-items:center;gap:8px;font-size:12px;min-width:0;}
+.estacoes-latitude span{min-width:90px;}
+.estacoes-latitude input{height:44px;min-width:60px;width:100%;accent-color:#83c9ff;}
+.estacoes-registros{display:flex;gap:8px;}.estacoes-registros button{flex:1;}
+.estacoes-comparacao{border-left:2px solid #8bcde7;padding-left:8px;font-size:12px;color:#d6eafa;}
+.estacoes-comparacao p{margin:2px 0;}.estacoes-comparacao strong{display:block;color:#ffe39a;font-weight:600;}
+.estacoes-limpar{justify-self:start;}.estacoes-laboratorio [hidden]{display:none!important;}
+.estacoes-nota{font-size:11px;color:#b8c7df;flex:none;}.estacoes-nota summary{display:flex;align-items:center;}.estacoes-nota p{margin:0;}
+.aprendizado-aprofundar{display:block;width:100%;margin-top:8px;}
+
+/* R2: laboratório de marés ideal, com diagrama vetorial e ciclo do ponto. */
+.mares-laboratorio{display:flex;flex-direction:column;gap:5px;padding:9px;overflow:auto;overscroll-behavior:contain;}
+.mares-laboratorio h3{flex:none;font-size:14px;line-height:1.25;margin:0;color:#d6eafa;}
+.mares-intro{flex:none;margin:0!important;color:#b8c7df;font-size:11px;line-height:1.35;}
+.mares-laboratorio .mares-diagrama{display:block;flex:none;width:100%;height:clamp(118px,24vh,190px);min-height:118px;border-radius:9px;background:radial-gradient(ellipse at center,#12283a,#081321);}
+.mares-diagrama text,.mares-curva text{fill:#d6eafa;font:13px -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-anchor:middle;}
+.mares-diagrama .mares-svg-label{fill:#a9c3d9;font-size:12px;}
+.mares-diagrama .mares-svg-small{fill:#d6eafa;font-size:12px;}
+.mares-diagrama .mares-terra{fill:#28617a;stroke:#73c8df;stroke-width:2;}
+.mares-diagrama .mares-terra-label{fill:#fff;font-weight:700;font-size:10px;}
+.mares-diagrama .mares-lua{fill:#c6d5e3;stroke:#eef5fa;stroke-width:1;}
+.mares-diagrama .mares-sol{fill:#ffd16e;stroke:#fff0be;stroke-width:1;}
+.mares-diagrama .mares-vetor-lua{stroke:#a9d9ff;stroke-width:2;}
+.mares-diagrama .mares-vetor-sol{stroke:#ffd16e;stroke-width:2;}
+.mares-diagrama .mares-vetor-resultante{stroke:#69d9c2;stroke-width:2.5;stroke-dasharray:5 3;}
+.mares-diagrama .mares-bojo{fill:#69d9c244;stroke:#69d9c2;stroke-width:1.5;}
+.mares-diagrama .mares-ponto{fill:#fff;stroke:#111d2b;stroke-width:2;}
+.mares-legenda{display:flex;justify-content:center;flex-wrap:wrap;gap:5px 10px;flex:none;color:#c7d8e8;font-size:10px;}
+.mares-legenda span{display:inline-flex;align-items:center;gap:4px;}
+.mares-legenda i{display:inline-block;width:9px;height:3px;border-radius:2px;background:#a9d9ff;}
+.mares-legenda-sol i{background:#ffd16e;}.mares-legenda-ambos i{background:#69d9c2;}
+.mares-laboratorio .mares-curva{display:block;flex:none;width:100%;height:96px;min-height:88px;border-radius:8px;background:#0a1725;}
+.mares-curva .mares-eixo{stroke:#60748a;stroke-width:1;}
+.mares-curva .mares-curva-linha{fill:none;stroke:#69d9c2;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.mares-curva .mares-tempo-marcador{stroke:#ffd16e;stroke-width:1.5;stroke-dasharray:3 3;}
+.mares-curva .mares-tempo-ponto{fill:#ffd16e;stroke:#fff4cf;stroke-width:1.5;}
+.mares-curva .mares-chart-label{fill:#a9bfd4;font-size:11px;}
+.mares-laboratorio .mares-estado{flex:none;margin:0!important;color:#ffe39a;font-size:12px;font-weight:600;}
+.mares-controles{display:grid;gap:6px;flex:none;}
+.mares-laboratorio .mares-fases{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;overflow:visible;padding:0;}
+.mares-laboratorio[data-modo=investigar] .mares-fases{grid-template-columns:repeat(4,minmax(0,1fr));}
+.mares-laboratorio button{min-width:44px;min-height:44px;color:#eaf1ff;font:inherit;font-size:11px;line-height:1.2;border:1px solid #83c9ff55;border-radius:9px;background:#153044;padding:5px;cursor:pointer;}
+.mares-laboratorio button[aria-pressed=true]{background:#225878;border-color:#83c9ff;}
+.mares-laboratorio .mares-label{font-size:11px;color:#b8c7df;}
+.mares-camadas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;}
+.mares-laboratorio .mares-hora{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 8px;color:#b8c7df;font-size:11px;}
+.mares-hora input{grid-column:1/-1;width:100%;height:44px;min-width:44px;margin:0;accent-color:#83c9ff;}
+.mares-hora output{color:#eaf1ff;}
+.mares-registros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+.mares-comparacao{border-left:2px solid #8bcde7;padding:5px 8px;color:#d6eafa;font-size:11px;line-height:1.35;}
+.mares-comparacao strong{display:block;color:#83c9ff;font-weight:600;}
+.mares-comparacao p{margin:3px 0;}
+.mares-laboratorio .mares-limpar{justify-self:start;padding-inline:10px;}
+.mares-laboratorio .mares-nota{flex:none;margin:0!important;color:#aebfd0;font-size:10px;line-height:1.35;}
+.mares-laboratorio :is(button,input):focus-visible{outline:3px solid #83c9ff;outline-offset:2px;}
+.mares-laboratorio [hidden]{display:none!important;}
+@media(max-height:420px){
+ .mares-laboratorio{gap:4px;padding:6px;}
+ .mares-laboratorio .mares-diagrama{height:110px;min-height:110px;}
+ .mares-laboratorio .mares-curva{height:78px;min-height:78px;}
+ .mares-laboratorio .mares-nota{font-size:9px;}
+}
+@media(max-width:600px){
+ .aprendizado-modelo.mares-laboratorio{z-index:91;left:calc(8px + var(--safe-left,0px));right:calc(8px + var(--safe-right,0px));}
+ .mares-laboratorio .mares-diagrama{height:clamp(132px,24vh,180px);}
+}
+
+.aprendizado-sts61-fonte{font-size:10px;line-height:1.35;color:#9fb2c9;margin-top:10px!important;}
+.aprendizado-modelo-nota[hidden]{display:none;}

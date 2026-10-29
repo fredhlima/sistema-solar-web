@@ -1,24 +1,31 @@
+import { recursoDisponivel } from './release-scope.js?v=301';
 import * as THREE from 'three';
-import { DADOS } from './dados.js?v=25';
-import { SistemaSolar3D } from './motor3d.js?v=61';
-import { iniciarUI } from './ui.js?v=60';
-import { iniciarMobileDock } from './mobile-dock.js?v=28';
+import { DADOS } from './dados.js?v=301';
+import { SistemaSolar3D } from './motor3d.js?v=65';
+import { iniciarUI } from './ui.js?v=301';
+import { iniciarMobileDock } from './mobile-dock.js?v=301';
 import { EVENTOS } from './eventos.js?v=11';
-import { MISSOES } from './missoes.js?v=13';
+import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
-import { QUIZ_PACOTES } from './quiz-dados.js?v=7';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t } from './i18n.js?v=39';
-import { criarPremium } from './premium.js?v=12';
-import { iniciarPaywall } from './paywall.js?v=9';
-import { iniciarQuiz } from './quiz.js?v=17';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=6';
-import { iniciarEstacoes } from './estacoes.js?v=50';
-import { iniciarMares } from './mares.js?v=37';
-import { iniciarProgresso } from './progresso.js?v=15';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=301';
+import { criarPremium } from './premium.js?v=301';
+import { iniciarPaywall } from './paywall.js?v=301';
+import { iniciarQuiz } from './quiz.js?v=301';
+import { iniciarHangar } from './hangar.js?v=301';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=301';
+import { iniciarEstacoes } from './estacoes.js?v=301';
+import { iniciarMares } from './mares.js?v=301';
+import { iniciarProgresso } from './progresso.js?v=301';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=18';
-import { iniciarTutorial } from './tutorial.js?v=20';
+import { iniciarMusica } from './musica.js?v=301';
+import { iniciarNavegacao } from './navegacao.js?v=301';
+import { iniciarAprendizado } from './aprendizado.js?v=301';
+import { iniciarTutorial } from './tutorial.js?v=301';
+
+// As trajetórias legadas das outras sondas ficam fora do recorte 1.0.
+const MISSOES = MISSOES_COMPLETAS.filter(m => m.id === 'apollo-11');
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();
@@ -44,8 +51,11 @@ iniciarPaywall({ premium, t });
 // recebe um getter indireto que passa a apontar pro AudioContext real da
 // música assim que ela iniciar — evita 2 AudioContext vivos ao mesmo tempo.
 const audioCompartilhado = { obterCtx: () => null };
-const quiz = iniciarQuiz({ motor, dados: DADOS, premium, obterCtxCompartilhado: () => audioCompartilhado.obterCtx() });
-const voce = iniciarVoceNoEspaco({ dados: DADOS, premium });
+const quiz = recursoDisponivel('quiz') ? iniciarQuiz({ motor, dados: DADOS, premium, obterCtxCompartilhado: () => audioCompartilhado.obterCtx() }) : {};
+const voce = recursoDisponivel('voce') ? iniciarVoceNoEspaco({ dados: DADOS, premium }) : {};
+let navegacao;
+const usarNavegacao=!new URLSearchParams(location.search).has('prototypeHost');
+const hangar = iniciarHangar({ premium, idioma:getIdioma(), aoSair:usarNavegacao?()=>navegacao?.sairHangar():undefined });
 // Estações do Ano: palco 3D próprio, desenhado pelo mesmo renderer do motor
 // (ver SPEC-estacoes-e-mares.md). Criado antes da UI porque iniciarUI recebe
 // a ação de abrir, como já faz com quiz e você-no-espaço.
@@ -56,10 +66,10 @@ const aoProgresso = (tipo, extra) =>
 const estacoes = iniciarEstacoes({ motor, dados: DADOS, premium, aoProgresso });
 const mares = iniciarMares({ motor, dados: DADOS, premium, aoProgresso });
 const avaliacao = criarAvaliacao();
-const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: QUIZ_PACOTES, premium, aoConquistar: avaliacao.pedirSeOportuno });
+const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: recursoDisponivel('quiz') ? QUIZ_PACOTES : [], premium, aoConquistar: avaliacao.pedirSeOportuno });
 const acoesUI = iniciarUI({
-  motor, dados: DADOS, eventos: EVENTOS, missoes: MISSOES, trajetorias, premium,
-  abrirQuiz: quiz.abrir, abrirVoce: voce.abrir, abrirEstacoes: estacoes.abrir, abrirMares: mares.abrir,
+  motor, dados: DADOS, eventos: recursoDisponivel('eventos') ? EVENTOS : null, missoes: MISSOES, trajetorias, premium,
+  abrirQuiz: quiz.abrir, abrirVoce: voce.abrir, abrirHangar: ()=>navegacao?navegacao.selecionar('hangar'):hangar.abrir(), abrirEstacoes: opcoes=>{if(opcoes||!navegacao)return estacoes.abrir(opcoes);return navegacao.abrirTemaEstacoes();}, abrirMares: opcoes=>{if(opcoes||!navegacao)return mares.abrir(opcoes);return navegacao.abrirTemaMares();},
 });
 // Música de fundo: depois da UI, para o botão ♫ entrar na .barra-acoes
 const musica = iniciarMusica();
@@ -67,7 +77,12 @@ audioCompartilhado.obterCtx = musica.obterCtx;
 
 // Dock mobile (UI paralela em toque+paisagem; desktop/web fica intacto).
 // Reusa o motor real e as ações do ui.js — ver mobile-dock.js.
-iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir, premium });
+const dock = iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir, premium });
+
+const aprendizado = iniciarAprendizado({ motor, acoes:{continuarRoteiro:id=>navegacao?.continuarRoteiro(id),permitirRoteiro:(id,recurso)=>recurso?premium.recurso(recurso):premium.permitido('hangar',id),explorarPeca:(id,peca)=>navegacao?.explorarPeca(id,peca),focarCorpo:id=>{if(id==='terra')acoesUI.definirRitmo(1/24);motor.focar(id);},explorarNave:id=>navegacao?navegacao.explorarNave(id):hangar.abrirNave(id),recomendarNave:id=>navegacao?.recomendarNave(id),experimentarModo:id=>navegacao?.experimentarModo(id)}, t, idioma:getIdioma() });
+if(usarNavegacao)navegacao = iniciarNavegacao({motor,hangar,acoes:acoesUI,dock,aprendizado,premium,t,idioma:getIdioma()});
+window.__navegacao=navegacao;
+window.__aprendizado=aprendizado;
 
 // Tutorial de onboarding: depois do dock, pra checar body.modo-dock (já
 // setado por iniciarMobileDock) e mirar os alvos certos (desktop ou dock).
@@ -114,17 +129,19 @@ window.__musica = musica;
 // Retorna true se havia algo pra fechar (o Java então NÃO sai do app) ou false
 // se a cena estava "vazia" (o Java segue com o comportamento padrão de saída).
 window.__voltarAndroid = function () {
+  if (navegacao?.voltar()) return true;
   const overlayAberto = [
     '.paywall-overlay', '.quiz-overlay', '.voce-no-espaco-overlay',
     '.progresso-overlay', '.palco-overlay', '.tutorial-overlay',
+    '.comparador-overlay', '.painel-eventos', '.tour-card', '.card-missao',
   ].some((sel) => {
     const el = document.querySelector(sel);
-    return el && getComputedStyle(el).display !== 'none';
+    return el && (sel==='.painel-eventos'?el.classList.contains('aberto'):getComputedStyle(el).display !== 'none');
   });
   const dockAberto = Boolean(window.__mdockAberto && window.__mdockAberto());
   const algoAberto = overlayAberto || dockAberto;
   if (algoAberto) {
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code:'Escape', bubbles: true, cancelable: true }));
   }
   return algoAberto;
 };
@@ -206,3 +223,6 @@ document.addEventListener('sim:cmd', (e) => {
     document.documentElement.dataset.simCmdResultado = 'erro: ' + err.message;
   }
 });
+
+
+window.__hangar = hangar;

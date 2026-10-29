@@ -95,3 +95,16 @@ export const MARCOS = [
   { id: 'equinocio-setembro', lambda: 180 },
   { id: 'solsticio-dezembro', lambda: 270 },
 ];
+
+/** Próximo marco pela direção do tempo, medido em avanço de longitude solar.
+ * Em um marco exato, retorna esse marco (distância zero); depois dele, o
+ * resultado segue para o próximo da sequência, com volta em 360°.
+ */
+export function proximoMarcoSolar(lambdaGraus, marcos = MARCOS) {
+  const lambda = ((lambdaGraus % 360) + 360) % 360;
+  return marcos.reduce((melhor, marco) => {
+    const distancia = ((marco.lambda - lambda + 360) % 360);
+    const distanciaMelhor = ((melhor.lambda - lambda + 360) % 360);
+    return distancia < distanciaMelhor ? marco : melhor;
+  });
+}

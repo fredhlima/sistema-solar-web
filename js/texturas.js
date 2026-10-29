@@ -1,3 +1,5 @@
+import { criarTexturaSuperficie } from './superficies.js?v=2';
+
 /**
  * Gerador de texturas procedurais para o simulador do sistema solar.
  * Todas as texturas são criadas via Canvas 2D, sem imagens externas.
@@ -701,6 +703,8 @@ export function criarTexturaAneis(raioInterno, raioExterno, cores, seed = 0) {
  * @returns {HTMLCanvasElement} Canvas 1024x512
  */
 export function criarTexturaCanvas(corpo) {
+  const superficie = criarTexturaSuperficie(corpo);
+  if (superficie) return superficie;
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;

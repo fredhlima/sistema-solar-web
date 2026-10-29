@@ -684,8 +684,8 @@ body.modo-dock .palco-card svg { max-height: 52px; height: auto; }
 body.modo-dock .palco-compacto .palco-card svg { max-height: 30px; }
 body.modo-dock .palco-hud { gap: 6px; }
 body.modo-dock .palco-rodape { padding: 5px 10px; gap: 8px; }
-body.modo-dock .palco-btn { min-height: 40px; min-width: 40px; padding: 0 11px; font-size: 12px; }
-body.modo-dock .palco-scrubber { height: 40px; }
+body.modo-dock .palco-btn { min-height: 44px; min-width: 44px; padding: 0 11px; font-size: 12px; }
+body.modo-dock .palco-scrubber { height: 44px; }
 
 
 /* Botão só de ícone: o SVG centralizado herda a cor do botão (currentColor),
@@ -888,8 +888,8 @@ body.modo-dock .palco-scrubber { height: 40px; }
    usuário abre e fecha o card. */
 body.modo-dock .palco-segmentado { max-width: 196px; min-width: 196px; }
 
-body.modo-dock .palco-segmento { min-height: 32px; font-size: 11px; padding: 0 5px; }
-body.modo-dock .palco-btn-pequeno { min-height: 32px; font-size: 11px; padding: 0 8px; }
+body.modo-dock .palco-segmento { min-height: 44px; font-size: 11px; padding: 0 5px; }
+body.modo-dock .palco-btn-pequeno { min-height: 44px; font-size: 11px; padding: 0 8px; }
 
 
 /* ————— o painel "Saiba mais" não é um card de coluna —————
@@ -950,3 +950,11 @@ body .palco-card.palco-explicacao .palco-card-nota {
 /* O `.palco-compacto` esconde as notas longas para caber nas colunas — mas o
    painel largo é justamente onde o texto longo deve aparecer. */
 .palco-compacto .palco-explicacao .palco-nota-longa { display: block; }
+
+/* Controles didáticos: área de toque contínua e indicador fácil de pegar. */
+.palco-lat { min-height:44px; accent-color:#7aa2ff; }
+.palco-scrubber, .palco-lat { appearance:none; background:transparent; }
+.palco-scrubber::-webkit-slider-runnable-track, .palco-lat::-webkit-slider-runnable-track { height:5px; border-radius:5px; background:#354963; }
+.palco-scrubber::-webkit-slider-thumb, .palco-lat::-webkit-slider-thumb { appearance:none; width:22px; height:22px; margin-top:-8.5px; border:2px solid #c7deff; border-radius:50%; background:#7aa2ff; }
+.palco-scrubber::-moz-range-track, .palco-lat::-moz-range-track { height:5px; border-radius:5px; background:#354963; }
+.palco-scrubber::-moz-range-thumb, .palco-lat::-moz-range-thumb { width:20px; height:20px; border:2px solid #c7deff; border-radius:50%; background:#7aa2ff; }

@@ -11,7 +11,7 @@
 // ciclo de vida, do scrubber, do selo de escala, do roteiro guiado e da
 // acessibilidade. O conteúdo vem de quem chama, via `construirCena`.
 import * as THREE from 'three';
-import { getIdioma } from './i18n.js?v=39';
+import { getIdioma } from './i18n.js?v=301';
 
 // Versão das texturas reais — a MESMA de motor3d._carregarTexturasReais.
 // Se lá mudar, muda aqui: servir a mesma imagem sob dois ?v= diferentes faz o
@@ -540,7 +540,9 @@ export function criarPalco(cfg) {
     if (e.key !== 'Escape' || !aberto) return;
     e.stopPropagation();
     e.preventDefault();
-    fechar();
+    const leitura = overlay?.querySelector('.palco-explicacao:not([hidden]) .palco-explicacao-fechar');
+    if (leitura) leitura.click();
+    else fechar();
   }
 
   const ref = {};

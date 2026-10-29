@@ -1,4 +1,5 @@
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=39';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=301';
+import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -7,7 +8,7 @@ function formatarDataParaTela(date) {
   return mqDataCompacta.matches ? formatarDataCompacta(date) : formatarDataLonga(date);
 }
 
-export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce, abrirEstacoes, abrirMares }) {
+export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium, abrirQuiz, abrirVoce, abrirHangar, abrirEstacoes, abrirMares }) {
   // Layout do painel: variante "ousada" escolhida pelo Fred (15/07/2026) —
   // rail vertical de Visualização + barra de comando central de Experiências.
   // O CSS segue escopado em .ux-ousada.
@@ -167,10 +168,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
   // Atalhos de teclado
   document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
-      // Não intercepta Espaço se o foco estiver num campo de digitação
-      // (ex.: o campo de data inline) — senão a simulação pausaria sozinha
-      const ae = document.activeElement;
-      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+      // Espaço ativa o controle focado; o atalho global pertence apenas à cena.
+      const interativo = el => el?.isContentEditable || el?.closest?.('button, input, textarea, select, a[href], summary, [role="button"], [role="slider"], [role="textbox"], [contenteditable="true"]');
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || interativo(e.target) || interativo(document.activeElement)) return;
       e.preventDefault();
       alternarPausa();
     }
@@ -367,34 +367,38 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       itensExp.appendChild(btnVoce);
     }
 
-    // Estações do Ano (Experiências) — 100% Pro (ITENS_GRATIS['estacoes-mares']
-    // é vazio), mesmo padrão de selo+gate usado nos botões de Eventos.
+    if (abrirHangar) {
+      const btnHangar = document.createElement('button');
+      btnHangar.className = 'botao';
+      btnHangar.id = 'btn-hangar';
+      btnHangar.textContent = t('btnHangar');
+      btnHangar.onclick = abrirHangar;
+      itensExp.appendChild(btnHangar);
+    }
+
+    // R1: Estações abre o essencial gratuito; a investigação continua Pro.
     if (abrirEstacoes) {
       const btnEstacoes = document.createElement('button');
       btnEstacoes.className = 'botao';
       btnEstacoes.id = 'btn-estacoes';
       btnEstacoes.innerHTML = t('btnEstacoes');
       btnEstacoes.onclick = () => {
-        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-estacoes');
         abrirEstacoes();
       };
-      if (!premiumTem('estacoes-mares')) btnEstacoes.appendChild(criarSeloPro());
       itensExp.appendChild(btnEstacoes);
     }
 
-    // Marés (Experiências) — mesmo recurso Pro que Estações.
+    // Marés abre a explicação essencial; a investigação continua Pro.
     if (abrirMares) {
       const btnMares = document.createElement('button');
       btnMares.className = 'botao';
       btnMares.id = 'btn-mares';
       btnMares.innerHTML = t('btnMares');
       btnMares.onclick = () => {
-        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-mares');
         abrirMares();
       };
-      if (!premiumTem('estacoes-mares')) btnMares.appendChild(criarSeloPro());
       itensExp.appendChild(btnMares);
     }
 
@@ -1163,6 +1167,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
 
+    const creditoTextura = CREDITOS_TEXTURAS[corpo.id];
+    if (creditoTextura) {
+      html += `<footer class="info-credito-textura">${t(creditoTextura.chave, { fonte: creditoTextura.fonte })}</footer>`;
+    }
+
     conteudo.innerHTML = html;
 
     const btnSaiba = document.getElementById('info-saiba-btn');
@@ -1173,21 +1182,17 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const btnEstacoesInfo = conteudo.querySelector('#info-estacoes-btn');
     if (btnEstacoesInfo && abrirEstacoes) {
       btnEstacoesInfo.onclick = () => {
-        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-estacoes');
         abrirEstacoes();
       };
-      if (!premiumTem('estacoes-mares')) btnEstacoesInfo.appendChild(criarSeloPro());
     }
 
     const btnMaresInfo = conteudo.querySelector('#info-mares-btn');
     if (btnMaresInfo && abrirMares) {
       btnMaresInfo.onclick = () => {
-        if (!premiumExigir('estacoes-mares')) return;
         progressoEvento('abriu-mares');
         abrirMares();
       };
-      if (!premiumTem('estacoes-mares')) btnMaresInfo.appendChild(criarSeloPro());
     }
 
     // Favoritar: alterna estado, persiste e atualiza o marcador na lista
@@ -1755,6 +1760,7 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     motor.setVelocidade(diasPorSegundo);
     atualizarLabelVelocidade();
     atualizarSliderVelocidade();
+    document.dispatchEvent(new Event('sim:ritmo'));
   }
 
   // Seguir a nave desde o lançamento: torna a trajetória visível, volta ao
@@ -1926,11 +1932,20 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
   // lógica daqui em vez de duplicá-la. Este "saco de ações" é o único contrato
   // entre os dois — mantê-lo fino.
   return {
+    fecharPainelInfo,
+    guardarTransporte() {
+      const salvo = { atual:estado.velocidadeAtual, anterior:estado.velocidadeAnterior, indice:estado.indiceVelocidades, motor:motor.velocidade };
+      return () => {
+        estado.velocidadeAtual=salvo.atual;estado.velocidadeAnterior=salvo.anterior;estado.indiceVelocidades=salvo.indice;
+        motor.setVelocidade(salvo.motor);atualizarLabelVelocidade();atualizarSliderVelocidade();
+      };
+    },
     // Experiências → reaproveitam os overlays existentes
-    abrirEventos: abrirPainelEventos,
+    abrirEventos: eventos ? abrirPainelEventos : undefined,
     abrirComparador,
     abrirQuiz,
     abrirVoce,
+    abrirHangar,
     iniciarTour,
     // Estações e Marés precisam sair daqui para o dock existir.
     //
@@ -1943,10 +1958,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     // Vão embrulhadas no mesmo evento de progresso que os botões do desktop
     // disparam, para o XP contar igual nos dois shells.
     abrirEstacoes: abrirEstacoes
-      ? () => { if (!premiumExigir('estacoes-mares')) return; progressoEvento('abriu-estacoes'); abrirEstacoes(); }
+      ? (opcoes) => { if (opcoes && !premiumExigir('estacoes-mares')) return; progressoEvento('abriu-estacoes'); abrirEstacoes(opcoes); }
       : undefined,
     abrirMares: abrirMares
-      ? () => { if (!premiumExigir('estacoes-mares')) return; progressoEvento('abriu-mares'); abrirMares(); }
+      ? (opcoes) => { if (opcoes && !premiumExigir('estacoes-mares')) return; progressoEvento('abriu-mares'); abrirMares(opcoes); }
       : undefined,
     // Exclusividade de janelas (dock): fecha qualquer página/overlay aberto —
     // eventos, card de missão, comparador, quiz, você-no-espaço, paywall —
@@ -1957,11 +1972,12 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       fecharPainelEventos();
       fecharCardMissao();
       for (const b of document.querySelectorAll('.botao-fechar-overlay')) {
-        const overlay = b.closest('.comparador-overlay, .quiz-overlay, .voce-no-espaco-overlay, .paywall-overlay');
+        const overlay = b.closest('.comparador-overlay, .quiz-overlay, .voce-no-espaco-overlay, .paywall-overlay, .hangar-overlay');
         if (overlay && getComputedStyle(overlay).display !== 'none') b.click();
       }
     },
     // Transporte de tempo
+    definirRitmo,
     alternarPausa,
     avancarVelocidade,
     recuarVelocidade,

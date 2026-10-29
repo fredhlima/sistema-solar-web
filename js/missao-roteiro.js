@@ -1,0 +1,8 @@
+const idiomas=['pt','en','es'];
+export function criarRoteiroMissao(m){
+ const investigacao=m.investigacao,pergunta=investigacao?.pergunta||m.pergunta;
+ const textos={};for(const lang of idiomas)textos[lang]={titulo:m.nome[lang],objetivoTexto:m.etapas[0].texto[lang],perguntaTexto:pergunta.texto[lang],opcao1:pergunta.correta[lang],opcao2:pergunta.incorreta[lang],certo:pergunta.explicacao[lang],tentar:({pt:'Observe a explicação e tente novamente. ',en:'Read the explanation and try again. ',es:'Lee la explicación e inténtalo de nuevo. '}[lang])+pergunta.explicacao[lang],recapTexto:investigacao?.sintese[lang]||m.etapas[11].texto[lang],fonte:({pt:'Fonte científica',en:'Scientific source',es:'Fuente científica'}[lang])+': '+m.fontes[0].nome,verHangar:{pt:'Ver a nave inteira no Hangar',en:'See the whole spacecraft in the Hangar',es:'Ver la nave completa en el Hangar'}[lang],...(investigacao?{investigacaoTitulo:investigacao.titulo[lang],investigacaoTexto:investigacao.texto[lang]}:{})};
+ const etapas=m.etapas.map((e,i)=>({titulo:e.titulo,corpo:i===10?'perguntaTexto':i===11?'recapTexto':e.texto,pergunta:i===10,recap:i===11,...(i<10?{experimento:{tipo:'missao-espacial',missao:m.nave,indice:i,alvo:e.alvo,fase:e.fase,titulo:e.titulo,fonte:m.fontes[0]}}:{})}));
+ if(investigacao)etapas.splice(10,0,{titulo:'investigacaoTitulo',corpo:'investigacaoTexto',acao:true,corpos:investigacao.corpos});
+ return{id:m.id,versao:investigacao?2:1,nave:m.nave,pro:true,recurso:'aprendizado',ambiente:'hangar',textos,urlFonte:m.fontes[0].url,fontesAdicionais:[...m.fontes.slice(1),...(investigacao?.fontes||[])],aprofundamentos:[{id:m.nave,rotulo:'verHangar'}],etapas};
+}

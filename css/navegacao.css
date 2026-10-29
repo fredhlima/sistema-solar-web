@@ -1,0 +1,62 @@
+/* A navegação só ocupa a cena quando a pessoa abre um menu. */
+.mdock-bar>button.mdock-sec{background:transparent;border:0;font-family:inherit;cursor:pointer}
+body.com-navegacao{--nav-h:var(--safe-top,0px)}
+.experiencias-overlay,.descobertas{position:fixed;inset:0;z-index:110;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:calc(12px + var(--safe-top,0px)) calc(18px + var(--safe-right,0px)) calc(12px + var(--safe-bottom,0px)) calc(18px + var(--safe-left,0px));background:#0308108c;color:#e5edf7;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.experiencias-painel,.aprendizado-biblioteca{box-sizing:border-box;width:100%;max-width:680px;max-height:100%;display:flex;flex-direction:column;overflow:hidden;background:#0b1421f7;border:1px solid #8da8c333;border-radius:20px;box-shadow:0 18px 60px #0007;animation:menu-entrar .18s ease-out}
+.experiencias-painel header,.aprendizado-biblioteca header{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 20px;flex-shrink:0;border-bottom:1px solid #ffffff0b}
+.experiencias-painel h1,.aprendizado-biblioteca h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.01em;outline:none}
+.experiencias-painel h1{flex:1}
+.experiencias-overlay button,.descobertas button,.cena-mostrar-controles{box-sizing:border-box;min-height:44px;min-width:44px;border:0;color:inherit;font:inherit;cursor:pointer;background:transparent;border-radius:10px}
+.experiencias-fechar,.aprendizado-biblioteca-voltar{font-size:28px!important;color:#b8c9db!important}
+.experiencias-conteudo,.aprendizado-biblioteca-corpo{overflow-y:auto;overscroll-behavior:contain;padding:14px 18px 18px}
+.experiencias-destaques{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.experiencias-destaques button{display:flex;align-items:center;gap:12px;min-height:88px;padding:14px;text-align:left;background:#132439;border:1px solid #78caff22}
+.experiencias-icone{font-size:32px;color:#81d1f5;flex-shrink:0;line-height:1}
+.experiencias-destaques strong{display:block;font-size:17px;font-weight:600}
+.experiencias-destaques small{display:block;font-size:12px;color:#aabdd0;margin-top:3px;line-height:1.4}
+.experiencias-grade{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.experiencias-grade button{display:flex;flex-direction:column;justify-content:center;text-align:left;align-items:flex-start;padding:8px 10px;min-height:58px;background:#ffffff04}
+.experiencias-grade strong{font-size:13px;font-weight:500}.experiencias-grade small{color:#9aafc7;font-size:11px}.experiencias-grade small:empty{display:none}
+.experiencias-grade #fullscreen-toggle{font-size:13px;color:#aac3d8}
+.roteiros-lista{display:grid;grid-template-columns:1fr;gap:22px}
+.roteiros-trilha h2{margin:0 0 4px;font-size:17px;color:#c7e7fa}
+.roteiros-trilha>p{margin:0 0 10px;color:#a8b9cb;font-size:13px}
+.roteiros-trilha-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:540px){.roteiros-trilha-lista{grid-template-columns:1fr}}
+.descobertas-sol{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:12px 14px;text-align:left;background:#142235!important;border:1px solid #8da8c31f!important}
+.descobertas-sol strong{font-size:15px;font-weight:550}.descobertas-sol span{font-size:12px;line-height:1.5;color:#adbed0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.descobertas-sol small{font-size:11px;color:#83c9e7;margin-top:auto;padding-top:2px}
+.roteiros-retomar{width:100%;text-align:left;padding:8px 12px;margin-bottom:10px;background:#15364a!important;color:#a3e1fb!important;font-size:13px!important}
+.roteiros-percurso{display:grid;gap:4px;margin-bottom:12px;padding:12px 14px;background:#10283a;border:1px solid #80d8ff40;border-radius:12px}
+.roteiros-percurso strong{font-size:14px;color:#c7e7fa}.roteiros-percurso span{font-size:12px;color:#a8b9cb}
+.roteiros-percurso-abrir{width:100%;min-height:44px;margin-top:4px;text-align:left;background:#235272!important;color:#f1fbff!important;font-size:14px!important}
+.aprendizado-biblioteca header{padding-left:8px}
+.cena-mostrar-controles{position:fixed;right:calc(12px + var(--safe-right,0px));top:calc(8px + var(--safe-top,0px));z-index:110;padding:0 14px;background:#09121eee;color:#c5e7fc;border:1px solid #87bdd633;font-size:12px}
+.experiencias-overlay [hidden],.descobertas [hidden],.experiencias-overlay[hidden],.descobertas[hidden],.cena-mostrar-controles[hidden]{display:none!important}
+.experiencias-overlay button:focus-visible,.descobertas button:focus-visible,.cena-mostrar-controles:focus-visible,.com-navegacao .mdock-sec:focus-visible{outline:2px solid #ffb454;outline-offset:-3px}
+@media(hover:hover){.experiencias-overlay button:hover,.descobertas button:hover{background-color:#20374b}}
+body.com-navegacao .hangar-overlay{top:0;display:block}body.com-navegacao .hangar-overlay[style*="display: none"]{display:none}
+body.com-navegacao .mdock-titulo{padding:0;background:transparent;border:0;box-shadow:none;gap:8px;top:calc(10px + var(--safe-top,0px))}body.com-navegacao .mdock-titulo-logo{width:28px;height:28px}body.com-navegacao .mdock-titulo-sub{display:none}
+body.com-navegacao .mdock-topo-dir{top:calc(6px + var(--safe-top,0px))}
+body.com-navegacao .mdock-sec-exp,body.com-navegacao .mdock-sec-xp{border:0;background:transparent;font-family:inherit;color:#b9d8ee;cursor:pointer;min-height:44px;padding:8px 6px;flex-direction:column;gap:5px;flex-shrink:0;width:94px;font-size:12px;font-weight:500}
+body.com-navegacao .mdock-sec-exp{width:76px}body.com-navegacao .mdock-sec .mdock-seta-sec{display:none}
+body.com-navegacao .mdock-sec[aria-expanded="true"]{color:#80d8ff}
+body.com-navegacao .mdock-settings-painel{top:calc(56px + var(--safe-top,0px))}
+body.com-navegacao .mdock-painel{top:calc(8px + var(--safe-top,0px))}
+body.com-navegacao .experiencias-itens{display:none!important}body.com-navegacao .experiencias-trigger{display:inline-flex}
+body[data-destino="hangar"] #mdock,body[data-destino="descobertas"] #mdock,body:not([data-destino="universo"]) .barra-acoes,body:not([data-destino="universo"]) .controles-tempo,body:not([data-destino="universo"]) .painel-explorar,body:not([data-destino="universo"]) .painel-info,body:not([data-destino="universo"]) .titulo{visibility:hidden;pointer-events:none}
+body.nav-atividade #mdock,body.nav-atividade .barra-acoes,body.nav-atividade .controles-tempo,body.nav-atividade .titulo,body.nav-cinema #mdock,body.nav-cinema .barra-acoes,body.nav-cinema .controles-tempo,body.nav-cinema .titulo{visibility:hidden;pointer-events:none}
+body.nav-menu .mdock-titulo,body.nav-menu .mdock-topo-dir{visibility:hidden}
+body.com-navegacao.nav-atividade #ui-root{z-index:150}
+body.com-navegacao .mdock-cal{max-height:calc(100% - var(--safe-top,0px) - var(--mdock-bar-h,95px) - 8px)}
+body.com-navegacao.quiz-encontrando #mdock,body.com-navegacao.quiz-encontrando #mdock-btn-exp,body.com-navegacao.quiz-encontrando #mdock-painel-exp{visibility:visible;pointer-events:auto}
+body.com-navegacao.quiz-encontrando .mdock-transporte,body.com-navegacao.quiz-encontrando .mdock-sec-xp,body.com-navegacao.quiz-encontrando .mdock-topo-dir,body.com-navegacao.quiz-encontrando .mdock-titulo{visibility:hidden;pointer-events:none}
+body.com-navegacao.modo-girar .experiencias-overlay,body.com-navegacao.modo-girar .descobertas,body.com-navegacao.modo-girar .cena-mostrar-controles{display:none}
+@media(max-height:420px){.experiencias-conteudo{padding:10px 14px 12px}.experiencias-destaques{margin-bottom:10px;gap:10px}.experiencias-destaques button{min-height:76px;padding:10px 12px}.experiencias-grade button{min-height:54px}.aprendizado-biblioteca-corpo{padding:10px 14px 12px}}
+@media(max-width:540px){.experiencias-grade{grid-template-columns:repeat(2,minmax(0,1fr))}.experiencias-destaques,.roteiros-lista{grid-template-columns:1fr}}
+@keyframes menu-entrar{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.experiencias-painel,.aprendizado-biblioteca{animation:none}}
+
+body.nav-guia #mdock,body.nav-guia .controles-tempo {visibility:visible;pointer-events:auto;}
+body.nav-guia .mdock-sec-exp,body.nav-guia .mdock-sec-xp,body.nav-guia .mdock-topo-dir,body.nav-guia .mdock-titulo {visibility:hidden;pointer-events:none;}
+
+.biblioteca-filtros{display:flex;align-items:center;gap:8px;padding:4px 14px;flex:none;border-bottom:1px solid #ffffff0b}.biblioteca-filtros button,.biblioteca-filtros select{min-height:44px;border-radius:10px;border:1px solid #83c9ff44;background:#102638;color:#d6eafa;font:inherit;padding:6px 12px}.biblioteca-filtros button[aria-pressed=true]{background:#225878;border-color:#83c9ff}.biblioteca-filtros select{min-width:0;max-width:55%;flex:1}.biblioteca-filtros select[hidden],.roteiros-trilha[hidden]{display:none}.biblioteca-filtros :focus-visible{outline:3px solid #83c9ff;outline-offset:2px}

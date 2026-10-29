@@ -1,21 +1,23 @@
 // Premium: modelo freemium com persistência em localStorage (com fallback em memória para node)
-export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco', 'estacoes-mares'];
+import { obterChaveRevenueCat, IOS_COMPRAS_TESTE } from './billing-config.js?v=2';
+export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco', 'estacoes-mares', 'hangar', 'aprendizado'];
 
 // "Provinha": itens liberados no free dentro de recursos premium — o usuário
 // prova o sabor (Apollo 11, pacote de quiz dos planetas, peso na Terra/Lua)
 // e o paywall vende o resto
 export const ITENS_GRATIS = {
+  hangar: ['hubble'],
   missoes: ['apollo-11'],
   eventos: [],
   quiz: ['planetas'],
   'voce-no-espaco': ['terra', 'lua'],
-  // Decisão do Fred (06/09/2026): Estações e Marés são os dois pagos. Antes
-  // Estações entrava como "provinha" grátis; agora a provinha do pacote fica
-  // por conta do quiz de Planetas e da Apollo 11.
+  // Os roteiros essenciais de Estações e Marés são recursos de aprendizado
+  // gratuitos. Este recurso controla os modos 3D complementares Pro.
   'estacoes-mares': [],
 };
 
 const CHAVE_STORAGE = 'sistema-solar-premium';
+const CHAVE_TESTE_IOS = 'sistema-solar-premium-teste-ios';
 
 // ID da entitlement configurada no RevenueCat (dashboard) — todo pacote que
 // libera o Pro precisa conceder esta entitlement. Já existia no dashboard
@@ -28,7 +30,6 @@ const ENTITLEMENT_PRO = 'solar_system_pro';
 // API Key). O app já está ligado ao Play Console via service account
 // (revenuecat-service-account@sistema-solar-revenuecat.iam.gserviceaccount.com,
 // 13/09/2026) — ver HANDOFF para os detalhes da conexão.
-const REVENUECAT_API_KEY = 'goog_XvBJbvyapdFIyKzJZXrqnHYVgai';
 
 // Acessa o plugin nativo do RevenueCat direto do bridge do Capacitor.
 // Não importamos o pacote NPM @revenuecat/purchases-capacitor: seu build
@@ -49,9 +50,8 @@ function estaNoAppNativo() {
   return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform?.());
 }
 
-class PlayBillingProvider {
-  // Integração real com Play Billing via RevenueCat.
-  // Produto: 'explorador_pro' — Entitlement: 'pro'
+class RevenueCatBillingProvider {
+  // Play Billing no Android e StoreKit no iOS; entitlement solar_system_pro.
   constructor() {
     this._configurando = null;
   }
@@ -59,12 +59,19 @@ class PlayBillingProvider {
   async _garantirConfigurado() {
     const plugin = obterPurchasesPlugin();
     if (!plugin) {
-      throw new Error('Plugin de compras não disponível (fora do app Android nativo)');
+      throw new Error('Plugin nativo de compras não disponível');
     }
     if (!this._configurando) {
-      this._configurando = plugin.configure({ apiKey: REVENUECAT_API_KEY });
+      const plataforma = window.Capacitor.getPlatform?.();
+      const apiKey = obterChaveRevenueCat(plataforma);
+      this._configurando = Promise.resolve().then(() => plugin.configure({ apiKey }));
     }
-    await this._configurando;
+    try {
+      await this._configurando;
+    } catch (e) {
+      this._configurando = null;
+      throw e;
+    }
     return plugin;
   }
 
@@ -111,7 +118,12 @@ class PlayBillingProvider {
 }
 
 const NATIVO = estaNoAppNativo();
-const PROVIDER = NATIVO ? 'revenuecat' : 'mock';
+// Dupla trava: opt-in no bundle + sinal nativo disponível somente em Debug.
+// Nenhum parâmetro de URL ou localStorage consegue habilitar este caminho.
+const TESTE_IOS = NATIVO && IOS_COMPRAS_TESTE === true
+  && window.Capacitor?.getPlatform?.() === 'ios'
+  && window.__SOLAR_IOS_DEBUG_PURCHASES__ === true;
+const PROVIDER = TESTE_IOS ? 'teste-ios' : NATIVO ? 'revenuecat' : 'mock';
 
 // v1.0 (teste fechado da Play Store, 08/08/2026): fora do app Android nativo
 // (showcase web, testes em node), NÃO existe compra real possível — manter
@@ -125,14 +137,16 @@ const PROVIDER = NATIVO ? 'revenuecat' : 'mock';
 const TUDO_LIBERADO = !NATIVO;
 
 export function criarPremium() {
+  const chaveStorage = TESTE_IOS ? CHAVE_TESTE_IOS : CHAVE_STORAGE;
   let estado = { ativo: false, transacaoId: null, data: null };
   let precoLocalCache = null;
+  let revisaoBilling = 0;
   const listeners = new Set();
 
   // Tenta ler do localStorage; fallback memória se indisponível (node, modo seguro)
   function lerStorage() {
     try {
-      const salvo = localStorage.getItem(CHAVE_STORAGE);
+      const salvo = localStorage.getItem(chaveStorage);
       if (salvo) {
         const parsed = JSON.parse(salvo);
         if (parsed && typeof parsed === 'object') {
@@ -146,7 +160,7 @@ export function criarPremium() {
 
   function salvarStorage() {
     try {
-      localStorage.setItem(CHAVE_STORAGE, JSON.stringify(estado));
+      localStorage.setItem(chaveStorage, JSON.stringify(estado));
     } catch (e) {
       // localStorage indisponível; estado continua apenas em memória
     }
@@ -169,23 +183,25 @@ export function criarPremium() {
   // provider fica null e comprar()/restaurar() usam o mock abaixo, como
   // sempre fizeram (TUDO_LIBERADO já libera tudo nesse caso, então esses
   // métodos só são chamados a partir de testes/depuração).
-  const billing = PROVIDER === 'revenuecat' ? new PlayBillingProvider() : null;
+  const billing = PROVIDER === 'revenuecat' ? new RevenueCatBillingProvider() : null;
 
   if (billing) {
     // Reconcilia com o status real da conta Play Store em segundo plano —
     // RevenueCat associa a compra ao usuário do Play Store automaticamente,
     // então quem já é Pro (reinstalou o app, limpou dados) não deveria
     // precisar clicar em "Restaurar compra" pra recuperar o acesso.
+    const revisaoInicial = revisaoBilling;
     billing.statusAtivo().then((proAtivo) => {
-      if (proAtivo && estado.ativo !== true) {
-        estado.ativo = true;
-        estado.transacaoId = estado.transacaoId || `revenuecat-${Date.now()}`;
-        estado.data = estado.data || new Date().toISOString();
+      if (revisaoInicial !== revisaoBilling) return;
+      if (proAtivo !== (estado.ativo === true)) {
+        estado.ativo = proAtivo;
+        estado.transacaoId = proAtivo ? (estado.transacaoId || `revenuecat-${Date.now()}`) : null;
+        estado.data = proAtivo ? (estado.data || new Date().toISOString()) : null;
         salvarStorage();
         notificarListeners();
       }
     }).catch((e) => {
-      console.error('Falha ao verificar status do Play Billing:', e);
+      console.warn('Não foi possível verificar o status da compra:', e);
     });
   }
 
@@ -204,14 +220,14 @@ export function criarPremium() {
       return estado.ativo === true;
     },
 
-    exigir(id) {
+    exigir(id, contexto) {
       // true se recurso(id), senão abre paywall e retorna false
       if (this.recurso(id)) {
         return true;
       }
       // Abre paywall se fnAbrir foi registrada
       if (this._fnAbrir) {
-        this._fnAbrir(id);
+        this._fnAbrir(id, undefined, contexto);
       }
       return false;
     },
@@ -227,16 +243,23 @@ export function criarPremium() {
     exigirItem(recursoId, itemId) {
       if (this.permitido(recursoId, itemId)) return true;
       if (this._fnAbrir) {
-        this._fnAbrir(recursoId);
+        this._fnAbrir(recursoId, itemId);
       }
       return false;
     },
 
     async comprar() {
+      if (TESTE_IOS) {
+        estado = { ativo: true, transacaoId: `teste-ios-${Date.now()}`, data: new Date().toISOString() };
+        salvarStorage();
+        notificarListeners();
+        return { ok: true, transacaoId: estado.transacaoId, simulado: true };
+      }
       if (billing) {
         // Play Billing real via RevenueCat: purchasePackage() já resolve
         // (ou rejeita, se o usuário cancelar/falhar) — sem timeout artificial.
         const proAtivo = await billing.comprar();
+        revisaoBilling += 1;
         estado.ativo = proAtivo;
         estado.transacaoId = proAtivo ? `revenuecat-${Date.now()}` : null;
         estado.data = proAtivo ? new Date().toISOString() : null;
@@ -260,11 +283,13 @@ export function criarPremium() {
     async restaurar() {
       if (billing) {
         const proAtivo = await billing.restaurar();
+        revisaoBilling += 1;
+        const mudou = proAtivo !== (estado.ativo === true);
         estado.ativo = proAtivo;
         estado.transacaoId = proAtivo ? (estado.transacaoId || `revenuecat-${Date.now()}`) : null;
         estado.data = proAtivo ? (estado.data || new Date().toISOString()) : null;
         salvarStorage();
-        if (proAtivo) notificarListeners();
+        if (proAtivo || mudou) notificarListeners();
         return { ok: true, restaurado: proAtivo };
       }
       // Lê storage; se ativo, notifica e retorna {ok, restaurado: true}.
@@ -294,9 +319,10 @@ export function criarPremium() {
 
     limpar() {
       // Apaga estado premium (testes)
+      revisaoBilling += 1;
       estado = { ativo: false, transacaoId: null, data: null };
       try {
-        localStorage.removeItem(CHAVE_STORAGE);
+        localStorage.removeItem(chaveStorage);
       } catch (e) {
         // sem-op se localStorage indisponível
       }

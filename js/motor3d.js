@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { criarTexturaCanvas, criarTexturaAneis } from './texturas.js?v=7';
+import { criarTexturaCanvas, criarTexturaAneis } from './texturas.js?v=8';
+import { PERFIS_FORMA, deformarSuperficie } from './superficies.js?v=2';
 
 const J2000_EPOCH = new Date('2000-01-01T12:00:00Z').getTime();
 const UA_KM = 149.6e6;
@@ -103,6 +104,11 @@ export class SistemaSolar3D {
     // Camadas de franja do Sol (auréola girante) — preenchido em
     // _adicionarGlowSol, lido a cada quadro por _atualizarFranjaSol.
     this._franjasSol = null;
+    this._areaAtiva = true;
+    this._suspensoDesde = null;
+    this._tempoSuspenso = 0;
+    this._raf = null;
+    this._renderCena = null;
   }
 
   iniciar() {
@@ -115,16 +121,17 @@ export class SistemaSolar3D {
     this._montarCorpos();
     this._configurarEventos();
     this._carregarTexturasReais();
+    document.addEventListener('visibilitychange', () => this._sincronizarAtividade());
     this._loop();
   }
 
-  // Troca texturas procedurais por imagens reais quando existirem em
+  // Troca o fallback procedural por mapas locais (fotográficos ou artísticos) em
   // texturas/ (manifest.json lista os ids disponíveis). Sem rede ou sem a
   // pasta, o visual procedural permanece — o app nunca depende disso.
   // ?v= aqui evita servir um manifest.json/jpg em cache divergente do atual
   // (diferente do resto do projeto, este caminho não tinha cache-busting).
   async _carregarTexturasReais() {
-    const V = 30;
+    const V = 31;
     try {
       const resp = await fetch(`texturas/manifest.json?v=${V}`);
       if (!resp.ok) return;
@@ -239,15 +246,49 @@ export class SistemaSolar3D {
   // UX (dock mobile): quando um painel cobre a fração ESQUERDA da tela, desloca
   // a ótica para a direita para centralizar o astro na metade livre — sem zoom
   // nem mexer na cena. fracaoEsquerda 0 = sem deslocamento.
-  setDeslocamentoVisao(fracaoEsquerda) {
-    this._deslocVisaoFrac = fracaoEsquerda || 0;
+  setDeslocamentoVisao(fracaoEsquerda, { zoom = 1, vertical = 0 } = {}) {
+    const destino = Math.max(0, Math.min(1, Number(fracaoEsquerda) || 0));
+    const zoomDestino = Math.max(1, Math.min(1.25, zoom));
+    if (destino === (this._deslocVisaoDestino || 0)
+      && vertical === (this._visaoVerticalDestino || 0)
+      && zoomDestino === (this._zoomFichaDestino || 1)) return;
+    this._deslocVisaoDestino = destino;
+    this._visaoVerticalDestino = vertical;
+    this._zoomFichaDestino = zoomDestino;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this._transicaoVisao = null;
+      this._deslocVisaoFrac = destino;
+      this._visaoVertical = vertical;
+      this._zoomFicha = zoomDestino;
+      this._aplicarDeslocamentoVisao();
+      return;
+    }
+    // Retoma a posição visível; o poll com o mesmo destino não reinicia.
+    this._transicaoVisao = {
+      inicio: this._agoraCena(), duracao: 600,
+      de: this._deslocVisaoFrac || 0, para: destino,
+      deVertical: this._visaoVertical || 0, paraVertical: vertical,
+      deZoom: this._zoomFicha || 1, paraZoom: zoomDestino,
+    };
+  }
+  _atualizarDeslocamentoVisao(agora) {
+    const transicao = this._transicaoVisao;
+    if (!transicao) return;
+    const p = Math.min(1, Math.max(0, (agora - transicao.inicio) / transicao.duracao));
+    const suave = p * p * (3 - 2 * p);
+    this._deslocVisaoFrac = transicao.de + (transicao.para - transicao.de) * suave;
+    this._visaoVertical = transicao.deVertical + (transicao.paraVertical - transicao.deVertical) * suave;
+    this._zoomFicha = transicao.deZoom + (transicao.paraZoom - transicao.deZoom) * suave;
+    if (p === 1) this._transicaoVisao = null;
     this._aplicarDeslocamentoVisao();
   }
   _aplicarDeslocamentoVisao() {
     if (!this.camera) return;
-    const f = this._deslocVisaoFrac || 0;
+    const f = this._deslocVisaoFrac || 0, vertical = this._visaoVertical || 0;
     const w = window.innerWidth, h = window.innerHeight;
-    if (f > 0) this.camera.setViewOffset(w, h, -f / 2 * w, 0, w, h);
+    // Zoom óptico: não modifica raios, órbitas nem a distância do zoom manual.
+    this.camera.zoom = this._zoomFicha || 1;
+    if (f || vertical) this.camera.setViewOffset(w, h, -f / 2 * w, -vertical / 2 * h, w, h);
     else if (this.camera.view) this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
@@ -439,7 +480,7 @@ export class SistemaSolar3D {
       textureObj.minFilter = THREE.LinearMipmapLinearFilter;
       textureObj.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
 
-      geometry = this.geometriaBases.planetaGeometry.clone();
+      geometry = this._criarGeometriaSuperficie(corpo);
       material = new THREE.MeshStandardMaterial({
         map: textureObj,
         roughness: 0.9,
@@ -490,7 +531,8 @@ export class SistemaSolar3D {
     }
 
     // Hitbox invisível para picking
-    const hitboxRaio = Math.max(escala.raio * 2.5, 1.2);
+    geometry.computeBoundingSphere();
+    const hitboxRaio = Math.max(escala.raio * Math.max(2.5, geometry.boundingSphere.radius), 1.2);
     const hitbox = new THREE.Mesh(
       new THREE.SphereGeometry(hitboxRaio, 16, 16),
       new THREE.MeshBasicMaterial({ visible: false })
@@ -539,7 +581,9 @@ export class SistemaSolar3D {
     // são esféricos. NÃO mexe na hitbox (mais abaixo): continua a esfera
     // simples, o cometa tem que continuar clicável nas pontas também.
     const seed = corpo.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const geometry = this._criarGeometriaNucleoCometa(corpo, seed);
+    const geometry = PERFIS_FORMA[corpo.id]
+      ? this._criarGeometriaSuperficie(corpo)
+      : this._criarGeometriaNucleoCometa(corpo, seed);
     const material = new THREE.MeshStandardMaterial({
       map: textureObj,
       roughness: 1,
@@ -565,8 +609,10 @@ export class SistemaSolar3D {
     // sem precisar assumir isso.
     const CLAMP_MAX_NUCLEO = 1.05;
     const alongamentoNucleo = corpo.aparencia?.alongamento ?? 1.0;
-    const raioNucleoLocalMax =
-      CLAMP_MAX_NUCLEO * Math.max(alongamentoNucleo, 1 / Math.sqrt(alongamentoNucleo));
+    geometry.computeBoundingSphere();
+    const raioNucleoLocalMax = PERFIS_FORMA[corpo.id]
+      ? geometry.boundingSphere.radius
+      : CLAMP_MAX_NUCLEO * Math.max(alongamentoNucleo, 1 / Math.sqrt(alongamentoNucleo));
 
     // Coma: halo brilhante ao redor do núcleo (mesmo recurso do glow do Sol)
     const corComa = corpo.aparencia.cores?.[2] || '#7d6f5a';
@@ -606,7 +652,7 @@ export class SistemaSolar3D {
     const cauda = grupoCauda;
 
     const hitbox = new THREE.Mesh(
-      new THREE.SphereGeometry(Math.max(escala.raio * 2.5, 1.2), 16, 16),
+      new THREE.SphereGeometry(Math.max(escala.raio * Math.max(2.5, raioNucleoLocalMax), 1.2), 16, 16),
       new THREE.MeshBasicMaterial({ visible: false })
     );
     hitbox.userData.corpo = corpo;
@@ -629,6 +675,19 @@ export class SistemaSolar3D {
       escala,
       periodoRotacao: corpo.periodoRotacaoHoras || 24,
     });
+  }
+
+  _criarGeometriaSuperficie(corpo) {
+    const geometry = this.geometriaBases.planetaGeometry.clone();
+    if (!PERFIS_FORMA[corpo.id]) return geometry;
+    const pos = geometry.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const [x, y, z] = deformarSuperficie(corpo.id, pos.getX(i), pos.getY(i), pos.getZ(i));
+      pos.setXYZ(i, x, y, z);
+    }
+    pos.needsUpdate = true;
+    geometry.computeVertexNormals();
+    return geometry;
   }
 
   // Deforma uma SphereGeometry(1) em "batata" irregular: soma de
@@ -1803,11 +1862,11 @@ export class SistemaSolar3D {
 
     const posInicial = this.camera.position.clone();
     const targetInicial = this.controls.target.clone();
-    const tempoInicio = performance.now();
+    const tempoInicio = this._agoraCena();
     const duracao = 1200;
 
     this.tweenFoco = () => {
-      const progresso = Math.min(1, (performance.now() - tempoInicio) / duracao);
+      const progresso = Math.min(1, (this._agoraCena() - tempoInicio) / duracao);
       const eased = progresso < 0.5
         ? 4 * progresso * progresso * progresso
         : 1 - Math.pow(-2 * progresso + 2, 3) / 2;
@@ -1864,11 +1923,11 @@ export class SistemaSolar3D {
 
     const posInicial = this.camera.position.clone();
     const targetInicial = this.controls.target.clone();
-    const tempoInicio = performance.now();
+    const tempoInicio = this._agoraCena();
     const duracao = 1200;
 
     this.tweenFoco = () => {
-      const progresso = Math.min(1, (performance.now() - tempoInicio) / duracao);
+      const progresso = Math.min(1, (this._agoraCena() - tempoInicio) / duracao);
       const eased = progresso < 0.5
         ? 4 * progresso * progresso * progresso
         : 1 - Math.pow(-2 * progresso + 2, 3) / 2;
@@ -1902,11 +1961,11 @@ export class SistemaSolar3D {
     const targetInicial = this.controls.target.clone();
     const posFinal = new THREE.Vector3(0, 260, 420);
     const targetFinal = new THREE.Vector3(0, 0, 0);
-    const tempoInicio = performance.now();
+    const tempoInicio = this._agoraCena();
     const duracao = 1000;
 
     this.tweenFoco = () => {
-      const progresso = Math.min(1, (performance.now() - tempoInicio) / duracao);
+      const progresso = Math.min(1, (this._agoraCena() - tempoInicio) / duracao);
       const eased = progresso < 0.5
         ? 4 * progresso * progresso * progresso
         : 1 - Math.pow(-2 * progresso + 2, 3) / 2;
@@ -2463,7 +2522,7 @@ export class SistemaSolar3D {
 
     // 3. Fator de conversão mundo↔pixel
     const tanMeioFov = Math.tan((this.camera.fov * Math.PI / 180) / 2);
-    const mundoPorPixel = (d) => (2 * d * tanMeioFov) / alturaPx;
+    const mundoPorPixel = (d) => (2 * d * tanMeioFov) / (alturaPx * this.camera.zoom);
 
     // Reusar vetores para não alocar por frame: são 2 por corpo × 45 corpos ×
     // 60 fps se alocar aqui dentro (ver comentário de alocação na L9)
@@ -2566,7 +2625,7 @@ export class SistemaSolar3D {
       if (
         x - w / 2 < MARGEM.lados ||
         x + w / 2 > larguraPx - MARGEM.lados ||
-        y - h / 2 < MARGEM.topo ||
+        y - h / 2 < (cand.id === this.corpoFocado && (this._zoomFicha || 1) > 1 ? 16 : MARGEM.topo) ||
         y + h / 2 > alturaPx - MARGEM.fundo
       ) {
         sprite.visible = false;
@@ -2596,15 +2655,39 @@ export class SistemaSolar3D {
     }
   }
 
+  // Relógio da cena: tweens e física não acumulam o intervalo suspenso.
+  _agoraCena() {
+    return (this._suspensoDesde ?? performance.now()) - this._tempoSuspenso;
+  }
+
+  setAtivo(ativo) {
+    this._areaAtiva = Boolean(ativo);
+    this._sincronizarAtividade();
+  }
+
+  get ativo() { return this._suspensoDesde === null; }
+
+  _sincronizarAtividade() {
+    const ativo = this._areaAtiva && !document.hidden;
+    if (!ativo && this._suspensoDesde === null) {
+      this._suspensoDesde = performance.now();
+      cancelAnimationFrame(this._raf); this._raf = null;
+    } else if (ativo && this._suspensoDesde !== null) {
+      this._tempoSuspenso += performance.now() - this._suspensoDesde;
+      this._suspensoDesde = null;
+      this._ultimoFrame = this._agoraCena();
+      if (this._renderCena) this._raf = requestAnimationFrame(this._renderCena);
+    }
+  }
+
   _loop() {
-    let ultimoTempo = performance.now();
-
+    this._ultimoFrame = this._agoraCena();
     const render = () => {
-      requestAnimationFrame(render);
-
-      const agora = performance.now();
-      const deltaSegundos = (agora - ultimoTempo) / 1000;
-      ultimoTempo = agora;
+      if (!this._areaAtiva || document.hidden) { this._sincronizarAtividade(); return; }
+      this._raf = requestAnimationFrame(render);
+      const agora = this._agoraCena();
+      const deltaSegundos = (agora - this._ultimoFrame) / 1000;
+      this._ultimoFrame = agora;
 
       // Palco ativo: renderiza a cena alternativa e sai. A cena principal fica
       // intacta — inclusive tempoDias, que NÃO avança (ver SPEC §3: 10 minutos
@@ -2629,11 +2712,14 @@ export class SistemaSolar3D {
       }
 
       this.controls.update();
+      this._atualizarDeslocamentoVisao(agora);
       this._atualizarRotulos();
       this._atualizarFranjaSol(deltaSegundos);
       this.renderer.render(this.scene, this.camera);
     };
 
-    render();
+    this._renderCena = render;
+    this._sincronizarAtividade();
+    if (this.ativo) render();
   }
 }

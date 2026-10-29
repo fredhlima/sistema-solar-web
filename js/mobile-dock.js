@@ -5,14 +5,31 @@
 // FASE 1: dock + título + nível/engrenagem + HUD + transporte + calendário +
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=39';
+import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=301';
 
 const pad2 = (n) => String(n).padStart(2, '0');
+// O motor interpreta instantes ISO absolutos. Converta a meia-noite local
+// escolhida no calendário para ISO completo, evitando que `YYYY-MM-DD` vire
+// meia-noite UTC e apareça como o dia anterior em fusos a oeste de Greenwich.
+const dataLocalParaISO = (ano, mes, dia) => new Date(ano, mes, dia).toISOString();
 // Usa o mesmo formatador do resto do app (respeita o idioma escolhido em
 // Settings) em vez de um array de meses fixo em pt-BR — achado do Fred
 // (16/09/2026): com Language=EN, essa pílula continuava mostrando "abr",
 // "fev" etc. porque tinha seu próprio array hardcoded, alheio ao i18n.
 const fmtData = (d) => `${formatarDataCompacta(d)} ▾`;
+const localeAtual = () => ({ pt: 'pt-BR', en: 'en', es: 'es' }[getIdioma()] || 'pt-BR');
+const formatadoresDataCompleta = new Map();
+const fmtDataCompleta = (d) => {
+  const locale = localeAtual();
+  if (!formatadoresDataCompleta.has(locale)) formatadoresDataCompleta.set(locale, new Intl.DateTimeFormat(locale, { dateStyle: 'full' }));
+  return formatadoresDataCompleta.get(locale).format(d);
+};
+const rotulosCalendario = () => ({
+  pt: { idioma: ['Português', 'Inglês', 'Espanhol'], anterior: 'Mês anterior', seguinte: 'Mês seguinte', irData: 'Ir para a data', escolher: 'Selecionar data' },
+  en: { idioma: ['Portuguese', 'English', 'Spanish'], anterior: 'Previous month', seguinte: 'Next month', irData: 'Go to date', escolher: 'Select date' },
+  es: { idioma: ['Portugués', 'Inglés', 'Español'], anterior: 'Mes anterior', seguinte: 'Mes siguiente', irData: 'Ir a la fecha', escolher: 'Seleccionar fecha' },
+}[getIdioma()] || { idioma: ['Português', 'Inglês', 'Espanhol'], anterior: 'Mês anterior', seguinte: 'Mês seguinte', irData: 'Ir para a data', escolher: 'Selecionar data' });
 
 const SVG_LOGO = `<svg viewBox="0 0 1024 1024">
   <defs>
@@ -138,9 +155,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
         <div class="mdock-settings-linha">
           <span>${t('mdockIdioma')}</span>
           <div class="mdock-idiomas">
-            <span class="mdock-idioma-op" id="mdock-lang-pt">PT</span>
-            <span class="mdock-idioma-op" id="mdock-lang-en">EN</span>
-            <span class="mdock-idioma-op" id="mdock-lang-es">ES</span>
+            <button type="button" class="mdock-idioma-op" id="mdock-lang-pt">PT</button>
+            <button type="button" class="mdock-idioma-op" id="mdock-lang-en">EN</button>
+            <button type="button" class="mdock-idioma-op" id="mdock-lang-es">ES</button>
           </div>
         </div>
         <button class="mdock-settings-acao" id="mdock-acao-tutorial">
@@ -163,32 +180,39 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       <div class="mdock-painel-corpo mdock-shell"></div>
     </div>
 
-    <div class="mdock-cal" id="mdock-cal" hidden>
+    <div class="mdock-cal" id="mdock-cal" role="group" aria-labelledby="mdock-cal-mes" hidden>
       <div class="mdock-cal-cabeca">
-        <span class="mdock-cal-nav" id="mdock-cal-prev">‹</span>
-        <span class="mdock-cal-mes" id="mdock-cal-mes"></span>
-        <span class="mdock-cal-nav" id="mdock-cal-next">›</span>
+        <button type="button" class="mdock-cal-nav" id="mdock-cal-prev">‹</button>
+        <span class="mdock-cal-mes" id="mdock-cal-mes" aria-live="polite"></span>
+        <button type="button" class="mdock-cal-nav" id="mdock-cal-next">›</button>
       </div>
+      <div class="mdock-cal-grade">
       <div class="mdock-cal-semana">
         ${t('diasSemanaAbrev').map((d) => `<div>${d}</div>`).join('')}
       </div>
       <div class="mdock-cal-dias" id="mdock-cal-dias"></div>
+      </div>
       <button class="mdock-cal-hoje" id="mdock-cal-hoje">${t('hoje')}</button>
     </div>
 
     <div class="mdock-bar">
-      <div class="mdock-sec mdock-sec-exp" id="mdock-btn-exp">${SVG_EXPLORAR}<span>${t('explorar')}</span> <span class="mdock-seta-sec" id="mdock-exp-seta">▴</span></div>
+      <button type="button" class="mdock-sec mdock-sec-exp" id="mdock-btn-exp">${SVG_EXPLORAR}<span>${t('explorar')}</span> <span class="mdock-seta-sec" id="mdock-exp-seta">▴</span></button>
       <div class="mdock-divisor"></div>
       <div class="mdock-sec mdock-transporte">
-        <span class="mdock-transp-btn" id="mdock-back" title="${t('mdockRetroceder')}">${SVG_VOLTAR}</span>
-        <span class="mdock-transp-play" id="mdock-play" title="${t('mdockPlayPausa')}">${SVG_PAUSE}</span>
-        <span class="mdock-transp-btn" id="mdock-fwd" title="${t('mdockAvancar')}">${SVG_AVANCAR}</span>
-        <input class="mdock-slider" id="mdock-slider" type="range" min="0" max="14" step="1" value="9" title="${t('tituloSlider')}">
-        <span class="mdock-speed" id="mdock-speed" title="${t('tituloSlider')}"></span>
-        <span class="mdock-data" id="mdock-date" title="${t('irParaData')}"></span>
+        <div class="mdock-ajuste">
+          <input class="mdock-slider" id="mdock-slider" type="range" min="0" max="14" step="1" value="9" aria-label="${t('tituloSlider')}" title="${t('tituloSlider')}">
+          <button type="button" class="mdock-speed" id="mdock-speed" title="${t('tituloSlider')}"></button>
+        </div>
+        <div class="mdock-reproducao">
+          <button type="button" class="mdock-transp-btn" id="mdock-back" aria-label="${t('mdockRetroceder')}" title="${t('mdockRetroceder')}">${SVG_VOLTAR}</button>
+          <button type="button" class="mdock-transp-play" id="mdock-play" aria-label="${t('mdockPlayPausa')}" title="${t('mdockPlayPausa')}">${SVG_PAUSE}</button>
+          <button type="button" class="mdock-transp-btn" id="mdock-fwd" aria-label="${t('mdockAvancar')}" title="${t('mdockAvancar')}">${SVG_AVANCAR}</button>
+        </div>
+        <button type="button" class="mdock-data" id="mdock-date" aria-controls="mdock-cal" aria-expanded="false" title="${t('irParaData')}"></button>
+
       </div>
       <div class="mdock-divisor"></div>
-      <div class="mdock-sec mdock-sec-xp" id="mdock-btn-xp">${SVG_XP}<span>${t('grupoExperiencias')}</span> <span class="mdock-seta-sec" id="mdock-xp-seta">▴</span></div>
+      <button type="button" class="mdock-sec mdock-sec-xp" id="mdock-btn-xp">${SVG_XP}<span>${t('grupoExperiencias')}</span> <span class="mdock-seta-sec" id="mdock-xp-seta">▴</span></button>
     </div>
   `;
   document.body.appendChild(mdock);
@@ -214,7 +238,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   // Fred em teste manual, 17/09/2026).
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    const focoNoCalendario = $('mdock-cal')?.contains(document.activeElement);
     if (estado.panel || estado.calOpen || estado.settingsOpen) fecharTudo();
+    if (focoNoCalendario) $('mdock-date').focus();
   });
 
   // Exposto para o back button nativo (ver __voltarAndroid em main.js): diz se
@@ -244,7 +270,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   $('mdock-fwd').onclick = () => { acoes.avancarVelocidade(); render(); };
   $('mdock-play').onclick = () => { acoes.alternarPausa(); render(); };
   $('mdock-speed').onclick = () => { acoes.avancarVelocidade(); render(); };
-  $('mdock-slider').addEventListener('change', (e) => {
+  $('mdock-slider').addEventListener('input', (e) => {
     const real = document.getElementById('tempo-slider');
     const atual = real ? parseInt(real.value, 10) : 9;
     const v = parseInt(e.target.value, 10);
@@ -262,15 +288,27 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       estado.calM = cur.getMonth();
     }
     render();
+    if (estado.calOpen) {
+      const grade = $('mdock-cal').querySelector('.mdock-cal-grade');
+      grade.scrollTop = 0;
+      const selecionado = grade.querySelector('.sel');
+      if (selecionado) {
+        const dia = selecionado.getBoundingClientRect(), caixa = grade.getBoundingClientRect();
+        grade.scrollTop = dia.top - caixa.top - (grade.clientHeight - dia.height) / 2;
+      }
+    }
   };
 
   // ---------- calendário ----------
-  $('mdock-cal-prev').onclick = () => { estado.calM--; if (estado.calM < 0) { estado.calM = 11; estado.calY--; } render(); };
-  $('mdock-cal-next').onclick = () => { estado.calM++; if (estado.calM > 11) { estado.calM = 0; estado.calY++; } render(); };
+  $('mdock-cal-prev').onclick = () => { estado.calM--; if (estado.calM < 0) { estado.calM = 11; estado.calY--; } render(); $('mdock-cal').querySelector('.mdock-cal-grade').scrollTop = 0; };
+  $('mdock-cal-next').onclick = () => { estado.calM++; if (estado.calM > 11) { estado.calM = 0; estado.calY++; } render(); $('mdock-cal').querySelector('.mdock-cal-grade').scrollTop = 0; };
   $('mdock-cal-hoje').onclick = () => {
-    acoes.irParaData(new Date().toISOString().slice(0, 10));
+    const devolverFoco = typeof document !== 'undefined' && document.activeElement === $('mdock-cal-hoje');
+    const hoje = new Date();
+    acoes.irParaData(dataLocalParaISO(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
     estado.calOpen = false;
     render();
+    if (devolverFoco) $('mdock-date').focus();
   };
 
   // ---------- painéis ----------
@@ -492,6 +530,14 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
         if (av.missoes?.length) subsecao(t('mdockMissoes'), (w) => av.missoes.forEach((m) => linhaComIcone(w, 'mdock-linha-triangulo', '▸', 'mdock-triangulo', m)));
         if (av.texto) subsecao(t('mdockDetalhes'), (w) => { const p = document.createElement('div'); p.className = 'mdock-av-texto'; p.textContent = av.texto; w.appendChild(p); });
       }
+      const credito = CREDITOS_TEXTURAS[corpo.id];
+      if (credito) {
+        const rodape = document.createElement('footer');
+        rodape.className = 'info-credito-textura';
+        rodape.style.gridColumn = '1 / -1';
+        rodape.textContent = t(credito.chave, { fonte: credito.fonte });
+        conteudo.appendChild(rodape);
+      }
     }
 
     [['resumo', 'mdockTabResumo'], ['numeros', 'mdockTabNumeros'], ['curio', 'mdockTabCurio'], ['avancado', 'mdockTabAvancado']].forEach(([key, chave]) => {
@@ -548,10 +594,11 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       { label: t('btnTamanhos'), icone: SVG_COMPARAR, acao: acoes.abrirComparador },
       { label: t('btnQuiz'), icone: SVG_QUIZ, acao: acoes.abrirQuiz },
       { label: t('btnVoce'), icone: SVG_VOCE, acao: acoes.abrirVoce },
-      // estacoes-mares é 100% Pro (sem provinha) — mesmo selo usado no resto
-      // do app (.premium-cadeado), já que o dock não tinha nenhum até agora.
-      acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes, pro: !!premium && !premium.recurso('estacoes-mares') },
-      acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares, pro: !!premium && !premium.recurso('estacoes-mares') },
+      acoes.abrirHangar && { label: t('btnHangar'), icone: SVG_VOCE, acao: acoes.abrirHangar },
+      // As entradas de Estações e Marés levam aos guias essenciais gratuitos.
+      // Os laboratórios de investigação e o 3D seguem sob o acesso Pro.
+      acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes, pro: false },
+      acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares, pro: false },
     ].filter(Boolean).forEach((it) => {
       const b = document.createElement('button');
       b.className = 'mdock-xp-btn' + (it.tour ? ' mdock-xp-btn-tour' : '');
@@ -656,18 +703,27 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     $('mdock-painel-xp').hidden = estado.panel !== 'xp';
     $('mdock-cal').hidden = !estado.calOpen;
     $('mdock-settings').hidden = !estado.settingsOpen;
-    // Explorar (e o card de missão, que abre na mesma janela — ver mobile.css)
-    // ocupam ~46% da esquerda: desloca a ótica pra centralizar o astro/nave
-    // focado na metade livre (sem zoom, sem mexer na cena/dados). SÓ no modo
-    // dock: `estado.panel` é sincronizado por um poll universal (roda mesmo
-    // no desktop, ao selecionar qualquer astro na cena) — sem o gate por
-    // body.modo-dock, o desktop levava um deslocamento de câmera de um
-    // painel esquerdo que nem existe lá (o painel de info do desktop é uma
-    // gaveta à DIREITA).
+    // Montar o conteúdo antes de medir o retângulo do painel.
+    syncPainelExp();
     const emModoDock = document.body.classList.contains('modo-dock');
     const cardMissaoEl = $('card-missao');
     const cardMissaoVisivel = !!cardMissaoEl && getComputedStyle(cardMissaoEl).display !== 'none';
-    if (motor.setDeslocamentoVisao) motor.setDeslocamentoVisao(emModoDock && (estado.panel === 'exp' || cardMissaoVisivel) ? 0.46 : 0);
+    let deslocamento = 0, vertical = 0, zoom = 1;
+    if (emModoDock && estado.panel === 'exp') {
+      const caixa = $('mdock-painel-exp').getBoundingClientRect();
+      const direita = $('mdock-gear').getBoundingClientRect().right;
+      deslocamento = (caixa.right + 16 + direita) / innerWidth - 1;
+      vertical = (caixa.top + caixa.bottom) / innerHeight - 1;
+      if (estado.sel) {
+        // Anéis têm extensão maior que o raio do planeta usado no foco.
+        zoom = ['saturno', 'urano'].includes(estado.sel) ? 1.08 : 1.25;
+      }
+    } else if (emModoDock && cardMissaoVisivel) deslocamento = 0.46;
+    if(document.body.classList.contains('nav-guia')){
+      const guia=document.querySelector('.aprendizado-sol');
+      if(guia&&!guia.hidden)deslocamento=guia.getBoundingClientRect().right/innerWidth;
+    }
+    motor.setDeslocamentoVisao?.(deslocamento, { vertical, zoom });
     // scrim de cena aparece quando um painel ou o calendário está aberto
     $('mdock-scrim-cena').hidden = !(estado.panel || estado.calOpen);
     // Classe no body (não em #mdock: o card do quiz vive em #ui-root, um
@@ -683,40 +739,65 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     $('mdock-exp-seta').textContent = estado.panel === 'exp' ? '▾' : '▴';
     $('mdock-xp-seta').textContent = estado.panel === 'xp' ? '▾' : '▴';
     $('mdock-date').classList.toggle('ativo', estado.calOpen);
+    $('mdock-date').setAttribute('aria-expanded', String(estado.calOpen));
 
-    // painel explorar (lista/ficha)
-    syncPainelExp();
 
     // transporte
     const et = acoes.estadoTempo();
     $('mdock-play').innerHTML = et.pausado ? SVG_PLAY : SVG_PAUSE;
+    $('mdock-play').setAttribute('aria-pressed', String(!et.pausado));
+    $('mdock-slider').setAttribute('aria-valuetext', et.rotulo);
     $('mdock-speed').textContent = et.rotulo.startsWith('−') ? '◀ ' + et.rotulo.slice(1) : et.rotulo;
     $('mdock-date').textContent = fmtData(acoes.getDataSimulada());
+    const rotulosCal = rotulosCalendario();
+    $('mdock-date').setAttribute('aria-label', `${rotulosCal.irData}: ${fmtDataCompleta(acoes.getDataSimulada())}`);
+    $('mdock-cal-prev').setAttribute('aria-label', rotulosCal.anterior);
+    $('mdock-cal-next').setAttribute('aria-label', rotulosCal.seguinte);
     const realSlider = document.getElementById('tempo-slider');
     if (realSlider) $('mdock-slider').value = realSlider.value;
 
     // calendário
     if (estado.calOpen) {
-      $('mdock-cal-mes').textContent = `${t('meses')[estado.calM]} ${estado.calY}`;
+      // Avoid repeated live-region announcements from the periodic render.
+      const tituloMes = `${t('meses')[estado.calM]} ${estado.calY}`;
+      if ($('mdock-cal-mes').textContent !== tituloMes) $('mdock-cal-mes').textContent = tituloMes;
       const dias = $('mdock-cal-dias');
-      dias.innerHTML = '';
-      const primeiro = new Date(estado.calY, estado.calM, 1).getDay();
-      const totalDias = new Date(estado.calY, estado.calM + 1, 0).getDate();
+      const chaveMes = `${estado.calY}-${estado.calM}`;
+      if (dias.dataset.mes !== chaveMes) {
+        dias.innerHTML = '';
+        const primeiro = new Date(estado.calY, estado.calM, 1).getDay();
+        const totalDias = new Date(estado.calY, estado.calM + 1, 0).getDate();
+        for (let i = 0; i < primeiro; i++) dias.appendChild(document.createElement('div'));
+        for (let d = 1; d <= totalDias; d++) {
+          const cel = document.createElement('button');
+          cel.type = 'button';
+          cel.textContent = String(d);
+          cel.className = 'mdock-cal-dia';
+          cel.dataset.dia = String(d);
+          cel.onclick = () => {
+            const devolverFoco = typeof document !== 'undefined' && document.activeElement === cel;
+            acoes.irParaData(dataLocalParaISO(estado.calY, estado.calM, d));
+            estado.calOpen = false;
+            render();
+            if (devolverFoco) $('mdock-date').focus();
+          };
+          dias.appendChild(cel);
+        }
+        dias.dataset.mes = chaveMes;
+      }
       const cur = acoes.getDataSimulada();
       const hoje = new Date();
-      for (let i = 0; i < primeiro; i++) dias.appendChild(document.createElement('div'));
-      for (let d = 1; d <= totalDias; d++) {
-        const cel = document.createElement('div');
-        cel.textContent = String(d);
-        cel.className = 'mdock-cal-dia';
-        if (cur.getFullYear() === estado.calY && cur.getMonth() === estado.calM && cur.getDate() === d) cel.classList.add('sel');
-        else if (hoje.getFullYear() === estado.calY && hoje.getMonth() === estado.calM && hoje.getDate() === d) cel.classList.add('hoje');
-        cel.onclick = () => {
-          acoes.irParaData(`${estado.calY}-${pad2(estado.calM + 1)}-${pad2(d)}`);
-          estado.calOpen = false;
-          render();
-        };
-        dias.appendChild(cel);
+      for (const cel of dias.querySelectorAll('button.mdock-cal-dia')) {
+        const d = Number(cel.dataset.dia);
+        const selecionado = cur.getFullYear() === estado.calY && cur.getMonth() === estado.calM && cur.getDate() === d;
+        const eHoje = hoje.getFullYear() === estado.calY && hoje.getMonth() === estado.calM && hoje.getDate() === d;
+        cel.classList.toggle('sel', selecionado);
+        cel.classList.toggle('hoje', eHoje);
+        const dataDia = new Date(estado.calY, estado.calM, d);
+        cel.setAttribute('aria-label', `${rotulosCal.escolher}: ${fmtDataCompleta(dataDia)}`);
+        cel.setAttribute('aria-pressed', String(selecionado));
+        if (eHoje) cel.setAttribute('aria-current', 'date');
+        else cel.removeAttribute('aria-current');
       }
     }
 
@@ -733,9 +814,18 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       $('mdock-lang-pt').classList.toggle('sel', lang === 'pt');
       $('mdock-lang-en').classList.toggle('sel', lang === 'en');
       $('mdock-lang-es').classList.toggle('sel', lang === 'es');
+      ['pt', 'en', 'es'].forEach((idioma, i) => {
+        const botao = $(`mdock-lang-${idioma}`);
+        botao.setAttribute('aria-label', rotulosCal.idioma[i]);
+        botao.setAttribute('aria-pressed', String(lang === idioma));
+      });
     }
   }
 
   render();
   setInterval(render, 500);
+  document.addEventListener('sim:ritmo',render);
+  return { fecharPaineis() {
+    estado.panel = null; estado.calOpen = false; estado.settingsOpen = false; render();
+  }};
 }

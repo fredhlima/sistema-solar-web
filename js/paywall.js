@@ -1,264 +1,195 @@
-// Paywall: overlay com UI de compra mockada
-// Exporta iniciarPaywall({ premium, t })
+import { NAVES_1_0 } from './release-scope.js?v=301';
+import { getIdioma } from './i18n.js?v=301';
+
+const AVISO_TESTE = {
+  pt: 'Compra simulada de teste: libera o Pro neste aparelho, sem cobrança.',
+  en: 'Simulated test purchase: unlocks Pro on this device, with no charge.',
+  es: 'Compra simulada de prueba: activa Pro en este dispositivo, sin cobro.',
+};
+// IDs conhecidos; nomes e textos são localizados. Nenhum texto recebido do iframe é renderizado.
+const NAVES_COMPLETAS = NAVES_1_0;
+const NAVES_PREVIAS = [];
+const BENEFICIOS = ['paywallBeneficioHangar', 'paywallBeneficioAprendizado', 'paywallBeneficio5'];
+const RECURSO_BENEFICIO = { hangar: 0, aprendizado: 1, 'estacoes-mares': 2 };
+// Contextos aceitos pelo paywall são IDs internos; nenhum texto vindo do roteiro é renderizado.
+const CONTEXTOS_ROTEIRO = {
+  'terra-ano': 'paywallContextoRoteiro_terra_ano',
+  'mares-oceano': 'paywallContextoRoteiro_mares_oceano',
+};
 
 export function iniciarPaywall({ premium, t }) {
-  if (typeof document === 'undefined') {
-    // Em node (testes): lança erro apenas se chamado, não no import
-    return {
-      abrir: () => { throw new Error('Paywall: document não disponível em ambiente node'); }
-    };
-  }
-
-  const root = document.getElementById('ui-root');
+  if (typeof document === 'undefined') return { abrir: () => { throw new Error('Paywall: document não disponível em ambiente node'); } };
+  const root = document.body;
   if (!root) return {};
-
-  // Cria DOM
+  const testeIOS = premium?.provider === 'teste-ios';
+  const loja = premium?.provider === 'revenuecat';
   const overlay = document.createElement('div');
   overlay.className = 'paywall-overlay';
-  overlay.innerHTML = `
-    <div class="paywall-card">
-      <button class="paywall-fechar botao-fechar-overlay" aria-label="${t('voltar')}"><span class="fechar-icone">✕</span><span class="fechar-texto">‹ ${t('voltar')}</span></button>
-      <div class="paywall-badge">${t('proBadge')}</div>
-      <h2 class="paywall-titulo">${t('paywallTitulo')}</h2>
-      <p class="paywall-subtitulo">${t('paywallSubtitulo')}</p>
-      <p class="paywall-contexto" hidden></p>
-
-      <p class="paywall-reciprocidade">${t('paywallReciprocidade')}</p>
-
-      <ul class="paywall-beneficios">
-        <li>${t('paywallBeneficio1')}</li>
-        <li>${t('paywallBeneficio2')}</li>
-        <li>${t('paywallBeneficio3')}</li>
-        <li>${t('paywallBeneficio4')}</li>
-        <li>${t('paywallBeneficio5')}</li>
-      </ul>
-
-      <div class="paywall-preco">${t('paywallPreco')}</div>
-      <div class="paywall-ancora">${t('paywallAncora')}</div>
-
-      <p class="paywall-perda">${t('paywallPerda')}</p>
-
-      <button id="paywall-comprar" class="paywall-comprar">${t('paywallComprar')}</button>
-      <button id="paywall-restaurar" class="paywall-restaurar">${t('paywallRestaurar')}</button>
-
-      ${premium?.provider === 'revenuecat' ? '' : `<div class="paywall-rodape">${t('paywallLegal')}</div>`}
-    </div>
-  `;
-  root.appendChild(overlay);
-  // Estado inicial explícito: a guarda do Esc lê o style inline, que sem
-  // isto nasce '' e faria o paywall "parecer aberto" antes do primeiro uso
   overlay.style.display = 'none';
-
-  const btnComprar = document.getElementById('paywall-comprar');
-  const btnRestaurar = document.getElementById('paywall-restaurar');
-  const btnFechar = overlay.querySelector('.paywall-fechar');
+  overlay.innerHTML = `
+    <section class="paywall-card" role="dialog" aria-modal="true" aria-labelledby="paywall-titulo" tabindex="-1">
+      <header class="paywall-cabecalho">
+        <button class="paywall-fechar botao-fechar-overlay" aria-label="${t('paywallFechar')}">‹ ${t('paywallFechar')}</button>
+        <span class="paywall-badge">${t('proBadge')}</span>
+      </header>
+      <div class="paywall-conteudo">
+        <div class="paywall-apresentacao">
+          <h2 id="paywall-titulo" class="paywall-titulo">${t('paywallTitulo')}</h2>
+          <p class="paywall-subtitulo">${t('paywallSubtitulo')}</p>
+          <p class="paywall-contexto" hidden></p>
+          <p class="paywall-reciprocidade">${t('paywallReciprocidade')}</p>
+        </div>
+        <ul class="paywall-beneficios">${BENEFICIOS.map(key => `<li>${t(key)}</li>`).join('')}</ul>
+      </div>
+      <footer class="paywall-decisao">
+        <div class="paywall-preco" aria-live="polite"></div>
+        <div class="paywall-ancora" ${testeIOS ? 'hidden' : ''}>${t('paywallAncora')}</div>
+        <button class="paywall-preco-repetir" hidden>${t('paywallPrecoRepetir')}</button>
+        <div class="paywall-mensagem" role="status" hidden></div>
+        <div class="paywall-acoes">
+          <button id="paywall-comprar" class="paywall-comprar"></button>
+          <button id="paywall-restaurar" class="paywall-restaurar">${t('paywallRestaurar')}</button>
+        </div>
+        ${loja || testeIOS ? '' : `<div class="paywall-rodape">${t('paywallLegal')}</div>`}
+      </footer>
+    </section>`;
+  root.appendChild(overlay);
   const card = overlay.querySelector('.paywall-card');
-
-  let estado = 'repouso'; // repouso | comprando | sucesso | erro | restaurando
+  const btnComprar = overlay.querySelector('#paywall-comprar');
+  const btnRestaurar = overlay.querySelector('#paywall-restaurar');
+  const btnFechar = overlay.querySelector('.paywall-fechar');
+  const btnPreco = overlay.querySelector('.paywall-preco-repetir');
+  const mensagem = overlay.querySelector('.paywall-mensagem');
+  const divPreco = overlay.querySelector('.paywall-preco');
+  const liBeneficios = Array.from(overlay.querySelectorAll('.paywall-beneficios li'));
+  let estado = 'repouso', preco = null, precoCarregando = false, sessao = 0, timerFechar = null, focoAnterior = null;
+  const aberto = () => overlay.style.display === 'flex';
+  const ocupado = () => estado === 'comprando' || estado === 'restaurando';
+  const avisoTeste = () => AVISO_TESTE[getIdioma()] || AVISO_TESTE.pt;
 
   function atualizarUI() {
-    const mensagem = card.querySelector('.paywall-mensagem');
-    if (mensagem) mensagem.remove();
-
-    if (estado === 'comprando') {
-      btnComprar.disabled = true;
-      btnComprar.textContent = t('paywallComprando');
-    } else if (estado === 'sucesso') {
-      btnComprar.disabled = true;
-      btnComprar.textContent = t('paywallSucesso');
-      btnComprar.style.color = '#7dde9a'; // Verde
-    } else if (estado === 'erro') {
-      btnComprar.disabled = false;
-      btnComprar.textContent = t('paywallComprar');
-      const msg = document.createElement('div');
-      msg.className = 'paywall-mensagem paywall-erro';
-      msg.textContent = t('paywallErro');
-      card.insertBefore(msg, card.querySelector('.paywall-rodape'));
-    } else if (estado === 'restaurando') {
-      btnRestaurar.disabled = true;
-      btnRestaurar.textContent = t('paywallComprando');
-    } else if (estado === 'restaurado') {
-      btnRestaurar.disabled = true;
-      btnRestaurar.textContent = t('paywallRestaurado');
-      btnRestaurar.style.color = '#7dde9a';
-    } else if (estado === 'nadaRestaurar') {
-      btnRestaurar.disabled = true;
-      btnRestaurar.textContent = t('paywallNadaRestaurar');
-    } else {
-      // repouso
-      btnComprar.disabled = false;
-      btnComprar.textContent = t('paywallComprar');
-      btnRestaurar.disabled = false;
-      btnRestaurar.textContent = t('paywallRestaurar');
-      // Limpa os inline dos estados de sucesso e devolve as cores ao CSS
-      // (inline '#e8edf7' deixava o CTA ilegível sobre o fundo ciano)
-      btnComprar.style.color = '';
-      btnRestaurar.style.color = '';
-    }
+    const concluido = estado === 'sucesso' || estado === 'restaurado';
+    btnComprar.disabled = ocupado() || concluido || (loja && !preco);
+    btnRestaurar.disabled = ocupado() || concluido;
+    btnPreco.disabled = ocupado() || precoCarregando;
+    card.setAttribute('aria-busy', String(ocupado()));
+    btnComprar.textContent = estado === 'comprando' ? t('paywallComprando')
+      : estado === 'sucesso' ? t('paywallSucesso')
+      : testeIOS ? t('paywallComprarTeste')
+      : loja && preco ? t('paywallComprarPreco', { preco }) : t('paywallComprar');
+    btnRestaurar.textContent = estado === 'restaurando' ? t('paywallComprando')
+      : estado === 'restaurado' ? t('paywallRestaurado') : t('paywallRestaurar');
+    const keys = { erro: 'paywallErro', cancelado: 'paywallCancelado', pendente: 'paywallPendente', nadaRestaurar: 'paywallNadaRestaurar' };
+    mensagem.hidden = !keys[estado];
+    mensagem.textContent = keys[estado] ? t(keys[estado]) : '';
+    mensagem.classList.toggle('paywall-erro', estado === 'erro');
+    btnPreco.hidden = !loja || precoCarregando || Boolean(preco);
+    divPreco.textContent = testeIOS ? avisoTeste()
+      : loja ? precoCarregando ? t('paywallPrecoSemValor') : preco ? t('paywallPrecoLoja', { preco }) : t('paywallPrecoIndisponivel')
+      : t('paywallPreco');
   }
-
-  let timerFechar = null;
 
   function fechar() {
     clearTimeout(timerFechar);
     timerFechar = null;
+    sessao++; // Respostas antigas de preço/compra não podem modificar outra abertura.
     overlay.style.display = 'none';
     estado = 'repouso';
-    atualizarUI();
+    focoAnterior?.focus?.();
   }
 
-  btnComprar.addEventListener('click', async () => {
-    if (estado !== 'repouso') return;
-    estado = 'comprando';
+  async function carregarPreco() {
+    if (!loja || precoCarregando) return;
+    const atual = sessao;
+    precoCarregando = true;
     atualizarUI();
-
-    try {
-      const res = await premium.comprar();
-      if (res.ok) {
-        estado = 'sucesso';
-        atualizarUI();
-        timerFechar = setTimeout(() => fechar(), 1400);
-      } else {
-        estado = 'erro';
-        atualizarUI();
-      }
-    } catch (e) {
-      console.error('Erro ao comprar:', e);
-      estado = 'erro';
-      atualizarUI();
-    }
-  });
-
-  btnRestaurar.addEventListener('click', async () => {
-    if (estado !== 'repouso') return;
-    estado = 'restaurando';
+    let valor = null;
+    try { valor = await premium.precoLocal(); }
+    catch (e) { console.warn('Preço da loja indisponível:', e); }
+    if (atual !== sessao || !aberto()) return;
+    preco = typeof valor === 'string' && valor.trim() ? valor : null;
+    precoCarregando = false;
     atualizarUI();
+  }
+  btnPreco.addEventListener('click', carregarPreco);
 
+  async function executar(acao) {
+    if (ocupado() || ['sucesso', 'restaurado'].includes(estado) || (acao === 'comprar' && loja && !preco)) return;
+    const atual = sessao;
+    estado = acao === 'comprar' ? 'comprando' : 'restaurando';
+    atualizarUI();
     try {
-      const res = await premium.restaurar();
-      if (res.ok) {
-        if (res.restaurado) {
-          estado = 'restaurado';
-        } else {
-          estado = 'nadaRestaurar';
-        }
-        atualizarUI();
-        timerFechar = setTimeout(() => fechar(), 1400);
-      } else {
-        estado = 'erro';
-        atualizarUI();
-      }
+      const res = await premium[acao]();
+      if (atual !== sessao || !aberto()) return;
+      estado = !res.ok ? 'erro' : acao === 'comprar' ? 'sucesso' : res.restaurado ? 'restaurado' : 'nadaRestaurar';
     } catch (e) {
-      console.error('Erro ao restaurar:', e);
-      estado = 'erro';
-      atualizarUI();
+      if (atual !== sessao || !aberto()) return;
+      // Códigos do SDK RevenueCat instalado; cancelar não é uma falha de compra.
+      const code = String(e?.code ?? '');
+      estado = e?.userCancelled === true || code === '1' ? 'cancelado' : code === '20' ? 'pendente' : 'erro';
+      if (estado === 'erro') console.warn('Compra/restauração não concluída:', e);
     }
-  });
-
+    atualizarUI();
+    if (estado === 'sucesso' || estado === 'restaurado') timerFechar = setTimeout(fechar, 1400);
+  }
+  btnComprar.addEventListener('click', () => executar('comprar'));
+  btnRestaurar.addEventListener('click', () => executar('restaurar'));
   btnFechar.addEventListener('click', fechar);
-
-  // Fechar ao clicar fora do card (no overlay)
-  overlay.addEventListener('click', (evt) => {
-    if (evt.target === overlay) fechar();
-  });
-
-  // Fechar com Esc — listener permanente com guarda de visibilidade; o
-  // stopImmediatePropagation impede os handlers de Esc da UI de fecharem
-  // outros painéis no mesmo toque enquanto o paywall está aberto
-  document.addEventListener('keydown', (evt) => {
-    if (evt.key === 'Escape' && overlay.style.display === 'flex') {
-      evt.stopImmediatePropagation();
-      fechar();
+  overlay.addEventListener('click', evt => { if (evt.target === overlay) fechar(); });
+  document.addEventListener('keydown', evt => {
+    if (!aberto()) return;
+    if (evt.key === 'Escape') { evt.stopImmediatePropagation(); fechar(); }
+    if (evt.key === 'Tab') {
+      const alvos = [...card.querySelectorAll('button:not(:disabled)')].filter(el => !el.hidden);
+      const primeiro = alvos[0], ultimo = alvos[alvos.length - 1];
+      if (evt.shiftKey && (document.activeElement === primeiro || document.activeElement === card)) { evt.preventDefault(); ultimo?.focus(); }
+      else if (!evt.shiftKey && (document.activeElement === ultimo || !card.contains(document.activeElement))) { evt.preventDefault(); primeiro?.focus(); }
     }
   }, { capture: true });
 
-  const liBeneficios = Array.from(overlay.querySelectorAll('.paywall-beneficios li'));
-
-  // Mapeamento recurso → índice do benefício correspondente (0-based)
-  const RECURSO_BENEFICIO = {
-    'quiz': 0,
-    'missoes': 1,
-    'eventos': 2,
-    'voce-no-espaco': 3,
-    'estacoes-mares': 4
-  };
-
-  // Função abrir
-  async function abrir(idRecurso) {
+  function abrir(idRecurso, itemId, contextoEstruturado) {
     clearTimeout(timerFechar);
     timerFechar = null;
+    if (!aberto()) focoAnterior = document.activeElement;
+    sessao++;
     overlay.style.display = 'flex';
     estado = 'repouso';
-
-    // Atualiza contexto: se existe chave paywallContexto_<idRecurso>, mostra;
-    // senão esconde. Converte hífens em underscores para acessar chave de tradução.
-    const pContexto = overlay.querySelector('.paywall-contexto');
-    if (idRecurso) {
-      const chaveContexto = 'paywallContexto_' + idRecurso.replace(/-/g, '_');
-      const textoContexto = t(chaveContexto);
-      // Trata como ausente se voltar a própria chave ou vazio
-      if (textoContexto && textoContexto !== chaveContexto) {
-        pContexto.textContent = textoContexto;
-        pContexto.hidden = false;
-      } else {
-        pContexto.hidden = true;
-      }
-    } else {
-      pContexto.hidden = true;
+    precoCarregando = false;
+    const contexto = overlay.querySelector('.paywall-contexto');
+    const titulo = overlay.querySelector('.paywall-titulo');
+    titulo.textContent = t('paywallTitulo');
+    const chave = typeof idRecurso === 'string' ? 'paywallContexto_' + idRecurso.replace(/-/g, '_') : '';
+    const texto = chave ? t(chave) : '';
+    contexto.textContent = texto && texto !== chave ? texto : '';
+    if (idRecurso === 'aprendizado') {
+      const roteiro = contextoEstruturado && typeof contextoEstruturado === 'object'
+        ? contextoEstruturado.roteiro
+        : null;
+      const chaveRoteiro = Object.prototype.hasOwnProperty.call(CONTEXTOS_ROTEIRO, roteiro)
+        ? CONTEXTOS_ROTEIRO[roteiro]
+        : null;
+      const chaveAprendizado = chaveRoteiro || 'paywallContexto_aprendizado';
+      const textoAprendizado = t(chaveAprendizado);
+      contexto.textContent = textoAprendizado !== chaveAprendizado ? textoAprendizado : '';
     }
-
-    // Reordena benefícios: o correspondente ao idRecurso vai pro topo com
-    // destaque, os demais sem destaque em ordem original
-    // Parte sempre da ordem ORIGINAL (liBeneficios, guardada na criação):
-    // indexar pela ordem atual do DOM erraria o item a partir da 2ª abertura,
-    // porque a abertura anterior já moveu um <li> para o topo.
-    const ulBeneficios = overlay.querySelector('.paywall-beneficios');
-    if (ulBeneficios) {
-      liBeneficios.forEach(li => ulBeneficios.appendChild(li));
-      // Sempre remove classe de destaque de todos
-      Array.from(ulBeneficios.querySelectorAll('li')).forEach(li => {
-        li.classList.remove('paywall-beneficio-destaque');
-      });
-
-      // Se há idRecurso válido, move o benefício correspondente pro topo
-      if (idRecurso && RECURSO_BENEFICIO.hasOwnProperty(idRecurso)) {
-        const indiceDestaque = RECURSO_BENEFICIO[idRecurso];
-        const lis = liBeneficios;
-
-        if (indiceDestaque < lis.length) {
-          const liDestaque = lis[indiceDestaque];
-          liDestaque.classList.add('paywall-beneficio-destaque');
-          // Move pro início usando firstChild
-          ulBeneficios.insertBefore(liDestaque, ulBeneficios.firstChild);
-        }
-      }
+    if (idRecurso === 'hangar' && [...NAVES_COMPLETAS, ...NAVES_PREVIAS].includes(itemId)) {
+      const nave = t('paywallNave_' + itemId.replace(/-/g, '_'));
+      titulo.textContent = nave;
+      contexto.textContent = t(NAVES_COMPLETAS.includes(itemId) ? 'paywallNaveCompleta' : 'paywallNavePrevia', { nave });
     }
-
-    // Atualiza preço
-    const divPreco = overlay.querySelector('.paywall-preco');
-    if (premium.provider === 'revenuecat') {
-      // Mostra placeholder enquanto carrega
-      divPreco.textContent = t('paywallPrecoSemValor');
-      try {
-        const preco = await premium.precoLocal();
-        if (preco) {
-          const textoPreco = t('paywallPrecoLoja').replace('{preco}', preco);
-          divPreco.textContent = textoPreco;
-        }
-      } catch (e) {
-        console.error('Erro ao carregar preço local:', e);
-        // Mantém o placeholder se falhar
-      }
-    } else {
-      // Mock/navegador: mantém o texto padrão
-      divPreco.textContent = t('paywallPreco');
+    contexto.hidden = !contexto.textContent;
+    const ul = overlay.querySelector('.paywall-beneficios');
+    liBeneficios.forEach(li => { li.classList.remove('paywall-beneficio-destaque'); ul.appendChild(li); });
+    if (Object.prototype.hasOwnProperty.call(RECURSO_BENEFICIO, idRecurso)) {
+      const li = liBeneficios[RECURSO_BENEFICIO[idRecurso]];
+      li.classList.add('paywall-beneficio-destaque');
+      ul.prepend(li);
     }
-
+    // A tela responde imediatamente, sem esperar a rede para permitir a saída.
     atualizarUI();
+    btnFechar.focus();
+    if (loja) void carregarPreco();
   }
-
-  // Registra função de abertura no premium
   premium.definirPaywall(abrir);
-
   return { abrir, fechar };
 }

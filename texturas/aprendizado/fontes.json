@@ -1,0 +1,11 @@
+{
+  "m82-hubble-webb.png": {
+    "fonte": "https://science.nasa.gov/asset/webb/m82-cigar-galaxy-hubble-webb-side-by-side/",
+    "download": "https://assets.science.nasa.gov/dynamicimage/assets/science/missions/webb/science/2026/06/STScI-01KM3SJRQSKB0ZASZV8MWGPV46.png?fit=clip&h=600&w=1200",
+    "credito": "NASA, ESA, CSA, Adam Smercina (STScI, Tufts), Thomas Williams (University of Manchester); Image Processing: Alyssa Pagan (STScI)",
+    "largura": 1200,
+    "altura": 600,
+    "sha256": "0122eeb4e4c049d15c9498b12de1914e1e8da802649cd991fb5ea44da02cb7b3",
+    "uso": "Par oficial intacto, Hubble à esquerda e Webb à direita; seleção por recorte CSS de cada metade, sem filtros ou edição de pixels."
+  }
+}
