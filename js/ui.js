@@ -1,4 +1,5 @@
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=301';
+import { abrirPrivacidade } from './privacidade.js?v=302';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=302';
 import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
@@ -294,6 +295,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     });
 
     grupoUtilidades.appendChild(seletorDiv);
+    const politica = document.createElement('button');
+    politica.type = 'button'; politica.className = 'botao'; politica.id = 'btn-privacidade';
+    politica.textContent = t('politicaPrivacidade'); politica.onclick = () => abrirPrivacidade({ focoAoFechar: politica });
+    grupoUtilidades.appendChild(politica);
+
 
     // Gatilho do popover de experiências (só aparece em mobile, via CSS)
     const triggerExp = document.createElement('button');

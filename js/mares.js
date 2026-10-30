@@ -10,8 +10,8 @@
 // Aqui se mostra a FORÇA relativa e o RITMO, que é o que a geometria permite.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=301';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=301';
+import { getIdioma } from './i18n.js?v=302';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=302';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -19,7 +19,7 @@ import {
   diaLunarHoras, formatarHoras, MES_SINODICO_DIAS, A_SOL, A_LUA,
   classificarMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
   DIA_SIDERAL_HORAS, AVANCO_LUA_GRAUS_DIA,
-} from './mares-calc.js?v=301';
+} from './mares-calc.js?v=302';
 
 const RAD = Math.PI / 180;
 

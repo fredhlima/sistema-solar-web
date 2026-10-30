@@ -1,4 +1,4 @@
-import {DADOS} from './dados.js?v=301';
+import {DADOS} from './dados.js?v=302';
 export const UA_KM=149597870.7;
 const ids=['sol','mercurio','venus','terra','marte','jupiter','saturno','urano','netuno'];
 export const CORPOS_ESCALA=ids.map(id=>{const c=DADOS.corpos.find(c=>c.id===id);return{id,diametroKm:c.raioKm*2,distanciaKm:c.distanciaMediaKm};});

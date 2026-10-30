@@ -1,4 +1,4 @@
-import {aoMudarAtividade} from './app-bridge.js?v=301';
+import {aoMudarAtividade} from './app-bridge.js?v=302';
 import * as T from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODELOS_FUTUROS } from './hangar-future-models.js?v=3';

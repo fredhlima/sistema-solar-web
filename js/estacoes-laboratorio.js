@@ -1,4 +1,4 @@
-import { declinacaoSolar, duracaoDoDia } from './estacoes-calc.js?v=301';
+import { declinacaoSolar, duracaoDoDia } from './estacoes-calc.js?v=302';
 
 const COPY = {
  pt: { essential:'Estações: compare os hemisférios', investigate:'Investigue a duração do dia', months:['Março','Junho','Setembro','Dezembro'], latitude:'Latitude', north:'N', south:'S', equator:'Equador', daylight:'de luz', night:'de noite', measure:'Registrar', empty:'Escolha uma situação e registre A. Mude o mês ou a latitude e registre B.', same:'A e B têm a mesma duração de luz.', more:'B tem {h} h a mais de luz que A.', less:'B tem {h} h a menos de luz que A.', changedBoth:'Você mudou mês e latitude. Para isolar um efeito, mude uma variável por vez.', changedNone:'Mude o mês ou a latitude para investigar outra situação.', note:'Modelo ideal: marcos do ano, sem calendário ou refração. Não prevê clima nem horários de nascer do Sol.', source:'Como o modelo funciona', reset:'Limpar comparação', june:'Junho: mais horas de luz no norte.', december:'Dezembro: mais horas de luz no sul.' },

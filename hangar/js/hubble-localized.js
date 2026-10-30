@@ -1,5 +1,5 @@
 import { PARTES, FONTES, RESUMO } from './hubble-data.js';
-import { MISSOES_NAVE } from './hangar-mission-data.js?v=301';
+import { MISSOES_NAVE } from './hangar-mission-data.js?v=302';
 
 // Only presentation text belongs here. IDs, URLs, dates, measurements, and
 // source keys remain supplied by the original Portuguese data.

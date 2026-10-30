@@ -1,5 +1,5 @@
 import { PARTES, FONTES, RESUMO } from './lunar-data.js';
-import { MISSOES_NAVE } from './hangar-mission-data.js?v=301';
+import { MISSOES_NAVE } from './hangar-mission-data.js?v=302';
 
 // Presentation copy only: IDs, URLs, facts and source keys come from the
 // Portuguese source data and are preserved by the recursive overlay.

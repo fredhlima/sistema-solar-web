@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {criarCena} from './hangar-scene.js?v=301';
+import {criarCena} from './hangar-scene.js?v=302';
 import {criarArtemis1Modelo} from './artemis1-model.js?v=6';
 import {ESTADOS_ARTEMIS1,PARTES_ARTEMIS1,estadoCenaArtemis1} from './artemis1-scene-state.js?v=2';
 export {ESTADOS_ARTEMIS1,PARTES_ARTEMIS1,estadoCenaArtemis1} from './artemis1-scene-state.js?v=2';

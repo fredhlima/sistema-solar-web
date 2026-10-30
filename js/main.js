@@ -1,28 +1,28 @@
-import { recursoDisponivel } from './release-scope.js?v=301';
+import { recursoDisponivel } from './release-scope.js?v=302';
 import * as THREE from 'three';
-import { DADOS } from './dados.js?v=301';
+import { DADOS } from './dados.js?v=302';
 import { SistemaSolar3D } from './motor3d.js?v=65';
-import { iniciarUI } from './ui.js?v=301';
-import { iniciarMobileDock } from './mobile-dock.js?v=301';
+import { iniciarUI } from './ui.js?v=302';
+import { iniciarMobileDock } from './mobile-dock.js?v=302';
 import { EVENTOS } from './eventos.js?v=11';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=301';
-import { criarPremium } from './premium.js?v=301';
-import { iniciarPaywall } from './paywall.js?v=301';
-import { iniciarQuiz } from './quiz.js?v=301';
-import { iniciarHangar } from './hangar.js?v=301';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=301';
-import { iniciarEstacoes } from './estacoes.js?v=301';
-import { iniciarMares } from './mares.js?v=301';
-import { iniciarProgresso } from './progresso.js?v=301';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=302';
+import { criarPremium } from './premium.js?v=302';
+import { iniciarPaywall } from './paywall.js?v=302';
+import { iniciarQuiz } from './quiz.js?v=302';
+import { iniciarHangar } from './hangar.js?v=302';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=302';
+import { iniciarEstacoes } from './estacoes.js?v=302';
+import { iniciarMares } from './mares.js?v=302';
+import { iniciarProgresso } from './progresso.js?v=302';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=301';
-import { iniciarNavegacao } from './navegacao.js?v=301';
-import { iniciarAprendizado } from './aprendizado.js?v=301';
-import { iniciarTutorial } from './tutorial.js?v=301';
+import { iniciarMusica } from './musica.js?v=302';
+import { iniciarNavegacao } from './navegacao.js?v=302';
+import { iniciarAprendizado } from './aprendizado.js?v=302';
+import { iniciarTutorial } from './tutorial.js?v=302';
 
 // As trajetórias legadas das outras sondas ficam fora do recorte 1.0.
 const MISSOES = MISSOES_COMPLETAS.filter(m => m.id === 'apollo-11');
@@ -129,6 +129,10 @@ window.__musica = musica;
 // Retorna true se havia algo pra fechar (o Java então NÃO sai do app) ou false
 // se a cena estava "vazia" (o Java segue com o comportamento padrão de saída).
 window.__voltarAndroid = function () {
+  if (document.getElementById('politica-dialogo')) {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true, cancelable: true }));
+    return true;
+  }
   if (navegacao?.voltar()) return true;
   const overlayAberto = [
     '.paywall-overlay', '.quiz-overlay', '.voce-no-espaco-overlay',

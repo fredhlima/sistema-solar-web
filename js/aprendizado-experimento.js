@@ -1,13 +1,13 @@
-import {criarLaboratorioEstacoes} from './estacoes-laboratorio.js?v=301';
-import {criarLaboratorioMares} from './mares-laboratorio.js?v=301';
+import {criarLaboratorioEstacoes} from './estacoes-laboratorio.js?v=302';
+import {criarLaboratorioMares} from './mares-laboratorio.js?v=302';
 import {criarMissao} from './aprendizado-missao.js?v=1';
-import {criarEscalas} from './aprendizado-escalas.js?v=301';
+import {criarEscalas} from './aprendizado-escalas.js?v=302';
 import {criarCometas} from './aprendizado-cometas.js?v=1';
 import {criarLuz} from './aprendizado-luz.js?v=1';
 import {criarHabitabilidade} from './aprendizado-habitabilidade.js?v=1';
 import {criarExperimentoAvancado} from './aprendizado-avancado.js?v=1';
-import {declinacaoSolar,duracaoDoDia} from './estacoes-calc.js?v=301';
-import {mareCombinada,alturaRelativa,AMP_QUADRATURA} from './mares-calc.js?v=301';
+import {declinacaoSolar,duracaoDoDia} from './estacoes-calc.js?v=302';
+import {mareCombinada,alturaRelativa,AMP_QUADRATURA} from './mares-calc.js?v=302';
 import {faseLunarIdeal,luzLunar} from './fenomenos-calc.js?v=1';
 const COPY={
  pt:{vista:'Vista da Terra',orbita:'Posições vistas de cima',sol:'Sol',terra:'Terra',lua:'Lua',angulo:'Posição da Lua',fases:['Nova','Quarto crescente','Cheia','Quarto minguante'],iluminada:'Disco iluminado',nota:'Desenho artístico e ideal, sem escala nem calendário real. Orientação convencional do disco; pode variar para quem observa. Fontes: NASA.'},

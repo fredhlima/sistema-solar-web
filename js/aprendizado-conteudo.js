@@ -1,10 +1,10 @@
-import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=301';
+import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=302';
 import {MISSAO_ROSETTA} from './rosetta-missao-conteudo.js?v=2';
 import {MISSAO_JUNO} from './juno-missao-conteudo.js?v=2';
 import {MISSAO_PARKER} from './parker-missao-conteudo.js?v=2';
 import {criarRoteiroMissao} from './missao-roteiro.js?v=2';
 import {MISSAO_VOYAGER} from './voyager-missao-conteudo.js?v=2';
-import {ROTEIROS_MUNDOS} from './mundos-roteiros.js?v=301';
+import {ROTEIROS_MUNDOS} from './mundos-roteiros.js?v=302';
 import {ROTEIRO_ESCALAS} from './escalas-roteiro.js?v=1';
 import {ROTEIRO_COMETAS} from './cometas-roteiro.js?v=3';
 import {ROTEIRO_LUZ} from './luz-roteiro.js?v=1';

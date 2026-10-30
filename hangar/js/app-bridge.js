@@ -1,6 +1,6 @@
-import {getIdiomaHangar} from './hangar-i18n.js?v=301';
-import { destinoNave, origemHangarValida } from './hangar-access.js?v=301';
-import { naveDisponivel } from '../../js/release-scope.js?v=301';
+import {getIdiomaHangar} from './hangar-i18n.js?v=302';
+import { destinoNave, origemHangarValida } from './hangar-access.js?v=302';
+import { naveDisponivel } from '../../js/release-scope.js?v=302';
 
 const integrado = window.parent !== window;
 let numeroPedido = 0;
@@ -65,7 +65,7 @@ if (integrado) {
       if(Number.isFinite(value)&&value>=0&&value<=120)document.documentElement.style.setProperty('--safe-'+side,value+'px');
     }
   });
-  document.querySelectorAll('a[href="../index.html?v=301"]').forEach(link => {
+  document.querySelectorAll('a[href="../index.html?v=302"]').forEach(link => {
     link.addEventListener('click', event => {
       event.preventDefault();
       publicar({ tipo: 'hangar:fechar' });

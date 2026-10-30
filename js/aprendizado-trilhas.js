@@ -1,4 +1,4 @@
-import {roteiroDisponivel} from './release-scope.js?v=301';
+import {roteiroDisponivel} from './release-scope.js?v=302';
 import {TRILHAS_MUNDOS} from './mundos-trilhas.js?v=1';
 const TRILHAS_COMPLETAS = [
  {id:'sondas-viagens',roteiros:['parker-sol','juno-jupiter','rosetta-cometa','voyager-viagem'],textos:{pt:{titulo:'Sondas e suas viagens',descricao:'Explore encontros, instrumentos e descobertas de missões espaciais.'},en:{titulo:'Spacecraft and their journeys',descricao:'Explore encounters, instruments, and discoveries from space missions.'},es:{titulo:'Sondas y sus viajes',descricao:'Explora encuentros, instrumentos y descubrimientos de misiones espaciales.'}}},

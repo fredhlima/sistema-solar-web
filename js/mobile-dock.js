@@ -1,3 +1,4 @@
+import { abrirPrivacidade } from './privacidade.js?v=302';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
 // Reusa o motor real e o "saco de ações" do ui.js (nada de simulação falsa).
@@ -6,7 +7,7 @@
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=301';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=302';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local
@@ -160,6 +161,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
             <button type="button" class="mdock-idioma-op" id="mdock-lang-es">ES</button>
           </div>
         </div>
+        <button class="mdock-settings-acao" id="mdock-acao-privacidade">
+          <span>${t('politicaPrivacidade')}</span><span class="mdock-acao-seta">›</span>
+        </button>
         <button class="mdock-settings-acao" id="mdock-acao-tutorial">
           <span>${t('tutorialRever')}</span><span class="mdock-acao-seta">›</span>
         </button>
@@ -672,6 +676,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     // proxy no botão "?" do desktop, que fica oculto no dock
     document.getElementById('btn-tutorial')?.click();
   };
+  $('mdock-acao-privacidade').onclick = () => { estado.settingsOpen = false; render(); abrirPrivacidade({ focoAoFechar: $('mdock-gear') }); };
   $('mdock-lang-pt').onclick = () => trocarIdioma('pt');
   $('mdock-lang-en').onclick = () => trocarIdioma('en');
   $('mdock-lang-es').onclick = () => trocarIdioma('es');

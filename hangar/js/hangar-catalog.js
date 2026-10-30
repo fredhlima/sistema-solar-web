@@ -1,12 +1,12 @@
-import {ht, aplicarIdiomaHangar} from './hangar-i18n.js?v=301';
+import {ht, aplicarIdiomaHangar} from './hangar-i18n.js?v=302';
 aplicarIdiomaHangar();
 document.title=ht('Hangar · Sistema Solar');
-import {aoMudarAtividade} from './app-bridge.js?v=301';
-import { naveDisponivel, NAVES_1_0 } from '../../js/release-scope.js?v=301';
+import {aoMudarAtividade} from './app-bridge.js?v=302';
+import { naveDisponivel, NAVES_1_0 } from '../../js/release-scope.js?v=302';
 import * as T from 'three';
 import { MODELOS_FUTUROS } from './hangar-future-models.js?v=3';
 import { criarCarregador, carregarPreview, iluminarPreview, enquadrarPreview, liberarPreview } from './hangar-preview.js?v=3';
-import { abrirNave } from './app-bridge.js?v=301';
+import { abrirNave } from './app-bridge.js?v=302';
 const texto = (selector, key) => { const node = document.querySelector(selector); if (node) node.textContent = ht(key); };
 const aria = (selector, key) => { const node = document.querySelector(selector); if (node) node.setAttribute('aria-label', ht(key)); };
 for (const [selector,key] of Object.entries({'.catalog-title span':'Quatro naves para explorar','#catalog-all':'Todas as naves','#picker-title':'Todas as naves','#picker-hint':'Escolha uma para centralizar no Hangar.','.picker-close':'Fechar','#info-title':'Sobre o Hangar','#catalog-info .info-head button':'Concluir','.info-content p:nth-child(1)':'O Hangar reúne quatro naves: Hubble, Saturno V, Discovery e Módulo Lunar.','.info-content p:nth-child(2)':'A exploração do Hubble é gratuita. Saturno V, Discovery e Módulo Lunar fazem parte do Sistema Solar Pro. No Shuttle, Discovery é a nave usada no roteiro STS-31.','.footnote a':'Créditos dos modelos ↗','.saturn .eyebrow':'O CAMINHO ATÉ A LUA','.saturn h2':'Saturno V','.saturn .card-copy > p:not(.eyebrow)':'Três estágios, módulo lunar e a cápsula que trouxe os astronautas de volta.','.shuttle .eyebrow':'UM OBSERVATÓRIO A BORDO','.shuttle .card-copy > p:not(.eyebrow)':'Discovery, tanque externo e propulsores. Veja o Canadarm retirar o Hubble do compartimento.','.saturn .card-bottom b':'Explorar 3D ↗','.shuttle .card-bottom b':'Explorar 3D ↗'})) texto(selector,key);
