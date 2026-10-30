@@ -1,28 +1,28 @@
-import { recursoDisponivel } from './release-scope.js?v=302';
+import { recursoDisponivel } from './release-scope.js?v=303';
 import * as THREE from 'three';
-import { DADOS } from './dados.js?v=302';
+import { DADOS } from './dados.js?v=303';
 import { SistemaSolar3D } from './motor3d.js?v=65';
-import { iniciarUI } from './ui.js?v=302';
-import { iniciarMobileDock } from './mobile-dock.js?v=302';
+import { iniciarUI } from './ui.js?v=303';
+import { iniciarMobileDock } from './mobile-dock.js?v=303';
 import { EVENTOS } from './eventos.js?v=11';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=302';
-import { criarPremium } from './premium.js?v=302';
-import { iniciarPaywall } from './paywall.js?v=302';
-import { iniciarQuiz } from './quiz.js?v=302';
-import { iniciarHangar } from './hangar.js?v=302';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=302';
-import { iniciarEstacoes } from './estacoes.js?v=302';
-import { iniciarMares } from './mares.js?v=302';
-import { iniciarProgresso } from './progresso.js?v=302';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=303';
+import { criarPremium } from './premium.js?v=303';
+import { iniciarPaywall } from './paywall.js?v=303';
+import { iniciarQuiz } from './quiz.js?v=303';
+import { iniciarHangar } from './hangar.js?v=303';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=303';
+import { iniciarEstacoes } from './estacoes.js?v=303';
+import { iniciarMares } from './mares.js?v=303';
+import { iniciarProgresso } from './progresso.js?v=303';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=302';
-import { iniciarNavegacao } from './navegacao.js?v=302';
-import { iniciarAprendizado } from './aprendizado.js?v=302';
-import { iniciarTutorial } from './tutorial.js?v=302';
+import { iniciarMusica } from './musica.js?v=303';
+import { iniciarNavegacao } from './navegacao.js?v=303';
+import { iniciarAprendizado } from './aprendizado.js?v=303';
+import { iniciarTutorial } from './tutorial.js?v=303';
 
 // As trajetórias legadas das outras sondas ficam fora do recorte 1.0.
 const MISSOES = MISSOES_COMPLETAS.filter(m => m.id === 'apollo-11');

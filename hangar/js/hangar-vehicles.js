@@ -1,8 +1,8 @@
-import {localizarLunar} from './lunar-localized.js?v=302';
-import {localizarSaturno} from './saturn-localized.js?v=302';
-import {localizarShuttle} from './shuttle-localized.js?v=302';
-import {localizarHubble} from './hubble-localized.js?v=302';
-import {getIdiomaHangar} from './hangar-i18n.js?v=302';
+import {localizarLunar} from './lunar-localized.js?v=303';
+import {localizarSaturno} from './saturn-localized.js?v=303';
+import {localizarShuttle} from './shuttle-localized.js?v=303';
+import {localizarHubble} from './hubble-localized.js?v=303';
+import {getIdiomaHangar} from './hangar-i18n.js?v=303';
 import {PARTES as WEBB,FONTES as FONTES_WEBB,RESUMO as RESUMO_WEBB,posicaoParte as posWebb} from './webb-data.js?v=1';
 import {prepararWebb,criarWebb} from './webb-model.js?v=1';
 import {PARTES as CASSINI,FONTES as FONTES_CASSINI,RESUMO as RESUMO_CASSINI,posicaoParte as posCassini} from './cassini-data.js?v=1';

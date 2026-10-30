@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {criarCena} from './hangar-scene.js?v=302';
+import {criarCena} from './hangar-scene.js?v=303';
 import {criarShuttle} from './shuttle-model.js?v=8';
 import {PARTES as PARTES_SHUTTLE, posicaoParte} from './shuttle-data.js?v=4';
 import {ESTADOS_STS61,PARTES_STS61,estadoCenaSTS61,ARTE_STS61} from './sts61-scene-state.js?v=1';

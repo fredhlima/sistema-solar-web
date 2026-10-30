@@ -1601,7 +1601,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Distancia del Sol",
-            "valor": "0.99 UA (casi igual Tierra)"
+            "valor": "~168 millones de km (1,12 UA)"
           },
           {
             "rotulo": "Período orbital",
@@ -1633,7 +1633,7 @@ export const TRADUCAO = {
             "OSIRIS-REx (2018-2023, colección muestra)",
             "Posible misión Hayabusa3 futura"
           ],
-          "texto": "Bennu es asteroide cercano-Tierra (a = 0.996 UA, e = 0.204, i = 17.16°), \"rubble pile\" ~490 m diámetro, órbita período 1.197 años. Composición condrita carbonácea tipo B (arcillas hidratadas, volátiles, materia orgánica — análogo meteoritos CM/CI). Albedo 0.057 muy oscuro. Tasa de rotación ~4.3h, posible satélite pequeño. OSIRIS-REx (2018-2023): mapeó, midió gravedad, recolectó ~250g muestras superficie octubre 2020, retornó Tierra septiembre 2023. Muestras riqueza científica: H₂O, aminoácidos, material presoar primordial. Riesgo impacto futuro bajo pero monitorizado (1/2700 milenio próximo)."
+          "texto": "Bennu es un asteroide cercano a la Tierra con semieje mayor aproximado de 1,12 UA y período orbital de unos 1,2 años. Es un cuerpo carbonáceo oscuro formado por fragmentos unidos por la gravedad. OSIRIS-REx tomó muestras en octubre de 2020 y su cápsula entregó más de 120 gramos de material a la Tierra en septiembre de 2023. Las muestras permiten estudiar materiales de los comienzos del sistema solar. Su órbita sigue siendo objeto de observación y estudio."
         },
         "comparacoes": [
           "Bennu es diminuto — apenas 490 metros — más pequeño que muchos cañones de la Tierra.",
@@ -1644,47 +1644,14 @@ export const TRADUCAO = {
     "apofis": {
       "nome": "Apófis",
       "info": {
-        "resumo": "Apófis es un asteroide cercano a la Tierra que fue considerado muy peligroso pero nuevas observaciones redujeron significativamente el riesgo de colisión. En 2029 pasará muy cerca de la Tierra, dentro de órbita de satélites geoestacionarios. Es un evento astronómico emocionante.",
-        "numeros": [
-          {
-            "rotulo": "Diámetro",
-            "valor": "375 m (~0.4 km)"
-          },
-          {
-            "rotulo": "Distancia del Sol",
-            "valor": "0.92 UA (promedio)"
-          },
-          {
-            "rotulo": "Período orbital",
-            "valor": "0.98 años"
-          },
-          {
-            "rotulo": "Composición",
-            "valor": "Condrita ordinaria"
-          },
-          {
-            "rotulo": "Albedo",
-            "valor": "0.26"
-          },
-          {
-            "rotulo": "Acercamiento 2029",
-            "valor": "31.600 km (en satélites geoestacionarios)"
-          }
-        ],
-        "curiosidades": [
-          "Apófis fue considerado peligroso pero observaciones de 2004-2013 descartaron colisión en próximo milenio (~99.99% seguro).",
-          "El paso de 2029 será visible a ojo desnudo — un espectáculo astronómico raro.",
-          "Apófis pasará dentro de la órbita de satélites geoestacionarios — nunca antes un asteroide tan grande estuvo tan cerca.",
-          "El nombre Apófis (divinidad del caos en mitología egipcia) fue dado apropiadamente dada la inicial alarma."
-        ],
+        "resumo": "Apofis es un asteroide cercano a la Tierra. Observaciones más precisas descartaron el riesgo de impacto considerado tras su descubrimiento. Su paso cercano del 13 de abril de 2029 permitirá estudiar cómo afecta la gravedad terrestre a un asteroide.",
+        "numeros": [{"rotulo":"Diámetro","valor":"~370 metros"},{"rotulo":"Distancia orbital antes de 2029","valor":"~138 millones de km (0,922 UA)"},{"rotulo":"Período orbital antes de 2029","valor":"~0,886 años"},{"rotulo":"Tipo espectral","valor":"Tipo S, rocoso"},{"rotulo":"Paso cercano en 2029","valor":"~32.000 km sobre la superficie terrestre"},{"rotulo":"Riesgo de impacto","valor":"Descartado durante al menos 100 años"}],
+        "curiosidades": ["La evaluación del riesgo cambió cuando nuevas observaciones mejoraron el conocimiento de la órbita.","El paso está previsto para el 13 de abril de 2029, más cerca de la Tierra que algunos satélites de comunicaciones.","El radar ayuda a medir distancia y movimiento para precisar la órbita.","En las regiones favorables y bajo cielos oscuros, Apofis podría verse sin telescopio durante el paso."],
         "avancado": {
-          "composicao": "Condrita ordinaria tipo Sq, silicatos, feldespato.",
+          "composicao": "Materiales silicatados y metales, como níquel y hierro.",
           "temperatura": "Estimada -70 °C (promedio)",
-          "missoes": [
-            "Observaciones telescópicas/radar 2004-present",
-            "Posible misión cerca al paso 2029 (Misión Apophis observación propuesta)"
-          ],
-          "texto": "Apófis es asteroide cercano-Tierra (a = 0.923 UA, e = 0.191), ~375 m diámetro, órbita período 0.988 años. Composición condrita ordinaria Sq. Albedo 0.26. Inicialmente clasificado riesgo nivel 4 escala Torino (2004, calculó colisión posible 2029/2036) pero observaciones refinadas 2004-2013 redujeron riesgo ~0 (99.99% seguro ninguna colisión próx 1000 años). Paso cercano 2029: periapsis 31.600 km (dentro órbita satélites geoestacionarios a 35.786 km), declinación máxima, visible ojo desnudo. Evento astronómico raro — nunca antes asteroide >350 m tan cercano."
+          "missoes": ["Observaciones ópticas y de radar","Ramses (ESA/JAXA): estudio del paso de 2029"],
+          "texto": "Antes del encuentro de 2029, Apofis tiene un semieje mayor de referencia de aproximadamente 0,922 UA y un período orbital de unos 323,6 días. El paso cercano a la Tierra cambiará su órbita. Ramses está concebida para acompañar al asteroide y estudiar los efectos de la gravedad terrestre. La escena de la aplicación es didáctica: no es una predicción de trayectoria ni recalcula la órbita posterior al encuentro."
         },
         "comparacoes": [
           "Apofis es aún más pequeño que Bennu — apenas 370 metros de diámetro.",
@@ -1851,7 +1818,7 @@ export const TRADUCAO = {
           },
           {
             "rotulo": "Distancia del Sol",
-            "valor": "96.4 UA (promedio)"
+            "valor": "~67,9 UA (semieje mayor)"
           },
           {
             "rotulo": "Período orbital",
@@ -1882,7 +1849,7 @@ export const TRADUCAO = {
           "missoes": [
             "Observaciones telescópicas solo; propuesta futura New Horizons 2+"
           ],
-          "texto": "Eris es planeta enano (a = 96.4 UA, e = 0.441, i = 44.2°, R = 1.163 km), más masivo conocido planeta enano (~0.28 M_Luna vs 0.024 M_Luna Plutón). Composición superficie: metano congelado, nitrógeno, posiblemente agua hielo (espectro similar Plutón/Tritón). Luna pequeña Dysnomia (R ~350 km, periodo 15.8 días) única satélite conocido. Descubrimiento 2005 Brown et al. desencadenó redefinición IAU 2006 planeta (3 criterios: órbita Sol, autogravedad esférica, despejado órbita) → Eris, Plutón, Ceres reclasificados \"planetas enanos\". Órbita extremadamente excéntrica 38-98 UA, período 559 años, último periastro 1698, próximo ~2257. Espectro metano similar Plutón/Tritón; significativo interés astrobiológico/geológico."
+          "texto": "Eris es planeta enano (a ≈ 67,9 UA, e = 0.441, i = 44.2°, R = 1.163 km), más masivo conocido planeta enano . Composición superficie: metano congelado, nitrógeno, posiblemente agua hielo (espectro similar Plutón/Tritón). Luna pequeña Dysnomia (R ~350 km, periodo 15.8 días) única satélite conocido. Descubrimiento 2005 Brown et al. desencadenó redefinición IAU 2006 planeta (3 criterios: órbita Sol, autogravedad esférica, despejado órbita) → Eris, Plutón, Ceres reclasificados \"planetas enanos\". Órbita extremadamente excéntrica 38-98 UA, período 559 años, último periastro 1698, próximo ~2257. Espectro metano similar Plutón/Tritón; significativo interés astrobiológico/geológico."
         }
       }
     },
@@ -1892,8 +1859,8 @@ export const TRADUCAO = {
         "resumo": "Haumea es un planeta enano inusual en el Cinturón de Kuiper con forma alargada debido a su rotación rápida. Posee anillos — el único planeta enano con anillos conocido. Tiene al menos dos lunas.",
         "numeros": [
           {
-            "rotulo": "Dimensiones",
-            "valor": "2.332 × 1.161 × 1.051 km (alargada)"
+            "rotulo": "Dimensiones estimadas",
+            "valor": "~2.322 × 1.704 × 1.026 km (modelo de 2017)"
           },
           {
             "rotulo": "Distancia del Sol",
@@ -1916,19 +1883,12 @@ export const TRADUCAO = {
             "valor": "2 (Hi'iaka, Namaka)"
           }
         ],
-        "curiosidades": [
-          "Haumea está tan deformada por su rápida rotación que es casi la mitad de ancho que de largo.",
-          "Haumea es el único planeta enano conocido con anillos — un sistema sorprendente que lo distingue.",
-          "Haumea rota tan rápido — cada 3.91 horas — que un día en Haumea es más corto que muchas películas.",
-          "Los anillos de Haumea pueden estar hechos de fragmentos de una colisión antigua."
-        ],
+        "curiosidades": ["Haumea completa una rotación en unas 3,9 horas.","Su forma alargada está relacionada con su rápida rotación.","Una ocultación estelar ayudó a revelar el anillo anunciado en 2017.","Su nombre homenajea a Haumea, una divinidad hawaiana."],
         "avancado": {
-          "composicao": "Hielo de agua, posiblemente metano congelado, material oscuro (posiblemente tholins orgánicos).",
+          "composicao": "Los astrónomos creen que Haumea es rocoso y está recubierto de hielo.",
           "temperatura": "-230 °C (estimada)",
-          "missoes": [
-            "Observaciones telescópicas solo"
-          ],
-          "texto": "Haumea es planeta enano (a = 43.13 UA, e = 0.195, i = 28.2°), forma única alargada 2.332 × 1.161 × 1.051 km por rotación rápida período 3.915 horas (ecuador velocidad ~280 m/s). Composición: hielo agua, posiblemente metano, material oscuro tholins organogénicos (espectro similar Plutón rojo). Sistema anillos descubierto 2017 (anillo principal denso ~100 km radio, secundario tenue) — único planeta enano anillos conocido. Dos satélites: Hi'iaka (R ~310 km, período 49.5 días), Namaka (R ~85 km, período 34.7 días). Nombre de diosa hawaiana fertilidad/crianza (apropiado para \"madre\" sistema KBO). Descubrimiento 2004 Brown et al., nombre votado 2008. Familia Haumea de KBO asociados (reliquias colisión antigua presumiblemente)."
+          "missoes": ["Observaciones con telescopios; ninguna visita de sonda"],
+          "texto": "Haumea es alargado y gira en unas 3,9 horas. Un modelo de ocultación estelar de Ortiz y colaboradores (2017) estima dimensiones de aproximadamente 2.322 × 1.704 × 1.026 km. La forma tridimensional depende del modelo y no es una medida exacta. Haumea tiene dos lunas conocidas, Hi’iaka y Namaka, y un anillo cuyo descubrimiento se anunció en 2017."
         }
       }
     },

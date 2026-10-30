@@ -1,8 +1,8 @@
-import {normalizarEstadoEstacoes} from './estacoes-laboratorio.js?v=302';
-import {normalizarEstadoMares} from './mares-laboratorio.js?v=302';
-import {criarExperimento} from './aprendizado-experimento.js?v=302';
-import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=302';
-import { ROTEIROS } from './aprendizado-conteudo.js?v=302';
+import {normalizarEstadoEstacoes} from './estacoes-laboratorio.js?v=303';
+import {normalizarEstadoMares} from './mares-laboratorio.js?v=303';
+import {criarExperimento} from './aprendizado-experimento.js?v=303';
+import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=303';
+import { ROTEIROS } from './aprendizado-conteudo.js?v=303';
 import { FAMILIA } from './aprendizado-familia-conteudo.js?v=3';
 const etapasPadrao=[{titulo:'objetivo',corpo:'objetivoTexto'},{titulo:'observar',corpo:'observarTexto',acao:true},{titulo:'explicacao',corpo:'explicacaoTexto'},{titulo:'pergunta',corpo:'perguntaTexto',pergunta:true},{titulo:'recap',corpo:'recapTexto',recap:true}];
 const total=id=>ROTEIROS[id].etapas?.length||5;
@@ -187,13 +187,13 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   if(cena){selecionar(dados.pecas[0].id);return;}
   const token=++geracao;
   try{
-   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=302');
+   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=303');
    let opcoes={};
    if(artemis){
-    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=302');
+    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=303');
     opcoes={partes:PARTES_ARTEMIS1.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarArtemis1Guiado,framing:{horizontal:.84,vertical:.80,offsetY:.08}};
    }else if(sts61){
-    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=302');
+    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=303');
     opcoes={partes:PARTES_STS61.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarShuttleSTS61};
    }else if(roteiro.nave==='jwst'){
     const [{PARTES,posicaoParte},{prepararWebb,criarWebb}]=await Promise.all([import('../hangar/js/webb-data.js?v=1'),import('../hangar/js/webb-model.js?v=1')]);await prepararWebb();opcoes={partes:PARTES,positionForPart:posicaoParte,buildModel:criarWebb};

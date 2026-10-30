@@ -1,5 +1,5 @@
 import { PARTES } from './saturno-v-data.js';
-import { MISSOES_NAVE } from './hangar-mission-data.js?v=302';
+import { MISSOES_NAVE } from './hangar-mission-data.js?v=303';
 
 // Only presentation text belongs here; source keys, URLs and IDs stay intact.
 const TEXT = {

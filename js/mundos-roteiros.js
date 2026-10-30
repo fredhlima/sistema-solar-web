@@ -1,4 +1,4 @@
-import {DADOS} from './dados.js?v=302';
+import {DADOS} from './dados.js?v=303';
 import {CREDITOS_TEXTURAS} from './creditos-texturas.js?v=2';
 import {MUNDOS_PLANETAS} from './mundos-planetas-conteudo.js?v=3';
 import {MUNDOS_LUAS} from './mundos-luas-conteudo.js?v=4';

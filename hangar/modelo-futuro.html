@@ -1,11 +1,11 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#04060e"><title>Hangar · Prévia 3D</title><link rel="stylesheet" href="css/hangar-future.css?v=5"></head><body>
-<header><a href="index.html?v=302" aria-label="Voltar ao catálogo">‹ Naves</a><strong id="model-name">Prévia 3D</strong><span>PRO · PRÉVIA</span></header>
+<header><a href="index.html?v=303" aria-label="Voltar ao catálogo">‹ Naves</a><strong id="model-name">Prévia 3D</strong><span>PRO · PRÉVIA</span></header>
 <main><section id="future-view"><canvas id="future-canvas" aria-label="Arraste para girar e faça pinça para aproximar"></canvas><div class="caption"><span id="load-state">CARREGANDO MODELO NASA</span></div><p id="future-error" hidden></p></section>
 <aside id="future-info" hidden><div class="info-head"><h2>Informações</h2></div><article><p class="eyebrow" id="mission">OBSERVATÓRIO</p><h1>Sobre esta nave</h1><span class="status"><i></i><span id="status">Conteúdo em desenvolvimento</span></span><p id="description"></p><div class="notice"><b>O que você está vendo?</b><p>Uma prévia do modelo 3D disponibilizado pelo acervo NASA 3D Resources. Arraste para girar e aproxime para observar os detalhes.</p></div><p class="next">Planejado: peças selecionáveis, conteúdo em dois níveis e exploração completa no padrão do Saturno V e do Shuttle.</p><a id="source" target="_blank" rel="noopener">NASA 3D Resources ↗</a><p class="next" id="credit-author"></p><p class="next">Modelos 3D cortesia da NASA (domínio público). Este aplicativo não é afiliado à NASA nem endossado por ela.</p><a href="../modelos/CREDITOS.md">Créditos dos modelos ↗</a></article></aside></main>
 <nav class="future-controls" aria-label="Visualização"><button id="reset">Enquadrar</button><button id="future-zoom-in" aria-label="Aproximar">+</button><button id="future-zoom-out" aria-label="Afastar">−</button><button id="future-rotate" aria-pressed="false">Girar</button><button id="show-info" aria-expanded="false">Sobre</button></nav>
 <script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/controls/":"../lib/addons/controls/","three/addons/loaders/":"../lib/addons/loaders/"}}</script><script type="module">
-import {autorizarNave} from './js/app-bridge.js?v=302';
+import {autorizarNave} from './js/app-bridge.js?v=303';
 const id=new URLSearchParams(location.search).get('modelo');
 if(['modulo-lunar','hubble','perseverance','ingenuity'].includes(id)) location.replace(`veiculo.html${location.search}`);
-else if(await autorizarNave(id))await import('./js/hangar-future.js?v=302');
+else if(await autorizarNave(id))await import('./js/hangar-future.js?v=303');
 </script></body></html>

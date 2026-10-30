@@ -900,7 +900,7 @@ export const TRADUCAO = {
         resumo: 'Vesta is the second largest asteroid in the Asteroid Belt and the brightest — it is the only one visible to the naked eye. It has a giant crater on its south pole that nearly destroyed it. Its surface tells the story of ancient collisions.',
         numeros: [
           { rotulo: 'Diameter', valor: '527 km' },
-          { rotulo: 'Distance from Sun', valor: '383.2 million km (2.56 AU)' },
+          { rotulo: 'Distance from Sun', valor: "~353 million km (2.36 AU)" },
           { rotulo: 'Orbital period', valor: '3.63 years' },
           { rotulo: 'Visual magnitude', valor: '+3.2 to +8.5 (naked eye visible!)' },
           { rotulo: 'Composition', valor: 'Basalt, olivine, pyroxene' },
@@ -1039,30 +1039,18 @@ export const TRADUCAO = {
     apofis: {
       nome: 'Apophis',
       info: {
-        resumo: 'Apophis is the most famous near-Earth asteroid — it is the most studied potentially dangerous asteroid. In 2004, it initially was described as having a small chance of collision with Earth in 2029, but refined observations eliminated that risk — a close call!',
-        numeros: [
-          { rotulo: 'Diameter', valor: '~370 meters' },
-          { rotulo: 'Distance from Sun', valor: '149.3 million km' },
-          { rotulo: 'Orbital period', valor: '0.886 years' },
-          { rotulo: 'Spectral type', valor: 'Sq (carbonaceous silicate)' },
-          { rotulo: 'Close approach 2029', valor: '~31,600 km (inside Moon orbit!)' },
-          { rotulo: 'Impact risk 2036-2099', valor: 'Virtually null' }
-        ],
-        curiosidades: [
-          'Apophis is the most famous potentially dangerous asteroid — in 2004, it was the first asteroid to receive Torino Scale probability > 0.',
-          'Apophis will pass extremely close to Earth on April 13, 2029 — closer than some communication satellites!',
-          'Apophis was intensively observed by radar (Goldstone, Arecibo, and Green Bank) to refine its orbit — and the risk was virtually eliminated.',
-          'The 2029 passage will be an astronomical spectacle — Apophis will shine like a star in the Big Dipper (magnitude ~3) — visible to the naked eye at night from Europe, Africa, and Asia!'
-        ],
+        resumo: "Apophis is a near-Earth asteroid. Refined observations ruled out the impact risk considered after its discovery. Its close passage on April 13, 2029 offers a chance to study how Earth’s gravity affects an asteroid.",
+        numeros: [{"rotulo":"Diameter","valor":"~370 meters"},{"rotulo":"Orbital distance before 2029","valor":"~138 million km (0.922 AU)"},{"rotulo":"Orbital period before 2029","valor":"~0.886 years"},{"rotulo":"Spectral type","valor":"S-type, rocky"},{"rotulo":"Close passage in 2029","valor":"~32,000 km above Earth’s surface"},{"rotulo":"Impact risk","valor":"Ruled out for at least 100 years"}],
+        curiosidades: ["Risk assessments changed as new observations improved knowledge of the orbit.","The passage is expected on April 13, 2029, closer to Earth than some communications satellites.","Radar helps measure distance and motion to refine the orbit.","In favorable locations under dark skies, Apophis may be visible without a telescope during the flyby."],
         comparacoes: [
           'Apophis is even smaller than Bennu — just 370 meters diameter.',
           'In the 2029 passage, Apophis will pass closer than communication satellites — a rare close asteroid approach without collision.'
         ],
         avancado: {
-          composicao: 'Silicate-carbonaceous, organic compounds, possible water, metals.',
+          composicao: "Silicate materials and metals, including nickel and iron.",
           temperatura: 'Surface: estimated -40 to -80 °C.',
-          missoes: ['Radar (Goldstone, Arecibo, Green Bank)', 'RAMSES (2028–2034, ESA/JAXA—orbital deflection demonstration)'],
-          texto: 'Apophis is NEA class Sq (silicate-carbonaceous). Semi-major axis 1.099 AU, eccentricity 0.1912, inclination 3.393°. Diameter ~370 m, mass ~7.8 × 10¹⁰ kg. Approach 2029: distance ~31,600 km (within geosynchronous). Radar observations (Goldstone, Arecibo, Green Bank) refined orbit; removed from Sentry Risk Table in March 2021 — risk ruled out for the next 100 years. RAMSES (ESA/JAXA 2028) will demonstrate planetary defense orbital deflection. Designated Torino Scale value in 2004; reduced to zero.'
+          missoes: ["Optical and radar observations","Ramses (ESA/JAXA): study of the 2029 flyby"],
+          texto: "Before the 2029 encounter, Apophis has a reference semi-major axis of approximately 0.922 AU and an orbital period of about 323.6 days. The close passage by Earth will change its orbit. Ramses is designed to accompany the asteroid and study the effects of Earth’s gravity. The app scene is educational: it is not a trajectory forecast and does not recalculate the orbit after the encounter."
         }
       }
     },
@@ -1182,24 +1170,19 @@ export const TRADUCAO = {
       info: {
         resumo: 'Haumea is an elongated dwarf planet that spins extremely fast — one rotation every 3.9 hours! Its rapid rotation may have created its rugby ball shape. It has a weak ring system around it.',
         numeros: [
-          { rotulo: 'Diameter (ellipsoid)', valor: '2,320 × 1,960 × 1,520 km' },
+          { rotulo: "Estimated dimensions", valor: "~2,322 × 1,704 × 1,026 km (2017 model)" },
           { rotulo: 'Distance from Sun', valor: '6,452 million km (43.1 AU)' },
           { rotulo: 'Orbital period', valor: '284 years' },
           { rotulo: 'Day length', valor: '3.9 hours (EXTREMELY fast!)' },
           { rotulo: 'Surface temperature', valor: '-228 °C' },
           { rotulo: 'Moons', valor: '2 (Hi\'iaka, Namaka)' }
         ],
-        curiosidades: [
-          'Haumea has the fastest rotation of any large body in the solar system — completes rotation every 3.9 hours!',
-          'Haumea\'s rapid rotation deformed it into an elongated rugby ball shape — not spherical like other dwarf planets.',
-          'Haumea has a weak ring system — the only dwarf planet with rings, in addition to its extreme rotation.',
-          'Haumea was named to honor the Hawaiian goddess, reflecting discovery by Keck Observatory in Hawaii.'
-        ],
+        curiosidades: ["Haumea completes a rotation in about 3.9 hours.","Its elongated shape is related to its rapid rotation.","A stellar occultation helped reveal the ring announced in 2017.","Its name honors Haumea, a Hawaiian deity."],
         avancado: {
-          composicao: 'Crystalline water ice (surface), methane ice, silicate rock, rocky core.',
+          composicao: "Astronomers believe Haumea is rocky with a coating of ice.",
           temperatura: 'Surface: estimated -228 °C.',
-          missoes: ['No probe planned; continuous infrared telescope observations'],
-          texto: 'Haumea is dwarf planet, ellipsoid R(a,b,c)=(960,749,600) km, discovered 2004. Ultra-rapid rotation 3.915h causes extreme gravity-oblateness deformation. Inclined 28.22°, eccentric 0.1944 orbit, period 283.8 years, perihelion ~2135. Possible past impact ejection created Haumea family (Kuiper Belt fragments). Weak ring system discovered 2017 (occultation observation). Moons Hi\'iaka (R ~310 km), Namaka (R ~85 km). Crystalline H₂O ice surface, methane, CO. Density 2.6 g/cm³.'
+          missoes: ["Telescope observations; no spacecraft visit"],
+          texto: "Haumea is elongated and rotates in about 3.9 hours. A stellar-occultation model by Ortiz and colleagues (2017) estimates dimensions of approximately 2,322 × 1,704 × 1,026 km. The three-dimensional shape depends on the model and is not an exact measurement. Haumea has two known moons, Hi’iaka and Namaka, and a ring whose discovery was announced in 2017."
         }
       }
     },

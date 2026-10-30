@@ -1,4 +1,4 @@
-import { MISSOES_NAVE } from './hangar-mission-data.js?v=302';
+import { MISSOES_NAVE } from './hangar-mission-data.js?v=303';
 
 // Presentation text only: the source data owns identifiers, geometry and URLs.
 const TEXT = { en: {}, es: {} };

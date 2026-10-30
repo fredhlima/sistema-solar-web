@@ -1,14 +1,14 @@
-import {localizarMissoesLunar} from './lunar-localized.js?v=302';
-import {localizarMissoesSaturno} from './saturn-localized.js?v=302';
-import {localizarMissoesShuttle} from './shuttle-localized.js?v=302';
-import {ht, getIdiomaHangar, aplicarIdiomaHangar} from './hangar-i18n.js?v=302';
-import {localizarMissoesHubble} from './hubble-localized.js?v=302';
+import {localizarMissoesLunar} from './lunar-localized.js?v=303';
+import {localizarMissoesSaturno} from './saturn-localized.js?v=303';
+import {localizarMissoesShuttle} from './shuttle-localized.js?v=303';
+import {ht, getIdiomaHangar, aplicarIdiomaHangar} from './hangar-i18n.js?v=303';
+import {localizarMissoesHubble} from './hubble-localized.js?v=303';
 aplicarIdiomaHangar();
 document.title=ht('Hangar · Explorar nave');
 import {prepararModuloLunarAtual} from './apollo-nasa.js?v=3';
-import {obterVeiculo} from './hangar-vehicles.js?v=302';
-import {MISSOES_NAVE} from './hangar-mission-data.js?v=302';
-import {criarCena} from './hangar-scene.js?v=302';
+import {obterVeiculo} from './hangar-vehicles.js?v=303';
+import {MISSOES_NAVE} from './hangar-mission-data.js?v=303';
+import {criarCena} from './hangar-scene.js?v=303';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 const textoUI = (selector, key) => { const node = document.querySelector(selector); if (node) node.textContent = ht(key); };

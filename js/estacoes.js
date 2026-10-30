@@ -12,13 +12,13 @@
 // por escrito seria ensinar o erro e corrigi-lo com legenda.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=302';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=302';
+import { getIdioma } from './i18n.js?v=303';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=303';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, proximoMarcoSolar, distanciaSolarUA, declinacaoSolar,
   duracaoDoDia, espalhamentoDaLuz, estacaoDoHemisferio, MARCOS, OBLIQUIDADE_TERRA,
-} from './estacoes-calc.js?v=302';
+} from './estacoes-calc.js?v=303';
 
 const RAD = Math.PI / 180;
 const UA_KM = 149.6e6;

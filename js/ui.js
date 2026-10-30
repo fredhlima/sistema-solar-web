@@ -1,5 +1,5 @@
-import { abrirPrivacidade } from './privacidade.js?v=302';
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=302';
+import { abrirPrivacidade } from './privacidade.js?v=303';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=303';
 import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de

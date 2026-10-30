@@ -1,4 +1,4 @@
-import { abrirPrivacidade } from './privacidade.js?v=302';
+import { abrirPrivacidade } from './privacidade.js?v=303';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
 // Reusa o motor real e o "saco de ações" do ui.js (nada de simulação falsa).
@@ -7,7 +7,7 @@ import { abrirPrivacidade } from './privacidade.js?v=302';
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=302';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=303';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local

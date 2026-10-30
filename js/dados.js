@@ -1534,7 +1534,7 @@ export const DADOS = { corpos: [
     tipo: 'asteroide',
     pai: 'sol',
     raioKm: 263.3,
-    distanciaMediaKm: 383.22e6,
+    distanciaMediaKm: 353000000,
     periodoOrbitalDias: 1325.4,
     excentricidade: 0.0889,
     inclinacaoOrbitaGraus: 7.133,
@@ -1551,7 +1551,7 @@ export const DADOS = { corpos: [
       resumo: 'Vesta é o segundo asteroide maior do cinturão de asteroides e o mais brilhante — é o único visível a olho nu. Tem uma cratera gigante no seu polo sul que quase o destruiu. Sua superfície conta a história antiga de colisões.',
       numeros: [
         { rotulo: 'Diâmetro', valor: '527 km' },
-        { rotulo: 'Distância do Sol', valor: '383,2 milhões km (2,56 UA)' },
+        { rotulo: 'Distância do Sol', valor: "~353 milhões km (2,36 UA)" },
         { rotulo: 'Período orbital', valor: '3,63 anos' },
         { rotulo: 'Magnitude visual', valor: '+3,2 a +8,5 (visível olho nu!)' },
         { rotulo: 'Composição', valor: 'Basalto, olivina, piroxênio' },
@@ -1716,7 +1716,7 @@ export const DADOS = { corpos: [
     tipo: 'asteroide',
     pai: 'sol',
     raioKm: 0.185,
-    distanciaMediaKm: 149.3e6,
+    distanciaMediaKm: 138000000,
     periodoOrbitalDias: 323.6,
     periodoRotacaoHoras: 30.87,
     excentricidade: 0.1912,
@@ -1741,30 +1741,18 @@ export const DADOS = { corpos: [
     },
     aneis: null,
     info: {
-      resumo: 'Apófis é o asteroide próximo da Terra mais famoso — é o asteroide potencialmente perigoso mais estudado. Em 2004, inicialmente foi descrito como tendo pequena chance de colidir com a Terra em 2029, mas as observações refinadas eliminaram esse risco — quase por pouco!',
-      numeros: [
-        { rotulo: 'Diâmetro', valor: '~370 metros' },
-        { rotulo: 'Distância do Sol', valor: '149,3 milhões km' },
-        { rotulo: 'Período orbital', valor: '0,886 anos' },
-        { rotulo: 'Tipo espectral', valor: 'Sq (silicato carbonáceo)' },
-        { rotulo: 'Passagem próxima 2029', valor: '~31.600 km (dentro órbita da Lua!)' },
-        { rotulo: 'Risco de impacto 2036-2099', valor: 'Praticamente nulo' }
-      ],
-      curiosidades: [
-        'Apófis é o asteroide potencialmente perigoso mais famoso — em 2004, foi a primeira vez que um asteroide recebeu probabilidade Torino Scale > 0.',
-        'Apófis passará extremamente perto da Terra em 13 de abril de 2029 — mais perto que alguns satélites de comunicação!',
-        'Apófis foi observado intensivamente por radar (Goldstone, Arecibo e Green Bank) para refinar sua órbita — e o risco foi praticamente eliminado.',
-        'A passagem de 2029 será um espetáculo astronômico — Apófis brilhará como uma estrela da Ursa Maior (magnitude ~3) — visível a olho nu à noite, da Europa, África e Ásia!'
-      ],
+      resumo: "Apófis é um asteroide próximo da Terra. Observações refinadas descartaram o risco de impacto que havia sido considerado após sua descoberta. Em 13 de abril de 2029, sua passagem próxima permitirá estudar como a gravidade terrestre afeta um asteroide.",
+      numeros: [{"rotulo":"Diâmetro","valor":"~370 metros"},{"rotulo":"Distância orbital antes de 2029","valor":"~138 milhões km (0,922 UA)"},{"rotulo":"Período orbital antes de 2029","valor":"~0,886 anos"},{"rotulo":"Tipo espectral","valor":"Tipo S, rochoso"},{"rotulo":"Passagem próxima em 2029","valor":"~32.000 km acima da superfície terrestre"},{"rotulo":"Risco de impacto","valor":"Descartado por pelo menos 100 anos"}],
+      curiosidades: ["A avaliação de risco mudou conforme novas observações tornaram a órbita mais conhecida.","A passagem está prevista para 13 de abril de 2029, mais perto da Terra que alguns satélites de comunicação.","O radar ajuda a medir distância e movimento para refinar a órbita.","Nas regiões favoráveis e sob céu escuro, Apófis poderá ser visto sem telescópio durante a passagem."],
       comparacoes: [
         'Apófis é ainda menor que Bennu — apenas 370 metros de diâmetro.',
         'Na passagem de 2029, Apófis passará mais perto que satélites de comunicação — um evento raro de perto de asteroide sem colisão.'
       ],
       avancado: {
-        composicao: 'Silicato-carbonáceo, compostos orgânicos, possível água, metais.',
+        composicao: "Materiais silicáticos e metais, como níquel e ferro.",
         temperatura: 'Superfície: estimada -40 a -80 °C.',
-        missoes: ['Radar (Goldstone, Arecibo, Green Bank)', 'RAMSES (2028–2034, ESA/JAXA—desvio orbital demonstração)'],
-        texto: 'Apófis é NEA classe Sq (silicato-carbonáceo). Semi-eixo maior 1,099 UA, excentricidade 0,1912, inclinação 3,393°. Diâmetro ~370 m, massa ~7,8 × 10¹⁰ kg. Aproximação 2029: distância ~31.600 km (dentro geosynchronous). Observações de radar (Goldstone, Arecibo, Green Bank) refinaram a órbita; removido da Sentry Risk Table em março de 2021 — risco descartado para os próximos 100 anos. RAMSES (ESA/JAXA 2028) demonstrará defesa planetária desvio de órbita. Designado Torino Scale value em 2004; reduzido para zero.'
+        missoes: ["Observações ópticas e de radar","Ramses (ESA/JAXA): estudo da passagem de 2029"],
+        texto: "Antes do encontro de 2029, o semieixo maior de referência de Apófis é aproximadamente 0,922 UA e o período orbital é cerca de 323,6 dias. A passagem próxima da Terra mudará sua órbita. A missão Ramses foi concebida para acompanhar o asteroide e estudar os efeitos da gravidade terrestre. A cena do app é didática: não é uma previsão de trajetória nem recalcula a órbita posterior ao encontro."
       }
     }
   },
@@ -1981,24 +1969,19 @@ export const DADOS = { corpos: [
     info: {
       resumo: 'Haumea é um planeta-anão alongado que gira extremamente rápido — uma revolução a cada 3,9 horas! Sua rotação rápida pode ter criado seu formato alongado de bola de rugby. Tem um sistema de anéis fraco ao seu redor.',
       numeros: [
-        { rotulo: 'Diâmetro (elipsoide)', valor: '2.320 × 1.960 × 1.520 km' },
+        { rotulo: "Dimensões estimadas", valor: "~2.322 × 1.704 × 1.026 km (modelo de 2017)" },
         { rotulo: 'Distância do Sol', valor: '6.452 milhões km (43,1 UA)' },
         { rotulo: 'Período orbital', valor: '284 anos' },
         { rotulo: 'Duração do dia', valor: '3,9 horas (EXTREMAMENTE rápido!)' },
         { rotulo: 'Temperatura da superfície', valor: '-228 °C' },
         { rotulo: 'Luas', valor: '2 (Hi\'iaka, Namaka)' }
       ],
-      curiosidades: [
-        'Haumea tem a rotação mais rápida de qualquer corpo maior do sistema solar — completa uma rotação a cada 3,9 horas!',
-        'A rotação rápida de Haumea a deformou em uma forma alongada tipo bola de rugby — não é esférica como outros planetas-anões.',
-        'Haumea tem um sistema de anéis fraco — o único planeta-anão com anéis, além de sua rotação extrema.',
-        'Haumea foi nomeada em honra à deusa hawaiana, refletindo a descoberta do Observatório Keck no Havaí.'
-      ],
+      curiosidades: ["Haumea completa uma rotação em cerca de 3,9 horas.","Sua forma alongada está relacionada à rotação rápida.","Uma ocultação estelar ajudou a revelar o anel anunciado em 2017.","Seu nome homenageia Haumea, uma divindade havaiana."],
       avancado: {
-        composicao: 'Gelo de água cristalino (superfície), gelo de metano, rocha silicática, núcleo rochoso.',
+        composicao: "Astrônomos acreditam que Haumea é rochoso e revestido de gelo.",
         temperatura: 'Superfície: estimada -228 °C.',
-        missoes: ['Sem sonda planejada; observações de telescópios infravermelhos continu'],
-        texto: 'Haumea é planeta-anão, elipsoide R(a,b,c)=(960,749,600) km, descoberto 2004. Rotação ultra-rápida 3,915h causa deformação gravity-oblateness extrema. Órbita inclinada 28,22°, excêntrica 0,1944, período 283,8 anos, periélio ~2135. Possível impact ejeção anterior causou família Haumea (fragmentos cinturão Kuiper). Sistema anéis fraco descoberto 2017 (observação occultação). Luas Hi\'iaka (R ~310 km), Namaka (R ~85 km). Superfície gelo H₂O cristalino, métano, CO. Densidade 2,6 g/cm³.'
+        missoes: ["Observações por telescópios; nenhuma visita de sonda"],
+        texto: "Haumea é alongado e gira em cerca de 3,9 horas. Um modelo derivado de ocultação estelar por Ortiz e colaboradores (2017) estima dimensões de aproximadamente 2.322 × 1.704 × 1.026 km. A forma tridimensional depende do modelo e não é uma medida exata. Haumea tem duas luas conhecidas, Hi’iaka e Namaka, e um anel cuja descoberta foi anunciada em 2017."
       }
     }
   },

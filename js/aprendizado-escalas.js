@@ -1,4 +1,4 @@
-import {medidasEscala} from './escalas-calc.js?v=302';
+import {medidasEscala} from './escalas-calc.js?v=303';
 const COPY={
  pt:{titulo:'Tamanhos e distâncias',tamanhos:'Tamanhos',distancias:'Distâncias',sol:'Sol no modelo',real:'Real',modelo:'Modelo',notaT:'Diâmetros em proporção linear; posições das barras são livres. Ilustração artística com dados do app baseados em NASA/JPL.',notaD:'Distâncias médias ao Sol em proporção linear, não posições atuais. Barras/marcadores não representam diâmetros. Fonte: NASA/JPL.',nomes:['Sol','Mercúrio','Vênus','Terra','Marte','Júpiter','Saturno','Urano','Netuno']},
  en:{titulo:'Sizes and distances',tamanhos:'Sizes',distancias:'Distances',sol:'Model Sun',real:'Actual',modelo:'Model',notaT:'Diameters in linear proportion; bar placement is arbitrary. Artistic illustration using app data based on NASA/JPL.',notaD:'Average distances from the Sun in linear proportion, not current positions. Bars/markers do not represent diameters. Source: NASA/JPL.',nomes:['Sun','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune']},

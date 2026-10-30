@@ -1,6 +1,6 @@
 // Integra a experiência do Hangar e mantém o acesso Pro no app principal.
-import { destinoNave, origemHangarValida } from '../hangar/js/hangar-access.js?v=302';
-import { naveDisponivel } from './release-scope.js?v=302';
+import { destinoNave, origemHangarValida } from '../hangar/js/hangar-access.js?v=303';
+import { naveDisponivel } from './release-scope.js?v=303';
 export function destinoHangarLocalizado(id, idioma = 'pt', peca = null) {
   const destino = destinoNave(id);
   if (!destino) return null;
@@ -29,7 +29,7 @@ export function iniciarHangar({ premium, aoSair, idioma="pt" } = {}) {
   let focoAnterior = null;
   let navePendente = null;
   let aberto = false, ativo = false;
-  const catalogo = `hangar/index.html?v=302&idioma=${['pt','en','es'].includes(idioma)?idioma:'pt'}`;
+  const catalogo = `hangar/index.html?v=303&idioma=${['pt','en','es'].includes(idioma)?idioma:'pt'}`;
   const permitido = id => premium?.permitido?.('hangar', id) === true;
   function navegar(id,peca=null) {
     if (!naveDisponivel(id)) return false;
