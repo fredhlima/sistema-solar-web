@@ -1,8 +1,9 @@
 {
   "version": "main302",
-  "sourceCommit": "2407ce40",
+  "sourceCommit": "af7d0b62",
   "date": "2026-10-30",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
-  "spacecraft": 4
+  "spacecraft": 4,
+  "supportPage": "suporte.html"
 }
