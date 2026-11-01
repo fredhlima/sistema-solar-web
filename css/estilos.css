@@ -2440,3 +2440,14 @@ body.modo-dock .eventos-cabecalho {
 .politica-conteudo a { color:#77d3ff; overflow-wrap:anywhere; }
 .politica-conteudo .idioma { font-size:14px; color:#b7c2d6; }
 .politica-painel :focus-visible { outline:2px solid #5cc8ff; outline-offset:3px; }
+
+/* Dynamic Type é opt-in: font-family sozinho não adapta o tamanho. */
+@supports (font: -apple-system-body) {
+ .politica-painel { font: -apple-system-body; line-height:1.6; }
+ .politica-painel > header { flex-wrap:wrap; }
+ .politica-painel > header h2 { font-size:1.125em; }
+ .politica-conteudo { min-height:0; flex:1 1 auto; }
+ .politica-conteudo h1 { font-size:1.3125em; }
+ .politica-conteudo h2 { font-size:1.125em; }
+ .politica-conteudo .idioma { font-size:.875em; }
+}

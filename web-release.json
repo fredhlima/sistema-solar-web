@@ -1,9 +1,10 @@
 {
-  "version": "main303",
-  "sourceCommit": "b5544773bcd1b4b9a416fed31bc50d27253e58b2",
-  "date": "2026-10-30",
+  "version": "main304",
+  "sourceCommit": "8f730a76193f21b7bbdffcd3d2f3aa533606742f",
+  "date": "2026-11-01",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
-  "supportPage": "suporte.html"
+  "supportPage": "suporte.html",
+  "change": "Dynamic Type in privacy reader"
 }
