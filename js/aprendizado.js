@@ -69,7 +69,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
  const resumo=(id=idAtual)=>{if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id))return null;return {...carregar(id).estado,id,total:total(id)};};
  const catalogo=()=>Object.values(ROTEIROS).sort((a,b)=>Number(a.pro===true)-Number(b.pro===true)).map(r=>({id:r.id,ambiente:r.ambiente,titulo:r.textos[lang].titulo,descricao:r.textos[lang].objetivoTexto,pro:r.pro===true,nave:r.nave,recurso:r.recurso,pecas:r.pecas?.map(p=>({id:p.id})),continuacao:trilhaDoRoteiro(r.id)?.proximo??null,investigacao:r.investigacao??null,aprofundamentos:aprofundamentosDoRoteiro(r.id),trilha:trilhaDoRoteiro(r.id)?.trilha.id,...resumo(r.id)}));
  const notificar=()=>ouvintes.forEach(fn=>fn(resumo()));
- function salvar(){const r=carregar(idAtual);r.estado.ultimaAtividade=Date.now();try{localStorage.setItem(chave(idAtual),JSON.stringify({versao:ROTEIROS[idAtual].versao,...r.estado}));}catch(_){r.persistente=false;}notificar();}
+ function salvar(){const r=carregar(idAtual);r.estado.ultimaAtividade=Date.now();try{localStorage.setItem(chave(idAtual),JSON.stringify({versao:ROTEIROS[idAtual].versao,...r.estado}));r.persistente=true;}catch(_){r.persistente=false;}notificar();}
  function renderizar(){
   if(!raiz)return;const roteiro=ROTEIROS[idAtual],registro=carregar(idAtual),estado=registro.estado;
   const texto=k=>roteiro.textos[lang][k]??COMUNS[lang][k]??k;

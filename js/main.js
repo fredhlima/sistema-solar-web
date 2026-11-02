@@ -19,9 +19,9 @@ import { iniciarEstacoes } from './estacoes.js?v=303';
 import { iniciarMares } from './mares.js?v=303';
 import { iniciarProgresso } from './progresso.js?v=303';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=303';
+import { iniciarMusica } from './musica.js?v=306';
 import { iniciarNavegacao } from './navegacao.js?v=303';
-import { iniciarAprendizado } from './aprendizado.js?v=305';
+import { iniciarAprendizado } from './aprendizado.js?v=306';
 import { iniciarTutorial } from './tutorial.js?v=303';
 
 // As trajetórias legadas das outras sondas ficam fora do recorte 1.0.

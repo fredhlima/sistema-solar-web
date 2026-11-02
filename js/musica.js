@@ -35,6 +35,9 @@ export function iniciarMusica() {
   let delayBrilho = null;
   let tocando = false;
   let timerAgenda = null;
+  let geracao = 0;
+  let tentativa = null;
+  let iniciada = false;
   let indiceAcorde = 0;
   let proximaTroca = 0;
   let proximoBrilho = 0;
@@ -158,10 +161,34 @@ export function iniciarMusica() {
     }
   }
 
-  function ligar() {
+  // AudioContext pode rejeitar tanto de forma síncrona quanto assíncrona.
+  function ignorarFalha(operacao) {
+    try { Promise.resolve(operacao()).catch(() => {}); } catch (e) { /* já fechado */ }
+  }
+
+  async function ligar() {
+    iniciada = true;
+    if (document.hidden || tocando || tentativa === geracao) return;
+    const versao = geracao;
+    tentativa = versao;
+    let contexto;
     try {
+      if (ctx && ctx.state === 'closed') {
+        const antigo = ctx;
+        ctx = null;
+        ignorarFalha(() => antigo.close());
+      }
       if (!ctx) montarGrafo();
-      if (ctx.state === 'suspended') ctx.resume();
+      contexto = ctx;
+      if (contexto.state === 'suspended') await contexto.resume();
+      if (versao !== geracao || contexto !== ctx || !ligada || document.hidden) {
+        // Um resume pendente pode concluir depois de desligar ou ocultar.
+        if (contexto === ctx && (!ligada || document.hidden)) {
+          ignorarFalha(() => contexto.suspend());
+        }
+        return;
+      }
+      if (contexto.state !== 'running') return;
       tocando = true;
       master.gain.setTargetAtTime(0.14, ctx.currentTime, 0.5);
       indiceAcorde = 0;
@@ -170,15 +197,29 @@ export function iniciarMusica() {
       tickAgenda();
       timerAgenda = setInterval(tickAgenda, 500);
     } catch (e) {
-      console.warn('Música indisponível neste dispositivo:', e.message);
-      tocando = false;
+      if (versao === geracao && (!contexto || contexto === ctx)) {
+        console.warn('Música indisponível neste dispositivo:', e.message);
+        tocando = false;
+        if (timerAgenda !== null) { clearInterval(timerAgenda); timerAgenda = null; }
+      }
+    } finally {
+      if (tentativa === versao) tentativa = null;
     }
   }
 
   function desligar() {
+    const retomadaPendente = tentativa === geracao;
+    geracao++;
     tocando = false;
-    if (timerAgenda) { clearInterval(timerAgenda); timerAgenda = null; }
+    if (timerAgenda !== null) { clearInterval(timerAgenda); timerAgenda = null; }
     if (!ctx) return;
+    if (retomadaPendente) {
+      const antigo = ctx;
+      ctx = null;
+      nosAtivos.clear();
+      ignorarFalha(() => antigo.close());
+      return;
+    }
     // Fade-out suave e depois corta os osciladores agendados
     master.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3);
     const fim = ctx.currentTime + 1.2;
@@ -236,14 +277,25 @@ export function iniciarMusica() {
   // o grafo do zero — é a única forma confiável de garantir que volta a
   // tocar de verdade, não só "no papel".
   document.addEventListener('visibilitychange', () => {
-    if (!tocando) return;
+    if (!iniciada || !ligada) return;
     if (document.hidden) {
-      if (ctx) ctx.suspend();
+      geracao++;
+      tocando = false;
+      if (timerAgenda !== null) { clearInterval(timerAgenda); timerAgenda = null; }
+      if (ctx) {
+        const contexto = ctx;
+        ignorarFalha(() => contexto.suspend());
+      }
     } else {
-      if (ctx) { try { ctx.close(); } catch (e) { /* já fechado */ } }
-      ctx = null;
+      geracao++;
+      tocando = false;
+      if (timerAgenda !== null) { clearInterval(timerAgenda); timerAgenda = null; }
+      if (ctx) {
+        const antigo = ctx;
+        ctx = null;
+        ignorarFalha(() => antigo.close());
+      }
       nosAtivos.clear();
-      if (timerAgenda) { clearInterval(timerAgenda); timerAgenda = null; }
       ligar();
     }
   });

@@ -1,10 +1,10 @@
 {
-  "version": "main305",
-  "sourceCommit": "eab7d8ee7c3201771e4fc2b0f235b7c06bd0aef4",
-  "date": "2026-11-01",
+  "version": "main306",
+  "sourceCommit": "7df0bd46998821ad786e9c7ee269bd95e65a8167",
+  "date": "2026-11-02",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Selected planet actions in learning guides"
+  "change": "Async audio lifecycle and learning storage recovery"
 }
