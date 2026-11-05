@@ -209,7 +209,7 @@ export const DADOS = { corpos: [
         composicao: 'Crosta silicática (continentes e oceano), manto de silicatos, núcleo externo líquido de Fe-Ni, núcleo interno sólido.',
         temperatura: 'Superfície: média 15 °C (varia -89 °C a 54 °C); núcleo: ~5.200 °C.',
         missoes: ['Gemini, Apollo (1960s–1970s)', 'Challenger, shuttle (1981–2011)', 'ISS (1998–presente)'],
-        texto: 'Terra é o terceiro planeta solar, único conhecido a abrigar vida complexa. Formou-se há 4,54 Ga com nucleossíntese solar. A tectônica de placas recicla a crosta e estabiliza o clima através do ciclo do carbono. O grande impacto que formou a Lua foi fundamental para seu dinamismo. Sua magnetosfera, gerada pelo núcleo líquido, protege da radiação solar. A biosfera integra atmosfera, hidrosfera e litosfera.'
+        texto: 'Terra é o terceiro planeta solar, único conhecido a abrigar vida complexa. Formou-se há 4,54 Ga pelo acúmulo gradual de rochas e poeira no disco ao redor do Sol jovem. A tectônica de placas recicla a crosta e estabiliza o clima através do ciclo do carbono. O grande impacto que formou a Lua foi fundamental para seu dinamismo. Sua magnetosfera, gerada pelo núcleo líquido, protege da radiação solar. A biosfera integra atmosfera, hidrosfera e litosfera.'
       }
     }
   },

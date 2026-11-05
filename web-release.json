@@ -1,10 +1,10 @@
 {
-  "version": "main306",
-  "sourceCommit": "7df0bd46998821ad786e9c7ee269bd95e65a8167",
-  "date": "2026-11-02",
+  "version": "main307",
+  "sourceCommit": "c513a5fb896bcb39449e80fd31e64346a32814db",
+  "date": "2026-11-05",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Async audio lifecycle and learning storage recovery"
+  "change": "Correct Earth formation explanation in PT, EN and ES; coherent language module cache"
 }

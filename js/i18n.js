@@ -104,7 +104,7 @@ export function formatarDataCurta(iso) {
 export async function carregarConteudoTraduzido() {
   if (idiomaAtual === 'pt') return null;
   try {
-    const mod = await import(`./traducoes-conteudo.${idiomaAtual}.js?v=303`);
+    const mod = await import(`./traducoes-conteudo.${idiomaAtual}.js?v=307`);
     return mod.TRADUCAO || null;
   } catch (e) {
     console.warn('Tradução de conteúdo indisponível, mantendo pt:', e.message);

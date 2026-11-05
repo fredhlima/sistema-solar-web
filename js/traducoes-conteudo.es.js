@@ -2240,7 +2240,7 @@ export const TRADUCAO = {
             "Challenger, shuttle (1981–2011)",
             "ISS (1998–presente)"
           ],
-          "texto": "La Tierra es el tercer planeta solar, el único conocido que alberga vida compleja. Se formó hace 4,54 Ga. La tectónica de placas recicla la corteza y estabiliza el clima a través del ciclo del carbono. El gran impacto que formó la Luna fue fundamental para su dinamismo. Su magnetosfera, generada por el núcleo líquido, la protege de la radiación solar. La biosfera integra atmósfera, hidrosfera y litosfera."
+          "texto": "La Tierra es el tercer planeta solar, el único conocido que alberga vida compleja. Se formó hace 4,54 Ga por la acumulación gradual de rocas y polvo en el disco alrededor del Sol joven. La tectónica de placas recicla la corteza y estabiliza el clima a través del ciclo del carbono. El gran impacto que formó la Luna fue fundamental para su dinamismo. Su magnetosfera, generada por el núcleo líquido, la protege de la radiación solar. La biosfera integra atmósfera, hidrosfera y litosfera."
         }
       }
     }
