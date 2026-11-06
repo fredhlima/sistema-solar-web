@@ -13,7 +13,7 @@ import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma 
 import { criarPremium } from './premium.js?v=303';
 import { iniciarPaywall } from './paywall.js?v=303';
 import { iniciarQuiz } from './quiz.js?v=303';
-import { iniciarHangar } from './hangar.js?v=303';
+import { iniciarHangar } from './hangar.js?v=308';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=303';
 import { iniciarEstacoes } from './estacoes.js?v=303';
 import { iniciarMares } from './mares.js?v=303';

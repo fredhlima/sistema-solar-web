@@ -1,10 +1,10 @@
 {
-  "version": "main307",
-  "sourceCommit": "c513a5fb896bcb39449e80fd31e64346a32814db",
-  "date": "2026-11-05",
+  "version": "main308",
+  "sourceCommit": "91cd00839e072db36049a6717a5e5cadcf8bc32b",
+  "date": "2026-11-06",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Correct Earth formation explanation in PT, EN and ES; coherent language module cache"
+  "change": "Accessible reading panels and coherent Hangar cache; native regression pending"
 }

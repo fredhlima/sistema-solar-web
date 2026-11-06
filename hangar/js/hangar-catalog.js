@@ -20,7 +20,7 @@ const previews = modelosCatalogo.map((item, index) => {
  const card = document.createElement('a');
  card.className = `vehicle-card future ${item.id}`;
  const explorable = ['modulo-lunar','hubble','perseverance','ingenuity','cassini','jwst'].includes(item.id);
- card.href = `${explorable ? 'veiculo' : 'modelo-futuro'}.html?modelo=${item.id}`;
+ card.href = `${explorable ? 'veiculo' : 'modelo-futuro'}.html?modelo=${item.id}&v=308`;
  card.innerHTML = `<div class="card-top"><span>${String(index + 3).padStart(2, '0')} / ${ht(item.missao)}</span></div><div class="illustration model-preview" aria-hidden="true"><span>${ht('PRÉVIA 3D · NASA')}</span></div><div class="card-copy"><h2>${ht(item.nome)}</h2><div class="card-bottom"><span>${explorable ? ht('Exploração por peças') : ht('Prévia 3D')}</span><b>${explorable ? ht('Explorar nave ↗') : ht('Ver modelo ↗')}</b></div></div>`;
  fleet.append(card);
  return { card, item };

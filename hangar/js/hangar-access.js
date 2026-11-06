@@ -9,7 +9,7 @@ export const NAVES_HANGAR = Object.freeze([
 export function destinoNave(id) {
   if (!NAVES_HANGAR.includes(id) || !naveDisponivel(id)) return null;
   return ['saturno', 'shuttle', 'modulo-lunar', 'hubble', 'perseverance', 'ingenuity', 'cassini', 'jwst'].includes(id)
-    ? `hangar/veiculo.html?modelo=${id}`
+    ? `hangar/veiculo.html?modelo=${id}&v=308`
     : `hangar/modelo-futuro.html?modelo=${id}`;
 }
 

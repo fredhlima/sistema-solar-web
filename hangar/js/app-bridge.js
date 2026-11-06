@@ -65,7 +65,7 @@ if (integrado) {
       if(Number.isFinite(value)&&value>=0&&value<=120)document.documentElement.style.setProperty('--safe-'+side,value+'px');
     }
   });
-  document.querySelectorAll('a[href="../index.html?v=303"]').forEach(link => {
+  document.querySelectorAll('a[href^="../index.html"]').forEach(link => {
     link.addEventListener('click', event => {
       event.preventDefault();
       publicar({ tipo: 'hangar:fechar' });

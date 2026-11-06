@@ -498,3 +498,50 @@ body.modo-dock .comparador-painel {
   body.com-navegacao .mdock-sec-exp { width: 60px; }
   body.com-navegacao .mdock-sec-xp { width: 80px; font-size: 11px; }
 }
+
+/* Leitura acessível: acompanha o tamanho de texto do iOS, preservando a base de 17pt. */
+@supports (font: -apple-system-body) {
+  #mdock-painel-exp.com-ficha { font: -apple-system-body; }
+  /* O tipo pode passar à linha seguinte antes de comprimir o nome. */
+  #mdock-painel-exp.com-ficha .mdock-ficha-linha { flex-wrap: wrap; }
+  #mdock-painel-exp.com-ficha .mdock-ficha-nome {
+    flex: 1 1 4em;
+    min-width: min(100%, 4em);
+    font-size: .941176em; /* 16/17 */
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+  }
+  #mdock-painel-exp.com-ficha .mdock-ficha-pill {
+    font-size: .529412em; /* 9/17 */
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  /* Mantém as abas numa linha, com rolagem horizontal e alvos originais. */
+  #mdock-painel-exp.com-ficha .mdock-abas { flex-wrap: nowrap; overflow-x: auto; }
+  #mdock-painel-exp.com-ficha .mdock-aba {
+    font-size: .529412em; /* 9/17 */
+    white-space: nowrap;
+  }
+  #mdock-painel-exp.com-ficha .mdock-resumo-txt { font-size: .764706em; /* 13/17 */ }
+  #mdock-painel-exp.com-ficha .mdock-subtitulo { font-size: .529412em; /* 9/17 */ }
+  #mdock-painel-exp.com-ficha .mdock-linha-diamante,
+  #mdock-painel-exp.com-ficha .mdock-linha-estrela,
+  #mdock-painel-exp.com-ficha .mdock-linha-triangulo,
+  #mdock-painel-exp.com-ficha .mdock-numero-rotulo,
+  #mdock-painel-exp.com-ficha .mdock-numero-valor,
+  #mdock-painel-exp.com-ficha .mdock-av-texto { font-size: .647059em; /* 11/17 */ }
+  #mdock-painel-exp.com-ficha .info-credito-textura { font-size: .588235em; /* 10/17 */ }
+
+  /* Os glifos decorativos mantêm o tamanho original, sem ampliar os ícones. */
+  #mdock-painel-exp.com-ficha .mdock-diamante,
+  #mdock-painel-exp.com-ficha .mdock-estrela-amb,
+  #mdock-painel-exp.com-ficha .mdock-triangulo { font-size: 11px; }
+  /* Evita que palavras e valores longos ampliem as colunas além do painel. */
+  #mdock-painel-exp.com-ficha .mdock-aba-conteudo.mdock-duas-colunas {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9em), 1fr));
+  }
+  #mdock-painel-exp.com-ficha .mdock-numero-linha { min-width: 0; }
+  #mdock-painel-exp.com-ficha .mdock-numero-rotulo,
+  #mdock-painel-exp.com-ficha .mdock-numero-valor { min-width: 0; overflow-wrap: anywhere; }
+}

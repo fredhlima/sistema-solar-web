@@ -31,3 +31,39 @@ aside{grid-column:2;grid-row:1/3;min-height:0;display:flex;flex-direction:column
 body.navegacao-cinema .app-header,body.navegacao-cinema>header {padding-right:calc(170px + var(--safe-right,0px));}
 
 :is(.aside-scroll,#mobile-sheet-title,#rocket):focus-visible{outline:3px solid var(--cyan);outline-offset:-4px}.aside-scroll{scroll-padding-block:8px}
+
+/* Leitura acessível: acompanha o tamanho de texto do iOS, preservando a base de 17pt. */
+@supports (font: -apple-system-body) {
+  aside.painel { font: -apple-system-body; }
+  aside.painel .panel-head h2 { font-size: .823529em; /* 14/17 */ min-width: 0; overflow-wrap: anywhere; }
+  aside.painel #reading-toggle { font-size: .705882em; /* 12/17 */ }
+  aside.painel article h2 { font-size: 1.176471em; /* 20/17 */ }
+  aside.painel article h3 { font-size: .705882em; /* 12/17 */ }
+  aside.painel article p { font-size: .764706em; /* 13/17 */ }
+  aside.painel article .eyebrow { font-size: .588235em; /* 10/17 */ }
+  aside.painel article summary, aside.painel article dl,
+  aside.painel article .sources a { font-size: .705882em; /* 12/17 */ }
+  aside.painel article .advanced-section ul { font-size: .764706em; /* 13/17 */ }
+
+  .detail-open aside.painel article ul,
+  .reading-expanded aside.painel article ul { font-size: 1em; }
+  .detail-open aside.painel article p,
+  .detail-open aside.painel article li,
+  .reading-expanded aside.painel article p,
+  .reading-expanded aside.painel article li { font-size: .882353em; /* 15/17 */ }
+  .detail-open aside.painel article h3,
+  .reading-expanded aside.painel article h3 { font-size: .823529em; /* 14/17 */ }
+  .detail-open aside.painel article .eyebrow { font-size: .647059em; /* 11/17 */ }
+  .reading-expanded aside.painel article h2 { font-size: 1.235294em; /* 21/17 */ }
+  .reading-expanded aside.painel .panel-head h2 { font-size: .882353em; /* 15/17 */ }
+  /* Na linha do tempo, títulos e parágrafos herdam o tamanho de li (15/17). */
+  .detail-open aside.painel article li h3,
+  .reading-expanded aside.painel article li h3 { font-size: .933333em; /* 14/15 */ }
+  .detail-open aside.painel article li p,
+  .reading-expanded aside.painel article li p { font-size: 1em; }
+  @media (max-height: 450px) {
+    aside.painel .panel-head h2 { font-size: .764706em; /* 13/17 */ }
+    /* O modo ampliado prevalece também na tela baixa, como no CSS original. */
+    .reading-expanded aside.painel .panel-head h2 { font-size: .882353em; /* 15/17 */ }
+  }
+}

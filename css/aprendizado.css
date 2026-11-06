@@ -273,3 +273,29 @@ body.com-navegacao.nav-guia .aprendizado-sol {max-height:calc(100dvh - var(--nav
 
 .aprendizado-sts61-fonte{font-size:10px;line-height:1.35;color:#9fb2c9;margin-top:10px!important;}
 .aprendizado-modelo-nota[hidden]{display:none;}
+
+/* Leitura acessível: acompanha o tamanho de texto do iOS, preservando a base de 17pt. */
+@supports (font: -apple-system-body) {
+  .aprendizado-sol { font: -apple-system-body; line-height: 1.5; }
+  /* O tamanho padrão de body no iOS é 17pt; 14/17 preserva o corpo anterior. */
+  .aprendizado-painel { font-size: .823529em; overflow-y: auto; overscroll-behavior: contain; }
+  /* Cabeçalho, conteúdo e rodapé permanecem alcançáveis no mesmo scroll. */
+  .aprendizado-conteudo { flex: none; overflow: visible; }
+  .aprendizado-cabecalho > div { min-width: 0; overflow-wrap: anywhere; }
+  .aprendizado-cabecalho h2 { font-size: 1.285714em; }
+  .aprendizado-kicker { font-size: .785714em; }
+  .aprendizado-trilha-posicao { font-size: .785714em; }
+  .aprendizado-modo { font-size: .857143em; flex-wrap: wrap; }
+  .aprendizado-modo-botao { font-size: 1em !important; }
+  .aprendizado-familia strong { font-size: .857143em; }
+  .aprendizado-familia span { font-size: .857143em; }
+  .aprendizado-fonte { font-size: .857143em; overflow-wrap: anywhere; }
+  .aprendizado-rodape { font-size: .857143em; overflow-wrap: anywhere; }
+  .aprendizado-rodape > div { flex-wrap: wrap; min-width: 0; }
+  .aprendizado-rodape button { font-size: 1.083333em; }
+  .aprendizado-trilha-fim { font-size: .928571em; }
+  .aprendizado-opcionais p { font-size: .857143em; }
+  .aprendizado-peca-leitura { font-size: .928571em; }
+  .aprendizado-mundos-fonte { font-size: .714286em; overflow-wrap: anywhere; }
+  .aprendizado-sts61-fonte { font-size: .714286em; overflow-wrap: anywhere; }
+}
