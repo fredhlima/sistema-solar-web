@@ -280,8 +280,10 @@ body.modo-dock .card-missao {
   padding: 8px 16px 4px; font: 600 9px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #7d88a2;
 }
 .mdock-item {
+  width: 100%; border: 0; background: transparent; text-align: left; appearance: none;
   box-sizing: border-box; min-height: 44px; padding: 8px 16px; font: 500 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #c9d3e6; cursor: pointer; display: flex; align-items: center; gap: 8px;
 }
+.mdock-item:focus-visible { outline: 2px solid #5cc8ff; outline-offset: -2px; }
 .mdock-item:hover { background: rgba(92, 200, 255, .08); color: #fff; }
 .mdock-item-lua { padding-left: 30px; color: #93a0b8; }
 .mdock-item-fav { color: #ffcf6b; }

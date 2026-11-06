@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { DADOS } from './dados.js?v=307';
 import { SistemaSolar3D } from './motor3d.js?v=65';
 import { iniciarUI } from './ui.js?v=303';
-import { iniciarMobileDock } from './mobile-dock.js?v=303';
+import { iniciarMobileDock } from './mobile-dock.js?v=309';
 import { EVENTOS } from './eventos.js?v=11';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real

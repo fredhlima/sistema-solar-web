@@ -354,7 +354,8 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       lista.appendChild(h);
     }
     function linhaItem(corpo, { numero, lua } = {}) {
-      const el = document.createElement('div');
+      const el = document.createElement('button');
+      el.type = 'button';
       el.className = 'mdock-item' + (lua ? ' mdock-item-lua' : '');
       el.textContent = numero ? `${numero}º ${corpo.nome}` : corpo.nome;
       if (acoes.ehFavorito(corpo.id)) {
@@ -399,7 +400,8 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       if (mis.length) {
         linhaGrupo(t('grupoMissoes') || 'Missões espaciais');
         mis.forEach((m) => {
-          const el = document.createElement('div');
+          const el = document.createElement('button');
+          el.type = 'button';
           el.className = 'mdock-item mdock-item-missao';
           const dot = document.createElement('span');
           dot.className = 'mdock-missao-dot';

@@ -1,10 +1,10 @@
 {
-  "version": "main308",
-  "sourceCommit": "91cd00839e072db36049a6717a5e5cadcf8bc32b",
+  "version": "main309",
+  "sourceCommit": "8e8e2aa2f1e629a525c8b4536608abd60ae39aa5",
   "date": "2026-11-06",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Accessible reading panels and coherent Hangar cache; native regression pending"
+  "change": "Native Explore buttons and visible keyboard focus; accessible readers retained"
 }
