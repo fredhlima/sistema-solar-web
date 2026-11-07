@@ -1,3 +1,4 @@
+import {medicaoMareLegada} from './fenomenos-unificados.js?v=312';
 // Modo "Marés" — Fase 2 da SPEC-estacoes-e-mares.md.
 //
 // O que este modo responde: por que o mar sobe e desce duas vezes por dia, e
@@ -10,8 +11,8 @@
 // Aqui se mostra a FORÇA relativa e o RITMO, que é o que a geometria permite.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=303';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=303';
+import { getIdioma } from './i18n.js?v=312';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=312';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
@@ -305,6 +306,16 @@ const TEXTOS = {
 function tm(chave) {
   const i = getIdioma();
   return (TEXTOS[i] && TEXTOS[i][chave]) || TEXTOS.pt[chave] || chave;
+}
+
+// A classificação por fase descreve a soma dos efeitos, não uma fonte isolada.
+export function textoAnuncioMare({camada, amplitude, estadoAgora, classeTexto, idioma='pt'}) {
+  if (camada === 'lua' || camada === 'sol') {
+    const texto = TEXTOS[idioma] || TEXTOS.pt;
+    const valor = forcaRelativaAMinima(amplitude).toFixed(1);
+    return `${texto[`camada_${camada}`]}. ${idioma === 'en' ? valor : valor.replace('.', ',')} ${texto.escalaForca}.`;
+  }
+  return `${estadoAgora}. ${classeTexto}.`;
 }
 
 function num(valor, casas) {
@@ -862,7 +873,8 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       if (amplitude === undefined) {
         const s = longitudeSolar(dias);
         const l = longitudeLunar(dias);
-        const m = mareCombinada(l, s);
+        const m = camada === 'lua' ? mareCombinada(l, l, 1, 0)
+          : camada === 'sol' ? mareCombinada(s, s, 0, 1) : mareCombinada(l, s);
         return atualizarHud(s, l, m.amplitude, alturaRelativa(0, m.amplitude), 0);
       }
 
@@ -993,7 +1005,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         const estadoAgora = pertoAgora
           ? (altura > 0 ? tm('preamar') : tm('baixamar'))
           : (subindoAgora ? tm('subindo') : tm('descendo'));
-        ctx.anunciar(`${estadoAgora}. ${classeTexto}.`);
+        ctx.anunciar(textoAnuncioMare({camada, amplitude, estadoAgora, classeTexto, idioma:getIdioma()}));
       }
     }
 
@@ -1019,6 +1031,15 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     return {
       scene, camera, atualizar, dispose, aoScrubber,
+      medirLegado: (m) => {
+        const medida=medicaoMareLegada(m);
+        return medida ? `${medida.angulo}° · ${tm(`camada_${medida.camada}`)} · ${num(medida.hora,1)}h · ${num(medida.razao,1)} ${tm('escalaForca')}` : null;
+      },
+      medir: () => {
+        const lua=longitudeLunar(dias),sol=longitudeSolar(dias);
+        const amplitude=(camada==='lua'?mareCombinada(lua,lua,1,0):camada==='sol'?mareCombinada(sol,sol,0,1):mareCombinada(lua,sol)).amplitude;
+        return `${tm(nomeDaFase(dias))} · ${tm(`camada_${camada}`)} · ${num(forcaRelativaAMinima(amplitude),1)} ${tm('escalaForca')}`;
+      },
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
@@ -1029,7 +1050,12 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
   }
 
   function roteiro() {
-    return [1, 2, 3, 4, 5].map((i) => ({ texto: tm(`passo${i}`) }));
+    const convites = {
+      pt:['Observe a Lua, a Terra e os bojos na cena.','Gire a visão para encontrar os dois lados.','Ative as forças e compare as setas perto e longe da Lua.','Observe o ponto marcado e use a animação para acompanhar a rotação.','Use o controle de fase para comparar lua nova, cheia e quartos. Explique a diferença de amplitude.'],
+      en:['Observe the Moon, Earth and bulges in the scene.','Rotate the view to find both sides.','Turn on forces and compare the arrows near and far from the Moon.','Watch the marked point and use the animation to follow rotation.','Use the phase slider to compare new, full and quarter moons. Explain the difference in range.'],
+      es:['Observa la Luna, la Tierra y los abultamientos en la escena.','Gira la vista para encontrar ambos lados.','Activa las fuerzas y compara las flechas cerca y lejos de la Luna.','Observa el punto marcado y usa la animación para seguir la rotación.','Usa el control de fase para comparar luna nueva, llena y cuartos. Explica la diferencia de amplitud.']
+    }[getIdioma()] || [];
+    return [1, 2, 3, 4, 5].map((i) => ({ texto: tm(`passo${i}`) + ' ' + (convites[i-1] || '') }));
   }
 
   const palco = criarPalco({
@@ -1043,7 +1069,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
   });
 
   return {
-    abrir: (opcoes) => palco.abrir(opcoes),
+    abrir: (opcoes) => premium.exigir('estacoes-mares') && palco.abrir(opcoes),
     fechar: () => palco.fechar(),
     get aberto() { return palco.aberto; },
   };

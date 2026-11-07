@@ -1,6 +1,7 @@
-import {TRILHAS, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=303';
-import { naveDisponivel } from './release-scope.js?v=303';
-import { destinoNave } from '../hangar/js/hangar-access.js?v=303';
+import {resolverFenomeno,modoDoFenomeno} from './fenomenos-unificados.js?v=312';
+import {TRILHAS, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=312';
+import { naveDisponivel } from './release-scope.js?v=312';
+import { destinoNave } from '../hangar/js/hangar-access.js?v=312';
 // A cena é o ponto de partida; Experiências é um menu contextual, sem barra permanente.
 const TEXTOS={
  pt:{experiencias:'Experiências',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves em 3D · Hubble grátis',aprenderNota:'Descubra o espaço por assunto',fechar:'Fechar experiências',voltar:'Voltar às experiências',cena:'Só a cena',mostrar:'Mostrar controles',novo:'Começar · grátis',retomar:'Retomar',rever:'Rever roteiro',quiz:'Planetas grátis',pro:'Pro'},
@@ -61,13 +62,11 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
   tour:{nome:t('btnTour'),acao:acoes.iniciarTour,painel:'.tour-card'},
   eventos:{nome:t('btnEventos'),acao:acoes.abrirEventos,painel:'.painel-eventos'},
   voce:{nome:t('btnVoce'),acao:acoes.abrirVoce,painel:'.voce-no-espaco-overlay'},
-  estacoes:{nome:t('btnEstacoes'),acao:acoes.abrirEstacoes,painel:'#palco-estacoes',nota:copy.novo},
-  mares:{nome:t('btnMares'),acao:acoes.abrirMares,painel:'#palco-mares',nota:copy.novo},
-  ...Object.fromEntries(aprendizado.catalogo().map(r=>[r.id,{acao:()=>aprendizado.abrir(r.id,{voltar:retornoEntreGuias?.destino===r.id}),painel:'.aprendizado-sol',guia:true}]))
+  ...Object.fromEntries(aprendizado.catalogo().map(r=>[r.id,{acao:()=>aprendizado.abrir(r.id,{voltar:retornoEntreGuias?.destino===r.id}),painel:modoDoFenomeno(r.id)?`#palco-${modoDoFenomeno(r.id)}`:'.aprendizado-sol',guia:!modoDoFenomeno(r.id)}]))
  };
  const selos=new Map();
  for(const [key,item]of Object.entries(atividades)){
-  if(item.guia||!item.acao)continue;const b=botao();b.dataset.activity=key;b.append(criar('strong',item.nome));const nota=criar('small',item.nota);b.append(nota);if(item.recurso)selos.set(key,nota);b.onclick=()=>abrirAtividade(key,b);grade.append(b);
+  if(roteiros.has(key)||item.guia||!item.acao)continue;const b=botao();b.dataset.activity=key;b.append(criar('strong',item.nome));const nota=criar('small',item.nota);b.append(nota);if(item.recurso)selos.set(key,nota);b.onclick=()=>abrirAtividade(key,b);grade.append(b);
  }
  const tela=botao(copy.cena);tela.id='fullscreen-toggle';tela.onclick=()=>{menuAberto=false;cinema=true;render();sairCena.focus();};grade.append(tela);
  const sairCena=botao(copy.mostrar,'cena-mostrar-controles');sairCena.id='scene-exit';sairCena.hidden=true;sairCena.onclick=()=>{cinema=false;render();focarEntrada();};
@@ -111,12 +110,11 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  const exigirGuia=r=>r.recurso?premium.exigir(r.recurso,{roteiro:r.id}):premium.exigirItem('hangar',r.nave);
  function abrirAtividade(key,b){
   if(modoModal()||atividade)return;
-  if(key==='estacoes')key='estacoes-guia';
-  if(key==='mares')key='mares-guia';
+  key=resolverFenomeno(key);
   if(!atividades[key]?.acao)return false;
   const roteiro=roteiros.get(key);if(roteiro?.trilha?.startsWith('mundos-')){grupoBiblioteca='mundos';categoriaMundos=roteiro.trilha;filtrarBiblioteca();}if(roteiro?.pro&&!permitirGuia(roteiro)){guiaSugerido={id:key,origem:b};if(!exigirGuia(roteiro))return;guiaSugerido=null;}
   retornoAtividade=destino==='descobertas'?'descobertas':'experiencias';limparPaineis();origem=b;menuAberto=false;restaurarTempo=acoes.guardarTransporte();atividade=key;cinema=false;render();iniciandoAtividade=true;
-  try{atividades[key].acao();}catch(error){console.warn('Atividade indisponível:',key,error);restaurarTempo?.();restaurarTempo=null;atividade=null;retornarAtividade();}finally{iniciandoAtividade=false;sincronizar();}
+  try{const modo=modoDoFenomeno(key);if(modo){const estado=aprendizado.resumo(key);const abrir=modo==='estacoes'?acoes.abrirEstacoes:acoes.abrirMares;abrir({roteiro:true,passoInicial:estado.concluido?0:estado.passo,aoEtapa:(passo,concluido)=>aprendizado.registrarFenomeno(key,passo,concluido)});}else atividades[key].acao();}catch(error){console.warn('Atividade indisponível:',key,error);restaurarTempo?.();restaurarTempo=null;atividade=null;retornarAtividade();}finally{iniciandoAtividade=false;sincronizar();}
  }
  function retornarAtividade(){destino=retornoAtividade==='descobertas'?'descobertas':'universo';menuAberto=retornoAtividade==='experiencias';render();origem?.focus({preventScroll:true});}
  function sincronizar(){
@@ -181,14 +179,8 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  }
  // Abrir uma simulação a partir de um roteiro conserva o passo e a assinatura.
  function experimentarModo(id){
-  if(!['estacoes','mares'].includes(id)||modoModal()||!atividades[atividade]?.guia)return false;
-  modoSugerido={id,origem:document.activeElement};
-  if(!premium.exigir('estacoes-mares'))return false;
-  modoSugerido=null;const guia=atividade;
-  guardando=true;aprendizado.fechar();atividade=id;retomarAposModo=guia;guardando=false;
-  render();iniciandoAtividade=true;
-  try{atividades[id].acao({roteiro:false});}catch(error){console.warn('Simulação indisponível:',id,error);}
-  finally{iniciandoAtividade=false;sincronizar();}return true;
+  if(!['estacoes','mares'].includes(id)||modoModal()||atividade)return false;
+  abrirAtividade(id,document.activeElement);return true;
  }
  function abrirTemaEstacoes(){if(modoModal()||atividade)return false;abrirAtividade('estacoes-guia',document.activeElement);return true;}
  function abrirTemaMares(){if(modoModal()||atividade)return false;abrirAtividade('mares-guia',document.activeElement);return true;}

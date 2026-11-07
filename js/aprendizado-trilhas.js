@@ -1,4 +1,4 @@
-import {roteiroDisponivel} from './release-scope.js?v=303';
+import {roteiroDisponivel} from './release-scope.js?v=312';
 import {TRILHAS_MUNDOS} from './mundos-trilhas.js?v=1';
 const TRILHAS_COMPLETAS = [
  {id:'sondas-viagens',roteiros:['parker-sol','juno-jupiter','rosetta-cometa','voyager-viagem'],textos:{pt:{titulo:'Sondas e suas viagens',descricao:'Explore encontros, instrumentos e descobertas de missões espaciais.'},en:{titulo:'Spacecraft and their journeys',descricao:'Explore encounters, instruments, and discoveries from space missions.'},es:{titulo:'Sondas y sus viajes',descricao:'Explora encuentros, instrumentos y descubrimientos de misiones espaciales.'}}},
@@ -23,7 +23,7 @@ const TRILHAS_COMPLETAS = [
   },
   {
     id: 'terra',
-    roteiros: ['terra', 'estacoes-guia', 'terra-ano', 'mares-guia', 'mares-oceano'],
+    roteiros: ['terra', 'estacoes-guia', 'mares-guia'],
     textos: {
       pt: {
         titulo: 'Terra em movimento',
@@ -111,15 +111,13 @@ for(const trilha of TRILHAS){
 // o catálogo por assunto; seus capítulos Pro são aprofundamentos opcionais.
 export const PERCURSO_ESSENCIAL = Object.freeze([
   'sol', 'planetas', 'pequenos',
-  'terra', 'estacoes-guia', 'mares-guia',
+  'terra',
   'lua', 'lua-fases', 'apollo11', 'marte', 'hubble', 'discovery-hubble'
 ]);
 
 const APROFUNDAMENTOS = Object.freeze({
   planetas: ['escalas-guia'],
   pequenos: ['cometas-guia'],
-  'estacoes-guia': ['terra-ano'],
-  'mares-guia': ['mares-oceano'],
   apollo11: ['saturno-estagios', 'lunar-pouso'],
   'saturno-estagios': ['artemis-1'],
   marte: ['perseverance-pouso', 'ingenuity-voo'],

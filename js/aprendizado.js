@@ -1,8 +1,9 @@
+import {resolverFenomeno,modoDoFenomeno} from './fenomenos-unificados.js?v=312';
 import {normalizarEstadoEstacoes} from './estacoes-laboratorio.js?v=303';
 import {normalizarEstadoMares} from './mares-laboratorio.js?v=303';
 import {criarExperimento} from './aprendizado-experimento.js?v=303';
-import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=303';
-import { ROTEIROS } from './aprendizado-conteudo.js?v=303';
+import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=312';
+import { ROTEIROS } from './aprendizado-conteudo.js?v=312';
 import { FAMILIA } from './aprendizado-familia-conteudo.js?v=3';
 const etapasPadrao=[{titulo:'objetivo',corpo:'objetivoTexto'},{titulo:'observar',corpo:'observarTexto',acao:true},{titulo:'explicacao',corpo:'explicacaoTexto'},{titulo:'pergunta',corpo:'perguntaTexto',pergunta:true},{titulo:'recap',corpo:'recapTexto',recap:true}];
 const total=id=>ROTEIROS[id].etapas?.length||5;
@@ -66,7 +67,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   }
   const registro={estado,atualizado,persistente};estados.set(id,registro);return registro;
  }
- const resumo=(id=idAtual)=>{if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id))return null;return {...carregar(id).estado,id,total:total(id)};};
+ const resumo=(id=idAtual)=>{id=resolverFenomeno(id);if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id))return null;return {...carregar(id).estado,id,total:total(id)};};
  const catalogo=()=>Object.values(ROTEIROS).sort((a,b)=>Number(a.pro===true)-Number(b.pro===true)).map(r=>({id:r.id,ambiente:r.ambiente,titulo:r.textos[lang].titulo,descricao:r.textos[lang].objetivoTexto,pro:r.pro===true,nave:r.nave,recurso:r.recurso,pecas:r.pecas?.map(p=>({id:p.id})),continuacao:trilhaDoRoteiro(r.id)?.proximo??null,investigacao:r.investigacao??null,aprofundamentos:aprofundamentosDoRoteiro(r.id),trilha:trilhaDoRoteiro(r.id)?.trilha.id,...resumo(r.id)}));
  const notificar=()=>ouvintes.forEach(fn=>fn(resumo()));
  function salvar(){const r=carregar(idAtual);r.estado.ultimaAtividade=Date.now();try{localStorage.setItem(chave(idAtual),JSON.stringify({versao:ROTEIROS[idAtual].versao,...r.estado}));r.persistente=true;}catch(_){r.persistente=false;}notificar();}
@@ -187,13 +188,13 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   if(cena){selecionar(dados.pecas[0].id);return;}
   const token=++geracao;
   try{
-   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=303');
+   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=312');
    let opcoes={};
    if(artemis){
-    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=303');
+    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=312');
     opcoes={partes:PARTES_ARTEMIS1.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarArtemis1Guiado,framing:{horizontal:.84,vertical:.80,offsetY:.08}};
    }else if(sts61){
-    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=303');
+    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=312');
     opcoes={partes:PARTES_STS61.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarShuttleSTS61};
    }else if(roteiro.nave==='jwst'){
     const [{PARTES,posicaoParte},{prepararWebb,criarWebb}]=await Promise.all([import('../hangar/js/webb-data.js?v=1'),import('../hangar/js/webb-model.js?v=1')]);await prepararWebb();opcoes={partes:PARTES,positionForPart:posicaoParte,buildModel:criarWebb};
@@ -220,13 +221,18 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
  }
  function descartarCena(){experimento?.dispose();experimento=null;geracao++;selecionarVisual=null;modeloKey=null;cena?.dispose();cena=null;preview?.remove();preview=null;}
  function abrir(id='sol',{voltar=false}={}){
-  if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id))return false;
+  id=resolverFenomeno(id);
+  if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id)||modoDoFenomeno(id))return false;
   if(ROTEIROS[id].pro&&acoes.permitirRoteiro?.(ROTEIROS[id].nave,ROTEIROS[id].recurso)!==true)return false;
   if(!raiz){raiz=document.createElement('div');raiz.className='aprendizado-sol';raiz.hidden=true;document.body.append(raiz);}
   if(raiz.hidden)focoAnterior=document.activeElement;
   idAtual=id;ritmoMissaoIniciado=false;revisando=false;voltarDisponivel=voltar;carregar(id).estado.iniciado=true;salvar();raiz.hidden=false;if(ROTEIROS[id].mundo)acoes.focarCorpo?.(ROTEIROS[id].corpo);renderizar();notificar();return true;
  }
  function fechar(){descartarCena();etapaVisual=null;revisando=false;if(raiz)raiz.hidden=true;notificar();focoAnterior?.focus?.({preventScroll:true});}
+ function registrarFenomeno(id,passo,concluido=false){
+  id=resolverFenomeno(id);if(!modoDoFenomeno(id)||acoes.permitirRoteiro?.(undefined,'estacoes-mares')!==true)return false;
+  const anterior=idAtual;idAtual=id;const estado=carregar(id).estado;estado.iniciado=true;estado.passo=Math.max(0,Math.min(total(id)-1,passo));if(concluido)estado.concluido=true;salvar();idAtual=anterior;return true;
+ }
  function aoMudar(fn){if(typeof fn!=='function')return()=>{};ouvintes.add(fn);return()=>ouvintes.delete(fn);}
- return {abrir,fechar,resumo,catalogo,aoMudar,inspectExperimento:()=>experimento?.inspect()||null,inspectModelo:()=>cena?.inspect()||null};
+ return {abrir,fechar,resumo,catalogo,aoMudar,registrarFenomeno,inspectExperimento:()=>experimento?.inspect()||null,inspectModelo:()=>cena?.inspect()||null};
 }

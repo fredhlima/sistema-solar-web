@@ -12,8 +12,8 @@
 // por escrito seria ensinar o erro e corrigi-lo com legenda.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=303';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=303';
+import { getIdioma } from './i18n.js?v=312';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=312';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, proximoMarcoSolar, distanciaSolarUA, declinacaoSolar,
@@ -992,6 +992,12 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
       // Fred pediu só a escala didática — o modo real deixava a Terra num
       // pixel e o argumento das estações não depende disso.
       scene, camera, atualizar, dispose, aoScrubber, irParaLambda,
+      medirLegado: (m) => Number.isFinite(m?.latitude) && [0,90,180,270].includes(m.angulo)
+        ? `${m.angulo}° · ${m.latitude}° · ${num(duracaoDoDia(m.latitude,declinacaoSolar(m.angulo)),1)}h` : null,
+      medir: () => {
+        const lambda=longitudeSolar(dias), dec=declinacaoSolar(lambda,obliquidade);
+        return `${new Date(946728000000 + dias * 86400000).toLocaleDateString(getIdioma()==='pt'?'pt-BR':getIdioma())} · ${Math.abs(latitude)}° · N ${num(duracaoDoDia(Math.abs(latitude),dec),1)}h / S ${num(duracaoDoDia(-Math.abs(latitude),dec),1)}h`;
+      },
       aoRedimensionar: (w, h) => {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
@@ -1009,13 +1015,12 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
 
   function roteiro() {
     const obl = corpoTerra.inclinacaoEixoGraus || OBLIQUIDADE_TERRA;
-    return [
-      { texto: te('passo1').replace('{obl}', num(obl, 2)) },
-      { texto: te('passo2') },
-      { texto: te('passo3') },
-      { texto: te('passo4') },
-      { texto: te('passo5') },
-    ];
+    const convites = {
+      pt:['Observe a Terra e seu eixo na cena.','Arraste o controle de tempo por uma volta e acompanhe o eixo.','Compare a luz nos dois hemisférios enquanto muda a data.','Experimente junho e dezembro e mude a latitude; compare as horas de luz.','Explique suas observações e explore outros momentos livremente.'],
+      en:['Observe Earth and its axis in the scene.','Drag the time slider through one orbit and follow the axis.','Compare sunlight in both hemispheres as you change the date.','Try June and December and change latitude; compare daylight hours.','Explain what you observed and explore other dates freely.'],
+      es:['Observa la Tierra y su eje en la escena.','Arrastra el control de tiempo por una órbita y sigue el eje.','Compara la luz en ambos hemisferios al cambiar la fecha.','Prueba junio y diciembre y cambia la latitud; compara las horas de luz.','Explica lo observado y explora otras fechas libremente.']
+    }[getIdioma()] || [];
+    return [1, 2, 3, 4, 5].map((i) => ({texto: te(`passo${i}`).replace('{obl}', num(obl, 2)) + ' ' + (convites[i-1] || '')}));
   }
 
   const palco = criarPalco({
@@ -1029,7 +1034,7 @@ export function iniciarEstacoes({ motor, dados, premium, aoProgresso }) {
   });
 
   return {
-    abrir: (opcoes) => palco.abrir(opcoes),
+    abrir: (opcoes) => premium.exigir('estacoes-mares') && palco.abrir(opcoes),
     fechar: () => palco.fechar(),
     get aberto() { return palco.aberto; },
   };

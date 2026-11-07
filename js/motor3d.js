@@ -2148,6 +2148,14 @@ export class SistemaSolar3D {
         const raioPai = this._calcularEscala(corpoPai).raio;
 
         if (this._escala === 'didatica') {
+          // Na ilustração de Marte, o piso de 0,45 fazia Fobos e Deimos
+          // ocuparem o mesmo raio e quase se tocarem: os semieixos calculados
+          // pela régua genérica diferiam só ~0,3 unidade. Mantemos a ordem e
+          // proporção das distâncias físicas com uma régua visual comprimida
+          // só para este par; o modo real e as demais luas seguem intactos.
+          if (corpoPai.id === 'marte' && (corpo.id === 'fobos' || corpo.id === 'deimos')) {
+            return raioPai + 2.2 + 1.1 * Math.pow(corpo.distanciaMediaKm / 9376, 0.6);
+          }
           return raioPai + 2.2 + 4 * Math.pow(corpo.distanciaMediaKm / 384400, 0.6);
         } else {
           const distKm = corpo.distanciaMediaKm;
@@ -2173,7 +2181,19 @@ export class SistemaSolar3D {
     if (corpo.tipo === 'estrela') {
       raio = 9;
     } else if (this._escala === 'didatica') {
-      if (raioKm) {
+      if (corpo.tipo === 'lua' && (corpo.id === 'fobos' || corpo.id === 'deimos')) {
+        const pai = this.dados.corpos.find((c) => c.id === corpo.pai);
+        if (pai?.id === 'marte' && pai.raioKm && raioKm) {
+          // A forma irregular amplia a silhueta (eixos máximos ~1,4× o raio
+          // base). Este fator didático mantém as luas legíveis com zoom, mas
+          // deixa seus envelopes pequenos diante de Marte e entre si.
+          raio = this._calcularEscala(pai).raio * 3 * Math.sqrt(raioKm / pai.raioKm);
+        } else if (raioKm) {
+          raio = Math.max(0.45, 1.1 * Math.sqrt(raioKm / 6371));
+        } else {
+          raio = 0.5;
+        }
+      } else if (raioKm) {
         raio = Math.max(0.45, 1.1 * Math.sqrt(raioKm / 6371));
       } else {
         raio = 0.5;

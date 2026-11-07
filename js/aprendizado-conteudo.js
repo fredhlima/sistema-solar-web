@@ -1,4 +1,4 @@
-import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=303';
+import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=312';
 import {MISSAO_ROSETTA} from './rosetta-missao-conteudo.js?v=2';
 import {MISSAO_JUNO} from './juno-missao-conteudo.js?v=2';
 import {MISSAO_PARKER} from './parker-missao-conteudo.js?v=2';
@@ -334,6 +334,11 @@ ROTEIROS_COMPLETOS['webb-desdobramento']=ROTEIRO_WEBB;
 export const ROTEIROS = Object.fromEntries(
  Object.entries(ROTEIROS_COMPLETOS).filter(([id])=>roteiroDisponivel(id)).map(([id, original])=>{
   const roteiro={...original};
+  if(id==='estacoes-guia'||id==='mares-guia'){
+   roteiro.pro=true;roteiro.recurso='estacoes-mares';delete roteiro.investigacao;
+   const nomes=id==='estacoes-guia'?{pt:['Estações em 3D','Observe a Terra e investigue luz, latitude e estações.'],en:['Seasons in 3D','Observe Earth and investigate sunlight, latitude and seasons.'],es:['Estaciones en 3D','Observa la Tierra e investiga luz, latitud y estaciones.']}:{pt:['Marés em 3D','Observe a Terra e a Lua e investigue as marés.'],en:['Tides in 3D','Observe Earth and the Moon and investigate tides.'],es:['Mareas en 3D','Observa la Tierra y la Luna e investiga las mareas.']};
+   roteiro.textos=Object.fromEntries(Object.entries(roteiro.textos).map(([lang,texto])=>[lang,{...texto,titulo:nomes[lang][0],objetivoTexto:nomes[lang][1]}]));
+  }
   if(id==='lua-fases'){roteiro.pro=false;delete roteiro.recurso;}
   if(roteiro.continuacao&&!roteiroDisponivel(roteiro.continuacao)) delete roteiro.continuacao;
   if(roteiro.investigacao&&!roteiroDisponivel(roteiro.investigacao)) delete roteiro.investigacao;

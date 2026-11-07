@@ -1,3 +1,4 @@
+import {historicoFenomeno} from './fenomenos-unificados.js?v=312';
 // Palco: infraestrutura genérica dos modos didáticos que precisam de uma cena
 // própria (Estações, Marés). Ver SPEC-estacoes-e-mares.md §2.
 //
@@ -11,7 +12,7 @@
 // ciclo de vida, do scrubber, do selo de escala, do roteiro guiado e da
 // acessibilidade. O conteúdo vem de quem chama, via `construirCena`.
 import * as THREE from 'three';
-import { getIdioma } from './i18n.js?v=303';
+import { getIdioma } from './i18n.js?v=312';
 
 // Versão das texturas reais — a MESMA de motor3d._carregarTexturasReais.
 // Se lá mudar, muda aqui: servir a mesma imagem sob dois ?v= diferentes faz o
@@ -442,6 +443,7 @@ export function criarPalco(cfg) {
   let elementoFocoAnterior = null;
   let passos = [];
   let passoAtual = -1;
+  let opcoesRoteiro = {};
   // O resumo do card fechado não precisa de 60 fps: a cada 6 quadros (~10×/s)
   // o número acompanha a cena sem custar leitura de textContent por quadro.
   const QUADROS_ENTRE_RESUMOS = 6;
@@ -484,6 +486,7 @@ export function criarPalco(cfg) {
       <div class="palco-sr" role="status" aria-live="polite" aria-atomic="true"></div>
       <div class="palco-roteiro" hidden>
         <p class="palco-roteiro-texto"></p>
+        <p class="palco-roteiro-historico" role="status" hidden></p>
         <div class="palco-roteiro-acoes">
           <button class="palco-roteiro-pular" type="button"></button>
           <span class="palco-roteiro-passo"></span>
@@ -508,6 +511,7 @@ export function criarPalco(cfg) {
     ref.escala = overlay.querySelector('.palco-escala');
     ref.roteiro = overlay.querySelector('.palco-roteiro');
     ref.roteiroTexto = overlay.querySelector('.palco-roteiro-texto');
+    ref.roteiroHistorico = overlay.querySelector('.palco-roteiro-historico');
     ref.roteiroPular = overlay.querySelector('.palco-roteiro-pular');
     ref.roteiroPasso = overlay.querySelector('.palco-roteiro-passo');
     ref.roteiroProximo = overlay.querySelector('.palco-roteiro-proximo');
@@ -675,14 +679,15 @@ export function criarPalco(cfg) {
   function iniciarRoteiro() {
     passos = (cfg.roteiro && cfg.roteiro()) || [];
     if (!passos.length) return encerrarRoteiro();
-    passoAtual = -1;
+    passoAtual = Math.max(0, Math.min(passos.length - 1, Number.isInteger(opcoesRoteiro.passoInicial) ? opcoesRoteiro.passoInicial : 0)) - 1;
     ref.roteiro.hidden = false;
     avancarRoteiro();
   }
 
   function avancarRoteiro() {
     passoAtual++;
-    if (passoAtual >= passos.length) return encerrarRoteiro();
+    if (passoAtual >= passos.length) { opcoesRoteiro.aoEtapa?.(passos.length - 1, true); return encerrarRoteiro(); }
+    opcoesRoteiro.aoEtapa?.(passoAtual, false);
     const p = passos[passoAtual];
     ref.roteiroTexto.textContent = p.texto;
     ref.roteiroPasso.textContent = tp('passo')
@@ -713,6 +718,7 @@ export function criarPalco(cfg) {
 
   function abrir(opcoes = {}) {
     if (aberto) return;
+    opcoesRoteiro = opcoes;
     if (!overlay) construirOverlay();
 
     elementoFocoAnterior = document.activeElement;
@@ -734,6 +740,41 @@ export function criarPalco(cfg) {
       anunciar,
       rodapeAcoes: ref.rodapeAcoes,
     });
+
+    ref.roteiroHistorico.hidden = true;
+    ref.roteiroHistorico.textContent = '';
+    // Duas medições permanecem junto da cena, inclusive ao reabrir a lição.
+    if (opcoes.roteiro === true && cena.medir) {
+      const chaveMedicoes = `sistema-solar-${id}-medicoes-3d`;
+      let medidas = {};
+      let legado=null;
+      try {
+        const atual=localStorage.getItem(chaveMedicoes);
+        if(atual) medidas=JSON.parse(atual) || {};
+        legado=JSON.parse(localStorage.getItem(`sistema-solar-aprendizado-${id==='estacoes'?'terra-ano':'mares-oceano'}`) || '{}');
+        for(const letra of ['A','B']) {
+          const dado=legado.medicoes?.[letra.toLowerCase()];
+          const texto=cena.medirLegado?.(dado);
+          // Valores antigos já salvos na primeira versão também são corrigidos.
+          if(texto && (!medidas[letra] || /^(Anterior|Previous):/.test(medidas[letra])))
+            medidas[letra]=`${{pt:'Anterior',en:'Previous',es:'Anterior'}[getIdioma()] || 'Anterior'}: ${texto}`;
+        }
+      } catch (_) {}
+      const historico=historicoFenomeno(legado,getIdioma());
+      ref.roteiroHistorico.textContent=historico?.texto || '';
+      ref.roteiroHistorico.hidden=!historico;
+      const card = document.createElement('section'); card.className = 'palco-card palco-medicoes';
+      const rotulos = {pt:['Comparar medições','Registrar A','Registrar B'],en:['Compare measurements','Record A','Record B'],es:['Comparar mediciones','Registrar A','Registrar B']}[getIdioma()] || ['Comparar medições','Registrar A','Registrar B'];
+      const titulo=document.createElement('p');titulo.className='palco-card-titulo';titulo.textContent=rotulos[0];card.append(titulo);
+      for (const [indice,letra] of ['A','B'].entries()) {
+        const linha=document.createElement('div'), botao=document.createElement('button'), valor=document.createElement('span');
+        botao.type='button';botao.className='palco-btn palco-btn-pequeno';botao.textContent=rotulos[indice+1];
+        valor.textContent=typeof medidas[letra]==='string'?medidas[letra]: '—';
+        botao.onclick=()=>{ if(tocando)alternarPlay(); medidas[letra]=String(cena.medir());valor.textContent=medidas[letra];try{localStorage.setItem(chaveMedicoes,JSON.stringify(medidas));}catch(_){} };
+        linha.append(botao,valor);card.append(linha);
+      }
+      ref.hudDir.append(card);
+    }
 
     // Quem chega por uma data específica (um solstício no painel de Eventos)
     // veio ver AQUELE instante: começar tocando o faria escapar em segundos.
@@ -783,7 +824,7 @@ export function criarPalco(cfg) {
     setTimeout(marcarRolagemDoHud, 500);
     window.addEventListener('resize', aoRedimensionarPalco);
 
-    if (opcoes.roteiro === false || jaViu()) encerrarRoteiro();
+    if (opcoes.roteiro === false || (opcoes.roteiro !== true && jaViu())) encerrarRoteiro();
     else iniciarRoteiro();
   }
 

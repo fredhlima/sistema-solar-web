@@ -1,4 +1,4 @@
-import { naveDisponivel } from '../../js/release-scope.js?v=303';
+import { naveDisponivel } from '../../js/release-scope.js?v=312';
 
 // Catálogo e destinos compartilham os mesmos IDs, sem aceitar URLs enviadas pelo iframe.
 export const NAVES_HANGAR = Object.freeze([
@@ -9,7 +9,7 @@ export const NAVES_HANGAR = Object.freeze([
 export function destinoNave(id) {
   if (!NAVES_HANGAR.includes(id) || !naveDisponivel(id)) return null;
   return ['saturno', 'shuttle', 'modulo-lunar', 'hubble', 'perseverance', 'ingenuity', 'cassini', 'jwst'].includes(id)
-    ? `hangar/veiculo.html?modelo=${id}&v=308`
+    ? `hangar/veiculo.html?modelo=${id}&v=312`
     : `hangar/modelo-futuro.html?modelo=${id}`;
 }
 

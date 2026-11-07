@@ -92,6 +92,7 @@ export function criarHubble(){
   if(!mesh.isMesh)return;
   mesh.geometry=mesh.geometry.clone();
   const material=mesh.material.clone();
+  material.side=T.DoubleSide;
   for(const [key,value] of Object.entries(material))if(value?.isTexture){
    if(!textures.has(value)){const texture=value.clone();texture.needsUpdate=true;textures.set(value,texture);}
    material[key]=textures.get(value);

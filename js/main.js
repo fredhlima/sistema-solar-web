@@ -1,31 +1,31 @@
-import { recursoDisponivel } from './release-scope.js?v=303';
+import { recursoDisponivel } from './release-scope.js?v=312';
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=311';
-import { SistemaSolar3D } from './motor3d.js?v=65';
-import { iniciarUI } from './ui.js?v=310';
-import { iniciarMobileDock } from './mobile-dock.js?v=310';
+import { SistemaSolar3D } from './motor3d.js?v=312';
+import { iniciarUI } from './ui.js?v=312';
+import { iniciarMobileDock } from './mobile-dock.js?v=312';
 import { EVENTOS } from './eventos.js?v=11';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=311';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=312';
 import { criarPremium } from './premium.js?v=303';
-import { iniciarPaywall } from './paywall.js?v=303';
-import { iniciarQuiz } from './quiz.js?v=303';
-import { iniciarHangar } from './hangar.js?v=308';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=303';
-import { iniciarEstacoes } from './estacoes.js?v=303';
-import { iniciarMares } from './mares.js?v=303';
-import { iniciarProgresso } from './progresso.js?v=303';
+import { iniciarPaywall } from './paywall.js?v=312';
+import { iniciarQuiz } from './quiz.js?v=312';
+import { iniciarHangar } from './hangar.js?v=312';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=312';
+import { iniciarEstacoes } from './estacoes.js?v=312';
+import { iniciarMares } from './mares.js?v=313';
+import { iniciarProgresso } from './progresso.js?v=312';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=306';
-import { iniciarNavegacao } from './navegacao.js?v=303';
-import { iniciarAprendizado } from './aprendizado.js?v=306';
-import { iniciarTutorial } from './tutorial.js?v=303';
+import { iniciarMusica } from './musica.js?v=312';
+import { iniciarNavegacao } from './navegacao.js?v=312';
+import { iniciarAprendizado } from './aprendizado.js?v=312';
+import { iniciarTutorial } from './tutorial.js?v=312';
 
-// As trajetórias legadas das outras sondas ficam fora do recorte 1.0.
-const MISSOES = MISSOES_COMPLETAS.filter(m => m.id === 'apollo-11');
+// As missões do Explorar usam trajetórias próprias, independentes do Hangar.
+const MISSOES = MISSOES_COMPLETAS;
 
 // i18n: aplica o overlay do idioma ANTES de montar motor e UI
 const traducao = await carregarConteudoTraduzido();

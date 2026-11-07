@@ -958,3 +958,8 @@ body .palco-card.palco-explicacao .palco-card-nota {
 .palco-scrubber::-webkit-slider-thumb, .palco-lat::-webkit-slider-thumb { appearance:none; width:22px; height:22px; margin-top:-8.5px; border:2px solid #c7deff; border-radius:50%; background:#7aa2ff; }
 .palco-scrubber::-moz-range-track, .palco-lat::-moz-range-track { height:5px; border-radius:5px; background:#354963; }
 .palco-scrubber::-moz-range-thumb, .palco-lat::-moz-range-thumb { width:20px; height:20px; border:2px solid #c7deff; border-radius:50%; background:#7aa2ff; }
+
+.palco-medicoes > div { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.palco-medicoes span { overflow-wrap: anywhere; font-size: 0.8rem; }
+
+.palco-roteiro-historico { margin: 0 0 8px; font-size: 0.82rem; line-height: 1.35; color: #cfdbf1; }

@@ -1,8 +1,8 @@
-import { recursoDisponivel } from './release-scope.js?v=303';
+import { recursoDisponivel } from './release-scope.js?v=312';
 // Progressão: níveis + badges com XP
 // Exporta iniciarProgresso({ dados })
 
-import { getIdioma } from './i18n.js?v=303';
+import { getIdioma } from './i18n.js?v=312';
 // só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
 // em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
 import { ITENS_GRATIS } from './premium.js?v=303';

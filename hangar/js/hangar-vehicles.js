@@ -18,7 +18,7 @@ import {criarShuttle} from './shuttle-model.js?v=8';
 import {PARTES as LUNAR,FONTES as FONTES_LUNAR,RESUMO as RESUMO_LUNAR} from './lunar-data.js?v=1';
 import {PARTES as HUBBLE,FONTES as FONTES_HUBBLE,RESUMO as RESUMO_HUBBLE} from './hubble-data.js?v=1';
 import {prepararModuloLunar,criarModuloLunar} from './lunar-model.js?v=1';
-import {prepararHubble,criarHubble} from './hubble-model.js?v=1';
+import {prepararHubble,criarHubble} from './hubble-model.js?v=312';
 const displacement=offsets=>(part,index,exploded)=>{const [x,y,z]=exploded?(offsets[part.id]||[0,0,0]):[0,0,0];return{x,y,z};};
 export const VEICULOS={
  jwst:{id:'jwst',nome:'James Webb',missao:'NASA / ESA / CSA · INFRAVERMELHO',subtitulo:'Desdobramento no espaço · 2021–2022',titulo:'Telescópio Espacial James Webb',destino:'DESTINO: ÓRBITA EM TORNO DE L2',intro:'Um observatório. Muitos desdobramentos.',descricao:'Explore o modelo exterior e acompanhe uma representação didática da abertura dos sistemas do Webb.',nota:'Lançado em 25 de dezembro de 2021.',separacao:'Agrupamento educativo do exterior. Escalas e movimentos de abertura são simplificados; não reproduzem as articulações de engenharia.',stats:[['6,5 m','espelho principal'],['18','segmentos'],['5','camadas do escudo']],resumo:RESUMO_WEBB,partes:WEBB,fontes:FONTES_WEBB,prepare:prepararWebb,buildModel:criarWebb,positionForPart:posWebb,revelar:[],url:'https://science.nasa.gov/mission/webb/deployment/',visualCredit:'Modelo exterior: NASA 3D Resources. Agrupamento de superfícies e movimentos de abertura: adaptação artística didática, sem interiores ou articulações exatas. Não há patrocínio ou aprovação das agências.',visualSource:'https://science.nasa.gov/3d-resources/james-webb-space-telescope/'},

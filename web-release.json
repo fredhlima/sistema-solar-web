@@ -1,10 +1,9 @@
 {
-  "version": "main311",
-  "sourceCommit": "403c3a9b834c3949d40ea431b93f47a4d84726b0",
-  "date": "2026-11-07",
-  "scope": "App Store 1.0 candidate web preview",
-  "chapters": 18,
+  "version": "main313",
+  "sourceCommit": "70a69c77e6b8dbbcc980de2fa0669a2fc781d4b6",
+  "chapters": 16,
   "spacecraft": 4,
-  "supportPage": "suporte.html",
-  "change": "Correct Earth rotation explanation, ocean-water cube scale and Bennu mass/particle descriptions"
+  "explorarMissions": 10,
+  "scope": "10 essential free lessons, 6 Pro deep dives; Hubble free; Apollo11 visual mission free and 9 Pro missions independent of Hangar",
+  "generatedAt": "2026-11-07"
 }
