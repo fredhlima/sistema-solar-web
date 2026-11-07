@@ -2224,13 +2224,13 @@ export const TRADUCAO = {
           "Nuestro océano cubre el 71% de la superficie y contiene el 97% del agua del planeta. El 3% de agua dulce está principalmente en los casquetes polares.",
           "La atmósfera terrestre tiene 78% de nitrógeno y 21% de oxígeno; solo el 1% son otros gases (CO₂, argón, etc.).",
           "La Tierra tiene un campo magnético protector que desvía el viento solar y nos protege de la radiación cósmica.",
-          "Te mueves a 1.670 km/h en el ecuador terrestre, pero no lo sientes porque estás en caída libre alrededor del Sol, y todo se mueve contigo.",
-          "Si comprimiéramos toda el agua de los océanos en un cubo sólido, ocuparía apenas 1.400 km de lado — pequeño lo suficiente para caber en California."
+          "En el ecuador, la rotación de la Tierra te lleva a unos 1.670 km/h. Tú y todo lo que te rodea giran juntos; la aceleración causada por la rotación es pequeña en comparación con la gravedad terrestre.",
+          "Si reuniéramos toda el agua de los océanos de la Tierra en un cubo, tendría unos 1.100 km de lado."
         ],
         "comparacoes": [
           "La Tierra orbita el Sol a 150 millones de km — un avión a 800 km/h tardaría 21 años en cubrir esa distancia.",
           "La luz del Sol tarda 8 minutos en llegar a la Tierra; ves el Sol como era hace 8 minutos.",
-          "Si comprimieras toda el agua de los océanos de la Tierra en un cubo, tendría apenas 1.386 km de lado."
+          "Si reuniéramos toda el agua de los océanos de la Tierra en un cubo, tendría unos 1.100 km de lado."
         ],
         "avancado": {
           "composicao": "Corteza silicática (continentes y océano), manto de silicatos, núcleo externo líquido de Fe-Ni, núcleo interno sólido.",

@@ -114,13 +114,13 @@ export const TRADUCAO = {
           'Our ocean covers 71% of the surface and contains 97% of the planet\'s water. The 3% of freshwater is mostly in polar ice caps.',
           'Earth\'s atmosphere is 78% nitrogen and 21% oxygen; only 1% is other gases (CO₂, argon, etc).',
           'Earth has a protective magnetic field that deflects solar wind and protects us from cosmic radiation.',
-          'You move at 1,670 km/h at the equator, but you don\'t feel it because you\'re in free fall orbiting the Sun, and everything around you moves together.',
-          'If we compressed all of Earth\'s ocean water into a solid cube, it would only be 1,400 km on each side — small enough to fit inside California!'
+          'At the equator, Earth\'s rotation carries you at about 1,670 km/h. You and everything around you rotate together; the acceleration caused by the rotation is small compared with Earth\'s gravity.',
+          'If all of Earth\'s ocean water were gathered into a cube, it would be about 1,100 km on a side.'
         ],
         comparacoes: [
           'Earth orbits the Sun at 150 million km — an airplane at 800 km/h would take 21 years to cover that distance.',
           'Sunlight takes 8 minutes to reach Earth; you see the Sun as it was 8 minutes ago.',
-          'If you compressed all of Earth\'s ocean water into a cube, it would only be 1,386 km on a side.'
+          'If all of Earth\'s ocean water were gathered into a cube, it would be about 1,100 km on a side.'
         ],
         avancado: {
           composicao: 'Silicate crust (continents and ocean), silicate mantle, liquid Fe-Ni outer core, solid inner core.',
@@ -1016,12 +1016,12 @@ export const TRADUCAO = {
           { rotulo: 'Orbital period', valor: '1.196 years' },
           { rotulo: 'Spectral type', valor: 'B (carbonaceous)' },
           { rotulo: 'Collision probability 2182', valor: '1 in 2,700 (very low)' },
-          { rotulo: 'Estimated mass', valor: '~73 trillion kg' }
+          { rotulo: 'Estimated mass', valor: '~73 billion kg' }
         ],
         curiosidades: [
           'Bennu is dangerous — there is a small chance (1 in 2,700) of collision with Earth in 2182, although unlikely.',
           'OSIRIS-REx collected a Bennu sample in 2020 — the first US asteroid sample return, returned in 2023.',
-          'Bennu ejects material from its surface — a rare phenomenon in small asteroids called outgassing.',
+          'OSIRIS-REx observed particles ejected from Bennu. Some particles fall back to the surface, while others temporarily orbit the asteroid or escape into space.',
           'Bennu is so small it has only 490 meters diameter — smaller than Mount Everest\'s height.'
         ],
         comparacoes: [
@@ -1032,7 +1032,7 @@ export const TRADUCAO = {
           composicao: 'Carbonaceous chondrite (type B), possible water, organic compounds.',
           temperatura: 'Surface: estimated -80 to -120 °C.',
           missoes: ['OSIRIS-REx (2018–2023, samples returned)', 'Possible future orbital deflection'],
-          texto: 'Bennu is NEA, class B (carbonaceous). Semi-major axis 1.126 AU, eccentricity 0.2037, inclination 6.035°. Diameter ~490 m, density ~1,190 kg/m³. Spinning top shape. Outgassing detected (particle ejection). OSIRIS-REx (2018-2023): orbit, mapping, sample collection Touch-and-Go (TAG), return 2023. Composition carbonaceous chondrite with water/possible organic matter. Impact risk 2182 estimated 1/2700.'
+          texto: 'Bennu is NEA, class B (carbonaceous). Semi-major axis 1.126 AU, eccentricity 0.2037, inclination 6.035°. Diameter ~490 m, density ~1,190 kg/m³, and estimated mass of about 73 billion kg. Spinning top shape. OSIRIS-REx observed particle ejections: some particles fall back to the surface, while others temporarily orbit Bennu or escape into space. OSIRIS-REx (2018-2023): orbit, mapping, sample collection Touch-and-Go (TAG), return 2023. Composition carbonaceous chondrite with water/possible organic matter. Impact risk 2182 estimated 1/2700.'
         }
       }
     },

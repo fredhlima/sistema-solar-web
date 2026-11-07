@@ -1,10 +1,10 @@
 {
-  "version": "main310",
-  "sourceCommit": "158e1b2ba9244a77f170cfd0291b71a399c887cf",
+  "version": "main311",
+  "sourceCommit": "403c3a9b834c3949d40ea431b93f47a4d84726b0",
   "date": "2026-11-07",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Texture license links and bundled third-party notices; original and artistic attribution preserved"
+  "change": "Correct Earth rotation explanation, ocean-water cube scale and Bennu mass/particle descriptions"
 }

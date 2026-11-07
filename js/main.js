@@ -1,6 +1,6 @@
 import { recursoDisponivel } from './release-scope.js?v=303';
 import * as THREE from 'three';
-import { DADOS } from './dados.js?v=307';
+import { DADOS } from './dados.js?v=311';
 import { SistemaSolar3D } from './motor3d.js?v=65';
 import { iniciarUI } from './ui.js?v=310';
 import { iniciarMobileDock } from './mobile-dock.js?v=310';
@@ -9,7 +9,7 @@ import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=8';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=307';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=311';
 import { criarPremium } from './premium.js?v=303';
 import { iniciarPaywall } from './paywall.js?v=303';
 import { iniciarQuiz } from './quiz.js?v=303';

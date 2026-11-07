@@ -197,13 +197,13 @@ export const DADOS = { corpos: [
         'Nosso oceano cobre 71% da superfície e contém 97% da água do planeta. Os 3% de água doce estão principalmente nas calotas polares.',
         'A atmosfera terrestre tem 78% de nitrogênio e 21% de oxigênio; apenas 1% é outros gases (CO₂, argônio, etc).',
         'A Terra tem um campo magnético protetor que desvia o vento solar e nos protege de radiação cósmica.',
-        'Você se move a 1.670 km/h no equador terrestre, mas não sente porque você está em queda livre ao redor do Sol, e tudo ao seu redor se move junto com você.',
-        'Se comprimíssemos toda a água dos oceanos da Terra em um cubo sólido, ocuparia apenas 1.400 km de lado — pequeno o suficiente para caber dentro de um estado como a Califórnia.'
+        'No equador, a rotação da Terra leva você a cerca de 1.670 km/h. Você e o que está ao seu redor giram juntos; a aceleração causada pela rotação é pequena em comparação com a gravidade terrestre.',
+        'Se reuníssemos toda a água dos oceanos da Terra em um cubo, ele teria cerca de 1.100 km de lado.'
       ],
       comparacoes: [
         'A Terra orbita o Sol a 150 milhões de km — um avião a 800 km/h levaria 21 anos para cobrir essa distância.',
         'A luz do Sol leva 8 minutos para chegar à Terra; você vê o Sol como ele era 8 minutos atrás.',
-        'Se você comprimisse toda a água dos oceanos da Terra em um cubo, ele teria apenas 1.386 km de lado.'
+        'Se reuníssemos toda a água dos oceanos da Terra em um cubo, ele teria cerca de 1.100 km de lado.'
       ],
       avancado: {
         composicao: 'Crosta silicática (continentes e oceano), manto de silicatos, núcleo externo líquido de Fe-Ni, núcleo interno sólido.',
@@ -1690,12 +1690,12 @@ export const DADOS = { corpos: [
         { rotulo: 'Período orbital', valor: '1,196 anos' },
         { rotulo: 'Tipo espectral', valor: 'B (carbonáceo)' },
         { rotulo: 'Probabilidade colisão 2182', valor: '1 em 2.700 (muito baixa)' },
-        { rotulo: 'Massa estimada', valor: '~73 trilhões de kg' }
+        { rotulo: 'Massa estimada', valor: '~73 bilhões de kg' }
       ],
       curiosidades: [
         'Bennu é perigoso — existe pequena chance (1 em 2.700) de colidir com a Terra em 2182, embora seja improvável.',
         'OSIRIS-REx coletou amostra de Bennu em 2020 — a primeira coleta de amostra de asteroide pelos EUA retornou em 2023.',
-        'Bennu ejeita material de sua superfície — fenômeno raro em asteroides pequenos chamado outgassing.',
+        'A OSIRIS-REx observou partículas sendo ejetadas de Bennu. Algumas caem de volta à superfície, outras orbitam temporariamente o asteroide ou escapam para o espaço.',
         'Bennu é tão pequeno que tem apenas 490 metros de diâmetro — menor que a altura do Monte Everest.'
       ],
       comparacoes: [
@@ -1706,7 +1706,7 @@ export const DADOS = { corpos: [
         composicao: 'Condrita carbonácea (tipo B), possível água, compostos orgânicos.',
         temperatura: 'Superfície: estimada -80 a -120 °C.',
         missoes: ['OSIRIS-REx (2018–2023, amostras retornadas)', 'Possível futuro de desvio orbital'],
-        texto: 'Bennu é NEA, classe B (carbonáceo). Semi-eixo maior 1,126 UA, excentricidade 0,2037, inclinação 6,035°. Diâmetro ~490 m, densidade ~1.190 kg/m³. Forma de pião (spinning top). Outgassing detectado (ejeção de partículas). OSIRIS-REx (2018-2023): órbita, mapeamento, coleta amostras Touchand-Go (TAG), retorno 2023. Composição condrita carbonácea com água/matéria orgânica possível. Risco de impacto 2182 estimado 1/2700.'
+        texto: 'Bennu é NEA, classe B (carbonáceo). Semi-eixo maior 1,126 UA, excentricidade 0,2037, inclinação 6,035°. Diâmetro ~490 m, densidade ~1.190 kg/m³ e massa estimada em cerca de 73 bilhões de kg. Forma de pião (spinning top). A OSIRIS-REx observou ejeções de partículas: algumas caem de volta à superfície, outras orbitam temporariamente Bennu ou escapam para o espaço. OSIRIS-REx (2018-2023): órbita, mapeamento, coleta amostras Touchand-Go (TAG), retorno 2023. Composição condrita carbonácea com água/matéria orgânica possível. Risco de impacto 2182 estimado 1/2700.'
       }
     }
   },
