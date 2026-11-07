@@ -639,6 +639,14 @@ button, input, select, textarea {
   overflow-wrap: anywhere;
 }
 
+.info-credito-textura a {
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  display: inline-block;
+  min-height: 24px;
+}
+
 .info-nome {
   font-size: 28px;
   font-weight: 600;

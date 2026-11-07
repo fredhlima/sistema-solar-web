@@ -6,7 +6,7 @@ import { abrirPrivacidade } from './privacidade.js?v=303';
 // FASE 1: dock + título + nível/engrenagem + HUD + transporte + calendário +
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
-import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
+import { criarRodapeTextura } from './creditos-texturas.js?v=3';
 import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=303';
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -536,12 +536,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
         if (av.missoes?.length) subsecao(t('mdockMissoes'), (w) => av.missoes.forEach((m) => linhaComIcone(w, 'mdock-linha-triangulo', '▸', 'mdock-triangulo', m)));
         if (av.texto) subsecao(t('mdockDetalhes'), (w) => { const p = document.createElement('div'); p.className = 'mdock-av-texto'; p.textContent = av.texto; w.appendChild(p); });
       }
-      const credito = CREDITOS_TEXTURAS[corpo.id];
-      if (credito) {
-        const rodape = document.createElement('footer');
-        rodape.className = 'info-credito-textura';
+      const rodape = criarRodapeTextura(corpo.id, t);
+      if (rodape) {
         rodape.style.gridColumn = '1 / -1';
-        rodape.textContent = t(credito.chave, { fonte: credito.fonte });
         conteudo.appendChild(rodape);
       }
     }

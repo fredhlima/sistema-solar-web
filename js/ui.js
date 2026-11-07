@@ -1,6 +1,6 @@
 import { abrirPrivacidade } from './privacidade.js?v=303';
 import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=303';
-import { CREDITOS_TEXTURAS } from './creditos-texturas.js?v=2';
+import { criarRodapeTextura } from './creditos-texturas.js?v=3';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -1173,12 +1173,9 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
     html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
 
-    const creditoTextura = CREDITOS_TEXTURAS[corpo.id];
-    if (creditoTextura) {
-      html += `<footer class="info-credito-textura">${t(creditoTextura.chave, { fonte: creditoTextura.fonte })}</footer>`;
-    }
-
     conteudo.innerHTML = html;
+    const rodapeTextura = criarRodapeTextura(corpo.id, t);
+    if (rodapeTextura) conteudo.appendChild(rodapeTextura);
 
     const btnSaiba = document.getElementById('info-saiba-btn');
     if (btnSaiba) btnSaiba.onclick = () => painel.classList.toggle('expandido');

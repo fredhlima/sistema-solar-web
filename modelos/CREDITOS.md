@@ -7,32 +7,19 @@ Céu/nuvens, terreno lunar/marciano, água, paraquedas e dispositivos de flutua�
 Todos os modelos abaixo vêm do acervo público **NASA 3D Resources**
 (<https://github.com/nasa/NASA-3D-Resources> / <https://science.nasa.gov/3d-resources/>).
 
-## Situação legal
+## Condições de uso e atribuição — revisão 07/11/2026
 
-Conteúdo produzido pela NASA **não está sujeito a direito autoral nos Estados
-Unidos** (obra de governo federal). O próprio repositório declara que os assets
-são *"free and without copyright"*. Não é necessária licença, pagamento nem
-autorização prévia para uso — inclusive comercial.
+O [repositório NASA 3D Resources](https://github.com/nasa/NASA-3D-Resources) descreve seu acervo como gratuito e sem copyright e remete às [diretrizes de mídia NASA](https://www.nasa.gov/nasa-brand-center/images-and-media/). Essas diretrizes incluem modelos 3D, exigem preservar a origem e vedam sugerir endosso. Marcas, pessoas identificáveis e eventual material de terceiros têm condições próprias; não deduzir autorização irrestrita somente da hospedagem.
 
-**Porém, três regras que NÃO são direito autoral continuam valendo:**
+Preservar os créditos específicos da tabela e as adaptações indicadas nas fichas. A página oficial do [módulo lunar](https://science.nasa.gov/3d-resources/apollo-lunar-module/) identifica NASA/Michael D. Carbajal; o repositório lista Carbajal como colaborador da NASA Headquarters. O nome individual, por si só, não demonstra conteúdo de terceiro nem substitui a análise da origem.
 
-1. **A insígnia da NASA (o "meatball" circular) e o logotipo "worm" NÃO são de
-   domínio público** — são protegidos por lei específica (14 CFR 1221). Eles
-   aparecem pintados nas texturas dos modelos, o que é uso legítimo enquanto
-   fizer parte da representação fiel do veículo. **Não podem** ser usados na
-   identidade do app: ícone, splash, banner da Play Store ou material de
-   marketing.
-2. **Proibido sugerir endosso.** A NASA não endossa produtos comerciais. Como
-   este app é freemium, a tela de créditos precisa trazer o aviso de
-   não-afiliação (ver `AVISO` abaixo).
-3. **Conteúdo de terceiros** dentro do acervo da NASA é marcado caso a caso.
-   Todos os modelos usados aqui são de autoria NASA — nenhum tem marcação de
-   terceiro.
+As insígnias/logotipos não devem ser tratados como domínio público ou como autorização automática para identidade/propaganda do app. Rever as condições aplicáveis ao candidato e ao material de divulgação antes de publicar. Não usar NASA como marca do produto nem insinuar vínculo comercial.
 
-## AVISO (texto obrigatório na tela de créditos, nos 3 idiomas)
+## Sinalização mantida no aplicativo
 
-> Modelos 3D cortesia da NASA (domínio público). Este aplicativo não é
-> afiliado à NASA nem endossado por ela.
+> Modelos 3D cortesia da NASA. Este aplicativo não é afiliado à NASA nem endossado por ela.
+
+As fichas distinguem malhas originais, agrupamento/desmontagem didática e complementos artísticos. Esta atualização corrige afirmações gerais antigas; não é aprovação integral de direitos de E5. Licenças das bibliotecas estão também em lib/licencas no pacote.
 
 ## Inventário
 

@@ -1,10 +1,10 @@
 {
-  "version": "main309",
-  "sourceCommit": "8e8e2aa2f1e629a525c8b4536608abd60ae39aa5",
-  "date": "2026-11-06",
+  "version": "main310",
+  "sourceCommit": "158e1b2ba9244a77f170cfd0291b71a399c887cf",
+  "date": "2026-11-07",
   "scope": "App Store 1.0 candidate web preview",
   "chapters": 18,
   "spacecraft": 4,
   "supportPage": "suporte.html",
-  "change": "Native Explore buttons and visible keyboard focus; accessible readers retained"
+  "change": "Texture license links and bundled third-party notices; original and artistic attribution preserved"
 }

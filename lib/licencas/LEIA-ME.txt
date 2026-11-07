@@ -1,0 +1,27 @@
+AVISOS DE COMPONENTES DE TERCEIROS / THIRD-PARTY NOTICES
+
+Three.js e addons locais — revisão 160 — autores Three.js — MIT.
+Fonte/licença: https://github.com/mrdoob/three.js/tree/r160
+Texto integral: LICENSE-threejs-MIT.txt.
+
+Decodificadores Draco locais — projeto Google/Draco — Apache License 2.0.
+Referência da distribuição Three.js: https://github.com/mrdoob/three.js/blob/r160/examples/jsm/libs/draco/README.md
+Texto integral: LICENSE-draco-Apache-2.0.txt, reproduzido sem alterações do upstream.
+A referência de licença não identifica por si só a revisão exata dos binários locais.
+Nenhum binário foi substituído por este aviso.
+
+Texturas: Solar System Scope/INOVE — https://www.solarsystemscope.com/textures/
+CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+Composições Wikimedia/Askaniy Anpilogov e demais créditos: veja o rodapé de cada astro.
+CC BY-SA 3.0: https://creativecommons.org/licenses/by-sa/3.0/
+CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+Os nomes/condições próprios dos componentes e assets permanecem aplicáveis;
+a licença do material original do aplicativo não substitui essas licenças.
+
+Modelos: NASA 3D Resources — https://github.com/nasa/NASA-3D-Resources
+Política de uso: https://www.nasa.gov/nasa-brand-center/images-and-media/
+Créditos específicos e adaptações didáticas aparecem nas fichas/controles do Hangar.
+NASA não patrocina nem endossa este aplicativo. Marcas e eventual conteúdo de
+terceiros têm condições próprias; a hospedagem no acervo não substitui sua revisão.
+
+As representações artísticas do app são identificadas separadamente nos rodapés.
