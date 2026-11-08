@@ -1,9 +1,9 @@
 {
-  "version": "main313",
-  "sourceCommit": "70a69c77e6b8dbbcc980de2fa0669a2fc781d4b6",
+  "version": "main314",
+  "sourceCommit": "762cbb7b708401e9e0514bd0c3ae9fa4318bb62f",
   "chapters": 16,
   "spacecraft": 4,
   "explorarMissions": 10,
   "scope": "10 essential free lessons, 6 Pro deep dives; Hubble free; Apollo11 visual mission free and 9 Pro missions independent of Hangar",
-  "generatedAt": "2026-11-07"
+  "generatedAt": "2026-11-08"
 }

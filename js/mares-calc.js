@@ -121,7 +121,8 @@ const TAXA_LUA_GRAUS_HORA = AVANCO_LUA_GRAUS_DIA / 24;
  * mais para reencontrá-la. Derivado, não embutido — o teste confere que dá
  * os ~12h25min conhecidos.
  */
-export function intervaloEntrePreamaresHoras() {
+export function intervaloEntrePreamaresHoras(camada = 'lua') {
+  if (camada === 'sol') return 12;
   const taxaTerra = 360 / DIA_SIDERAL_HORAS;
   return 180 / (taxaTerra - TAXA_LUA_GRAUS_HORA);
 }
@@ -183,18 +184,38 @@ export function forcaRelativaAMinima(amplitude) {
  * @param {number} n       instante central, em dias desde J2000
  * @param {number} horas   largura total da janela, em horas
  * @param {number} passos  número de subdivisões
+ * @param {string} camada  'lua', 'sol' ou 'ambos' (padrão)
  * @returns {{h: number, altura: number}[]}  `h` em horas relativas ao centro
  *          (de -horas/2 a +horas/2), `altura` a altura relativa da maré
  */
-export function curvaDaPraia(n, horas = 26, passos = 96) {
+export function curvaDaPraia(n, horas = 26, passos = 96, camada = 'ambos') {
   const pontos = [];
   for (let i = 0; i <= passos; i++) {
     const dh = (i / passos) * horas - horas / 2;
     const nn = n + dh / 24;
-    const { amplitude, eixoGraus } = mareCombinada(longitudeLunar(nn), longitudeSolar(nn));
+    const lua = longitudeLunar(nn), sol = longitudeSolar(nn);
+    const { amplitude, eixoGraus } = camada === 'lua' ? mareCombinada(lua, lua, 1, 0)
+      : camada === 'sol' ? mareCombinada(sol, sol, 0, 1) : mareCombinada(lua, sol);
     const lon = ((nn * 360) / (DIA_SIDERAL_HORAS / 24)) % 360;
     const psi = ((lon - eixoGraus) % 360 + 360) % 360;
     pontos.push({ h: dh, altura: alturaRelativa(psi, amplitude) });
   }
   return pontos;
+}
+
+// No polinômio do modelo, os extremos são +A e -A/2. A faixa próxima
+// de cada extremo usa a mesma proporção relativa de 75% em seu próprio lado.
+export function classificarEstadoMare(altura, amplitude, tendencia) {
+  if (altura >= amplitude * 0.75) return 'preamar';
+  if (altura <= -amplitude * 0.375) return 'baixamar';
+  return tendencia > 0 ? 'subindo' : 'descendo';
+}
+
+// A inclinação da curva depende do instante e camada, não do último frame.
+export function estadoMare(n, camada = 'ambos') {
+  const lua = longitudeLunar(n), sol = longitudeSolar(n);
+  const mar = camada === 'lua' ? mareCombinada(lua, lua, 1, 0)
+    : camada === 'sol' ? mareCombinada(sol, sol, 0, 1) : mareCombinada(lua, sol);
+  const pontos = curvaDaPraia(n, 0.02, 2, camada);
+  return classificarEstadoMare(pontos[1].altura, mar.amplitude, pontos[2].altura - pontos[0].altura);
 }

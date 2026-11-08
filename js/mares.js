@@ -18,9 +18,9 @@ import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,
   nomeDaFase, mareCombinada, alturaRelativa, intervaloEntrePreamaresHoras,
   diaLunarHoras, formatarHoras, MES_SINODICO_DIAS, A_SOL, A_LUA,
-  classificarMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
+  classificarMare, estadoMare, AMP_QUADRATURA, AMP_SIZIGIA, forcaRelativaAMinima, curvaDaPraia,
   DIA_SIDERAL_HORAS, AVANCO_LUA_GRAUS_DIA,
-} from './mares-calc.js?v=303';
+} from './mares-calc.js?v=314';
 
 const RAD = Math.PI / 180;
 
@@ -125,7 +125,8 @@ const TEXTOS = {
     titulo: 'Marés',
     subtitulo: 'Por que o mar sobe e desce',
     mareTitulo: 'A maré agora',
-    ritmoCurto: 'maré alta a cada {i}',
+    ritmoCurto: 'maré alta aproximadamente a cada {i}',
+    ritmoCombinado: 'o intervalo entre marés altas varia com a combinação',
     sizigia: 'Maré de sizígia — a mais forte',
     quadratura: 'Maré de quadratura — a mais fraca',
     intermediaria: 'Entre a mais forte e a mais fraca',
@@ -185,7 +186,8 @@ const TEXTOS = {
     titulo: 'Tides',
     subtitulo: 'Why the sea rises and falls',
     mareTitulo: 'The tide now',
-    ritmoCurto: 'high tide every {i}',
+    ritmoCurto: 'high tide approximately every {i}',
+    ritmoCombinado: 'the interval between high tides varies with the combination',
     sizigia: 'Spring tide — the strongest',
     quadratura: 'Neap tide — the weakest',
     intermediaria: 'Between the strongest and the weakest',
@@ -245,7 +247,8 @@ const TEXTOS = {
     titulo: 'Mareas',
     subtitulo: 'Por qué el mar sube y baja',
     mareTitulo: 'La marea ahora',
-    ritmoCurto: 'marea alta cada {i}',
+    ritmoCurto: 'marea alta aproximadamente cada {i}',
+    ritmoCombinado: 'el intervalo entre pleamares varía con la combinación',
     sizigia: 'Marea viva — la más fuerte',
     quadratura: 'Marea muerta — la más débil',
     intermediaria: 'Entre la más fuerte y la más débil',
@@ -308,12 +311,20 @@ function tm(chave) {
   return (TEXTOS[i] && TEXTOS[i][chave]) || TEXTOS.pt[chave] || chave;
 }
 
+// No modelo combinado a separação dos máximos não é um período fixo.
+export function textoRitmoMare(camada, idioma='pt') {
+  const texto=TEXTOS[idioma] || TEXTOS.pt;
+  return camada === 'lua' || camada === 'sol'
+    ? texto.ritmoCurto.replace('{i}',formatarHoras(intervaloEntrePreamaresHoras(camada)))
+    : texto.ritmoCombinado;
+}
+
 // A classificação por fase descreve a soma dos efeitos, não uma fonte isolada.
 export function textoAnuncioMare({camada, amplitude, estadoAgora, classeTexto, idioma='pt'}) {
   if (camada === 'lua' || camada === 'sol') {
     const texto = TEXTOS[idioma] || TEXTOS.pt;
     const valor = forcaRelativaAMinima(amplitude).toFixed(1);
-    return `${texto[`camada_${camada}`]}. ${idioma === 'en' ? valor : valor.replace('.', ',')} ${texto.escalaForca}.`;
+    return `${texto[`camada_${camada}`]}. ${estadoAgora}. ${idioma === 'en' ? valor : valor.replace('.', ',')} ${texto.escalaForca}.`;
   }
   return `${estadoAgora}. ${classeTexto}.`;
 }
@@ -345,7 +356,6 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
     // e em sizígia se somam porque apontam junto. Com os dois sempre
     // sobrepostos, o usuário vê só o resultado e tem de acreditar na conta.
     let camada = 'ambos';
-    let alturaAnterior = null;
     const marcosVistos = new Set();
 
     const scene = new THREE.Scene();
@@ -726,7 +736,6 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
       controls.update();
       atualizarHud(lamSol, lamLua, amplitude, altura, psi);
-      alturaAnterior = altura;
     }
 
     // As setas seguem o sinal do polinômio de Legendre: para fora perto dos
@@ -806,7 +815,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
 
     // Curva da maré ao longo de 26 horas, mostrando dois ciclos de alta/baixa.
     function svgCurvaMare(dias, altura, amplitude) {
-      const pontos = curvaDaPraia(dias, 26, 96);
+      const pontos = curvaDaPraia(dias, 26, 96, camada);
       if (pontos.length === 0) return '';
 
       // Mapeia coordenadas dos pontos para a viewport SVG
@@ -846,14 +855,10 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
       const marcarX = maximos.slice(0, 2).map((i) => xs[i]);
 
       // Determina o estado atual para o aria-label
-      const subindoAgora = alturaAnterior !== null && altura > alturaAnterior;
-      const pertoAgora = Math.abs(altura) > amplitude * 0.75;
-      const estadoLabel = pertoAgora
-        ? (altura > 0 ? tm('preamar') : tm('baixamar'))
-        : (subindoAgora ? tm('subindo') : tm('descendo'));
+      const estadoLabel = tm(estadoMare(dias, camada));
 
       // SVG
-      let svg = `<svg viewBox="0 0 120 60" width="100%" height="60" role="img" aria-label="${estadoLabel}. ${num(forcaRelativaAMinima(amplitude), 1)} ${tm('escalaForca')}" xmlns="http://www.w3.org/2000/svg">
+      let svg = `<svg viewBox="0 0 120 60" width="100%" height="60" role="img" aria-label="${tm(`camada_${camada}`)}. ${estadoLabel}. ${num(forcaRelativaAMinima(amplitude), 1)} ${tm('escalaForca')}" xmlns="http://www.w3.org/2000/svg">
         <line x1="4" y1="30" x2="116" y2="30" stroke="#3a4a68" stroke-width="1" stroke-dasharray="3 3"/>
         <polyline points="${points.trim()}" fill="none" stroke="#4d9fe0" stroke-width="2" stroke-linejoin="round"/>`;
 
@@ -875,7 +880,9 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         const l = longitudeLunar(dias);
         const m = camada === 'lua' ? mareCombinada(l, l, 1, 0)
           : camada === 'sol' ? mareCombinada(s, s, 0, 1) : mareCombinada(l, s);
-        return atualizarHud(s, l, m.amplitude, alturaRelativa(0, m.amplitude), 0);
+        const lon = (dias * 360) / (DIA_SIDERAL_HORAS / 24);
+        const psi = ((lon - m.eixoGraus) % 360 + 360) % 360;
+        return atualizarHud(s, l, m.amplitude, alturaRelativa(psi, m.amplitude), psi);
       }
 
       // Força da maré: classificação usando a mesma régua que a fase lunar
@@ -923,16 +930,10 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         `<span><span style="color:#ff8a5c">●</span> ${tm('praiaTitulo')}</span>`
         + `<span class="palco-titulo-extra">— ${tm('praiaLegenda')}</span>`;
       cardPraia.valor.innerHTML = svgCurvaMare(dias, altura, amplitude);
-      const subindo = alturaAnterior !== null && altura > alturaAnterior;
-      const perto = Math.abs(altura) > amplitude * 0.75;
-      const estado = perto
-        ? (altura > 0 ? tm('preamar') : tm('baixamar'))
-        : (subindo ? tm('subindo') : tm('descendo'));
-      const intervalo = formatarHoras(intervaloEntrePreamaresHoras());
-      // O ritmo era um card só para si, mas é uma leitura desta mesma curva:
-      // as duas cristas que aparecem no gráfico estão a 12h25 uma da outra.
+      const estado = tm(estadoMare(dias, camada));
+      const intervaloLunar = formatarHoras(intervaloEntrePreamaresHoras());
       cardPraia.nota.innerHTML = `<div class="palco-nota-longa">${tm('curvaNota')}</div>`
-        + `${estado} · ${tm('ritmoCurto').replace('{i}', intervalo)}`;
+        + `${estado} · ${textoRitmoMare(camada,getIdioma())}`;
 
       // Saiba mais
       botoesCamada.forEach((b) => {
@@ -976,7 +977,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
           .replace('{ds}', formatarHoras(DIA_SIDERAL_HORAS))
           .replace('{a}', num((diaLunarHoras() - DIA_SIDERAL_HORAS) * 60, 0))
           .replace('{dl}', formatarHoras(diaLunarHoras()))
-          .replace('{i}', intervalo));
+          .replace('{i}', intervaloLunar));
 
       cardForcas.nota2.innerHTML = topico('topicoAltura') + par(tm('alturaNota'))
         + topico('topicoLinhas') + par(tm('eixosNota'))
@@ -1000,11 +1001,7 @@ export function iniciarMares({ motor, dados, premium, aoProgresso }) {
         const classe = classificarMare(dias);
         const classeTexto = classe === 'sizigia' ? tm('sizigia')
           : classe === 'quadratura' ? tm('quadratura') : tm('intermediaria');
-        const subindoAgora = alturaAnterior !== null && altura > alturaAnterior;
-        const pertoAgora = Math.abs(altura) > amplitude * 0.75;
-        const estadoAgora = pertoAgora
-          ? (altura > 0 ? tm('preamar') : tm('baixamar'))
-          : (subindoAgora ? tm('subindo') : tm('descendo'));
+        const estadoAgora = tm(estadoMare(dias, camada));
         ctx.anunciar(textoAnuncioMare({camada, amplitude, estadoAgora, classeTexto, idioma:getIdioma()}));
       }
     }
