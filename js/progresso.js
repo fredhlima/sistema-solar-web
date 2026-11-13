@@ -6,7 +6,7 @@ import { TRILHAS, PERCURSO_ESSENCIAL } from './aprendizado-trilhas.js?v=314';
 import { getIdioma } from './i18n.js?v=317';
 // só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
 // em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
-import { ITENS_GRATIS } from './premium.js?v=305';
+import { ITENS_GRATIS } from './premium.js?v=306';
 
 // Textos localizados (pt/en/es)
 const TEXTOS = {

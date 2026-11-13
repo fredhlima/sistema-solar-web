@@ -1,9 +1,9 @@
 import { NAVES_1_0, ROTEIROS_1_0 } from './release-scope.js?v=314';
 import { ROTEIROS } from './aprendizado-conteudo.js?v=314';
-import { ITENS_GRATIS } from './premium.js?v=305';
+import { ITENS_GRATIS } from './premium.js?v=306';
 import { MISSOES } from './missoes.js?v=13';
 import { QUIZ_PACOTES } from './quiz-dados.js?v=9';
-import { precoDeLancamentoAtivo } from './billing-config.js?v=3';
+import { precoDeLancamentoAtivo, dataLancamentoEfetiva } from './billing-config.js?v=4';
 import { getIdioma } from './i18n.js?v=317';
 
 const AVISO_TESTE = {
@@ -102,8 +102,9 @@ export function iniciarPaywall({ premium, t }) {
     mensagem.textContent = keys[estado] ? t(keys[estado]) : '';
     mensagem.classList.toggle('paywall-erro', estado === 'erro');
     btnPreco.hidden = !loja || precoCarregando || Boolean(preco);
-    // Rótulo de lançamento: só com data futura em billing-config.js; nunca mostra valor antigo ou riscado.
-    divLancamento.hidden = !precoDeLancamentoAtivo();
+    // Rótulo de lançamento: só com data futura (painel do RevenueCat ou build, ver billing-config.js);
+    // nunca mostra valor antigo ou riscado.
+    divLancamento.hidden = !precoDeLancamentoAtivo(new Date(), dataLancamentoEfetiva(premium.lancamentoAteRemoto?.()));
     divPreco.textContent = testeIOS ? avisoTeste()
       : loja ? precoCarregando ? t('paywallPrecoSemValor') : preco ? t('paywallPrecoLoja', { preco }) : t('paywallPrecoIndisponivel')
       : t('paywallPreco');

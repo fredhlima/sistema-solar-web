@@ -1,5 +1,5 @@
 // Premium: modelo freemium com persistência em localStorage (com fallback em memória para node)
-import { obterChaveRevenueCat, IOS_COMPRAS_TESTE } from './billing-config.js?v=3';
+import { obterChaveRevenueCat, IOS_COMPRAS_TESTE, CHAVE_METADADO_LANCAMENTO } from './billing-config.js?v=4';
 export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco', 'estacoes-mares', 'hangar', 'aprendizado'];
 
 // "Provinha": itens liberados no free dentro de recursos premium — o usuário
@@ -109,6 +109,9 @@ class RevenueCatBillingProvider {
       const plugin = await this._garantirConfigurado();
       const { current } = await plugin.getOfferings();
       const priceString = current?.availablePackages?.[0]?.product?.priceString;
+      // Vem na mesma resposta do preço: a data do rótulo de lançamento definida no painel (billing-config.js).
+      const data = current?.metadata?.[CHAVE_METADADO_LANCAMENTO];
+      this.lancamentoAteRemoto = typeof data === 'string' ? data : null;
       return priceString || null;
     } catch (e) {
       console.error('Erro ao obter preço local:', e);
@@ -376,6 +379,11 @@ export function criarPremium() {
         }
       }
       return null;
+    },
+
+    // Data do rótulo de lançamento vinda do painel do RevenueCat, lida junto com o preço; null se não veio.
+    lancamentoAteRemoto() {
+      return billing?.lancamentoAteRemoto ?? null;
     },
 
     provider: PROVIDER
