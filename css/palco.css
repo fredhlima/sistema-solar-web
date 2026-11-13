@@ -802,6 +802,9 @@ body.modo-dock .palco-scrubber { height: 44px; }
   color: #e8edf7;
 }
 
+/* Sem resumo (valor que é só gráfico), o espaço volta inteiro para o título. */
+.palco-card-colapsado .palco-card-resumo:empty { display: none; }
+
 /* O card fechado nunca transborda a própria caixa */
 .palco-card-colapsado { overflow: hidden; }
 

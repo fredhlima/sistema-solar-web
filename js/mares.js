@@ -12,7 +12,7 @@ import {medicaoMareLegada} from './fenomenos-unificados.js?v=312';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getIdioma } from './i18n.js?v=317';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=317';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=318';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,

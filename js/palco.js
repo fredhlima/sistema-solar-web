@@ -227,6 +227,11 @@ function atualizarResumo(card) {
     resumo.setAttribute('aria-hidden', 'true');   // o valor real segue no DOM
     card.appendChild(resumo);
   }
+  // Valor que é só gráfico ("A luz que chega aí", em Estações) não tem número
+  // para resumir: o primeiro texto dele é o rótulo de um eixo ("ângulo da luz"),
+  // que não informa nada e ainda tirava espaço do título — em inglês sobrava
+  // "THE LIGHT THAT REACHES YO". Fechado, esse card mostra só o título.
+  if (valor.querySelector('.palco-graficos')) { resumo.textContent = ''; return; }
   resumo.textContent = primeiroTexto(valor)
     || primeiroTexto(card.querySelector('.palco-card-nota'))
     || '';
