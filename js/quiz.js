@@ -1,7 +1,7 @@
 // Quiz espacial com pacotes de perguntas, medalhas e persistência
 // Exporta: iniciarQuiz({ motor, dados, premium }) -> { abrir }
 
-import { getIdioma } from './i18n.js?v=313';
+import { getIdioma } from './i18n.js?v=314';
 import { QUIZ_PACOTES } from './quiz-dados.js?v=9';
 
 const TEXTOS = {
@@ -26,6 +26,8 @@ const TEXTOS = {
     erro: 'Incorreto!',
     revelado: 'Aqui está!',
     cadeado: 'Recurso Pro',
+    curto_titulo: 'Mini-teste',
+    curto_completo: 'Fazer o pacote completo',
   },
   en: {
     tituloQuiz: 'Space Quiz',
@@ -48,6 +50,8 @@ const TEXTOS = {
     erro: 'Incorrect!',
     revelado: 'Here it is!',
     cadeado: 'Pro Feature',
+    curto_titulo: 'Mini test',
+    curto_completo: 'Take the full package',
   },
   es: {
     tituloQuiz: 'Quiz Espacial',
@@ -70,6 +74,8 @@ const TEXTOS = {
     erro: '¡Incorrecto!',
     revelado: '¡Aquí está!',
     cadeado: 'Función Pro',
+    curto_titulo: 'Mini prueba',
+    curto_completo: 'Hacer el paquete completo',
   },
 };
 
@@ -110,6 +116,7 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
   // Estado do quiz
   let estadoAtual = 'pacotes'; // pacotes | multipla | encontrar | resultado
   let pacoteAtual = null;
+  let pacoteCompleto = null; // definido só no modo curto (sim:abrir-quiz com limite)
   let perguntaIndex = 0;
   let pontuacao = 0;
   let tentativas = {}; // { perguntaId: { erros: n, acertou: bool, pts: n } }
@@ -354,7 +361,18 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
   }
 
   // ========== Entrar em um pacote ==========
-  function entrarPacote(pacote) {
+  function entrarPacote(pacote, limite = null) {
+    pacoteCompleto = null;
+    if (pacote && Array.isArray(pacote.perguntas) && Number.isInteger(limite) && limite >= 1 && limite < pacote.perguntas.length) {
+      // Modo curto: sorteia `limite` perguntas; não conta como pacote concluído.
+      const embaralhadas = [...pacote.perguntas];
+      for (let i = embaralhadas.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [embaralhadas[i], embaralhadas[j]] = [embaralhadas[j], embaralhadas[i]];
+      }
+      pacoteCompleto = pacote;
+      pacote = { ...pacote, perguntas: embaralhadas.slice(0, limite) };
+    }
     if (!pacote || !Array.isArray(pacote.perguntas)) {
       // Pacote malformado, volta
       mostrarPacotes();
@@ -728,29 +746,35 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
     if (pct >= 90) medalha = 'ouro';
     else if (pct >= 70) medalha = 'prata';
 
-    // Persiste resultado
-    const storage = lerStorage();
+    const modoCurto = pacoteCompleto !== null;
     const id = pacoteAtual.id || 'sem-id';
-    const melhor = storage[id] ? storage[id].melhorPct : null;
 
-    if (melhor === null || pct > melhor) {
-      storage[id] = { melhorPct: pct, medalha };
-      salvarStorage(storage);
+    // Persiste resultado (modo curto não conta como pacote concluído)
+    if (!modoCurto) {
+      const storage = lerStorage();
+      const melhor = storage[id] ? storage[id].melhorPct : null;
+
+      if (melhor === null || pct > melhor) {
+        storage[id] = { melhorPct: pct, medalha };
+        salvarStorage(storage);
+      }
+
+      progressoEvento('quiz-pacote', { pacoteId: id, pct, medalha: pct >= 50 ? medalha : null });
     }
-
-    progressoEvento('quiz-pacote', { pacoteId: id, pct, medalha: pct >= 50 ? medalha : null });
 
     tocarFanfarra();
 
     const titulo = document.createElement('h2');
     titulo.className = 'quiz-resultado-titulo';
-    titulo.textContent = tt('resultado_titulo');
+    titulo.textContent = tt(modoCurto ? 'curto_titulo' : 'resultado_titulo');
     conteudo.appendChild(titulo);
 
-    const medalhaEl = document.createElement('div');
-    medalhaEl.className = `quiz-medalha-resultado quiz-medalha-${medalha}`;
-    medalhaEl.textContent = '●';
-    conteudo.appendChild(medalhaEl);
+    if (!modoCurto) {
+      const medalhaEl = document.createElement('div');
+      medalhaEl.className = `quiz-medalha-resultado quiz-medalha-${medalha}`;
+      medalhaEl.textContent = '●';
+      conteudo.appendChild(medalhaEl);
+    }
 
     const pts = document.createElement('div');
     pts.className = 'quiz-resultado-pts';
@@ -766,9 +790,18 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
     btnRepetir.className = 'quiz-btn-resultado';
     btnRepetir.textContent = tt('repetir');
     btnRepetir.addEventListener('click', () => {
-      entrarPacote(pacoteAtual);
+      entrarPacote(modoCurto ? pacoteCompleto : pacoteAtual, modoCurto ? pacoteAtual.perguntas.length : null);
     });
     conteudo.appendChild(btnRepetir);
+
+    if (modoCurto) {
+      const btnCompleto = document.createElement('button');
+      btnCompleto.className = 'quiz-btn-resultado';
+      btnCompleto.dataset.quizCompleto = '1';
+      btnCompleto.textContent = tt('curto_completo');
+      btnCompleto.addEventListener('click', () => entrarPacote(pacoteCompleto));
+      conteudo.appendChild(btnCompleto);
+    }
 
     const btnVoltar = document.createElement('button');
     btnVoltar.className = 'quiz-btn-resultado quiz-btn-secundario';
@@ -811,6 +844,20 @@ export function iniciarQuiz({ motor, dados, premium, obterCtxCompartilhado }) {
     overlay.style.display = 'flex';
     mostrarPacotes();
   }
+
+  // Contrato com as outras áreas (Início, fim de trilha): abre direto num pacote.
+  // detail: { pacoteId, limite? } — limite = nº de perguntas sorteadas (mini-teste).
+  document.addEventListener('sim:abrir-quiz', (evt) => {
+    const { pacoteId, limite } = evt.detail || {};
+    const pacote = Array.isArray(QUIZ_PACOTES) ? QUIZ_PACOTES.find(p => p && p.id === pacoteId) : null;
+    if (!pacote) { abrir(); return; }
+    if (premium && !premium.permitido('quiz', pacote.id)) {
+      if (premium.exigirItem) premium.exigirItem('quiz', pacote.id);
+      return;
+    }
+    overlay.style.display = 'flex';
+    entrarPacote(pacote, Number.isInteger(limite) ? limite : null);
+  });
 
   // Após comprar o Pro, se a tela de pacotes estiver aberta, atualiza os
   // selos/bloqueios sem exigir fechar e reabrir o quiz (mesmo padrão de

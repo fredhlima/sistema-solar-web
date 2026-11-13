@@ -137,7 +137,8 @@ body.com-navegacao .aprendizado-sol {
 .aprendizado-continuar {width:100%;text-align:left;margin-bottom:8px;border-color:#83c9ff;background:#204e74;}
 .aprendizado-retorno {width:100%;text-align:left;margin-bottom:12px;-webkit-appearance:none;appearance:none;}
 
-.aprendizado-continuar, .aprendizado-retorno {border-radius:10px;padding:8px 12px;}
+.aprendizado-continuar, .aprendizado-retorno, .aprendizado-quiz-trilha {border-radius:10px;padding:8px 12px;}
+.aprendizado-quiz-trilha {width:100%;min-height:44px;text-align:left;margin-bottom:8px;border-color:#83c9ff;background:#204e74;}
 
 /* Durante a leitura, o transporte continua acessível abaixo da cena. */
 body.com-navegacao.nav-guia .aprendizado-sol {max-height:calc(100dvh - var(--nav-h) - var(--mdock-bar-h,64px) - 20px);}

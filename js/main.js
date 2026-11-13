@@ -2,27 +2,27 @@ import { recursoDisponivel } from './release-scope.js?v=313';
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=311';
 import { SistemaSolar3D } from './motor3d.js?v=312';
-import { iniciarUI } from './ui.js?v=313';
-import { iniciarMobileDock } from './mobile-dock.js?v=313';
-import { EVENTOS } from './eventos.js?v=12';
+import { iniciarUI } from './ui.js?v=314';
+import { iniciarMobileDock } from './mobile-dock.js?v=314';
+import { EVENTOS } from './eventos.js?v=13';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
 // só a lista de pacotes, para o painel de Conquistas derivar o total real
 import { QUIZ_PACOTES } from './quiz-dados.js?v=9';
 import { Trajetorias } from './trajetorias.js?v=20';
-import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=313';
+import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma } from './i18n.js?v=314';
 import { criarPremium } from './premium.js?v=303';
-import { iniciarPaywall } from './paywall.js?v=313';
-import { iniciarQuiz } from './quiz.js?v=313';
+import { iniciarPaywall } from './paywall.js?v=314';
+import { iniciarQuiz } from './quiz.js?v=314';
 import { iniciarHangar } from './hangar.js?v=316';
-import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=313';
-import { iniciarEstacoes } from './estacoes.js?v=313';
-import { iniciarMares } from './mares.js?v=315';
-import { iniciarProgresso } from './progresso.js?v=316';
+import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=314';
+import { iniciarEstacoes } from './estacoes.js?v=314';
+import { iniciarMares } from './mares.js?v=316';
+import { iniciarProgresso } from './progresso.js?v=317';
 import { criarAvaliacao } from './avaliacao.js?v=1';
-import { iniciarMusica } from './musica.js?v=313';
-import { iniciarNavegacao } from './navegacao.js?v=313';
-import { iniciarAprendizado } from './aprendizado.js?v=316';
-import { iniciarTutorial } from './tutorial.js?v=313';
+import { iniciarMusica } from './musica.js?v=314';
+import { iniciarNavegacao } from './navegacao.js?v=314';
+import { iniciarAprendizado } from './aprendizado.js?v=317';
+import { iniciarTutorial } from './tutorial.js?v=314';
 
 // As missões do Explorar usam trajetórias próprias, independentes do Hangar.
 const MISSOES = MISSOES_COMPLETAS;
@@ -81,7 +81,7 @@ audioCompartilhado.obterCtx = musica.obterCtx;
 const dock = iniciarMobileDock({ motor, dados: DADOS, missoes: MISSOES, acoes: acoesUI, abrirProgresso: progresso.abrir, premium });
 
 const aprendizado = iniciarAprendizado({ motor, acoes:{continuarRoteiro:id=>navegacao?.continuarRoteiro(id),permitirRoteiro:(id,recurso)=>recurso?premium.recurso(recurso):premium.permitido('hangar',id),explorarPeca:(id,peca)=>navegacao?.explorarPeca(id,peca),focarCorpo:id=>{if(id==='terra')acoesUI.definirRitmo(1/24);motor.focar(id);},explorarNave:id=>navegacao?navegacao.explorarNave(id):hangar.abrirNave(id),recomendarNave:id=>navegacao?.recomendarNave(id),experimentarModo:id=>navegacao?.experimentarModo(id)}, t, idioma:getIdioma() });
-if(usarNavegacao)navegacao = iniciarNavegacao({motor,hangar,acoes:acoesUI,dock,aprendizado,premium,t,idioma:getIdioma()});
+if(usarNavegacao)navegacao = iniciarNavegacao({motor,hangar,acoes:acoesUI,dock,aprendizado,premium,t,idioma:getIdioma(),eventos:recursoDisponivel('eventos')?EVENTOS:null,abrirProgresso:progresso.abrir});
 window.__navegacao=navegacao;
 window.__aprendizado=aprendizado;
 

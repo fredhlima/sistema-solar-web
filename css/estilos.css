@@ -2459,3 +2459,11 @@ body.modo-dock .eventos-cabecalho {
  .politica-conteudo h2 { font-size:1.125em; }
  .politica-conteudo .idioma { font-size:.875em; }
 }
+
+/* Lote D (encaixes): ficha -> Comparador destaca o corpo + Terra */
+.comparador-corpo.comparador-destaque { outline: 2px solid #5cc8ff; outline-offset: 4px; border-radius: 10px; }
+.comparador-corpo.comparador-esmaecido { opacity: 0.4; }
+/* Alvos de toque ≥ 44px nos botões dos cartões de evento e de missão (Lote D) */
+@media (pointer: coarse) {
+  .evento-btn, .card-missao-btn-capitulo, .card-missao-btn-lancamento { min-height: 44px; }
+}

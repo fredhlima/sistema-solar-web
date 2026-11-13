@@ -2260,7 +2260,7 @@ export const TRADUCAO = {
     },
     "perseidas-2028": {
       "nome": "Lluvia de Meteoros Perseidas",
-      "descricao": "Pico de actividad de la lluvia de meteoros Perseidas — hasta 100 meteoros por hora. Mejor observación en el cielo nocturno sin contaminación luminosa."
+      "descricao": "Pico de actividad de la lluvia de meteoros Perseidas en la noche del 12 al 13 de agosto — hasta 100 meteoros por hora. Mejor observación en el cielo nocturno sin contaminación luminosa."
     },
     "oposicao-jupiter-2029": {
       "nome": "Oposición de Júpiter",
@@ -2276,15 +2276,15 @@ export const TRADUCAO = {
     },
     "quadrantidas-2026": {
       "nome": "Lluvia de Meteoros Cuadrántidas",
-      "descricao": "Pico de la lluvia de meteoros Cuadrántidas — hasta cerca de 80 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte."
+      "descricao": "Pico de la lluvia de meteoros Cuadrántidas en la noche del 3 al 4 de enero — hasta cerca de 80 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte."
     },
     "liridas-2026": {
       "nome": "Lluvia de Meteoros Líridas",
-      "descricao": "Pico de la lluvia de meteoros Líridas — hasta 20 meteoros por hora. Una de las lluvias más antiguas registradas por la humanidad, observada desde hace más de 2.600 años. Deja rastros brillantes en el cielo nocturno."
+      "descricao": "Pico de la lluvia de meteoros Líridas en la noche del 22 al 23 de abril — hasta 20 meteoros por hora. Una de las lluvias más antiguas registradas por la humanidad, observada desde hace más de 2.600 años. Deja rastros brillantes en el cielo nocturno."
     },
     "eta-aquaridas-2026": {
       "nome": "Lluvia de Meteoros Eta Acuáridas",
-      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas — hasta cerca de 50 meteoros por hora. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
+      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas en la madrugada del 6 de mayo, antes del amanecer — hasta cerca de 50 meteoros por hora. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
     },
     "eclipse-solar-total-2027": {
       "nome": "Eclipse Solar Total (uno de los más largos del siglo)",

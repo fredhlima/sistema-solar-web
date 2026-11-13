@@ -1,4 +1,4 @@
-import { abrirPrivacidade } from './privacidade.js?v=313';
+import { abrirPrivacidade } from './privacidade.js?v=314';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
 // Reusa o motor real e o "saco de ações" do ui.js (nada de simulação falsa).
@@ -7,7 +7,8 @@ import { abrirPrivacidade } from './privacidade.js?v=313';
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=313';
+import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=314';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=314';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local
@@ -50,6 +51,9 @@ const SVG_LOGO = `<svg viewBox="0 0 1024 1024">
 const SVG_GEAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`;
 
 const SVG_EXPLORAR = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.2 5.2-5.2 2.2 2.2-5.2z"/></svg>`;
+const SVG_INICIO = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.2L12 4l8 7.2"/><path d="M6.2 9.6V19h11.6V9.6"/><path d="M10 19v-5h4v5"/></svg>`;
+const SVG_APRENDER = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2c2.9-.9 5.6-.7 8.5.9v11.6c-2.9-1.6-5.6-1.8-8.5-.9z"/><path d="M20.5 6.2c-2.9-.9-5.6-.7-8.5.9v11.6c2.9-1.6 5.6-1.8 8.5-.9z"/></svg>`;
+const SVG_HANGAR = `<svg viewBox="0 0 24 24" fill="none" stroke="#5cc8ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 2.6 4.2 6 3.6 10.4h-7.2C7.8 9 9 5.6 12 3z"/><circle cx="12" cy="9.2" r="1.3"/><path d="M8.4 13.4L6 17l3-.8M15.6 13.4L18 17l-3-.8M10.4 16.8L12 20l1.6-3.2"/></svg>`;
 const SVG_XP = `<svg viewBox="0 0 24 24" fill="#5cc8ff"><path d="M12 2l1.7 6.1L20 10l-6.3 1.9L12 18l-1.7-6.1L4 10l6.3-1.9z"/></svg>`;
 
 // Ícones de transporte custom: ⏮/▶/⏸/⏭ (Unicode) renderizam coloridos como
@@ -199,8 +203,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       <button class="mdock-cal-hoje" id="mdock-cal-hoje">${t('hoje')}</button>
     </div>
 
-    <div class="mdock-bar">
-      <button type="button" class="mdock-sec mdock-sec-exp" id="mdock-btn-exp">${SVG_EXPLORAR}<span>${t('explorar')}</span> <span class="mdock-seta-sec" id="mdock-exp-seta">▴</span></button>
+    <div class="mdock-bar" role="group" aria-label="${t('areasNavegacao')}">
+      <button type="button" class="mdock-sec mdock-area mdock-sec-xp" id="mdock-btn-xp" data-area="inicio">${SVG_INICIO}<span>${t('inicioTitulo')}</span> <span class="mdock-seta-sec" id="mdock-xp-seta">▴</span></button>
+      <button type="button" class="mdock-sec mdock-area mdock-sec-exp" id="mdock-btn-exp" data-area="explorar">${SVG_EXPLORAR}<span>${t('explorar')}</span> <span class="mdock-seta-sec" id="mdock-exp-seta">▴</span></button>
       <div class="mdock-divisor"></div>
       <div class="mdock-sec mdock-transporte">
         <div class="mdock-ajuste">
@@ -216,7 +221,8 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
 
       </div>
       <div class="mdock-divisor"></div>
-      <button type="button" class="mdock-sec mdock-sec-xp" id="mdock-btn-xp">${SVG_XP}<span>${t('grupoExperiencias')}</span> <span class="mdock-seta-sec" id="mdock-xp-seta">▴</span></button>
+      <button type="button" class="mdock-sec mdock-area mdock-area-nav" id="mdock-btn-aprender" data-area="aprender">${SVG_APRENDER}<span>${t('areaAprender')}</span></button>
+      <button type="button" class="mdock-sec mdock-area mdock-area-nav" id="mdock-btn-hangar" data-area="hangar">${SVG_HANGAR}<span>${t('areaHangar')}</span></button>
     </div>
   `;
   document.body.appendChild(mdock);
@@ -430,6 +436,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   }
 
   // ---------- Explorar: ficha do astro selecionado (4 abas) ----------
+  const IDS_COMPARADOR = ['sol', 'mercurio', 'venus', 'terra', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'lua', 'plutao']; // igual a ui.js
   function montarFicha(shell, id) {
     const corpo = dados.corpos.find((c) => c.id === id);
     if (!corpo) { estado.sel = null; montarLista(shell); return; }
@@ -512,6 +519,23 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
           h.textContent = t('mdockComparacoes');
           conteudo.appendChild(h);
           inf.comparacoes.forEach((c) => linhaComIcone(conteudo, 'mdock-linha-diamante', '◆', 'mdock-diamante', c));
+        }
+        // Ligações com outras áreas (mesma regra da ficha desktop em ui.js): peso e comparador
+        const encaixes = [];
+        if (acoes.abrirVoce && CORPOS_COM_PESO.includes(corpo.id)) encaixes.push(['encaixePeso', 'mdock-encaixe-peso', () => acoes.abrirVoce({ corpo: corpo.id })]);
+        if (acoes.abrirComparador && IDS_COMPARADOR.includes(corpo.id) && corpo.id !== 'terra') encaixes.push(['encaixeComparar', 'mdock-encaixe-comparar', () => acoes.abrirComparador({ corpo: corpo.id })]);
+        if (encaixes.length) {
+          const linhaEnc = document.createElement('div');
+          linhaEnc.className = 'mdock-encaixes';
+          for (const [chave, cls, fn] of encaixes) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'mdock-encaixe ' + cls;
+            b.textContent = t(chave);
+            b.onclick = () => { fecharTudo(); fn(); };
+            linhaEnc.appendChild(b);
+          }
+          conteudo.appendChild(linhaEnc);
         }
       } else if (estado.tab === 'numeros') {
         (inf.numeros || []).forEach((n) => {

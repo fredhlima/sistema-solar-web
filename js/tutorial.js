@@ -1,4 +1,4 @@
-import { t, tToque } from './i18n.js?v=313';
+import { t, tToque } from './i18n.js?v=314';
 
 const CHAVE = 'sistema-solar-tutorial-visto';
 
@@ -9,13 +9,16 @@ const CHAVE = 'sistema-solar-tutorial-visto';
 // independente (Q3, 24/09) mostrou que ele era a primeira frase lida pela
 // criança, antes do "Bem-vindo". Agora é uma nota discreta no ÚLTIMO passo
 // (ver .tutorial-card-nota em mostrarPasso).
+// Os passos apresentam as quatro áreas (Início, Explorar, Aprender, Hangar) e o
+// tempo. Os alvos de Aprender/Hangar são criados por navegacao.js (desktop:
+// .area-aprender/.area-hangar; dock: #mdock-btn-aprender/#mdock-btn-hangar).
 const PASSOS = [
-  { alvo: null,                    alvoMobile: null,             titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
-  { alvo: '#painel-explorar',      alvoMobile: '#mdock-btn-exp',  titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
-  { alvo: '.grupo-experiencias',   alvoMobile: '#mdock-btn-xp',   titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },
-  { alvo: '.grupo-visualizacao',   alvoMobile: '.mdock-gear',     titulo: 'tutorialTitulo4', texto: 'tutorialTexto4' },
-  { alvo: '.controles-tempo',      alvoMobile: '.mdock-transporte', titulo: 'tutorialTitulo5', texto: 'tutorialTexto5' },
-  { alvo: '.progresso-chip',       alvoMobile: '#mdock-nivel',    titulo: 'tutorialTitulo6', texto: 'tutorialTexto6' },
+  { alvo: null,                    alvoMobile: null,                  titulo: 'tutorialTitulo1', texto: 'tutorialTexto1' },
+  { alvo: '.experiencias-trigger', alvoMobile: '#mdock-btn-xp',       titulo: 'tutorialTitulo2', texto: 'tutorialTexto2' },
+  { alvo: '#painel-explorar',      alvoMobile: '#mdock-btn-exp',      titulo: 'tutorialTitulo3', texto: 'tutorialTexto3' },
+  { alvo: '.area-aprender',        alvoMobile: '#mdock-btn-aprender', titulo: 'tutorialTitulo4', texto: 'tutorialTexto4' },
+  { alvo: '.area-hangar',          alvoMobile: '#mdock-btn-hangar',   titulo: 'tutorialTitulo5', texto: 'tutorialTexto5' },
+  { alvo: '.controles-tempo',      alvoMobile: '.mdock-transporte',   titulo: 'tutorialTitulo6', texto: 'tutorialTexto6' },
 ];
 
 let passoAtual = 0;

@@ -2,13 +2,16 @@ import {resolverFenomeno,modoDoFenomeno} from './fenomenos-unificados.js?v=312';
 import {TRILHAS, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=313';
 import { naveDisponivel } from './release-scope.js?v=313';
 import { destinoNave } from '../hangar/js/hangar-access.js?v=313';
+import { montarInicio } from './inicio.js?v=2';
+import { capituloDoEvento, PACOTE_DESAFIO } from './encaixes.js?v=2';
+import { formatarDataCurta } from './i18n.js?v=314';
 // A cena é o ponto de partida; Experiências é um menu contextual, sem barra permanente.
 const TEXTOS={
- pt:{experiencias:'Experiências',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves em 3D · Hubble grátis',aprenderNota:'Descubra o espaço por assunto',fechar:'Fechar experiências',voltar:'Voltar às experiências',cena:'Só a cena',mostrar:'Mostrar controles',novo:'Começar · grátis',retomar:'Retomar',rever:'Rever roteiro',quiz:'Planetas grátis',pro:'Pro'},
- en:{experiencias:'Experiences',aprender:'Learn',hangar:'Hangar',hangarNota:'3D spacecraft · Free Hubble',aprenderNota:'Discover space by topic',fechar:'Close experiences',voltar:'Back to experiences',cena:'Scene only',mostrar:'Show controls',novo:'Start · free',retomar:'Resume',rever:'Review lesson',quiz:'Free planets',pro:'Pro'},
- es:{experiencias:'Experiencias',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves en 3D · Hubble gratis',aprenderNota:'Descubre el espacio por tema',fechar:'Cerrar experiencias',voltar:'Volver a experiencias',cena:'Solo la escena',mostrar:'Mostrar controles',novo:'Comenzar · gratis',retomar:'Retomar',rever:'Repasar recorrido',quiz:'Planetas gratis',pro:'Pro'}
+ pt:{experiencias:'Experiências',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves em 3D · Hubble grátis',aprenderNota:'Descubra o espaço por assunto',fechar:'Fechar Início',voltar:'Voltar ao Início',cena:'Só a cena',mostrar:'Mostrar controles',novo:'Começar · grátis',retomar:'Retomar',rever:'Rever roteiro',quiz:'Planetas grátis',pro:'Pro'},
+ en:{experiencias:'Experiences',aprender:'Learn',hangar:'Hangar',hangarNota:'3D spacecraft · Free Hubble',aprenderNota:'Discover space by topic',fechar:'Close Home',voltar:'Back to Home',cena:'Scene only',mostrar:'Show controls',novo:'Start · free',retomar:'Resume',rever:'Review lesson',quiz:'Free planets',pro:'Pro'},
+ es:{experiencias:'Experiencias',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves en 3D · Hubble gratis',aprenderNota:'Descubre el espacio por tema',fechar:'Cerrar Inicio',voltar:'Volver al Inicio',cena:'Solo la escena',mostrar:'Mostrar controles',novo:'Comenzar · gratis',retomar:'Retomar',rever:'Repasar recorrido',quiz:'Planetas gratis',pro:'Pro'}
 };
-export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,idioma='pt'}) {
+export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,idioma='pt',eventos=null,abrirProgresso}) {
  const copy=TEXTOS[idioma]||TEXTOS.pt;
  const percursoCopy={pt:{titulo:'Percurso essencial · grátis',capitulos:'capítulos concluídos',continuar:'Continuar',comecar:'Começar'},en:{titulo:'Essential path · free',capitulos:'chapters complete',continuar:'Continue',comecar:'Start'},es:{titulo:'Recorrido esencial · gratis',capitulos:'capítulos completados',continuar:'Continuar',comecar:'Comenzar'}}[idioma]||{titulo:'Percurso essencial · grátis',capitulos:'capítulos concluídos',continuar:'Continuar',comecar:'Começar'};
  const criar=(tag,text,cls)=>{const el=document.createElement(tag);if(text)el.textContent=text;if(cls)el.className=cls;return el;};
@@ -20,15 +23,18 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  const focarEntrada=()=>entradas.find(visivel)?.focus({preventScroll:true});
  const nav=criar('div',null,'experiencias-overlay');nav.id='destinations';nav.hidden=true;
  const menu=criar('section',null,'experiencias-painel');menu.setAttribute('role','dialog');menu.setAttribute('aria-modal','true');menu.setAttribute('aria-labelledby','experiences-title');
- const cabMenu=criar('header');const tituloMenu=criar('h1',copy.experiencias);tituloMenu.id='experiences-title';tituloMenu.tabIndex=-1;
+ const cabMenu=criar('header');const tituloMenu=criar('h1',t('inicioTitulo'));tituloMenu.id='experiences-title';tituloMenu.tabIndex=-1;
  const fecharMenu=botao('×','experiencias-fechar');fecharMenu.setAttribute('aria-label',copy.fechar);fecharMenu.onclick=()=>fecharExperiencias();cabMenu.append(tituloMenu,fecharMenu);
  const conteudo=criar('div',null,'experiencias-conteudo'),destaques=criar('div',null,'experiencias-destaques'),grade=criar('div',null,'experiencias-grade');
  for(const [id,nome,nota,icone]of [['hangar',copy.hangar,copy.hangarNota,'✧'],['descobertas',copy.aprender,copy.aprenderNota,'◎']]){const b=botao();b.dataset.destination=id;const simbolo=criar('span',icone,'experiencias-icone');simbolo.setAttribute('aria-hidden','true');const texto=criar('span');texto.append(criar('strong',nome),criar('small',nota));b.append(simbolo,texto);b.onclick=()=>selecionar(id);destaques.append(b);}
- conteudo.append(destaques,grade);menu.append(cabMenu,conteudo);nav.append(menu);nav.onclick=e=>{if(e.target===nav)fecharExperiencias();};
+ const inicio=montarInicio({t,aprendizado,percurso:PERCURSO_ESSENCIAL,ordem:TRILHAS.flatMap(tr=>tr.roteiros),eventos,capituloDoEvento,formatarData:formatarDataCurta,
+  acoes:{abrirCapitulo:id=>document.dispatchEvent(new CustomEvent('sim:abrir-capitulo',{detail:{id}})),abrirEventos:eventos&&acoes.abrirEventos?b=>abrirAtividade('eventos',b):undefined,abrirDesafio:b=>abrirAtividade('quiz',b,()=>document.dispatchEvent(new CustomEvent('sim:abrir-quiz',{detail:{pacoteId:PACOTE_DESAFIO,limite:3}}))),abrirProgresso:abrirProgresso?b=>{menuAberto=false;render();abrirProgresso();}:undefined},
+  progresso:()=>{const icone=document.querySelector('.progresso-chip-icone')?.textContent?.trim(),nome=document.querySelector('.progresso-chip-nome')?.textContent?.trim();let xp=NaN;try{xp=JSON.parse(localStorage.getItem('sistema-solar-progresso')||'null')?.xp;}catch(_){}return nome?{icone,nome,xp:Number.isFinite(xp)?xp:NaN}:null;}});
+ conteudo.append(inicio.el,destaques,grade);menu.append(cabMenu,conteudo);nav.append(menu);nav.onclick=e=>{if(e.target===nav)fecharExperiencias();};
  const painel=criar('div',null,'descobertas');painel.id='discoveries';painel.hidden=true;
  const biblioteca=criar('section',null,'aprendizado-biblioteca');biblioteca.setAttribute('role','dialog');biblioteca.setAttribute('aria-modal','true');biblioteca.setAttribute('aria-labelledby','discoveries-title');
  const cab=criar('header');const voltar=botao('‹','aprendizado-biblioteca-voltar');voltar.setAttribute('aria-label',copy.voltar);voltar.onclick=()=>abrirExperiencias();
- const titulo=criar('h1',copy.aprender);titulo.id='discoveries-title';titulo.tabIndex=-1;cab.append(voltar,titulo);
+ const titulo=criar('h1',t('aprenderTituloTela'));titulo.id='discoveries-title';titulo.tabIndex=-1;cab.append(voltar,titulo);
  const corpo=criar('div',null,'aprendizado-biblioteca-corpo'),listaGuias=criar('div',null,'roteiros-lista');const cartoesGuias=new Map();const roteiros=new Map(aprendizado.catalogo().map(r=>[r.id,r]));
  const grupos=new Map();
  const ordemTemas=['fundamentos','terra','lua','marte','observatorios','saturno','sondas-viagens'];
@@ -71,13 +77,20 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  const tela=botao(copy.cena);tela.id='fullscreen-toggle';tela.onclick=()=>{menuAberto=false;cinema=true;render();sairCena.focus();};grade.append(tela);
  const sairCena=botao(copy.mostrar,'cena-mostrar-controles');sairCena.id='scene-exit';sairCena.hidden=true;sairCena.onclick=()=>{cinema=false;render();focarEntrada();};
  document.body.append(nav,painel,sairCena);document.body.classList.add('com-navegacao');
- for(const b of entradas){b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-controls',nav.id);b.onclick=()=>menuAberto?fecharExperiencias():abrirExperiencias();}
+ for(const b of entradas){b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-controls',nav.id);b.dataset.area='inicio';b.onclick=()=>menuAberto?fecharExperiencias():abrirExperiencias();}
+ // Barra de 4 áreas. No dock (celular) os botões Explorar/Aprender/Hangar já estão na barra
+ // (mobile-dock.js); no desktop criamos Explorar/Aprender/Hangar ao lado do gatilho do Início.
+ const gatilho=entradas.find(e=>e.classList.contains('experiencias-trigger'));
+ if(gatilho){gatilho.textContent=`✦ ${t('inicioTitulo')}`;const grupo=[['explorar',t('explorar'),()=>selecionar('universo')],['aprender',t('areaAprender'),()=>selecionar('descobertas')],['hangar',t('areaHangar'),()=>selecionar('hangar')]].map(([area,nome,acao])=>{const b=botao(nome,`botao area-nav area-${area}`);b.dataset.area=area;b.onclick=acao;return b;});gatilho.after(...grupo);gatilho.parentElement?.setAttribute('role','group');gatilho.parentElement?.setAttribute('aria-label',t('areasNavegacao'));}
+ document.getElementById('mdock-btn-aprender')?.addEventListener('click',()=>selecionar('descobertas'));
+ document.getElementById('mdock-btn-hangar')?.addEventListener('click',()=>selecionar('hangar'));
+ function marcarAreas(){const atual=destino==='hangar'?'hangar':destino==='descobertas'||atividades[atividade]?.guia?'aprender':menuAberto&&!atividade?'inicio':'explorar';for(const el of document.querySelectorAll('[data-area]')){if(el.dataset.area===atual)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');}}
  const modoModal=()=>visivel(document.querySelector('.paywall-overlay'))||visivel(document.querySelector('.tutorial-overlay'))||!!hangar.frame?.contentDocument?.body?.classList.contains('reading-expanded')&&destino==='hangar';
  function render(){
   document.body.dataset.destino=destino;document.body.classList.toggle('nav-atividade',!!atividade);document.body.classList.toggle('nav-cinema',cinema);document.body.classList.toggle('nav-menu',menuAberto);
   document.body.classList.toggle('nav-guia',atividades[atividade]?.guia===true);
   nav.hidden=!menuAberto||!!atividade;painel.hidden=destino!=='descobertas'||!!atividade;sairCena.hidden=!cinema;
-  for(const b of entradas)b.setAttribute('aria-expanded',String(menuAberto));
+  for(const b of entradas)b.setAttribute('aria-expanded',String(menuAberto));marcarAreas();
   const universo=destino!=='hangar'||!!atividade,ativo=(destino==='universo'&&!menuAberto)||!!atividade;
   document.querySelector('#cena').style.visibility=universo?'visible':'hidden';document.querySelector('#cena').inert=!ativo;
   motor.setAtivo(ativo);hangar.setAtivo(destino==='hangar'&&!atividade);
@@ -94,7 +107,7 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
   if(document.body.classList.contains('nav-modal')!==modal)document.body.classList.toggle('nav-modal',modal);
  }
  function limparPaineis(){dock?.fecharPaineis();acoes.fecharPainelInfo?.();document.querySelector('.experiencias-itens')?.classList.remove('aberto');}
- function abrirExperiencias(){if(modoModal()||atividade)return false;limparPaineis();destino='universo';cinema=false;menuAberto=true;render();tituloMenu.focus({preventScroll:true});return true;}
+ function abrirExperiencias(){if(modoModal()||atividade)return false;limparPaineis();destino='universo';cinema=false;menuAberto=true;inicio.atualizar();render();tituloMenu.focus({preventScroll:true});return true;}
  function fecharExperiencias(){menuAberto=false;render();focarEntrada();}
  function selecionar(next,forcar=false){
   if(!['universo','hangar','descobertas'].includes(next)||(!forcar&&(modoModal()||atividade)))return false;
@@ -108,15 +121,15 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  }
  const permitirGuia=r=>r.recurso?premium.recurso(r.recurso):premium.permitido('hangar',r.nave);
  const exigirGuia=r=>r.recurso?premium.exigir(r.recurso,{roteiro:r.id}):premium.exigirItem('hangar',r.nave);
- function abrirAtividade(key,b){
+ function abrirAtividade(key,b,acaoAlternativa){
   if(modoModal()||atividade)return;
   key=resolverFenomeno(key);
   if(!atividades[key]?.acao)return false;
   const roteiro=roteiros.get(key);if(roteiro?.trilha?.startsWith('mundos-')){grupoBiblioteca='mundos';categoriaMundos=roteiro.trilha;filtrarBiblioteca();}if(roteiro?.pro&&!permitirGuia(roteiro)){guiaSugerido={id:key,origem:b};if(!exigirGuia(roteiro))return;guiaSugerido=null;}
   retornoAtividade=destino==='descobertas'?'descobertas':'experiencias';limparPaineis();origem=b;menuAberto=false;restaurarTempo=acoes.guardarTransporte();atividade=key;cinema=false;render();iniciandoAtividade=true;
-  try{const modo=modoDoFenomeno(key);if(modo){const estado=aprendizado.resumo(key);const abrir=modo==='estacoes'?acoes.abrirEstacoes:acoes.abrirMares;abrir({roteiro:true,passoInicial:estado.concluido?0:estado.passo,aoEtapa:(passo,concluido)=>aprendizado.registrarFenomeno(key,passo,concluido)});}else atividades[key].acao();}catch(error){console.warn('Atividade indisponível:',key,error);restaurarTempo?.();restaurarTempo=null;atividade=null;retornarAtividade();}finally{iniciandoAtividade=false;sincronizar();}
+  try{const modo=modoDoFenomeno(key);if(modo){const estado=aprendizado.resumo(key);const abrir=modo==='estacoes'?acoes.abrirEstacoes:acoes.abrirMares;abrir({roteiro:true,passoInicial:estado.concluido?0:estado.passo,aoEtapa:(passo,concluido)=>aprendizado.registrarFenomeno(key,passo,concluido)});}else (acaoAlternativa||atividades[key].acao)();}catch(error){console.warn('Atividade indisponível:',key,error);restaurarTempo?.();restaurarTempo=null;atividade=null;retornarAtividade();}finally{iniciandoAtividade=false;sincronizar();}
  }
- function retornarAtividade(){destino=retornoAtividade==='descobertas'?'descobertas':'universo';menuAberto=retornoAtividade==='experiencias';render();origem?.focus({preventScroll:true});}
+ function retornarAtividade(){destino=retornoAtividade==='descobertas'?'descobertas':'universo';menuAberto=retornoAtividade==='experiencias';if(menuAberto)inicio.atualizar();render();origem?.focus({preventScroll:true});}
  function sincronizar(){
   if(guardando||iniciandoAtividade)return;guardando=true;
   let naveLiberada=null,modoLiberado=null,guiaRetomar=null,focoCancelado=null,abrirGuia=null,focoRetomar=null;
@@ -184,7 +197,18 @@ export function iniciarNavegacao({motor,hangar,acoes,dock,aprendizado,premium,t,
  }
  function abrirTemaEstacoes(){if(modoModal()||atividade)return false;abrirAtividade('estacoes-guia',document.activeElement);return true;}
  function abrirTemaMares(){if(modoModal()||atividade)return false;abrirAtividade('mares-guia',document.activeElement);return true;}
- render();return {abrirTemaEstacoes,abrirTemaMares,selecionar,explorarNave,explorarPeca,continuarRoteiro,recomendarNave,sairHangar,experimentarModo,inspect:()=>({destino,atividade,cinema,ultimaArea,menuAberto}),voltar(){
+ // Contrato com as outras áreas (Lote D): sim:abrir-capitulo {id} abre o capítulo como o cartão de Aprender.
+ // Com paywall/tutorial aberto ou no Hangar o pedido é ignorado; com um capítulo aberto também (a pessoa já está
+ // nele); com outra atividade aberta (Eventos, Quiz, Comparador...) ela é fechada antes e, ao fim do capítulo,
+ // a pessoa volta ao Início.
+ function abrirCapitulo(id,b){
+  if(!id||modoModal()||destino==='hangar'||atividades[atividade]?.guia)return false;
+  if(!roteiros.has(resolverFenomeno(id))&&!roteiros.has(id))return false;
+  if(atividade){acoes.fecharOverlays?.();sincronizar();if(atividade)return false;}
+  abrirAtividade(id,b||cartoesGuias.get(id)?.botao||null);return !!atividade;
+ }
+ document.addEventListener('sim:abrir-capitulo',e=>{abrirCapitulo(e.detail?.id,nav.contains(document.activeElement)?document.activeElement:undefined);});
+ inicio.atualizar();render();return {abrirTemaEstacoes,abrirTemaMares,selecionar,explorarNave,explorarPeca,continuarRoteiro,recomendarNave,sairHangar,experimentarModo,inspect:()=>({destino,atividade,cinema,ultimaArea,menuAberto,inicio:inicio.estado()}),voltar(){
   if(visivel(document.querySelector('.paywall-overlay'))||visivel(document.querySelector('.tutorial-overlay')))return false;
   if(destino==='hangar'){
    const doc=hangar.frame.contentDocument;

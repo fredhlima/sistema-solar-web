@@ -4,7 +4,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Quadrântidas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-01-03',
-    descricao: 'Pico da chuva de meteoros Quadrântidas — até cerca de 80 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte.',
+    descricao: 'Pico da chuva de meteoros Quadrântidas na noite de 3 para 4 de janeiro — até cerca de 80 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte.',
     corpoFoco: null
   },
   {
@@ -20,7 +20,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Líridas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-04-22',
-    descricao: 'Pico da chuva de meteoros Líridas — até 20 meteoros por hora. Uma das chuvas mais antigas registradas pela humanidade, observada há mais de 2.600 anos. Deixa rastros brilhantes no céu noturno.',
+    descricao: 'Pico da chuva de meteoros Líridas na noite de 22 para 23 de abril — até 20 meteoros por hora. Uma das chuvas mais antigas registradas pela humanidade, observada há mais de 2.600 anos. Deixa rastros brilhantes no céu noturno.',
     corpoFoco: null
   },
   {
@@ -28,7 +28,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Eta Aquáridas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-05-06',
-    descricao: 'Pico da chuva de meteoros Eta Aquáridas — até cerca de 50 meteoros por hora. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
+    descricao: 'Pico da chuva de meteoros Eta Aquáridas na madrugada de 6 de maio, antes do amanhecer — até cerca de 50 meteoros por hora. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
     corpoFoco: null
   },
   {
@@ -132,7 +132,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Perseidas',
     tipo: 'chuva-meteoros',
     dataISO: '2028-08-12',
-    descricao: 'Pico de atividade da chuva de meteoros Perseidas — até 100 meteoros por hora. Melhor observação no céu noturno sem poluição luminosa.',
+    descricao: 'Pico de atividade da chuva de meteoros Perseidas na noite de 12 para 13 de agosto — até 100 meteoros por hora. Melhor observação no céu noturno sem poluição luminosa.',
     corpoFoco: null
   },
   {

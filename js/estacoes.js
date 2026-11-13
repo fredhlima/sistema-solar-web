@@ -12,8 +12,8 @@
 // por escrito seria ensinar o erro e corrigi-lo com legenda.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=313';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=313';
+import { getIdioma } from './i18n.js?v=314';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=314';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, proximoMarcoSolar, distanciaSolarUA, declinacaoSolar,

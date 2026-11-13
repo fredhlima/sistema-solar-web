@@ -1,4 +1,4 @@
-import { getIdioma } from './i18n.js?v=313';
+import { getIdioma } from './i18n.js?v=314';
 
 // Texts (pt/en/es)
 const TEXTOS = {
@@ -120,6 +120,9 @@ const GRAVIDADES = {
   plutao: 0.62
 };
 
+// Corpos que têm gravidade tabelada (a ficha do astro usa para decidir se mostra o botão)
+export const CORPOS_COM_PESO = Object.keys(GRAVIDADES);
+
 // Ordem dos corpos a exibir
 const CORPOS_ORDEM = [
   'terra', 'lua', 'sol', 'mercurio', 'venus', 'marte',
@@ -235,6 +238,7 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
   let pesoAtual = pesoCarro;
   let idadeAtual = idadeCarro;
   let bloqueiosPorCorpo = {};
+  let corpoFoco = null; // corpo destacado ao abrir pela ficha do astro
 
   // Map: premium undefined = all unlocked; premium set = check permits
   const temPremium = premium !== undefined;
@@ -279,6 +283,8 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
 
       const card = document.createElement('div');
       card.className = 'voce-no-espaco-card-item';
+      card.dataset.corpo = corpoId;
+      if (corpoId === corpoFoco) card.classList.add('voce-no-espaco-foco');
       if (!permitido) card.classList.add('voce-no-espaco-bloqueado');
 
       // Fundo com cores do corpo
@@ -461,8 +467,19 @@ export function iniciarVoceNoEspaco({ dados, premium }) {
   reconstruirGrid();
 
   // Open function
-  function abrir() {
+  // opcoes.corpo (opcional): abre já destacando o corpo (ficha do astro).
+  // Corpo Pro sem acesso: mostra o paywall em vez de abrir, como o toque no card.
+  function abrir(opcoes) {
+    const corpoId = opcoes && typeof opcoes === 'object' ? opcoes.corpo : null;
+    corpoFoco = corpoId && GRAVIDADES[corpoId] ? corpoId : null;
+    if (corpoFoco && !ePermitido(corpoFoco)) {
+      corpoFoco = null;
+      premium.exigirItem('voce-no-espaco', corpoId);
+      return;
+    }
     overlay.style.display = 'flex';
+    reconstruirGrid();
+    if (corpoFoco) grid.querySelector(`[data-corpo="${corpoFoco}"]`)?.scrollIntoView?.({ block: 'nearest' });
   }
 
   return { abrir, fechar };

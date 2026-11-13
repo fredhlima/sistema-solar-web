@@ -4,6 +4,8 @@ import {normalizarEstadoMares} from './mares-laboratorio.js?v=303';
 import {criarExperimento} from './aprendizado-experimento.js?v=303';
 import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=313';
 import { ROTEIROS } from './aprendizado-conteudo.js?v=313';
+import { pacoteDaTrilha } from './encaixes.js?v=2';
+import { t as tUI } from './i18n.js?v=314';
 import { FAMILIA } from './aprendizado-familia-conteudo.js?v=3';
 const etapasPadrao=[{titulo:'objetivo',corpo:'objetivoTexto'},{titulo:'observar',corpo:'observarTexto',acao:true},{titulo:'explicacao',corpo:'explicacaoTexto'},{titulo:'pergunta',corpo:'perguntaTexto',pergunta:true},{titulo:'recap',corpo:'recapTexto',recap:true}];
 const total=id=>ROTEIROS[id].etapas?.length||5;
@@ -79,7 +81,8 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   const textoResumo=resumoAnterior?{pt:'Você concluiu a versão anterior. Seu progresso foi preservado; recomece se quiser explorar as novas atividades.',en:'You completed the previous version. Your progress is preserved; start again to explore the new activities.',es:'Completaste la versión anterior. Tu progreso se conserva; vuelve a empezar para explorar las nuevas actividades.'}[lang]:texto('recapTexto');
   const aprofundamentos=roteiro.aprofundamentos|| (roteiro.relacionado?[{id:roteiro.relacionado,rotulo:'relacionadoTitulo'}]:[]);
   const trilha=trilhaDoRoteiro(idAtual),proximo=ROTEIROS[trilha?.proximo],essencial=trilha?.indiceEssencial>=0;
-  const continuar=proximo?`<button class="aprendizado-continuar" type="button" data-guia="${proximo.id}">${essencial?trilhaCopy.continuarGratis:trilhaCopy.proximo}: ${proximo.textos[lang].titulo}${proximo.pro?' · Pro':''} →</button>`:`<p class="aprendizado-trilha-fim">${essencial?trilhaCopy.fim:trilhaCopy.fimPro}</p>`;
+  const pacoteQuizFim=!proximo&&trilha?pacoteDaTrilha(essencial?'essencial':trilha.trilha.id):null;
+  const continuar=proximo?`<button class="aprendizado-continuar" type="button" data-guia="${proximo.id}">${essencial?trilhaCopy.continuarGratis:trilhaCopy.proximo}: ${proximo.textos[lang].titulo}${proximo.pro?' · Pro':''} →</button>`:`<p class="aprendizado-trilha-fim">${essencial?trilhaCopy.fim:trilhaCopy.fimPro}</p>${pacoteQuizFim?`<button class="aprendizado-quiz-trilha" type="button" data-pacote="${pacoteQuizFim}">${tUI('encaixeQuizTrilha')}</button>`:''}`;
   const opcionais=[...new Set([...aprofundamentosDoRoteiro(idAtual),...(roteiro.investigacao?[roteiro.investigacao]:[])])].map(id=>ROTEIROS[id]).filter(Boolean);
   const conviteInvestigacao=opcionais.length?`<div class="aprendizado-opcionais"><p>${trilhaCopy.aprofundar}</p>${opcionais.map(r=>`<button class="aprendizado-aprofundar" type="button" data-guia="${r.id}">${r.textos[lang].titulo} · Pro →</button>`).join('')}</div>`:'';
  const respostas=(pilotoRevisado(idAtual)||transferenciaRevisada(idAtual))&&estado.ordemResposta?['nao','sim']:['sim','nao'];
@@ -110,6 +113,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   raiz.querySelector('.aprendizado-modo-botao')?.addEventListener('click',()=>{emFamilia=!emFamilia;try{localStorage.setItem(chaveFamilia,emFamilia?'1':'0');}catch(_){}renderizar();raiz.querySelector('.aprendizado-modo-botao')?.focus({preventScroll:true});});
   raiz.querySelector('.aprendizado-continuar')?.addEventListener('click',e=>acoes.continuarRoteiro?.(e.currentTarget.dataset.guia));
   raiz.querySelectorAll('.aprendizado-aprofundar').forEach(b=>b.addEventListener('click',e=>acoes.continuarRoteiro?.(e.currentTarget.dataset.guia)));
+  raiz.querySelector('.aprendizado-quiz-trilha')?.addEventListener('click',e=>document.dispatchEvent(new CustomEvent('sim:abrir-quiz',{detail:{pacoteId:e.currentTarget.dataset.pacote}})));
   raiz.querySelector('.aprendizado-revisar')?.addEventListener('click',()=>{revisando=true;renderizar();});
   raiz.querySelectorAll('.aprendizado-relacionado').forEach(b=>b.addEventListener('click',()=>acoes.recomendarNave?.(b.dataset.nave)));
   raiz.querySelector('.aprendizado-repetir')?.addEventListener('click',()=>{registro.estado={...novoEstado(),iniciado:true};registro.atualizado=false;salvar();renderizar();});

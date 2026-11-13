@@ -336,3 +336,8 @@ body.modo-dock .voce-no-espaco-frase {
 }
 body.modo-dock .voce-no-espaco-selo { font-size: 8px; padding: 2px 5px; }
 body.modo-dock .voce-no-espaco-hint { font-size: 8px; line-height: 1.1; }
+
+.voce-no-espaco-card-item.voce-no-espaco-foco {
+  outline: 2px solid #5cc8ff;
+  outline-offset: 2px;
+}

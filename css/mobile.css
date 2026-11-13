@@ -497,8 +497,8 @@ body.modo-dock .comparador-painel {
   .mdock-ajuste { gap: 4px; }
   .mdock-speed { width: 58px; min-width: 58px; font-size: 11px; }
   .mdock-data { min-width: 90px; padding: 4px; font-size: 11px; }
-  body.com-navegacao .mdock-sec-exp { width: 60px; }
-  body.com-navegacao .mdock-sec-xp { width: 80px; font-size: 11px; }
+  body.com-navegacao .mdock-sec.mdock-area { font-size: 11px; padding: 6px 2px; }
+  .mdock-bar { gap: 4px; }
 }
 
 /* Leitura acessível: acompanha o tamanho de texto do iOS, preservando a base de 17pt. */
@@ -547,3 +547,8 @@ body.modo-dock .comparador-painel {
   #mdock-painel-exp.com-ficha .mdock-numero-rotulo,
   #mdock-painel-exp.com-ficha .mdock-numero-valor { min-width: 0; overflow-wrap: anywhere; }
 }
+
+/* Ligações da ficha do dock (Você no Espaço / Comparador) */
+.mdock-encaixes { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; grid-column: 1 / -1; }
+.mdock-encaixe { min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(131,201,255,.3); background: rgba(16,38,56,.9); color: #d6eafa; font: inherit; font-size: 13px; text-align: left; cursor: pointer; overflow-wrap: anywhere; }
+.mdock-encaixe:focus-visible { outline: 2px solid #ffb454; outline-offset: 2px; }

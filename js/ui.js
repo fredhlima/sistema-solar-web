@@ -1,6 +1,8 @@
-import { abrirPrivacidade } from './privacidade.js?v=313';
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=313';
+import { abrirPrivacidade } from './privacidade.js?v=314';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=314';
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
+import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=314';
+import { capituloDoEvento, capituloDaMissao } from './encaixes.js?v=2';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -22,6 +24,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
   // XP do sistema de progressão (js/progresso.js escuta este evento)
   const progressoEvento = (tipo, extra) =>
     document.dispatchEvent(new CustomEvent('sim:progresso', { detail: { tipo, ...(extra || {}) } }));
+  // Ligação para um capítulo (contrato com a navegação: sim:abrir-capitulo)
+  const abrirCapitulo = (id) =>
+    document.dispatchEvent(new CustomEvent('sim:abrir-capitulo', { detail: { id } }));
+  // Corpos mostrados no Comparador (o botão da ficha só aparece para eles, exceto a própria Terra)
+  const IDS_COMPARADOR = ['sol', 'mercurio', 'venus', 'terra', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'lua', 'plutao'];
   const criarSeloPro = () => {
     const selo = document.createElement('span');
     selo.className = 'premium-cadeado';
@@ -1171,6 +1178,13 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       html += `<button class="botao info-modo-btn" id="info-mares-btn">${t('maresLuaBotao')}</button>`;
     }
 
+    if (abrirVoce && CORPOS_COM_PESO.includes(corpo.id)) {
+      html += `<button class="botao info-modo-btn" id="info-peso-btn">${t('encaixePeso')}</button>`;
+    }
+    if (IDS_COMPARADOR.includes(corpo.id) && corpo.id !== 'terra') {
+      html += `<button class="botao info-modo-btn" id="info-comparar-btn">${t('encaixeComparar')}</button>`;
+    }
+
     html += `<button class="info-saiba-btn" id="info-saiba-btn"><span>${t('fichaSaibaMais')}</span><span>${t('saibaMenos')}</span></button>`;
 
     conteudo.innerHTML = html;
@@ -1195,6 +1209,21 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       btnMaresInfo.onclick = () => {
         progressoEvento('abriu-mares');
         abrirMares();
+      };
+    }
+
+    const btnPesoInfo = conteudo.querySelector('#info-peso-btn');
+    if (btnPesoInfo) {
+      btnPesoInfo.onclick = () => {
+        progressoEvento('abriu-voce');
+        abrirVoce({ corpo: corpo.id });
+      };
+    }
+    const btnCompararInfo = conteudo.querySelector('#info-comparar-btn');
+    if (btnCompararInfo) {
+      btnCompararInfo.onclick = () => {
+        progressoEvento('abriu-comparador');
+        abrirComparador({ corpo: corpo.id });
       };
     }
 
@@ -1560,6 +1589,17 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
       if (!premiumTem('eventos')) btn.appendChild(criarSeloPro());
       div.appendChild(btn);
 
+      // Evento -> capítulo que explica o fenômeno (só se houver capítulo liberado)
+      const idCapitulo = capituloDoEvento(evento);
+      if (idCapitulo) {
+        const btnCap = document.createElement('button');
+        btnCap.className = 'botao evento-btn evento-btn-capitulo';
+        btnCap.dataset.capitulo = idCapitulo;
+        btnCap.textContent = t('encaixeVerCapitulo');
+        btnCap.onclick = () => abrirCapitulo(idCapitulo);
+        div.appendChild(btnCap);
+      }
+
       conteudo.appendChild(div);
     });
   }
@@ -1645,7 +1685,15 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     root.appendChild(div);
   }
 
-  function abrirComparador() {
+  function abrirComparador(opcoes) {
+    // Vindo da ficha do astro: destaca o corpo ao lado da Terra
+    const corpoFoco = opcoes && typeof opcoes.corpo === 'string' && IDS_COMPARADOR.includes(opcoes.corpo) ? opcoes.corpo : null;
+    estado.comparadorFoco = corpoFoco && corpoFoco !== 'terra' ? [corpoFoco, 'terra'] : null;
+    if (corpoFoco === 'sol' && !estado.incluirSolComparador) {
+      estado.incluirSolComparador = true;
+      const cb = document.getElementById('comparador-incluir-sol');
+      if (cb) cb.checked = true;
+    }
     fecharPainelEventos();
     fecharCardMissao();
     if (estado.painelInfoAberto) {
@@ -1683,6 +1731,10 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
       const div = document.createElement('div');
       div.className = 'comparador-corpo';
+      div.dataset.corpo = idCorpo;
+      if (estado.comparadorFoco) {
+        div.classList.add(estado.comparadorFoco.includes(idCorpo) ? 'comparador-destaque' : 'comparador-esmaecido');
+      }
       // Clique no CARTÃO inteiro (não só no círculo): com o Sol incluído o
       // círculo de corpos pequenos (ex.: Terra) fica com poucos pixels de
       // diâmetro — precisa de uma área de toque maior que ele mesmo.
@@ -1717,9 +1769,14 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
 
       scroll.appendChild(div);
     });
+
+    if (estado.comparadorFoco) {
+      scroll.querySelector(`[data-corpo="${estado.comparadorFoco[0]}"]`)?.scrollIntoView?.({ block: 'nearest', inline: 'center' });
+    }
   }
 
   function fecharComparador() {
+    estado.comparadorFoco = null;
     const overlay = document.getElementById('comparador-overlay');
     if (overlay) {
       overlay.style.display = 'none';
@@ -1887,6 +1944,17 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
         btnSeguir.onclick = () => seguirMissao(idMissao);
         conteudo.appendChild(btnSeguir);
       }
+    }
+
+    // Missão -> capítulo da sonda correspondente
+    const idCapituloMissao = capituloDaMissao(idMissao);
+    if (idCapituloMissao) {
+      const btnCap = document.createElement('button');
+      btnCap.className = 'botao card-missao-btn-lancamento card-missao-btn-capitulo';
+      btnCap.dataset.capitulo = idCapituloMissao;
+      btnCap.textContent = t('encaixeVerCapitulo');
+      btnCap.onclick = () => abrirCapitulo(idCapituloMissao);
+      conteudo.appendChild(btnCap);
     }
 
     // Enable trajectory visibility (and reflect in side eye icon)
