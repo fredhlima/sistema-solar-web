@@ -2252,7 +2252,7 @@ export const TRADUCAO = {
     },
     "oposicao-marte-2027": {
       "nome": "Oposición de Marte",
-      "descricao": "Marte en oposición — el planeta más brillante y cercano a la Tierra. Ideal para observación con telescopios. Distancia de aproximación más pequeña."
+      "descricao": "Marte en oposición: el planeta queda opuesto al Sol y es visible toda la noche. Es una oposición distante, a unas 0,68 UA (~100 millones de km) de la Tierra. Ideal para observación con telescopios."
     },
     "conjuncao-venus-jupiter-2027": {
       "nome": "Conjunción Venus-Júpiter",
@@ -2272,11 +2272,11 @@ export const TRADUCAO = {
     },
     "geminideas-2030": {
       "nome": "Lluvia de Meteoros Geminidas",
-      "descricao": "Pico de la lluvia de meteoros Geminidas — hasta 150 meteoros por hora en cielo oscuro. La mejor lluvia de meteoros del año."
+      "descricao": "Pico de la lluvia de meteoros Geminidas en la noche del 13 al 14 de diciembre — hasta 150 meteoros por hora en cielo oscuro. La mejor lluvia de meteoros del año."
     },
     "quadrantidas-2026": {
       "nome": "Lluvia de Meteoros Cuadrántidas",
-      "descricao": "Pico de la lluvia de meteoros Cuadrántidas — hasta 120 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte."
+      "descricao": "Pico de la lluvia de meteoros Cuadrántidas — hasta cerca de 80 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte."
     },
     "liridas-2026": {
       "nome": "Lluvia de Meteoros Líridas",
@@ -2284,11 +2284,11 @@ export const TRADUCAO = {
     },
     "eta-aquaridas-2026": {
       "nome": "Lluvia de Meteoros Eta Acuáridas",
-      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas — hasta 60 meteoros por hora. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
+      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas — hasta cerca de 50 meteoros por hora. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
     },
     "eclipse-solar-total-2027": {
-      "nome": "Eclipse Solar Total (el más largo del siglo)",
-      "descricao": "El eclipse solar total más largo del siglo XXI: 6 minutos y 23 segundos de oscuridad total sobre Luxor, en Egipto. La franja de totalidad cruza el sur de España y el norte de África. Un récord que solo será superado en 2114."
+      "nome": "Eclipse Solar Total (uno de los más largos del siglo)",
+      "descricao": "Uno de los eclipses solares totales más largos del siglo XXI: hasta 6 minutos y 23 segundos de oscuridad total sobre Luxor, en Egipto. La franja de totalidad cruza el sur de España y el norte de África."
     },
     "eclipse-solar-total-2028": {
       "nome": "Eclipse Solar Total en Australia",
@@ -2308,11 +2308,11 @@ export const TRADUCAO = {
     },
     "eclipse-solar-anular-2030": {
       "nome": "Eclipse Solar Anular",
-      "descricao": "Eclipse solar anular que forma un anillo de fuego en el cielo. Observable en Argelia, Túnez, Libia, Grecia y Turquía. Uno de los espectáculos visuales más impresionantes."
+      "descricao": "Eclipse solar anular que forma un anillo de fuego en el cielo. Observable en Argelia, Túnez, Grecia y Turquía. Uno de los espectáculos visuales más impresionantes."
     },
     "eclipse-solar-anular-2031": {
       "nome": "Eclipse Solar Anular",
-      "descricao": "Eclipse solar anular visible en Angola, Namibia, Zambia y Tanzania. El anillo de fuego dura hasta 5 minutos y medio en algunos lugares. Una alineación celestial impresionante."
+      "descricao": "Eclipse solar anular visible en Angola, República Democrática del Congo, Zambia y Tanzania. El anillo de fuego dura hasta 5 minutos y medio en algunos lugares. Una alineación celestial impresionante."
     },
     "eclipse-lunar-total-2032": {
       "nome": "Eclipse Lunar Total",
@@ -2332,7 +2332,7 @@ export const TRADUCAO = {
     },
     "maxima-elongacao-mercurio-2034": {
       "nome": "Máxima Elongación de Mercurio",
-      "descricao": "Mercurio alcanza su mayor separación angular del Sol en el cielo — hasta 28°. La mejor oportunidad para observar al planeta esquivo al atardecer. Un planeta que pocos logran ver."
+      "descricao": "Mercurio alcanza su mayor separación angular del Sol en el cielo — cerca de 27°. La mejor oportunidad para observar al planeta esquivo al amanecer, antes de la salida del Sol. Un planeta que pocos logran ver."
     },
     "eclipse-solar-total-2035": {
       "nome": "Eclipse Solar Total en Asia",
@@ -2340,31 +2340,27 @@ export const TRADUCAO = {
     },
     "eclipse-lunar-total-2036": {
       "nome": "Eclipse Lunar Total",
-      "descricao": "La Luna cruza el centro de la sombra de la Tierra en un eclipse total profundo y oscuro. Visible desde las Américas, Europa y África. Cuanto más polvo tenga la atmósfera terrestre, más roja se ve la Luna."
+      "descricao": "Eclipse lunar total largo, con cerca de 1 h 14 min de totalidad. Visible desde las Américas, Europa y África. Cuanto más polvo tenga la atmósfera terrestre, más roja se ve la Luna."
     },
     "oposicao-saturno-2032": {
       "nome": "Oposición de Saturno",
       "descricao": "Saturno en oposición — la mejor época para observar el planeta con anillos. Los anillos están en máxima apertura, ofreciendo una vista espectacular."
     },
-    "conjuncao-venus-mercurio-2034": {
-      "nome": "Conjunción Venus-Mercurio Rara",
-      "descricao": "Venus y Mercurio en conjunción muy cercana. Evento raro — los dos planetas internos más cercanos posibles en el cielo."
-    },
     "oposicao-urano-2035": {
       "nome": "Oposición de Urano",
-      "descricao": "Urano en oposición — el planeta helado está en su posición más brillante. Requiere telescopio para observación, pero alcanza magnitud 5.7."
+      "descricao": "Urano en oposición — el planeta helado está en su posición más brillante. Requiere telescopio para observación, pero alcanza magnitud 5.5."
     },
     "perseidas-2038": {
-      "nome": "Lluvia de Meteoros Perseidas (Pico Alto)",
-      "descricao": "Pico esperado de hasta 150 meteoros por hora — Perseidas en año de actividad excepcional. Uno de los mejores espectáculos de meteoros del año."
+      "nome": "Lluvia de Meteoros Perseidas",
+      "descricao": "Pico esperado la noche del 12 al 13 de agosto — hasta cerca de 100 meteoros por hora. Uno de los mejores espectáculos de meteoros del año."
     },
     "oposicao-netuno-2040": {
       "nome": "Oposición de Neptuno",
-      "descricao": "Neptuno en oposición — el planeta más distante del sistema solar está en su posición más brillante. Alcanza magnitud 7.8 (observable con binoculares)."
+      "descricao": "Neptuno en oposición — el planeta más distante del sistema solar está en su posición más brillante. Alcanza magnitud 7.7 (observable con binoculares)."
     },
     "perihelio-halley-2061": {
       "nome": "Retorno del Cometa Halley",
-      "descricao": "El famoso Cometa Halley alcanza su perihelio — el paso más cercano al Sol. Será visible a simple vista durante semanas. La próxima oportunidad de ver este visitante después de 2061 será en 2136."
+      "descricao": "El famoso Cometa Halley alcanza su perihelio — el paso más cercano al Sol. Será visible a simple vista durante semanas. La próxima oportunidad de ver este visitante después de 2061 será en 2134."
     },
     "equinocio-marco-2026": {
       "nome": "Equinoccio de Marzo",

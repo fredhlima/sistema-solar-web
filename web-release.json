@@ -1,9 +1,10 @@
 {
-  "version": "main314",
-  "sourceCommit": "762cbb7b708401e9e0514bd0c3ae9fa4318bb62f",
-  "chapters": 16,
+  "version": "main315",
+  "sourceCommit": "8597d5f45d752a8c72993a9bd1727e0cafe8f58c",
+  "chapters": 31,
   "spacecraft": 4,
   "explorarMissions": 10,
-  "scope": "10 essential free lessons, 6 Pro deep dives; Hubble free; Apollo11 visual mission free and 9 Pro missions independent of Hangar",
-  "generatedAt": "2026-11-08"
+  "resources": ["quiz", "eventos", "voce-no-espaco"],
+  "scope": "Onda 1: 10 essential free lessons, 21 Pro deep dives and worlds; Quiz, Eventos and Voce no Espaco on; Hubble free; Apollo11 visual mission free and 9 Pro missions",
+  "generatedAt": "2026-11-12"
 }

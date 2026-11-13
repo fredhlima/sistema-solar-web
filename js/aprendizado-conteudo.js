@@ -1,4 +1,4 @@
-import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=312';
+import {roteiroDisponivel, naveDisponivel} from './release-scope.js?v=313';
 import {MISSAO_ROSETTA} from './rosetta-missao-conteudo.js?v=2';
 import {MISSAO_JUNO} from './juno-missao-conteudo.js?v=2';
 import {MISSAO_PARKER} from './parker-missao-conteudo.js?v=2';

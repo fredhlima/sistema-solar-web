@@ -1,7 +1,7 @@
 import {resolverFenomeno,modoDoFenomeno} from './fenomenos-unificados.js?v=312';
-import {TRILHAS, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=312';
-import { naveDisponivel } from './release-scope.js?v=312';
-import { destinoNave } from '../hangar/js/hangar-access.js?v=312';
+import {TRILHAS, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=313';
+import { naveDisponivel } from './release-scope.js?v=313';
+import { destinoNave } from '../hangar/js/hangar-access.js?v=313';
 // A cena é o ponto de partida; Experiências é um menu contextual, sem barra permanente.
 const TEXTOS={
  pt:{experiencias:'Experiências',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves em 3D · Hubble grátis',aprenderNota:'Descubra o espaço por assunto',fechar:'Fechar experiências',voltar:'Voltar às experiências',cena:'Só a cena',mostrar:'Mostrar controles',novo:'Começar · grátis',retomar:'Retomar',rever:'Rever roteiro',quiz:'Planetas grátis',pro:'Pro'},

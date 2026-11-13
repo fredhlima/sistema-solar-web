@@ -48,7 +48,7 @@ body.nav-atividade #mdock,body.nav-atividade .barra-acoes,body.nav-atividade .co
 body.nav-menu .mdock-titulo,body.nav-menu .mdock-topo-dir{visibility:hidden}
 body.com-navegacao.nav-atividade #ui-root{z-index:150}
 body.com-navegacao .mdock-cal{max-height:calc(100% - var(--safe-top,0px) - var(--mdock-bar-h,95px) - 8px)}
-body.com-navegacao.quiz-encontrando #mdock,body.com-navegacao.quiz-encontrando #mdock-btn-exp,body.com-navegacao.quiz-encontrando #mdock-painel-exp{visibility:visible;pointer-events:auto}
+body.com-navegacao.quiz-encontrando #mdock{visibility:visible;pointer-events:none}body.com-navegacao.quiz-encontrando #mdock-btn-exp,body.com-navegacao.quiz-encontrando #mdock-painel-exp{visibility:visible;pointer-events:auto}
 body.com-navegacao.quiz-encontrando .mdock-transporte,body.com-navegacao.quiz-encontrando .mdock-sec-xp,body.com-navegacao.quiz-encontrando .mdock-topo-dir,body.com-navegacao.quiz-encontrando .mdock-titulo{visibility:hidden;pointer-events:none}
 body.com-navegacao.modo-girar .experiencias-overlay,body.com-navegacao.modo-girar .descobertas,body.com-navegacao.modo-girar .cena-mostrar-controles{display:none}
 @media(max-height:420px){.experiencias-conteudo{padding:10px 14px 12px}.experiencias-destaques{margin-bottom:10px;gap:10px}.experiencias-destaques button{min-height:76px;padding:10px 12px}.experiencias-grade button{min-height:54px}.aprendizado-biblioteca-corpo{padding:10px 14px 12px}}

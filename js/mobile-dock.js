@@ -1,4 +1,4 @@
-import { abrirPrivacidade } from './privacidade.js?v=312';
+import { abrirPrivacidade } from './privacidade.js?v=313';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
 // Reusa o motor real e o "saco de ações" do ui.js (nada de simulação falsa).
@@ -7,7 +7,7 @@ import { abrirPrivacidade } from './privacidade.js?v=312';
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=312';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=313';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local
@@ -586,8 +586,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
   // caminho porque os testes miravam os ids do desktop (`btn-estacoes`).
   //
   // A ordem espelha a do desktop: os dois modos vêm depois de "Você no
-  // Espaço". `filter(Boolean)` protege o caso de `iniciarUI` ter sido montado
-  // sem eles.
+  // Espaço". O filtro descarta qualquer item cuja `acao` não seja função
+  // (entrada opcional ausente ou ação não injetada por `iniciarUI`): sem isso
+  // o botão era criado e lançava TypeError ao ser tocado.
   function montarExperiencias(shell) {
     const wrap = document.createElement('div');
     wrap.className = 'mdock-xp-lista';
@@ -602,7 +603,7 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
       // Os laboratórios de investigação e o 3D seguem sob o acesso Pro.
       acoes.abrirEstacoes && { label: t('btnEstacoes'), icone: SVG_ESTACOES, acao: acoes.abrirEstacoes, pro: false },
       acoes.abrirMares && { label: t('btnMares'), icone: SVG_MARES, acao: acoes.abrirMares, pro: false },
-    ].filter(Boolean).forEach((it) => {
+    ].filter(it => it && typeof it.acao === 'function').forEach((it) => {
       const b = document.createElement('button');
       b.className = 'mdock-xp-btn' + (it.tour ? ' mdock-xp-btn-tour' : '');
       b.innerHTML = it.icone;

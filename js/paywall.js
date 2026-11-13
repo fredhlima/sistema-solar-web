@@ -1,5 +1,5 @@
-import { NAVES_1_0 } from './release-scope.js?v=312';
-import { getIdioma } from './i18n.js?v=312';
+import { NAVES_1_0 } from './release-scope.js?v=313';
+import { getIdioma } from './i18n.js?v=313';
 
 const AVISO_TESTE = {
   pt: 'Compra simulada de teste: libera o Pro neste aparelho, sem cobrança.',

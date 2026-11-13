@@ -4,7 +4,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Quadrântidas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-01-03',
-    descricao: 'Pico da chuva de meteoros Quadrântidas — até 120 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte.',
+    descricao: 'Pico da chuva de meteoros Quadrântidas — até cerca de 80 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte.',
     corpoFoco: null
   },
   {
@@ -28,7 +28,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Eta Aquáridas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-05-06',
-    descricao: 'Pico da chuva de meteoros Eta Aquáridas — até 60 meteoros por hora. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
+    descricao: 'Pico da chuva de meteoros Eta Aquáridas — até cerca de 50 meteoros por hora. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
     corpoFoco: null
   },
   {
@@ -51,7 +51,7 @@ export const EVENTOS = [
     id: 'equinocio-setembro-2026',
     nome: 'Equinócio de Setembro',
     tipo: 'estacao',
-    dataISO: '2026-09-23',
+    dataISO: '2026-09-22',
     descricao: 'De novo dia e noite quase iguais no planeta inteiro. O Sol cruza o equador, agora indo para o sul: começa a primavera no Brasil e o outono no hemisfério norte.',
     corpoFoco: 'terra'
   },
@@ -68,7 +68,7 @@ export const EVENTOS = [
     nome: 'Oposição de Marte',
     tipo: 'oposicao',
     dataISO: '2027-02-19',
-    descricao: 'Marte em oposição — o planeta mais brilhante e próximo da Terra. Ideal para observação com telescópios. Menor distância de aproximação.',
+    descricao: 'Marte em oposição: o planeta fica do lado oposto ao Sol e visível a noite toda. É uma oposição distante, a cerca de 0,68 UA (~100 milhões de km) da Terra. Ideal para observação com telescópios.',
     corpoFoco: 'marte'
   },
   {
@@ -97,10 +97,10 @@ export const EVENTOS = [
   },
   {
     id: 'eclipse-solar-total-2027',
-    nome: 'Eclipse Solar Total (o mais longo do século)',
+    nome: 'Eclipse Solar Total (um dos mais longos do século)',
     tipo: 'eclipse',
     dataISO: '2027-08-02',
-    descricao: 'O eclipse solar total mais longo do século XXI: 6 minutos e 23 segundos de escuridão total sobre Luxor, no Egito. A faixa de totalidade cruza o sul da Espanha e o norte da África. Um recorde que só será batido em 2114.',
+    descricao: 'Um dos eclipses solares totais mais longos do século XXI: até 6 minutos e 23 segundos de escuridão total sobre Luxor, no Egito. A faixa de totalidade cruza o sul da Espanha e o norte da África.',
     corpoFoco: 'terra'
   },
   {
@@ -115,7 +115,7 @@ export const EVENTOS = [
     id: 'solsticio-dezembro-2027',
     nome: 'Solstício de Dezembro',
     tipo: 'estacao',
-    dataISO: '2027-12-22',
+    dataISO: '2027-12-21',
     descricao: 'O Sol chega ao ponto mais ao sul do céu: é o dia mais longo do ano no Brasil e o mais curto na Europa. Na Antártida o Sol não se põe; no Ártico é noite o dia inteiro.',
     corpoFoco: 'terra'
   },
@@ -147,7 +147,7 @@ export const EVENTOS = [
     id: 'superlua-2029',
     nome: 'Superlua (Lua Cheia no Perigeu)',
     tipo: 'marco',
-    dataISO: '2029-03-30',
+    dataISO: '2029-03-29',
     descricao: 'A Lua cheia coincide com seu ponto mais próximo à Terra — uma superlua. Aparenta até 14% maior no céu. Fenômeno raro que afeta as marés de forma mais intensa.',
     corpoFoco: 'lua'
   },
@@ -180,7 +180,7 @@ export const EVENTOS = [
     nome: 'Eclipse Solar Anular',
     tipo: 'eclipse',
     dataISO: '2030-06-01',
-    descricao: 'Eclipse solar anular formando um anel de fogo no céu. Observável na Argélia, Tunísia, Líbia, Grécia e Turquia. Um dos espetáculos visuais mais impressionantes.',
+    descricao: 'Eclipse solar anular formando um anel de fogo no céu. Observável na Argélia, Tunísia, Grécia e Turquia. Um dos espetáculos visuais mais impressionantes.',
     corpoFoco: 'terra'
   },
   {
@@ -188,7 +188,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Geminídeas',
     tipo: 'chuva-meteoros',
     dataISO: '2030-12-13',
-    descricao: 'Pico da chuva de meteoros Geminídeas — até 150 meteoros por hora em céu escuro. Melhor chuva de meteoros do ano.',
+    descricao: 'Pico da chuva de meteoros Geminídeas na noite de 13 para 14 de dezembro — até 150 meteoros por hora em céu escuro. Melhor chuva de meteoros do ano.',
     corpoFoco: null
   },
   {
@@ -196,7 +196,7 @@ export const EVENTOS = [
     nome: 'Eclipse Solar Anular',
     tipo: 'eclipse',
     dataISO: '2031-05-21',
-    descricao: 'Eclipse solar anular visível em Angola, Namíbia, Zâmbia e Tanzânia. O anel de fogo dura até 5 minutos e meio em alguns locais. Um alinhamento celestial impressionante.',
+    descricao: 'Eclipse solar anular visível em Angola, República Democrática do Congo, Zâmbia e Tanzânia. O anel de fogo dura até 5 minutos e meio em alguns locais. Um alinhamento celestial impressionante.',
     corpoFoco: 'terra'
   },
   {
@@ -243,17 +243,9 @@ export const EVENTOS = [
     id: 'maxima-elongacao-mercurio-2034',
     nome: 'Máxima Elongação de Mercúrio',
     tipo: 'marco',
-    dataISO: '2034-03-08',
-    descricao: 'Mercúrio atinge seu maior afastamento angular do Sol no céu — até 28° de distância. Melhor oportunidade para observar o planeta esquivo ao entardecer. Um planeta que poucos conseguem ver.',
+    dataISO: '2034-03-09',
+    descricao: 'Mercúrio atinge seu maior afastamento angular do Sol no céu — cerca de 27° de distância. Melhor oportunidade para observar o planeta esquivo ao amanhecer, antes do nascer do Sol. Um planeta que poucos conseguem ver.',
     corpoFoco: 'mercurio'
-  },
-  {
-    id: 'conjuncao-venus-mercurio-2034',
-    nome: 'Conjunção Vênus-Mercúrio Rara',
-    tipo: 'conjuncao',
-    dataISO: '2034-03-22',
-    descricao: 'Vênus e Mercúrio em conjunção muito próxima. Evento raro — os dois planetas internos mais próximos possível no céu.',
-    corpoFoco: null
   },
   {
     id: 'eclipse-solar-total-2035',
@@ -266,12 +258,11 @@ export const EVENTOS = [
   {
     // id mantido por compatibilidade (progresso salvo); não há oposição de Urano
     // em 2035 — a de 30/12/2034 é a mais próxima (checagem de 24/09/2026).
-    // Netuno 2040: data calculada pelo período sinódico (±2 dias).
     id: 'oposicao-urano-2035',
     nome: 'Oposição de Urano',
     tipo: 'oposicao',
     dataISO: '2034-12-30',
-    descricao: 'Urano em oposição — o planeta gelado está no seu mais brilhante. Requer telescópio para observação, mas alcança magnitude 5,7.',
+    descricao: 'Urano em oposição — o planeta gelado está no seu mais brilhante. Requer telescópio para observação, mas alcança magnitude 5,5.',
     corpoFoco: 'urano'
   },
   {
@@ -279,23 +270,24 @@ export const EVENTOS = [
     nome: 'Eclipse Lunar Total',
     tipo: 'eclipse',
     dataISO: '2036-02-11',
-    descricao: 'A Lua cruza o centro da sombra da Terra num eclipse total profundo e escuro. Visível das Américas, Europa e África. Quanto mais poluída de poeira estiver a atmosfera da Terra, mais vermelha a Lua fica.',
+    descricao: 'Eclipse lunar total longo, com cerca de 1h14 de totalidade. Visível das Américas, Europa e África. Quanto mais poluída de poeira estiver a atmosfera da Terra, mais vermelha a Lua fica.',
     corpoFoco: 'lua'
   },
   {
     id: 'perseidas-2038',
-    nome: 'Chuva de Meteoros Perseidas (Pico Alto)',
+    nome: 'Chuva de Meteoros Perseidas',
     tipo: 'chuva-meteoros',
     dataISO: '2038-08-12',
-    descricao: 'Pico esperado de até 150 meteoros por hora — Perseidas em ano de atividade excepcional. Um dos melhores espetáculos de meteoros do ano.',
+    descricao: 'Pico esperado na noite de 12 para 13 de agosto — até cerca de 100 meteoros por hora. Um dos melhores espetáculos de meteoros do ano.',
     corpoFoco: null
   },
   {
+    // Data conferida na JPL Horizons em 12/11/2026.
     id: 'oposicao-netuno-2040',
     nome: 'Oposição de Netuno',
     tipo: 'oposicao',
-    dataISO: '2040-10-26',
-    descricao: 'Netuno em oposição — o planeta mais distante do sistema solar está no seu mais brilhante. Alcança magnitude 7,8 (observável com binóculos).',
+    dataISO: '2040-10-27',
+    descricao: 'Netuno em oposição — o planeta mais distante do sistema solar está no seu mais brilhante. Alcança magnitude 7,7 (observável com binóculos).',
     corpoFoco: 'netuno'
   },
   {
@@ -303,7 +295,7 @@ export const EVENTOS = [
     nome: 'Retorno do Cometa Halley',
     tipo: 'cometa',
     dataISO: '2061-07-28',
-    descricao: 'O famoso Cometa Halley atinge seu periélio — a passagem mais próxima do Sol. Será visível a olho nu durante semanas. Próxima oportunidade de ver este visitante depois de 2061 será 2136.',
+    descricao: 'O famoso Cometa Halley atinge seu periélio — a passagem mais próxima do Sol. Será visível a olho nu durante semanas. Próxima oportunidade de ver este visitante depois de 2061 será 2134.',
     corpoFoco: 'halley'
   }
 ];

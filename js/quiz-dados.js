@@ -742,7 +742,7 @@ export const QUIZ_PACOTES = [
         id: 'recordes-5',
         tipo: 'multipla',
         texto: {
-          pt: 'Qual é o corpo mais denso do sistema solar (exeto o próprio Sol)?',
+          pt: 'Qual é o corpo mais denso do sistema solar (exceto o próprio Sol)?',
           en: 'What is the densest body in the solar system (except the Sun itself)?',
           es: '¿Cuál es el cuerpo más denso del sistema solar (excepto el propio Sol)?'
         },
@@ -751,11 +751,11 @@ export const QUIZ_PACOTES = [
           en: ['Mercury', 'Earth', 'Moon', 'Jupiter'],
           es: ['Mercurio', 'Tierra', 'Luna', 'Júpiter']
         },
-        corretaIndex: 0,
+        corretaIndex: 1,
         explicacao: {
-          pt: 'Mercúrio tem a maior densidade porque é feito principalmente de ferro — sua massa se concentra em um núcleo de ferro que ocupa 75% da massa total do planeta!',
-          en: 'Mercury has the highest density because it is mostly made of iron — its mass is concentrated in an iron core that makes up 75% of the planet\'s total mass!',
-          es: 'Mercurio tiene la mayor densidad porque está hecho principalmente de hierro — su masa se concentra en un núcleo de hierro que ocupa el 75% de la masa total del planeta.'
+          pt: 'A Terra é o corpo mais denso do sistema solar (exceto o Sol), com 5,51 g/cm³. Isso se deve ao núcleo de ferro e níquel e à compressão causada pela própria gravidade. Mercúrio vem logo depois, com 5,43 g/cm³, por ter um núcleo de ferro proporcionalmente enorme.',
+          en: 'Earth is the densest body in the solar system (except the Sun), at 5.51 g/cm³. This is due to its iron-nickel core and the compression caused by its own gravity. Mercury comes right after, at 5.43 g/cm³, because its iron core is proportionally huge.',
+          es: 'La Tierra es el cuerpo más denso del sistema solar (excepto el Sol), con 5,51 g/cm³. Se debe a su núcleo de hierro y níquel y a la compresión causada por su propia gravedad. Mercurio viene justo después, con 5,43 g/cm³, por tener un núcleo de hierro proporcionalmente enorme.'
         }
       },
       {
@@ -922,9 +922,9 @@ export const QUIZ_PACOTES = [
         id: 'recordes-14',
         tipo: 'multipla',
         texto: {
-          pt: 'Qual corpo tem o menor tamanho mas densidade altíssima (estrela de nêutrons-like)?',
-          en: 'Which body has the smallest size but extremely high density?',
-          es: '¿Cuál cuerpo tiene el tamaño más pequeño pero densidad altísima?'
+          pt: 'Qual destes corpos é pequeno, mas quase tão denso quanto a Terra?',
+          en: 'Which of these bodies is small but almost as dense as Earth?',
+          es: '¿Cuál de estos cuerpos es pequeño, pero casi tan denso como la Tierra?'
         },
         opcoes: {
           pt: ['Plutão', 'Ceres', 'Mercúrio', 'Nenhum (o Sol é o mais denso)'],
@@ -933,9 +933,9 @@ export const QUIZ_PACOTES = [
         },
         corretaIndex: 2,
         explicacao: {
-          pt: 'Mercúrio é o corpo mais denso do sistema solar (exceto o Sol) com 5,43 g/cm³. Apesar de ser pequeno (4.879 km), tem um núcleo de ferro gigante que representa 75% de sua massa. É como um núcleo de planeta embrulhado em uma fina casca de rocha.',
-          en: 'Mercury is the densest body in the solar system (except the Sun) with 5.43 g/cm³. Despite being small (4,879 km), it has a giant iron core representing 75% of its mass. It is like a planet\'s core wrapped in a thin shell of rock.',
-          es: 'Mercurio es el cuerpo más denso del sistema solar (excepto el Sol) con 5,43 g/cm³. A pesar de ser pequeño (4.879 km), tiene un núcleo de hierro gigante que representa el 75% de su masa. Es como un núcleo planetario envuelto en una capa delgada de roca.'
+          pt: 'Mercúrio é pequeno (4.879 km), mas tem densidade altíssima: 5,43 g/cm³, quase a da Terra. Plutão (1,85 g/cm³) e Ceres (2,16 g/cm³) são bem menos densos. O segredo de Mercúrio é um núcleo de ferro enorme, que ocupa cerca de 85% do raio do planeta. É como um núcleo de planeta embrulhado em uma fina casca de rocha.',
+          en: 'Mercury is small (4,879 km) but has a very high density: 5.43 g/cm³, almost as high as Earth. Pluto (1.85 g/cm³) and Ceres (2.16 g/cm³) are far less dense. Mercury\'s secret is a huge iron core that fills about 85% of the planet\'s radius. It is like a planet core wrapped in a thin shell of rock.',
+          es: 'Mercurio es pequeño (4.879 km), pero tiene una densidad altísima: 5,43 g/cm³, casi la de la Tierra. Plutón (1,85 g/cm³) y Ceres (2,16 g/cm³) son mucho menos densos. El secreto de Mercurio es un núcleo de hierro enorme que ocupa cerca del 85% del radio del planeta. Es como un núcleo planetario envuelto en una capa delgada de roca.'
         }
       },
       {

@@ -1,4 +1,4 @@
-import { getIdioma } from './i18n.js?v=312';
+import { getIdioma } from './i18n.js?v=313';
 
 // Texts (pt/en/es)
 const TEXTOS = {
