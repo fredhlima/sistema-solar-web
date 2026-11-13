@@ -251,6 +251,13 @@ body.modo-dock .card-missao {
   bottom: var(--mdock-bar-h, 56px); top: calc(54px + var(--safe-top));
   width: min(46vw, 460px); border-radius: 16px 16px 0 0; z-index: 60;
 }
+/* O card tem altura fixa (top+bottom): o corpo preenche e só o conteúdo rola por
+   dentro. Sem isto o max-height:320px de .card-missao-conteudo ultrapassava o card
+   no celular deitado e "Entender no capítulo" ficava sob a barra inferior. */
+/* (o display do card é inline — block/none —, por isso o corpo usa height:100%) */
+body.modo-dock .card-missao-corpo { height: 100%; min-height: 0; display: flex; flex-direction: column; box-sizing: border-box; }
+body.modo-dock .card-missao-header { flex: none; }
+body.modo-dock .card-missao-conteudo { flex: 0 1 auto; min-height: 0; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .mdock-painel-cabeca {
   box-sizing: border-box; min-height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 7px 14px;
   border-bottom: 1px solid rgba(120, 160, 255, .08); cursor: pointer;

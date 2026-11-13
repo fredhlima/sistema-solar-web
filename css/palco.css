@@ -961,5 +961,9 @@ body .palco-card.palco-explicacao .palco-card-nota {
 
 .palco-medicoes > div { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .palco-medicoes span { overflow-wrap: anywhere; font-size: 0.8rem; }
+/* Fechado (telas baixas), o card mostra só o título. As linhas "Registrar A/B"
+   são filhas diretas, não um .palco-card-valor: sem esta regra elas continuavam
+   visíveis numa linha só e "Registrar B" saía cortado na borda do card. */
+.palco-medicoes.palco-card-colapsado > div { display: none; }
 
 .palco-roteiro-historico { margin: 0 0 8px; font-size: 0.82rem; line-height: 1.35; color: #cfdbf1; }

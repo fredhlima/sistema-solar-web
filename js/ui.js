@@ -1735,7 +1735,11 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     const corposComparador = idsCorpo.map(id => dados.corpos.find(c => c.id === id)).filter(Boolean);
     const diametroPxDe = c => ((c.raioKm || 6371) / 6371) * 56; // Terra = 56px
     const maiorPx = Math.max(...corposComparador.map(diametroPxDe));
-    const fatorEscala = Math.min(1, 480 / maiorPx);
+    // 480px em telas altas; em celular deitado (altura ~400-440) o maior corpo
+    // precisa caber na faixa de rolagem (altura da tela - cabeçalho/toggle/rótulo),
+    // senão Júpiter vazava por cima e por baixo. A proporção entre corpos é mantida.
+    const alturaMaxCorpo = Math.max(100, Math.min(480, window.innerHeight - 240));
+    const fatorEscala = Math.min(1, alturaMaxCorpo / maiorPx);
 
     idsCorpo.forEach(idCorpo => {
       const corpo = dados.corpos.find(c => c.id === idCorpo);

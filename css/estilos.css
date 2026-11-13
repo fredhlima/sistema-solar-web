@@ -2255,6 +2255,9 @@ body.modo-dock .voce-no-espaco-overlay,
 body.modo-dock .paywall-overlay {
   align-items: stretch !important;
   justify-content: stretch !important;
+  /* border-box: o overlay (width:100%) somava o padding das safe areas e o painel
+     vazava ~62px além da borda direita (comparador no iPhone deitado) */
+  box-sizing: border-box !important;
   /* laterais: notch/Dynamic Island viram borda ESQUERDA/DIREITA em paisagem —
      sem isto o conteúdo das páginas colava na área de risco (iPhone do Fred) */
   padding: 0 var(--safe-right) 0 var(--safe-left) !important;

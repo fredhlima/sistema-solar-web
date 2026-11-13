@@ -2,7 +2,7 @@ import { recursoDisponivel } from './release-scope.js?v=314';
 import * as THREE from 'three';
 import { DADOS } from './dados.js?v=311';
 import { SistemaSolar3D } from './motor3d.js?v=312';
-import { iniciarUI } from './ui.js?v=317';
+import { iniciarUI } from './ui.js?v=318';
 import { iniciarMobileDock } from './mobile-dock.js?v=317';
 import { EVENTOS } from './eventos.js?v=16';
 import { MISSOES as MISSOES_COMPLETAS } from './missoes.js?v=13';
