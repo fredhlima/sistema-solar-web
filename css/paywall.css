@@ -29,6 +29,11 @@
 .paywall-decisao { flex: none; border-top: 1px solid rgba(120,160,255,.16); margin-top: 16px; padding-top: 12px; }
 .paywall-preco { font-size: 16px; line-height: 1.4; font-weight: 600; }
 .paywall-ancora { font-size: 12px; color: #acb8cb; margin-top: 2px; }
+.paywall-lancamento { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #ffb454; border: 1px solid rgba(255, 180, 84, .5); }
+/* Restaurar compra nos Ajustes (js/restaurar-compra.js) */
+.restaurar-status { display: block; margin: 0 0 6px; font-size: 12px; line-height: 1.35; color: #acb8cb; }
+.restaurar-status[hidden] { display: none; }
+.restaurar-botao[disabled] { opacity: .6; }
 .paywall-acoes { display: flex; gap: 10px; margin-top: 10px; }
 .paywall-comprar, .paywall-restaurar, .paywall-preco-repetir {
   box-sizing: border-box; min-height: 44px; padding: 10px 14px; border: 1px solid rgba(147,160,184,.35); border-radius: 12px;

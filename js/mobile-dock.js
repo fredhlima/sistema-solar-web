@@ -1,4 +1,5 @@
-import { abrirPrivacidade } from './privacidade.js?v=314';
+import { abrirPrivacidade } from './privacidade.js?v=315';
+import { restauracaoDisponivel, ligarRestaurar } from './restaurar-compra.js?v=2';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
 // Reusa o motor real e o "saco de ações" do ui.js (nada de simulação falsa).
@@ -7,8 +8,8 @@ import { abrirPrivacidade } from './privacidade.js?v=314';
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
-import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=314';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=314';
+import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=315';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=315';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local
@@ -168,6 +169,10 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
         <button class="mdock-settings-acao" id="mdock-acao-privacidade">
           <span>${t('politicaPrivacidade')}</span><span class="mdock-acao-seta">›</span>
         </button>
+        ${restauracaoDisponivel(premium) ? `<button class="mdock-settings-acao restaurar-botao" id="mdock-acao-restaurar" type="button">
+          <span id="mdock-restaurar-rotulo">${t('paywallRestaurar')}</span><span class="mdock-acao-seta">›</span>
+        </button>
+        <span class="restaurar-status" id="mdock-restaurar-status" hidden></span>` : ''}
         <button class="mdock-settings-acao" id="mdock-acao-tutorial">
           <span>${t('tutorialRever')}</span><span class="mdock-acao-seta">›</span>
         </button>
@@ -701,6 +706,9 @@ export function iniciarMobileDock({ motor, dados, missoes, acoes, abrirProgresso
     document.getElementById('btn-tutorial')?.click();
   };
   $('mdock-acao-privacidade').onclick = () => { estado.settingsOpen = false; render(); abrirPrivacidade({ focoAoFechar: $('mdock-gear') }); };
+  if (restauracaoDisponivel(premium)) {
+    ligarRestaurar({ premium, t, botao: $('mdock-acao-restaurar'), rotulo: $('mdock-restaurar-rotulo'), status: $('mdock-restaurar-status') });
+  }
   $('mdock-lang-pt').onclick = () => trocarIdioma('pt');
   $('mdock-lang-en').onclick = () => trocarIdioma('en');
   $('mdock-lang-es').onclick = () => trocarIdioma('es');

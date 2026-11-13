@@ -1,12 +1,12 @@
-import { recursoDisponivel, ROTEIROS_1_0, NAVES_1_0, naveDisponivel } from './release-scope.js?v=313';
-import { TRILHAS, PERCURSO_ESSENCIAL } from './aprendizado-trilhas.js?v=313';
+import { recursoDisponivel, ROTEIROS_1_0, NAVES_1_0, naveDisponivel } from './release-scope.js?v=314';
+import { TRILHAS, PERCURSO_ESSENCIAL } from './aprendizado-trilhas.js?v=314';
 // Progressão: níveis + badges com XP
 // Exporta iniciarProgresso({ dados })
 
-import { getIdioma } from './i18n.js?v=314';
+import { getIdioma } from './i18n.js?v=315';
 // só a lista de itens grátis: as badges derivam daqui se são alcançáveis sem Pro,
 // em vez de repetir a regra de negócio (se ITENS_GRATIS mudar, o selo acompanha)
-import { ITENS_GRATIS } from './premium.js?v=303';
+import { ITENS_GRATIS } from './premium.js?v=304';
 
 // Textos localizados (pt/en/es)
 const TEXTOS = {

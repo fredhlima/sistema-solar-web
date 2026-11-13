@@ -1,8 +1,9 @@
-import { abrirPrivacidade } from './privacidade.js?v=314';
-import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=314';
+import { abrirPrivacidade } from './privacidade.js?v=315';
+import { restauracaoDisponivel, ligarRestaurar } from './restaurar-compra.js?v=2';
+import { t, tToque, formatarDataLonga, formatarDataCompacta, formatarDataCurta, ordinal, trocarIdioma, getIdioma } from './i18n.js?v=315';
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
-import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=314';
-import { capituloDoEvento, capituloDaMissao } from './encaixes.js?v=2';
+import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=315';
+import { capituloDoEvento, capituloDaMissao } from './encaixes.js?v=3';
 
 // Telas estreitas: "29 de julho de 2026" quebra em várias linhas na barra de
 // tempo. Abaixo de 430px usamos a versão compacta (mês abreviado).
@@ -306,6 +307,17 @@ export function iniciarUI({ motor, dados, eventos, missoes, trajetorias, premium
     politica.type = 'button'; politica.className = 'botao'; politica.id = 'btn-privacidade';
     politica.textContent = t('politicaPrivacidade'); politica.onclick = () => abrirPrivacidade({ focoAoFechar: politica });
     grupoUtilidades.appendChild(politica);
+    // Restaurar compra (Lote E): fora da tela de compra; só com loja/compra de teste (ver restaurar-compra.js).
+    if (restauracaoDisponivel(premium)) {
+      const restaurar = document.createElement('button');
+      restaurar.type = 'button'; restaurar.className = 'botao restaurar-botao'; restaurar.id = 'btn-restaurar';
+      const rotuloRestaurar = document.createElement('span');
+      restaurar.appendChild(rotuloRestaurar);
+      const statusRestaurar = document.createElement('span');
+      statusRestaurar.className = 'restaurar-status'; statusRestaurar.id = 'btn-restaurar-status';
+      grupoUtilidades.append(restaurar, statusRestaurar);
+      ligarRestaurar({ premium, t, botao: restaurar, rotulo: rotuloRestaurar, status: statusRestaurar });
+    }
 
 
     // Gatilho do popover de experiências (só aparece em mobile, via CSS)

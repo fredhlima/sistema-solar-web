@@ -2,11 +2,12 @@ import {resolverFenomeno,modoDoFenomeno} from './fenomenos-unificados.js?v=312';
 import {normalizarEstadoEstacoes} from './estacoes-laboratorio.js?v=303';
 import {normalizarEstadoMares} from './mares-laboratorio.js?v=303';
 import {criarExperimento} from './aprendizado-experimento.js?v=303';
-import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=313';
-import { ROTEIROS } from './aprendizado-conteudo.js?v=313';
-import { pacoteDaTrilha } from './encaixes.js?v=2';
-import { t as tUI } from './i18n.js?v=314';
+import {trilhaDoRoteiro, aprofundamentosDoRoteiro, PERCURSO_ESSENCIAL} from './aprendizado-trilhas.js?v=314';
+import { ROTEIROS } from './aprendizado-conteudo.js?v=314';
+import { pacoteDaTrilha } from './encaixes.js?v=3';
+import { t as tUI } from './i18n.js?v=315';
 import { FAMILIA } from './aprendizado-familia-conteudo.js?v=3';
+import { AMOSTRA_PASSOS_PRO, temAmostraPro } from './release-scope.js?v=314';
 const etapasPadrao=[{titulo:'objetivo',corpo:'objetivoTexto'},{titulo:'observar',corpo:'observarTexto',acao:true},{titulo:'explicacao',corpo:'explicacaoTexto'},{titulo:'pergunta',corpo:'perguntaTexto',pergunta:true},{titulo:'recap',corpo:'recapTexto',recap:true}];
 const total=id=>ROTEIROS[id].etapas?.length||5;
 const COMUNS = ROTEIROS.sol.textos;
@@ -73,18 +74,27 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
  const catalogo=()=>Object.values(ROTEIROS).sort((a,b)=>Number(a.pro===true)-Number(b.pro===true)).map(r=>({id:r.id,ambiente:r.ambiente,titulo:r.textos[lang].titulo,descricao:r.textos[lang].objetivoTexto,pro:r.pro===true,nave:r.nave,recurso:r.recurso,pecas:r.pecas?.map(p=>({id:p.id})),continuacao:trilhaDoRoteiro(r.id)?.proximo??null,investigacao:r.investigacao??null,aprofundamentos:aprofundamentosDoRoteiro(r.id),trilha:trilhaDoRoteiro(r.id)?.trilha.id,...resumo(r.id)}));
  const notificar=()=>ouvintes.forEach(fn=>fn(resumo()));
  function salvar(){const r=carregar(idAtual);r.estado.ultimaAtividade=Date.now();try{localStorage.setItem(chave(idAtual),JSON.stringify({versao:ROTEIROS[idAtual].versao,...r.estado}));r.persistente=true;}catch(_){r.persistente=false;}notificar();}
+ // Amostra Pro (Lote E): sem Pro, um capítulo Pro libera só os AMOSTRA_PASSOS_PRO primeiros passos (js/release-scope.js).
+ // `passoDestino` é o número (base 1) do passo que a pessoa quer alcançar; true = precisa de Pro e não tem.
+ function bloqueadoPelaAmostra(passoDestino,id=idAtual){
+  const r=ROTEIROS[id];
+  return r.pro===true&&temAmostraPro(id)&&passoDestino>AMOSTRA_PASSOS_PRO&&acoes.permitirRoteiro?.(r.nave,r.recurso)!==true;
+ }
  function renderizar(){
   if(!raiz)return;const roteiro=ROTEIROS[idAtual],registro=carregar(idAtual),estado=registro.estado;
   const texto=k=>roteiro.textos[lang][k]??COMUNS[lang][k]??k;
   const mostrarResumo=estado.concluido&&!revisando;
   const resumoAnterior=mostrarResumo&&(registro.atualizado&&(pilotoRevisado(idAtual)||transferenciaRevisada(idAtual))||estado.revisaoPendente===true);
   const textoResumo=resumoAnterior?{pt:'Você concluiu a versão anterior. Seu progresso foi preservado; recomece se quiser explorar as novas atividades.',en:'You completed the previous version. Your progress is preserved; start again to explore the new activities.',es:'Completaste la versión anterior. Tu progreso se conserva; vuelve a empezar para explorar las nuevas actividades.'}[lang]:texto('recapTexto');
-  const aprofundamentos=roteiro.aprofundamentos|| (roteiro.relacionado?[{id:roteiro.relacionado,rotulo:'relacionadoTitulo'}]:[]);
+  const aprofundamentosTodos=roteiro.aprofundamentos|| (roteiro.relacionado?[{id:roteiro.relacionado,rotulo:'relacionadoTitulo'}]:[]);
+  const aprofundamentos=acoes.ofertaProativa?.()===false?aprofundamentosTodos.filter(n=>acoes.permitirRoteiro?.(n.id,undefined)===true):aprofundamentosTodos;
   const trilha=trilhaDoRoteiro(idAtual),proximo=ROTEIROS[trilha?.proximo],essencial=trilha?.indiceEssencial>=0;
   const pacoteQuizFim=!proximo&&trilha?pacoteDaTrilha(essencial?'essencial':trilha.trilha.id):null;
   const continuar=proximo?`<button class="aprendizado-continuar" type="button" data-guia="${proximo.id}">${essencial?trilhaCopy.continuarGratis:trilhaCopy.proximo}: ${proximo.textos[lang].titulo}${proximo.pro?' · Pro':''} →</button>`:`<p class="aprendizado-trilha-fim">${essencial?trilhaCopy.fim:trilhaCopy.fimPro}</p>${pacoteQuizFim?`<button class="aprendizado-quiz-trilha" type="button" data-pacote="${pacoteQuizFim}">${tUI('encaixeQuizTrilha')}</button>`:''}`;
   const opcionais=[...new Set([...aprofundamentosDoRoteiro(idAtual),...(roteiro.investigacao?[roteiro.investigacao]:[])])].map(id=>ROTEIROS[id]).filter(Boolean);
-  const conviteInvestigacao=opcionais.length?`<div class="aprendizado-opcionais"><p>${trilhaCopy.aprofundar}</p>${opcionais.map(r=>`<button class="aprendizado-aprofundar" type="button" data-guia="${r.id}">${r.textos[lang].titulo} · Pro →</button>`).join('')}</div>`:'';
+  // Oferta proativa (Lote E): depois de uma recusa na sessão, o convite "Investigar mais com Pro" e as sugestões de nave Pro somem.
+  const ofertaProativa=acoes.ofertaProativa?.()!==false;
+  const conviteInvestigacao=opcionais.length&&ofertaProativa?`<div class="aprendizado-opcionais"><p>${trilhaCopy.aprofundar}</p>${opcionais.map(r=>`<button class="aprendizado-aprofundar" type="button" data-guia="${r.id}">${r.textos[lang].titulo} · Pro →</button>`).join('')}</div>`:'';
  const respostas=(pilotoRevisado(idAtual)||transferenciaRevisada(idAtual))&&estado.ordemResposta?['nao','sim']:['sim','nao'];
  const convites=aprofundamentos.length?`<div class="aprendizado-aprofundamentos">${aprofundamentos.map(n=>`<button class="aprendizado-relacionado" type="button" data-nave="${n.id}">${texto(n.rotulo)}</button>`).join('')}</div>`:'';
  const TOTAL=total(idAtual),etapas=roteiro.etapas||etapasPadrao;
@@ -127,7 +137,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   }
   raiz.querySelectorAll('[data-resposta]').forEach(b=>b.onclick=()=>{estado.resposta=b.dataset.resposta;estado.tentativas=Math.min(10000,estado.tentativas+1);salvar();mostrarFeedback();raiz.querySelector('.aprendizado-feedback').scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});mostrarFeedback();
   raiz.querySelector('.aprendizado-voltar')?.addEventListener('click',()=>{estado.passo--;salvar();renderizar();});
-  raiz.querySelector('.aprendizado-avancar').onclick=()=>{if(revisando){revisando=false;renderizar();raiz.querySelector('.aprendizado-revisar')?.focus({preventScroll:true});return;}if(estado.concluido)return fechar();let concluiuAgora=false;if(estado.passo<TOTAL-1)estado.passo++;else{estado.concluido=true;estado.revisaoPendente=false;concluiuAgora=true;}registro.atualizado=false;salvar();if(concluiuAgora)avisarConclusao(idAtual);renderizar();};
+  raiz.querySelector('.aprendizado-avancar').onclick=()=>{if(revisando){revisando=false;renderizar();raiz.querySelector('.aprendizado-revisar')?.focus({preventScroll:true});return;}if(estado.concluido)return fechar();if(bloqueadoPelaAmostra(estado.passo+2)){acoes.exigirRoteiro?.(roteiro.nave,roteiro.recurso,{roteiro:idAtual,amostra:true,titulo:roteiro.textos[lang].titulo});return;}let concluiuAgora=false;if(estado.passo<TOTAL-1)estado.passo++;else{estado.concluido=true;estado.revisaoPendente=false;concluiuAgora=true;}registro.atualizado=false;salvar();if(concluiuAgora)avisarConclusao(idAtual);renderizar();};
  }
  async function atualizarVisual(dados,ocultar){
   const roteiro=ROTEIROS[idAtual],sts61=roteiro.missao==='sts61',artemis=roteiro.missao==='artemis-1',leituraPecas=sts61||artemis;
@@ -192,13 +202,13 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   if(cena){selecionar(dados.pecas[0].id);return;}
   const token=++geracao;
   try{
-   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=313');
+   const {criarCena}=await import('../hangar/js/hangar-scene.js?v=314');
    let opcoes={};
    if(artemis){
-    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=313');
+    const {PARTES_ARTEMIS1,criarArtemis1Guiado}=await import('../hangar/js/artemis1-scene.js?v=314');
     opcoes={partes:PARTES_ARTEMIS1.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarArtemis1Guiado,framing:{horizontal:.84,vertical:.80,offsetY:.08}};
    }else if(sts61){
-    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=313');
+    const {PARTES_STS61,criarShuttleSTS61}=await import('../hangar/js/sts61-scene.js?v=314');
     opcoes={partes:PARTES_STS61.map(p=>({...p,curto:roteiro.textos[lang][roteiro.pecas.find(x=>x.id===p.id)?.rotulo]||p.curto})),buildModel:criarShuttleSTS61};
    }else if(roteiro.nave==='jwst'){
     const [{PARTES,posicaoParte},{prepararWebb,criarWebb}]=await Promise.all([import('../hangar/js/webb-data.js?v=1'),import('../hangar/js/webb-model.js?v=1')]);await prepararWebb();opcoes={partes:PARTES,positionForPart:posicaoParte,buildModel:criarWebb};
@@ -227,10 +237,10 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
  function abrir(id='sol',{voltar=false}={}){
   id=resolverFenomeno(id);
   if(typeof id!=='string'||!Object.prototype.hasOwnProperty.call(ROTEIROS,id)||modoDoFenomeno(id))return false;
-  if(ROTEIROS[id].pro&&acoes.permitirRoteiro?.(ROTEIROS[id].nave,ROTEIROS[id].recurso)!==true)return false;
+  if(ROTEIROS[id].pro&&!temAmostraPro(id)&&acoes.permitirRoteiro?.(ROTEIROS[id].nave,ROTEIROS[id].recurso)!==true)return false;
   if(!raiz){raiz=document.createElement('div');raiz.className='aprendizado-sol';raiz.hidden=true;document.body.append(raiz);}
   if(raiz.hidden)focoAnterior=document.activeElement;
-  idAtual=id;ritmoMissaoIniciado=false;revisando=false;voltarDisponivel=voltar;carregar(id).estado.iniciado=true;salvar();raiz.hidden=false;if(ROTEIROS[id].mundo)acoes.focarCorpo?.(ROTEIROS[id].corpo);renderizar();notificar();return true;
+  idAtual=id;ritmoMissaoIniciado=false;revisando=false;voltarDisponivel=voltar;const estadoAbrir=carregar(id).estado;if(!estadoAbrir.concluido&&bloqueadoPelaAmostra(estadoAbrir.passo+1,id))estadoAbrir.passo=AMOSTRA_PASSOS_PRO-1;estadoAbrir.iniciado=true;salvar();raiz.hidden=false;if(ROTEIROS[id].mundo)acoes.focarCorpo?.(ROTEIROS[id].corpo);renderizar();notificar();return true;
  }
  function fechar(){descartarCena();etapaVisual=null;revisando=false;if(raiz)raiz.hidden=true;notificar();focoAnterior?.focus?.({preventScroll:true});}
  // Só a transição não concluído -> concluído avisa o progresso (XP, trilhas, conquistas); rever um capítulo já concluído não repete.
@@ -240,5 +250,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   const anterior=idAtual;idAtual=id;const estado=carregar(id).estado;estado.iniciado=true;estado.passo=Math.max(0,Math.min(total(id)-1,passo));const jaConcluido=estado.concluido===true;if(concluido)estado.concluido=true;salvar();idAtual=anterior;if(concluido&&!jaConcluido)avisarConclusao(id);return true;
  }
  function aoMudar(fn){if(typeof fn!=='function')return()=>{};ouvintes.add(fn);return()=>ouvintes.delete(fn);}
+ // Recusa de oferta proativa (paywall.js): o capítulo concluído atualiza o painel para esconder os convites Pro.
+ if(typeof document!=='undefined'&&typeof document.addEventListener==='function')document.addEventListener('sim:oferta-recusada',()=>{if(raiz&&!raiz.hidden&&carregar(idAtual).estado.concluido)renderizar();});
  return {abrir,fechar,resumo,catalogo,aoMudar,registrarFenomeno,inspectExperimento:()=>experimento?.inspect()||null,inspectModelo:()=>cena?.inspect()||null};
 }

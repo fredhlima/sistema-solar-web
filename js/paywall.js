@@ -1,5 +1,10 @@
-import { NAVES_1_0 } from './release-scope.js?v=313';
-import { getIdioma } from './i18n.js?v=314';
+import { NAVES_1_0, ROTEIROS_1_0 } from './release-scope.js?v=314';
+import { ROTEIROS } from './aprendizado-conteudo.js?v=314';
+import { ITENS_GRATIS } from './premium.js?v=304';
+import { MISSOES } from './missoes.js?v=13';
+import { QUIZ_PACOTES } from './quiz-dados.js?v=9';
+import { precoDeLancamentoAtivo } from './billing-config.js?v=3';
+import { getIdioma } from './i18n.js?v=315';
 
 const AVISO_TESTE = {
   pt: 'Compra simulada de teste: libera o Pro neste aparelho, sem cobrança.',
@@ -9,8 +14,19 @@ const AVISO_TESTE = {
 // IDs conhecidos; nomes e textos são localizados. Nenhum texto recebido do iframe é renderizado.
 const NAVES_COMPLETAS = NAVES_1_0;
 const NAVES_PREVIAS = [];
-const BENEFICIOS = ['paywallBeneficioHangar', 'paywallBeneficioAprendizado', 'paywallBeneficio5'];
-const RECURSO_BENEFICIO = { hangar: 0, aprendizado: 1, 'estacoes-mares': 2 };
+// Benefícios da 1.0 (máx. 5). Os números vêm dos dados, não de texto escrito à mão:
+// capítulos Pro de ROTEIROS_1_0, missões Pro (todas menos as grátis) e pacotes de quiz.
+const CAPITULOS_PRO = ROTEIROS_1_0.filter(id => ROTEIROS[id]?.pro === true).length;
+const MISSOES_PRO = MISSOES.length - (ITENS_GRATIS.missoes || []).length;
+const BENEFICIOS = [
+  { key: 'paywallBen_capitulos', params: { n: CAPITULOS_PRO } },
+  { key: 'paywallBen_modos3d' },
+  { key: 'paywallBen_naves' },
+  { key: 'paywallBen_missoes', params: { m: MISSOES_PRO, q: QUIZ_PACOTES.length } },
+  { key: 'paywallBen_extras' },
+];
+// Qual benefício aparece destacado (e primeiro) conforme o recurso que abriu o paywall.
+const RECURSO_BENEFICIO = { aprendizado: 0, 'estacoes-mares': 1, hangar: 2, missoes: 3, quiz: 3, eventos: 4, 'voce-no-espaco': 4 };
 // Contextos aceitos pelo paywall são IDs internos; nenhum texto vindo do roteiro é renderizado.
 const CONTEXTOS_ROTEIRO = {
   'terra-ano': 'paywallContextoRoteiro_terra_ano',
@@ -39,10 +55,11 @@ export function iniciarPaywall({ premium, t }) {
           <p class="paywall-contexto" hidden></p>
           <p class="paywall-reciprocidade">${t('paywallReciprocidade')}</p>
         </div>
-        <ul class="paywall-beneficios">${BENEFICIOS.map(key => `<li>${t(key)}</li>`).join('')}</ul>
+        <ul class="paywall-beneficios">${BENEFICIOS.map(({ key, params }) => `<li>${t(key, params)}</li>`).join('')}</ul>
       </div>
       <footer class="paywall-decisao">
         <div class="paywall-preco" aria-live="polite"></div>
+        <div class="paywall-lancamento" hidden>${t('paywallLancamento')}</div>
         <div class="paywall-ancora" ${testeIOS ? 'hidden' : ''}>${t('paywallAncora')}</div>
         <button class="paywall-preco-repetir" hidden>${t('paywallPrecoRepetir')}</button>
         <div class="paywall-mensagem" role="status" hidden></div>
@@ -61,8 +78,9 @@ export function iniciarPaywall({ premium, t }) {
   const btnPreco = overlay.querySelector('.paywall-preco-repetir');
   const mensagem = overlay.querySelector('.paywall-mensagem');
   const divPreco = overlay.querySelector('.paywall-preco');
+  const divLancamento = overlay.querySelector('.paywall-lancamento');
   const liBeneficios = Array.from(overlay.querySelectorAll('.paywall-beneficios li'));
-  let estado = 'repouso', preco = null, precoCarregando = false, sessao = 0, timerFechar = null, focoAnterior = null;
+  let estado = 'repouso', preco = null, precoCarregando = false, sessao = 0, timerFechar = null, focoAnterior = null, ofertaProativa = false;
   const aberto = () => overlay.style.display === 'flex';
   const ocupado = () => estado === 'comprando' || estado === 'restaurando';
   const avisoTeste = () => AVISO_TESTE[getIdioma()] || AVISO_TESTE.pt;
@@ -84,6 +102,8 @@ export function iniciarPaywall({ premium, t }) {
     mensagem.textContent = keys[estado] ? t(keys[estado]) : '';
     mensagem.classList.toggle('paywall-erro', estado === 'erro');
     btnPreco.hidden = !loja || precoCarregando || Boolean(preco);
+    // Rótulo de lançamento: só com data futura em billing-config.js; nunca mostra valor antigo ou riscado.
+    divLancamento.hidden = !precoDeLancamentoAtivo();
     divPreco.textContent = testeIOS ? avisoTeste()
       : loja ? precoCarregando ? t('paywallPrecoSemValor') : preco ? t('paywallPrecoLoja', { preco }) : t('paywallPrecoIndisponivel')
       : t('paywallPreco');
@@ -95,7 +115,17 @@ export function iniciarPaywall({ premium, t }) {
     sessao++; // Respostas antigas de preço/compra não podem modificar outra abertura.
     overlay.style.display = 'none';
     estado = 'repouso';
+    // Fechar sem comprar uma oferta proativa a encerra pela sessão (premium.ofertaProativaPermitida).
+    if (ofertaProativa && !premium.recurso('aprendizado')) {
+      premium.registrarRecusaProativa?.();
+      // Adiado: o painel do capítulo ainda está inert até a navegação reagir ao fechamento do paywall.
+      setTimeout(() => document.dispatchEvent(new CustomEvent('sim:oferta-recusada')), 0);
+    }
+    ofertaProativa = false;
     focoAnterior?.focus?.();
+    // O painel de baixo ainda está inert até a navegação reagir ao fechamento; se o foco não pegou, tenta de novo logo depois.
+    const retorno = focoAnterior;
+    if (retorno?.isConnected) setTimeout(() => { if (!aberto() && (overlay.contains(document.activeElement) || !document.activeElement || document.activeElement === document.body)) retorno.focus?.(); }, 0);
   }
 
   async function carregarPreco() {
@@ -152,6 +182,7 @@ export function iniciarPaywall({ premium, t }) {
     timerFechar = null;
     if (!aberto()) focoAnterior = document.activeElement;
     sessao++;
+    ofertaProativa = contextoEstruturado?.proativo === true;
     overlay.style.display = 'flex';
     estado = 'repouso';
     precoCarregando = false;
@@ -176,6 +207,11 @@ export function iniciarPaywall({ premium, t }) {
       const nave = t('paywallNave_' + itemId.replace(/-/g, '_'));
       titulo.textContent = nave;
       contexto.textContent = t(NAVES_COMPLETAS.includes(itemId) ? 'paywallNaveCompleta' : 'paywallNavePrevia', { nave });
+    }
+    // Amostra de capítulo Pro (Lote E): o contexto é o capítulo que a pessoa estava lendo.
+    // Só o título localizado do próprio app entra no texto (via textContent), com limite de tamanho.
+    if (contextoEstruturado?.amostra === true && typeof contextoEstruturado.titulo === 'string' && contextoEstruturado.titulo.length <= 120) {
+      contexto.textContent = t('paywallContextoAmostra', { capitulo: contextoEstruturado.titulo });
     }
     contexto.hidden = !contexto.textContent;
     const ul = overlay.querySelector('.paywall-beneficios');

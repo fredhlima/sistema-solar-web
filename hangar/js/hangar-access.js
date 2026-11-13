@@ -1,4 +1,4 @@
-import { naveDisponivel } from '../../js/release-scope.js?v=313';
+import { naveDisponivel } from '../../js/release-scope.js?v=314';
 
 // Catálogo e destinos compartilham os mesmos IDs, sem aceitar URLs enviadas pelo iframe.
 export const NAVES_HANGAR = Object.freeze([

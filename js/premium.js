@@ -1,5 +1,5 @@
 // Premium: modelo freemium com persistência em localStorage (com fallback em memória para node)
-import { obterChaveRevenueCat, IOS_COMPRAS_TESTE } from './billing-config.js?v=2';
+import { obterChaveRevenueCat, IOS_COMPRAS_TESTE } from './billing-config.js?v=3';
 export const RECURSOS_PREMIUM = ['missoes', 'eventos', 'quiz', 'voce-no-espaco', 'estacoes-mares', 'hangar', 'aprendizado'];
 
 // "Provinha": itens liberados no free dentro de recursos premium — o usuário
@@ -141,6 +141,20 @@ export function criarPremium() {
   let estado = { ativo: false, transacaoId: null, data: null };
   let precoLocalCache = null;
   let revisaoBilling = 0;
+  let recusouProativa = false;
+  // Primeiro capítulo concluído: lê o mesmo armazenamento do aprendizado (sistema-solar-aprendizado-<id>).
+  function algumCapituloConcluido() {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const chave = localStorage.key(i);
+        if (!chave?.startsWith('sistema-solar-aprendizado-')) continue;
+        if (JSON.parse(localStorage.getItem(chave))?.concluido === true) return true;
+      }
+    } catch (e) {
+      // armazenamento indisponível: sem prova de capítulo concluído, não há oferta proativa
+    }
+    return false;
+  }
   const listeners = new Set();
 
   // Tenta ler do localStorage; fallback memória se indisponível (node, modo seguro)
@@ -220,11 +234,25 @@ export function criarPremium() {
       return estado.ativo === true;
     },
 
+    // Oferta proativa (Lote E): oferta de Pro que a pessoa não pediu tocando em algo Pro (ex.: "Investigar mais
+    // com Pro" no fim de um capítulo). Regras: nunca antes de concluir o primeiro capítulo, e nunca de novo na
+    // mesma sessão depois que ela fechou o paywall de uma oferta proativa. A recusa vive só em memória (sessão).
+    ofertaProativaPermitida() {
+      if (this.ativo) return true; // com Pro não há oferta a limitar
+      return !recusouProativa && algumCapituloConcluido();
+    },
+
+    registrarRecusaProativa() {
+      recusouProativa = true;
+    },
+
     exigir(id, contexto) {
       // true se recurso(id), senão abre paywall e retorna false
       if (this.recurso(id)) {
         return true;
       }
+      // Oferta proativa fora das regras: não abre nada (a interface já esconde esses convites).
+      if (contexto?.proativo === true && !this.ofertaProativaPermitida()) return false;
       // Abre paywall se fnAbrir foi registrada
       if (this._fnAbrir) {
         this._fnAbrir(id, undefined, contexto);
@@ -240,10 +268,11 @@ export function criarPremium() {
       return (ITENS_GRATIS[recursoId] || []).includes(itemId);
     },
 
-    exigirItem(recursoId, itemId) {
+    exigirItem(recursoId, itemId, contexto) {
       if (this.permitido(recursoId, itemId)) return true;
+      if (contexto?.proativo === true && !this.ofertaProativaPermitida()) return false;
       if (this._fnAbrir) {
-        this._fnAbrir(recursoId, itemId);
+        this._fnAbrir(recursoId, itemId, contexto);
       }
       return false;
     },

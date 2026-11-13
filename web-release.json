@@ -1,6 +1,6 @@
 {
-  "version": "main317",
-  "sourceCommit": "7738a1fb826ffdf28702c3a8399b083b71848074",
+  "version": "main318",
+  "sourceCommit": "301a07ed8226e0fc0f253ab7090b63fd04f749de",
   "chapters": 31,
   "spacecraft": 4,
   "explorarMissions": 10,
@@ -10,7 +10,8 @@
     "voce-no-espaco"
   ],
   "scope": "Onda 1: 10 essential free lessons, 21 Pro deep dives and worlds; Quiz, Eventos and Voce no Espaco on; Hubble free; Apollo11 visual mission free and 9 Pro missions",
-  "generatedAt": "2026-11-12",
+  "generatedAt": "2026-11-13",
   "progress": "unified: chapters, trails and spacecraft award XP and badges",
-  "navigation": "Home + 4-area bar (Home, Explore, Learn, Hangar); links between areas"
+  "navigation": "Home + 4-area bar (Home, Explore, Learn, Hangar); links between areas",
+  "monetization": "Pro chapters open with a 2-step preview; Seasons and Tides stay fully Pro; restore purchase in settings (native only); launch-price label only until a set date"
 }

@@ -8,7 +8,7 @@ document.title=ht('Hangar · Explorar nave');
 import {prepararModuloLunarAtual} from './apollo-nasa.js?v=3';
 import {obterVeiculo} from './hangar-vehicles.js?v=312';
 import {MISSOES_NAVE} from './hangar-mission-data.js?v=303';
-import {criarCena} from './hangar-scene.js?v=313';
+import {criarCena} from './hangar-scene.js?v=314';
 
 const $=s=>document.querySelector(s),buttons=new Map();
 const textoUI = (selector, key) => { const node = document.querySelector(selector); if (node) node.textContent = ht(key); };

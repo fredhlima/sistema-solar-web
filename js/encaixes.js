@@ -1,7 +1,7 @@
 // encaixes.js — ligações entre áreas (Lote D da proposta integrada).
 // Funções puras, sem side-effect de import. Cada mapeamento lista candidatos em
 // ordem de preferência e devolve o primeiro capítulo liberado na 1.0, ou null.
-import { roteiroDisponivel } from './release-scope.js?v=313';
+import { roteiroDisponivel } from './release-scope.js?v=314';
 
 const primeiro = (lista) => lista.find(roteiroDisponivel) || null;
 

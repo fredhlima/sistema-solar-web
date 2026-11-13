@@ -1,6 +1,6 @@
 import {getIdiomaHangar} from './hangar-i18n.js?v=303';
-import { destinoNave, origemHangarValida } from './hangar-access.js?v=313';
-import { naveDisponivel } from '../../js/release-scope.js?v=313';
+import { destinoNave, origemHangarValida } from './hangar-access.js?v=314';
+import { naveDisponivel } from '../../js/release-scope.js?v=314';
 
 const integrado = window.parent !== window;
 let numeroPedido = 0;

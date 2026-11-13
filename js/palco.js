@@ -12,7 +12,7 @@ import {historicoFenomeno} from './fenomenos-unificados.js?v=312';
 // ciclo de vida, do scrubber, do selo de escala, do roteiro guiado e da
 // acessibilidade. O conteúdo vem de quem chama, via `construirCena`.
 import * as THREE from 'three';
-import { getIdioma } from './i18n.js?v=314';
+import { getIdioma } from './i18n.js?v=315';
 
 // Versão das texturas reais — a MESMA de motor3d._carregarTexturasReais.
 // Se lá mudar, muda aqui: servir a mesma imagem sob dois ?v= diferentes faz o

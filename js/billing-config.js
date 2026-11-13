@@ -17,3 +17,17 @@ export function obterChaveRevenueCat(plataforma) {
   }
   return chave;
 }
+
+// Preço de lançamento (decisão do dono, 12/11/2026): preencha com a data ISO 'AAAA-MM-DD' em que o preço sobe
+// (último dia do preço de lançamento, no fuso local de quem usa o app). Enquanto for null, ou depois dessa data,
+// o paywall não mostra rótulo nenhum. O app só exibe o rótulo "Preço de lançamento"; o valor vem sempre da loja
+// e nunca aparece riscado ou escrito no código. O preço em si é agendado no App Store Connect e na Play Console.
+export const PRECO_LANCAMENTO_ATE = null;
+
+// true somente com data válida e hoje (data local) <= data. `hoje` e `ate` existem para teste.
+export function precoDeLancamentoAtivo(hoje = new Date(), ate = PRECO_LANCAMENTO_ATE) {
+  if (typeof ate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(ate)) return false;
+  const pad = n => String(n).padStart(2, '0');
+  const dataLocal = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`;
+  return dataLocal <= ate;
+}

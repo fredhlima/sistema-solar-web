@@ -1,6 +1,6 @@
 // Integra a experiência do Hangar e mantém o acesso Pro no app principal.
-import { destinoNave, origemHangarValida } from '../hangar/js/hangar-access.js?v=313';
-import { naveDisponivel } from './release-scope.js?v=313';
+import { destinoNave, origemHangarValida } from '../hangar/js/hangar-access.js?v=314';
+import { naveDisponivel } from './release-scope.js?v=314';
 export function destinoHangarLocalizado(id, idioma = 'pt', peca = null) {
   const destino = destinoNave(id);
   if (!destino) return null;

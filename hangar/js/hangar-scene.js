@@ -1,5 +1,5 @@
 import {criarAmbienteMissao} from './mission-environment.js?v=303';
-import {aoMudarAtividade} from './app-bridge.js?v=313';
+import {aoMudarAtividade} from './app-bridge.js?v=314';
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {PARTES,posicaoParte} from './saturno-v-data.js?v=4';
