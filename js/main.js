@@ -13,15 +13,15 @@ import { carregarConteudoTraduzido, aplicarTraducoes, aplicarHtml, t, getIdioma 
 import { criarPremium } from './premium.js?v=303';
 import { iniciarPaywall } from './paywall.js?v=313';
 import { iniciarQuiz } from './quiz.js?v=313';
-import { iniciarHangar } from './hangar.js?v=313';
+import { iniciarHangar } from './hangar.js?v=316';
 import { iniciarVoceNoEspaco } from './voce-no-espaco.js?v=313';
 import { iniciarEstacoes } from './estacoes.js?v=313';
 import { iniciarMares } from './mares.js?v=315';
-import { iniciarProgresso } from './progresso.js?v=313';
+import { iniciarProgresso } from './progresso.js?v=316';
 import { criarAvaliacao } from './avaliacao.js?v=1';
 import { iniciarMusica } from './musica.js?v=313';
 import { iniciarNavegacao } from './navegacao.js?v=313';
-import { iniciarAprendizado } from './aprendizado.js?v=313';
+import { iniciarAprendizado } from './aprendizado.js?v=316';
 import { iniciarTutorial } from './tutorial.js?v=313';
 
 // As missões do Explorar usam trajetórias próprias, independentes do Hangar.
@@ -66,6 +66,7 @@ const aoProgresso = (tipo, extra) =>
 const estacoes = iniciarEstacoes({ motor, dados: DADOS, premium, aoProgresso });
 const mares = iniciarMares({ motor, dados: DADOS, premium, aoProgresso });
 const avaliacao = criarAvaliacao();
+// O pedido de avaliação só dispara quando uma trilha é concluída (ver progresso.js).
 const progresso = iniciarProgresso({ dados: DADOS, missoes: MISSOES, pacotesQuiz: recursoDisponivel('quiz') ? QUIZ_PACOTES : [], premium, aoConquistar: avaliacao.pedirSeOportuno });
 const acoesUI = iniciarUI({
   motor, dados: DADOS, eventos: recursoDisponivel('eventos') ? EVENTOS : null, missoes: MISSOES, trajetorias, premium,

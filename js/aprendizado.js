@@ -123,7 +123,7 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   }
   raiz.querySelectorAll('[data-resposta]').forEach(b=>b.onclick=()=>{estado.resposta=b.dataset.resposta;estado.tentativas=Math.min(10000,estado.tentativas+1);salvar();mostrarFeedback();raiz.querySelector('.aprendizado-feedback').scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});mostrarFeedback();
   raiz.querySelector('.aprendizado-voltar')?.addEventListener('click',()=>{estado.passo--;salvar();renderizar();});
-  raiz.querySelector('.aprendizado-avancar').onclick=()=>{if(revisando){revisando=false;renderizar();raiz.querySelector('.aprendizado-revisar')?.focus({preventScroll:true});return;}if(estado.concluido)return fechar();if(estado.passo<TOTAL-1)estado.passo++;else{estado.concluido=true;estado.revisaoPendente=false;}registro.atualizado=false;salvar();renderizar();};
+  raiz.querySelector('.aprendizado-avancar').onclick=()=>{if(revisando){revisando=false;renderizar();raiz.querySelector('.aprendizado-revisar')?.focus({preventScroll:true});return;}if(estado.concluido)return fechar();let concluiuAgora=false;if(estado.passo<TOTAL-1)estado.passo++;else{estado.concluido=true;estado.revisaoPendente=false;concluiuAgora=true;}registro.atualizado=false;salvar();if(concluiuAgora)avisarConclusao(idAtual);renderizar();};
  }
  async function atualizarVisual(dados,ocultar){
   const roteiro=ROTEIROS[idAtual],sts61=roteiro.missao==='sts61',artemis=roteiro.missao==='artemis-1',leituraPecas=sts61||artemis;
@@ -229,9 +229,11 @@ export function iniciarAprendizado({ acoes = {}, idioma = 'pt' } = {}) {
   idAtual=id;ritmoMissaoIniciado=false;revisando=false;voltarDisponivel=voltar;carregar(id).estado.iniciado=true;salvar();raiz.hidden=false;if(ROTEIROS[id].mundo)acoes.focarCorpo?.(ROTEIROS[id].corpo);renderizar();notificar();return true;
  }
  function fechar(){descartarCena();etapaVisual=null;revisando=false;if(raiz)raiz.hidden=true;notificar();focoAnterior?.focus?.({preventScroll:true});}
+ // Só a transição não concluído -> concluído avisa o progresso (XP, trilhas, conquistas); rever um capítulo já concluído não repete.
+ function avisarConclusao(id){if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('sim:progresso',{detail:{tipo:'capitulo-concluido',id}}));}
  function registrarFenomeno(id,passo,concluido=false){
   id=resolverFenomeno(id);if(!modoDoFenomeno(id)||acoes.permitirRoteiro?.(undefined,'estacoes-mares')!==true)return false;
-  const anterior=idAtual;idAtual=id;const estado=carregar(id).estado;estado.iniciado=true;estado.passo=Math.max(0,Math.min(total(id)-1,passo));if(concluido)estado.concluido=true;salvar();idAtual=anterior;return true;
+  const anterior=idAtual;idAtual=id;const estado=carregar(id).estado;estado.iniciado=true;estado.passo=Math.max(0,Math.min(total(id)-1,passo));const jaConcluido=estado.concluido===true;if(concluido)estado.concluido=true;salvar();idAtual=anterior;if(concluido&&!jaConcluido)avisarConclusao(id);return true;
  }
  function aoMudar(fn){if(typeof fn!=='function')return()=>{};ouvintes.add(fn);return()=>ouvintes.delete(fn);}
  return {abrir,fechar,resumo,catalogo,aoMudar,registrarFenomeno,inspectExperimento:()=>experimento?.inspect()||null,inspectModelo:()=>cena?.inspect()||null};

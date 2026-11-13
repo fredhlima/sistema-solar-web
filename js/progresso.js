@@ -1,4 +1,5 @@
-import { recursoDisponivel } from './release-scope.js?v=313';
+import { recursoDisponivel, ROTEIROS_1_0, NAVES_1_0, naveDisponivel } from './release-scope.js?v=313';
+import { TRILHAS, PERCURSO_ESSENCIAL } from './aprendizado-trilhas.js?v=313';
 // Progressão: níveis + badges com XP
 // Exporta iniciarProgresso({ dados })
 
@@ -47,6 +48,16 @@ const TEXTOS = {
     badgeEstacoesDesc: 'Visitou os 4 marcos do ano',
     badgeMares: 'Mestre das Marés',
     badgeMaresDesc: 'Viu a maré de sizígia e a de quadratura',
+    badgePrimeiroCapitulo: 'Primeira Lição',
+    badgePrimeiroCapituloDesc: 'Concluiu o primeiro capítulo',
+    badgePercursoEssencial: 'Percurso Essencial',
+    badgePercursoEssencialDesc: 'Concluiu todos os capítulos do percurso essencial',
+    badgeTrilhaCompleta: 'Trilha Completa',
+    badgeTrilhaCompletaDesc: 'Concluiu todos os capítulos de uma trilha',
+    badgePilotoHangar: 'Piloto do Hangar',
+    badgePilotoHangarDesc: 'Explorou todas as naves do Hangar',
+    badgeJornadaCompleta: 'Jornada Completa',
+    badgeJornadaCompletaDesc: 'Concluiu todos os capítulos',
     // UI
     niveisSubiuNivel: 'Subiu de nível: {nivel}',
     niveisNovaConquista: 'Nova conquista: {badge}',
@@ -54,6 +65,7 @@ const TEXTOS = {
     paineisConquistasCorposVisitados: 'Corpos visitados',
     paineisConquistasPacotesOuro: 'Pacotes ouro',
     paineisConquistasMissoes: 'Missões vistas',
+    paineisConquistasCapitulos: 'Capítulos concluídos',
     fechaBotao: 'Fechar',
   },
   en: {
@@ -94,6 +106,16 @@ const TEXTOS = {
     badgeEstacoesDesc: 'Visited the 4 milestones of the year',
     badgeMares: 'Master of the Tides',
     badgeMaresDesc: 'Saw both the spring tide and the neap tide',
+    badgePrimeiroCapitulo: 'First Lesson',
+    badgePrimeiroCapituloDesc: 'Completed the first chapter',
+    badgePercursoEssencial: 'Essential Path',
+    badgePercursoEssencialDesc: 'Completed every chapter of the essential path',
+    badgeTrilhaCompleta: 'Trail Complete',
+    badgeTrilhaCompletaDesc: 'Completed every chapter of a trail',
+    badgePilotoHangar: 'Hangar Pilot',
+    badgePilotoHangarDesc: 'Explored every craft in the Hangar',
+    badgeJornadaCompleta: 'Complete Journey',
+    badgeJornadaCompletaDesc: 'Completed every chapter',
     // UI
     niveisSubiuNivel: 'Leveled up: {nivel}',
     niveisNovaConquista: 'New achievement: {badge}',
@@ -101,6 +123,7 @@ const TEXTOS = {
     paineisConquistasCorposVisitados: 'Bodies visited',
     paineisConquistasPacotesOuro: 'Gold packs',
     paineisConquistasMissoes: 'Missions discovered',
+    paineisConquistasCapitulos: 'Chapters completed',
     fechaBotao: 'Close',
   },
   es: {
@@ -141,6 +164,16 @@ const TEXTOS = {
     badgeEstacoesDesc: 'Visitó los 4 hitos del año',
     badgeMares: 'Maestro de las Mareas',
     badgeMaresDesc: 'Vio la marea viva y la marea muerta',
+    badgePrimeiroCapitulo: 'Primera Lección',
+    badgePrimeiroCapituloDesc: 'Completó el primer capítulo',
+    badgePercursoEssencial: 'Recorrido Esencial',
+    badgePercursoEssencialDesc: 'Completó todos los capítulos del recorrido esencial',
+    badgeTrilhaCompleta: 'Ruta Completa',
+    badgeTrilhaCompletaDesc: 'Completó todos los capítulos de una ruta',
+    badgePilotoHangar: 'Piloto del Hangar',
+    badgePilotoHangarDesc: 'Exploró todas las naves del Hangar',
+    badgeJornadaCompleta: 'Viaje Completo',
+    badgeJornadaCompletaDesc: 'Completó todos los capítulos',
     // UI
     niveisSubiuNivel: 'Subió de nivel: {nivel}',
     niveisNovaConquista: 'Nuevo logro: {badge}',
@@ -148,6 +181,7 @@ const TEXTOS = {
     paineisConquistasCorposVisitados: 'Cuerpos visitados',
     paineisConquistasPacotesOuro: 'Paquetes oro',
     paineisConquistasMissoes: 'Misiones descubiertas',
+    paineisConquistasCapitulos: 'Capítulos completados',
     fechaBotao: 'Cerrar',
   }
 };
@@ -194,6 +228,13 @@ const MISSOES_PARA_ENGENHEIRO = 7;
 const MARCOS_PARA_ESTACOES = 4;
 // Sizígia e quadratura: os dois extremos do ciclo, que é o que o modo ensina
 const MARCOS_PARA_MARES = 2;
+
+// XP do aprendizado e do Hangar (só a primeira vez de cada item)
+const XP_CAPITULO = 15;
+const XP_TRILHA = 25;
+const XP_NAVE = 10;
+// O percurso essencial conta como uma trilha concluída, com este id
+const ID_TRILHA_ESSENCIAL = 'essencial';
 
 // Configuração de badges
 const BADGES = [
@@ -316,6 +357,51 @@ const BADGES = [
     // Marés não está na provinha grátis, então esta badge nasce marcada como
     // PRO — e deixa de ser sozinha se o Fred liberar o modo (D7 da SPEC)
     exigePro: () => !(ITENS_GRATIS['estacoes-mares'] || []).includes('mares')
+  },
+  // Aprendizado e Hangar. As condições leem o ESTADO primeiro (e só depois os
+  // dados do catálogo), então um estado sem os campos novos nunca as quebra.
+  {
+    id: 'primeiro-capitulo',
+    nome: 'badgePrimeiroCapitulo',
+    desc: 'badgePrimeiroCapituloDesc',
+    icone: '✎',
+    condicao: (estado) => (estado.capitulosConcluidos || []).length >= 1
+  },
+  {
+    id: 'percurso-essencial',
+    nome: 'badgePercursoEssencial',
+    desc: 'badgePercursoEssencialDesc',
+    icone: '➤',
+    // o percurso essencial é 100% grátis: sem exigePro
+    condicao: (estado) => (estado.trilhasConcluidas || []).includes(ID_TRILHA_ESSENCIAL)
+  },
+  {
+    id: 'trilha-completa',
+    nome: 'badgeTrilhaCompleta',
+    desc: 'badgeTrilhaCompletaDesc',
+    icone: '⚑',
+    // qualquer trilha de TRILHAS (o percurso essencial tem a sua própria badge)
+    condicao: (estado) => (estado.trilhasConcluidas || []).some(id => id !== ID_TRILHA_ESSENCIAL),
+    // só é grátis se alguma trilha tiver todos os capítulos no percurso essencial
+    exigePro: () => !TRILHAS.some(t => t.roteiros.every(id => PERCURSO_ESSENCIAL.includes(id)))
+  },
+  {
+    id: 'piloto-do-hangar',
+    nome: 'badgePilotoHangar',
+    desc: 'badgePilotoHangarDesc',
+    icone: '✈\uFE0E',
+    condicao: (estado) => (estado.navesExploradas || []).length >= 1
+      && NAVES_1_0.every(id => estado.navesExploradas.includes(id)),
+    exigePro: () => NAVES_1_0.some(id => !(ITENS_GRATIS.hangar || []).includes(id))
+  },
+  {
+    id: 'jornada-completa',
+    nome: 'badgeJornadaCompleta',
+    desc: 'badgeJornadaCompletaDesc',
+    icone: '✪',
+    condicao: (estado) => (estado.capitulosConcluidos || []).length >= 1
+      && ROTEIROS_1_0.every(id => estado.capitulosConcluidos.includes(id)),
+    exigePro: () => ROTEIROS_1_0.some(id => !PERCURSO_ESSENCIAL.includes(id))
   }
 ];
 
@@ -345,7 +431,8 @@ function migrar(estado) {
   // arrays/objetos ausentes para os handlers de progresso usarem depois.
   const listas = [
     'corposVisitados', 'missoesVistas', 'eventosViajados',
-    'marcosEstacoes', 'marcosMares', 'badges'
+    'marcosEstacoes', 'marcosMares', 'badges',
+    'capitulosConcluidos', 'trilhasConcluidas', 'navesExploradas'
   ];
   for (const chave of listas) {
     const valor = estado[chave];
@@ -395,6 +482,10 @@ function criarEstadoVazio() {
     eventosViajados: [],
     marcosEstacoes: [],
     marcosMares: [],
+    // capítulos e trilhas concluídos e naves exploradas (só a 1ª vez paga XP)
+    capitulosConcluidos: [],
+    trilhasConcluidas: [],
+    navesExploradas: [],
     medalhasPorPacote: {},
     // pacotes de quiz já concluídos ao menos uma vez — repetição paga simbólico
     pacotesConcluidos: [],
@@ -446,6 +537,58 @@ function contarMissoesDisponiveis(vistas, missoes) {
   return [...new Set(vistas)].filter(id => ids.has(id)).length;
 }
 
+// Trilhas que rendem XP ao serem concluídas: o percurso essencial + cada trilha
+function trilhasDeProgresso() {
+  return [{ id: ID_TRILHA_ESSENCIAL, roteiros: PERCURSO_ESSENCIAL }, ...TRILHAS];
+}
+
+// Registra um capítulo concluído. Só a 1ª conclusão de cada id paga (15 XP) e a
+// trilha que ele completar paga uma vez (25 XP). Devolve { xp, trilhas }, onde
+// `trilhas` são os ids de trilhas que acabaram de ser concluídas.
+export function registrarCapitulo(estado, id) {
+  const resultado = { xp: 0, trilhas: [] };
+  if (typeof id !== 'string' || !ROTEIROS_1_0.includes(id)) return resultado;
+  if (!Array.isArray(estado.capitulosConcluidos)) estado.capitulosConcluidos = [];
+  if (!Array.isArray(estado.trilhasConcluidas)) estado.trilhasConcluidas = [];
+  if (estado.capitulosConcluidos.includes(id)) return resultado;
+  estado.capitulosConcluidos.push(id);
+  resultado.xp = XP_CAPITULO;
+  for (const trilha of trilhasDeProgresso()) {
+    if (estado.trilhasConcluidas.includes(trilha.id)) continue;
+    if (trilha.roteiros.every(cap => estado.capitulosConcluidos.includes(cap))) {
+      estado.trilhasConcluidas.push(trilha.id);
+      resultado.xp += XP_TRILHA;
+      resultado.trilhas.push(trilha.id);
+    }
+  }
+  return resultado;
+}
+
+// Nave explorada: 1ª vez por id, só naves do catálogo 1.0. Devolve o XP.
+export function registrarNave(estado, id) {
+  if (typeof id !== 'string' || !naveDisponivel(id)) return 0;
+  if (!Array.isArray(estado.navesExploradas)) estado.navesExploradas = [];
+  if (estado.navesExploradas.includes(id)) return 0;
+  estado.navesExploradas.push(id);
+  return XP_NAVE;
+}
+
+// Crédito retroativo, uma única vez: quem concluiu capítulos antes do progresso
+// único recebe o XP e as trilhas como se tivesse concluído agora. `lerSalvo(id)`
+// devolve o JSON bruto do capítulo. Sem toasts e sem pedido de avaliação (o
+// chamador só soma XP e avalia conquistas). Devolve o XP creditado.
+export function creditarCapitulosAnteriores(estado, lerSalvo) {
+  if (!estado.unicos || estado.unicos['migracao-capitulos'] === true) return 0;
+  let xp = 0;
+  for (const id of ROTEIROS_1_0) {
+    let salvo = null;
+    try { salvo = JSON.parse(lerSalvo(id) || 'null'); } catch (_) { salvo = null; }
+    if (salvo && salvo.concluido === true) xp += registrarCapitulo(estado, id).xp;
+  }
+  estado.unicos['migracao-capitulos'] = true;
+  return xp;
+}
+
 // Adiciona XP e retorna badges ganhos nesta chamada
 function adicionarXp(estado, quantidade, dados) {
   const nivelAntes = calcularNivel(estado.xp);
@@ -473,8 +616,9 @@ function adicionarXp(estado, quantidade, dados) {
 // mostrar "/5 pacotes" (são 6) e "/7 missões" (são 10), fazendo quem visse as 10
 // missões ler "10/7". Ambos são opcionais: sem eles o contador se esconde, o que
 // é melhor do que mentir.
-// aoConquistar (opcional): chamado depois dos toasts de nível/conquista —
-// usado por main.js para o pedido de avaliação (js/avaliacao.js).
+// aoConquistar (opcional): chamado SÓ quando uma trilha é concluída (inclui o
+// percurso essencial) — usado por main.js para o pedido de avaliação
+// (js/avaliacao.js). Subir de nível ou ganhar conquista comum não chama.
 export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConquistar }) {
   if (typeof document === 'undefined') {
     return {
@@ -496,6 +640,18 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
 
   // Estado
   const estado = carregarEstado();
+
+  // Crédito retroativo único dos capítulos já concluídos (sem toasts, sem avaliação)
+  if (estado.unicos['migracao-capitulos'] !== true) {
+    let xpRetro = 0;
+    try {
+      xpRetro = creditarCapitulosAnteriores(estado, id => localStorage.getItem('sistema-solar-aprendizado-' + id));
+    } catch (e) {
+      estado.unicos['migracao-capitulos'] = true;
+    }
+    adicionarXp(estado, xpRetro, dados);
+    salvarEstado(estado);
+  }
 
   // Cria DOM (overlay + chip)
   const overlay = document.createElement('div');
@@ -527,6 +683,10 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
         <div class="progresso-contador">
           <span class="progresso-contador-label">${tt('paineisConquistasMissoes')}</span>
           <span class="progresso-contador-valor"><strong class="progresso-missoes-atual">0</strong>/<strong class="progresso-missoes-total">—</strong></span>
+        </div>
+        <div class="progresso-contador">
+          <span class="progresso-contador-label">${tt('paineisConquistasCapitulos')}</span>
+          <span class="progresso-contador-valor"><strong class="progresso-capitulos-atual">0</strong>/<strong class="progresso-capitulos-total">${ROTEIROS_1_0.length}</strong></span>
         </div>
       </div>
     </div>
@@ -600,6 +760,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
     overlay.querySelector('.progresso-visitados-total').textContent = dados.corpos.length;
     overlay.querySelector('.progresso-ouro-atual').textContent = ouroCount;
     overlay.querySelector('.progresso-missoes-atual').textContent = contarMissoesDisponiveis(estado.missoesVistas, missoes);
+    overlay.querySelector('.progresso-capitulos-atual').textContent = estado.capitulosConcluidos.filter(id => ROTEIROS_1_0.includes(id)).length;
     // Totais derivados dos dados — nunca escritos à mão (ver comentário em
     // iniciarProgresso). `totalPacotes`/`totalMissoes` vêm do closure.
     overlay.querySelector('.progresso-ouro-total').textContent = totalPacotes || '—';
@@ -620,7 +781,6 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
       for (const badge of res.badges) {
         mostrarToast(`${tt('niveisNovaConquista', { badge: tt(badge.nome) })}`);
       }
-      if (res.subiu || res.badges.length) aoConquistar?.();
     }
   }
 
@@ -629,6 +789,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
     const tipo = evt.detail.tipo;
 
     let xpGanho = 0;
+    let trilhaConcluida = false;
     const badgesAntigos = new Set(estado.badges);
 
     // Repetir um pacote de quiz pagava XP integral, indefinidamente — dava para
@@ -691,6 +852,12 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
         xpGanho = 5;
         estado.marcosEstacoes.push(id);
       }
+    } else if (tipo === 'capitulo-concluido') {
+      const r = registrarCapitulo(estado, evt.detail.id);
+      xpGanho = r.xp;
+      trilhaConcluida = r.trilhas.length > 0;
+    } else if (tipo === 'nave-explorada') {
+      xpGanho = registrarNave(estado, evt.detail.id);
     } else if (tipo === 'mares-marco') {
       const id = evt.detail.id;
       if (!Array.isArray(estado.marcosMares)) estado.marcosMares = [];
@@ -716,7 +883,7 @@ export function iniciarProgresso({ dados, missoes, pacotesQuiz, premium, aoConqu
           mostrarToast(`${tt('niveisNovaConquista', { badge: tt(badge.nome) })}`);
         }
       }
-      if (res.subiu || res.badges.some(b => !badgesAntigos.has(b.id))) aoConquistar?.();
+      if (trilhaConcluida) aoConquistar?.();
     }
   }
 

@@ -31,6 +31,10 @@ export function iniciarHangar({ premium, aoSair, idioma="pt" } = {}) {
   let aberto = false, ativo = false;
   const catalogo = `hangar/index.html?v=313&idioma=${['pt','en','es'].includes(idioma)?idioma:'pt'}`;
   const permitido = id => premium?.permitido?.('hangar', id) === true;
+  // Entrar numa nave (autorizada) conta como "nave explorada" para o progresso.
+  function avisarExploracao(id) {
+    document.dispatchEvent(new CustomEvent('sim:progresso', { detail: { tipo: 'nave-explorada', id } }));
+  }
   function navegar(id,peca=null) {
     if (!naveDisponivel(id)) return false;
     const destino = destinoHangarLocalizado(id, idioma, peca);
@@ -65,6 +69,7 @@ export function iniciarHangar({ premium, aoSair, idioma="pt" } = {}) {
     abrir();
     if (!exigir(id)) return false;
     if (peca || !frame.src.endsWith(destinoHangarLocalizado(id, idioma))) navegar(id,peca);
+    avisarExploracao(id);
     return true;
   }
   function nomeNave() {
@@ -85,6 +90,7 @@ export function iniciarHangar({ premium, aoSair, idioma="pt" } = {}) {
     const id = navePendente;
     navePendente = null;
     navegar(id);
+    avisarExploracao(id);
   });
   function enviarMargens() {
     if(overlay.style.display==='none')return;
@@ -105,7 +111,7 @@ export function iniciarHangar({ premium, aoSair, idioma="pt" } = {}) {
     if (data?.tipo === 'hangar:fechar') { fechar(); return; }
     if (!naveDisponivel(data?.id) || !destinoNave(data?.id)) return;
     if (data.tipo === 'hangar:abrir') {
-      if (exigir(data.id)) navegar(data.id);
+      if (exigir(data.id)) { navegar(data.id); avisarExploracao(data.id); }
     } else if (data.tipo === 'hangar:autorizar' && typeof data.pedidoId === 'string' && data.pedidoId.length <= 100) {
       const acesso = ativo ? exigir(data.id) : permitido(data.id);
       frame.contentWindow.postMessage({ tipo: 'hangar:autorizacao', pedidoId: data.pedidoId, permitido: acesso }, window.location.origin);

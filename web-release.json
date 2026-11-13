@@ -1,10 +1,15 @@
 {
-  "version": "main315",
-  "sourceCommit": "8597d5f45d752a8c72993a9bd1727e0cafe8f58c",
+  "version": "main316",
+  "sourceCommit": "2bc7054a028d9e42ce8f0054fb4eff150b8eac58",
   "chapters": 31,
   "spacecraft": 4,
   "explorarMissions": 10,
-  "resources": ["quiz", "eventos", "voce-no-espaco"],
+  "resources": [
+    "quiz",
+    "eventos",
+    "voce-no-espaco"
+  ],
   "scope": "Onda 1: 10 essential free lessons, 21 Pro deep dives and worlds; Quiz, Eventos and Voce no Espaco on; Hubble free; Apollo11 visual mission free and 9 Pro missions",
-  "generatedAt": "2026-11-12"
+  "generatedAt": "2026-11-12",
+  "progress": "unified: chapters, trails and spacecraft award XP and badges"
 }
