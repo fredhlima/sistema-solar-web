@@ -4,7 +4,7 @@ import { naveDisponivel, temAmostraPro } from './release-scope.js?v=314';
 import { destinoNave } from '../hangar/js/hangar-access.js?v=314';
 import { montarInicio } from './inicio.js?v=2';
 import { capituloDoEvento, PACOTE_DESAFIO } from './encaixes.js?v=3';
-import { formatarDataCurta } from './i18n.js?v=315';
+import { formatarDataCurta } from './i18n.js?v=317';
 // A cena é o ponto de partida; Experiências é um menu contextual, sem barra permanente.
 const TEXTOS={
  pt:{experiencias:'Experiências',aprender:'Aprender',hangar:'Hangar',hangarNota:'Naves em 3D · Hubble grátis',aprenderNota:'Descubra o espaço por assunto',fechar:'Fechar Início',voltar:'Voltar ao Início',cena:'Só a cena',mostrar:'Mostrar controles',novo:'Começar · grátis',retomar:'Retomar',rever:'Rever roteiro',quiz:'Planetas grátis',pro:'Pro'},

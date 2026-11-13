@@ -1,4 +1,4 @@
-import { abrirPrivacidade } from './privacidade.js?v=315';
+import { abrirPrivacidade } from './privacidade.js?v=317';
 import { restauracaoDisponivel, ligarRestaurar } from './restaurar-compra.js?v=2';
 // mobile-dock.js — UI paralela de celular/tablet em PAISAGEM (dock inferior estilo
 // "liquid glass"). Só aparece em toque+paisagem; o desktop/web fica intacto.
@@ -8,8 +8,8 @@ import { restauracaoDisponivel, ligarRestaurar } from './restaurar-compra.js?v=2
 // settings + tela "gire o celular" + esconder chrome desktop no modo dock/girar.
 // Painéis Explorar/Experiências são SHELLS vazios nesta fase (conteúdo = Fase 2).
 import { criarRodapeTextura } from './creditos-texturas.js?v=3';
-import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=315';
-import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=315';
+import { CORPOS_COM_PESO } from './voce-no-espaco.js?v=317';
+import { t, trocarIdioma, getIdioma, formatarDataCompacta } from './i18n.js?v=317';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 // O motor interpreta instantes ISO absolutos. Converta a meia-noite local

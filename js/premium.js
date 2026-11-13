@@ -11,8 +11,8 @@ export const ITENS_GRATIS = {
   eventos: [],
   quiz: ['planetas'],
   'voce-no-espaco': ['terra', 'lua'],
-  // Os roteiros essenciais de Estações e Marés são recursos de aprendizado
-  // gratuitos. Este recurso controla os modos 3D complementares Pro.
+  // Estações e Marés são 100% Pro (decisão do dono, 12/11/2026): sem itens
+  // grátis e sem amostra (ver SEM_AMOSTRA_PRO em release-scope.js).
   'estacoes-mares': [],
 };
 

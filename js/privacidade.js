@@ -1,4 +1,4 @@
-import { t, getIdioma } from './i18n.js?v=315';
+import { t, getIdioma } from './i18n.js?v=317';
 
 // A política vem do mesmo pacote offline do aplicativo; nunca de um site externo.
 export function abrirPrivacidade({ focoAoFechar = document.activeElement } = {}) {

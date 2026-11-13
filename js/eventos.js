@@ -4,7 +4,7 @@ export const EVENTOS = [
     nome: 'Chuva de Meteoros Quadrântidas',
     tipo: 'chuva-meteoros',
     dataISO: '2026-01-03',
-    descricao: 'Pico da chuva de meteoros Quadrântidas na noite de 3 para 4 de janeiro — até cerca de 80 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte.',
+    descricao: 'Pico da chuva de meteoros Quadrântidas na noite de 3 para 4 de janeiro — até cerca de 80 meteoros por hora. A primeira grande chuva de meteoros do ano, originária de um asteroide. Observável em céu escuro no hemisfério norte. Em 2026 a Lua cheia atrapalhou a observação.',
     corpoFoco: null
   },
   {
@@ -27,8 +27,8 @@ export const EVENTOS = [
     id: 'eta-aquaridas-2026',
     nome: 'Chuva de Meteoros Eta Aquáridas',
     tipo: 'chuva-meteoros',
-    dataISO: '2026-05-06',
-    descricao: 'Pico da chuva de meteoros Eta Aquáridas na madrugada de 6 de maio, antes do amanhecer — até cerca de 50 meteoros por hora. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
+    dataISO: '2026-05-05',
+    descricao: 'Pico da chuva de meteoros Eta Aquáridas nas madrugadas de 5 e 6 de maio, antes do amanhecer — até cerca de 50 meteoros por hora em céu escuro; em 2026 a Lua brilhante reduziu bastante a contagem. Originária de detritos do Cometa Halley, é melhor observada no hemisfério sul. Meteoros brilhantes e velozes.',
     corpoFoco: null
   },
   {

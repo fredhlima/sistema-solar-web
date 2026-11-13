@@ -11,8 +11,8 @@ import {medicaoMareLegada} from './fenomenos-unificados.js?v=312';
 // Aqui se mostra a FORÇA relativa e o RITMO, que é o que a geometria permite.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getIdioma } from './i18n.js?v=315';
-import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=315';
+import { getIdioma } from './i18n.js?v=317';
+import { criarPalco, aplicarTexturaReal, areaSegura, distanciaParaEnquadrar } from './palco.js?v=317';
 import { criarTexturaCanvas } from './texturas.js?v=8';
 import {
   diasDesdeJ2000, longitudeSolar, longitudeLunar, elongacao, fracaoIluminada,

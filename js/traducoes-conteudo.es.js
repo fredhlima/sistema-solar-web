@@ -2276,7 +2276,7 @@ export const TRADUCAO = {
     },
     "quadrantidas-2026": {
       "nome": "Lluvia de Meteoros Cuadrántidas",
-      "descricao": "Pico de la lluvia de meteoros Cuadrántidas en la noche del 3 al 4 de enero — hasta cerca de 80 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte."
+      "descricao": "Pico de la lluvia de meteoros Cuadrántidas en la noche del 3 al 4 de enero — hasta cerca de 80 meteoros por hora. La primera gran lluvia de meteoros del año, originada en un asteroide. Observable en cielo oscuro en el hemisferio norte. En 2026 la Luna llena dificultó la observación."
     },
     "liridas-2026": {
       "nome": "Lluvia de Meteoros Líridas",
@@ -2284,7 +2284,7 @@ export const TRADUCAO = {
     },
     "eta-aquaridas-2026": {
       "nome": "Lluvia de Meteoros Eta Acuáridas",
-      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas en la madrugada del 6 de mayo, antes del amanecer — hasta cerca de 50 meteoros por hora. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
+      "descricao": "Pico de la lluvia de meteoros Eta Acuáridas en las madrugadas del 5 y 6 de mayo, antes del amanecer — hasta cerca de 50 meteoros por hora con cielo oscuro; en 2026 la Luna brillante redujo mucho el conteo. Originada en restos del Cometa Halley, se observa mejor desde el hemisferio sur. Meteoros brillantes y veloces."
     },
     "eclipse-solar-total-2027": {
       "nome": "Eclipse Solar Total (uno de los más largos del siglo)",

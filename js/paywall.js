@@ -1,10 +1,10 @@
 import { NAVES_1_0, ROTEIROS_1_0 } from './release-scope.js?v=314';
 import { ROTEIROS } from './aprendizado-conteudo.js?v=314';
-import { ITENS_GRATIS } from './premium.js?v=304';
+import { ITENS_GRATIS } from './premium.js?v=305';
 import { MISSOES } from './missoes.js?v=13';
 import { QUIZ_PACOTES } from './quiz-dados.js?v=9';
 import { precoDeLancamentoAtivo } from './billing-config.js?v=3';
-import { getIdioma } from './i18n.js?v=315';
+import { getIdioma } from './i18n.js?v=317';
 
 const AVISO_TESTE = {
   pt: 'Compra simulada de teste: libera o Pro neste aparelho, sem cobrança.',
